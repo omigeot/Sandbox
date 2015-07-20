@@ -215,6 +215,14 @@ var sandboxState = function(id, metadata)
             }
         }
     }
+    this.getProperty = function(nodeID,prop)
+    {
+        var node = this.findNode(nodeID);
+        if(!node)
+            return;
+        var val = node.properties[prop];
+        return val;
+    }
     this.setProperty = function(nodeid, prop, val)
     {
        

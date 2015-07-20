@@ -587,8 +587,9 @@ function sandboxWorld(id, metadata)
             //We'll only accept a deleteNode if the user has ownership of the object
             if (message.action == "deleteNode")
             {
+                var displayname = this.state.getProperty(message.node,'DisplayName');
                 this.state.deleteNode(message.node)
-                xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, node.properties ? node.properties.DisplayName : "", null, this.id);
+                xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, displayname || message.node, null, this.id);
             }
             //We'll only accept a createChild if the user has ownership of the object
             //Note that you now must share a scene with a user!!!!
