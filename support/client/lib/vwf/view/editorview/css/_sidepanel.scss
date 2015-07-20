@@ -1,0 +1,44 @@
+@import 'polyfill';
+
+#sidepanel
+{
+	width: 250px;
+	@include flex-shrink(0);
+
+	background: #515151 url(../../../../images/ui-bg_diagonals-thick_8_333333_40x40.png) 0% 0% repeat;
+	background-size: 5%;
+	outline: none;
+	position: relative;
+
+	#sidetab {
+		position: absolute;
+		left: -49px;
+		top: 10%;
+
+		&:hover {
+			color: #82b8ff;
+		}
+
+		@include transform(rotate(-90deg));
+
+		font-size: 12px;
+		font-family: 'Open Sans',sans-serif;
+		background: #4c4c4c;
+		padding: 3px 15px;
+		text-align: center;
+		vertical-align: middle;
+		/* border-radius: 7px; */
+		border: 2px solid #82b8ff;
+		border-bottom: none;
+		color: white;
+		text-shadow: 1px 1px 3px black;
+		cursor: pointer;
+	}
+}
+
+
+@media only screen and (max-width: 1024px) {
+	#sidepanel {
+		width: 250px;
+	}
+}

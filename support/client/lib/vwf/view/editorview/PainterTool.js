@@ -383,8 +383,8 @@ function PainterTool() {
 
             if ($('#sidepanel').data('jsp'))
                 $('#sidepanel').data('jsp').reinitialise();
-            if (!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible'))
-                hideSidePanel();
+            //if (!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible'))
+            //    hideSidePanel();
         });
 
         var checked = ($('#PainterToolGUIActivteTool').next().attr('aria-pressed'));

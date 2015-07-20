@@ -45,7 +45,7 @@ define(function() {
 
 
                 if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
-                if (!$('#sidepanel').children().is(':visible')) hideSidePanel();
+                //if (!$('#sidepanel').children().is(':visible')) hideSidePanel();
             });
         });
         $('#sidepanel').append('<div id="Players"  class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="border-radius: 2px;width: 100%;margin:0px;padding:0px">' + "<div id='playerstitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Players</span></div>" + '	 <div id="PlayerList"></div>' + '</div>');
@@ -690,8 +690,8 @@ define(function() {
             $('#playerstitle').removeClass('sidetab-editor-title-active')
             $('#PlayerList').hide('blind', function() {
                 $('#MenuUsersicon').removeClass('iconselected');
-                if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
-                if (!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible')) hideSidePanel();
+                //if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
+                //if (!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible')) hideSidePanel();
             });
         }
         this.hidePlayers();

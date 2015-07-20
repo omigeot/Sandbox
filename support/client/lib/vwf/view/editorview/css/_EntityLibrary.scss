@@ -20,9 +20,7 @@
 		top: 10%;
 		height: 21px;
 
-		-webkit-transform: rotate(90deg);
-		-moz-transform: rotate(90deg);
-		transform: rotate(90deg);
+		@include transform(rotate(90deg));
 
 		font-size: 12px;
 		font-family: 'Open Sans',sans-serif;

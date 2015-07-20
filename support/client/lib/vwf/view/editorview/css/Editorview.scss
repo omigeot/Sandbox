@@ -6,6 +6,7 @@
 @import 'statusbar';
 @import 'EntityLibrary';
 @import 'scripteditor';
+@import 'sidepanel';
 
 @-webkit-keyframes pulsing {
 	0% {
@@ -393,14 +394,6 @@ input[type="text"]:focus, input[type="password"]:focus {
 	padding-bottom: 1px;
 }
 
-#sidepanel {
-	z-index: 100;
-	position: fixed;
-	width: 320px;
-	background-color: #414141;
-	outline: none;
-}
-
 .EditorDataSectionTitle {
 	text-align: center;
 	margin: 3em 0px 0px 0px;
@@ -414,11 +407,6 @@ input[type="text"]:focus, input[type="password"]:focus {
 }
 
 
-@media only screen and (max-width: 1024px) {
-	#sidepanel {
-		width: 250px;
-	}
-}
 
 .GLGEStat {
 	z-index: 999999;
@@ -602,35 +590,6 @@ input[type="text"]:focus, input[type="password"]:focus {
 /* Yuk! CSS Hack for IE6 3 pixel bug :( */
 * html .jspCorner {
 	margin: 0 -3px 0 0;
-}
-
-#sidetabs {
-	position: absolute;
-	left: -40px;
-	top: 23px;
-}
-
-.sidetab:hover {
-	color: #82b8ff;
-}
-
-.sidetab {
-	-webkit-transform: rotate(-90deg);
-	-moz-transform: rotate(90deg);
-	transform: rotate(-90deg);
-	height: auto;
-	margin: 0px 44px 24px 3px;
-	font-size: 12px;
-	font-family: 'Open Sans',sans-serif;
-	background: #414149;
-	padding: 3px 7px 7px 8px;
-	text-align: center;
-	vertical-align: middle;
-	/* border-radius: 7px; */
-	border: 2px solid #82b8ff;
-	color: white;
-	/* text-shadow: 1px 1px 3px black; */
-	cursor: pointer;
 }
 
 .PrivateMessageWindow {

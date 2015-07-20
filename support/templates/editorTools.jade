@@ -5,6 +5,7 @@ include ./3DRIntegration
 include ./toolbar
 include ./EntityLibrary
 include ./scripteditor
+include ./sidepanel
 
 mixin editorTools_head
 	+menus_head
@@ -14,6 +15,7 @@ mixin editorTools_head
 	+3DRIntegration_head
 	+EntityLibrary_head
 	+scripteditor_head
+	+sidepanel_head
 
 mixin editorTools_body
 
@@ -31,6 +33,8 @@ mixin editorTools_body
 					iframe#resizer(href='about:blank', frameborder='0')
 
 				+scripteditor_body
+
+			+sidepanel_body
 
 		+statusbar_body
 		

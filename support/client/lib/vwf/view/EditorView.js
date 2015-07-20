@@ -13,7 +13,47 @@ jQuery.extend({
     }
 });
 
-define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.3.9/src/alertify", "vwf/view/editorview/angular-app", "vwf/view/editorview/Menubar", "vwf/view/editorview/ObjectPools", "vwf/view/editorview/LocationTools", "vwf/view/editorview/WindowResize", "vwf/view/editorview/_PermissionsManager", "vwf/view/editorview/InputSetup", "vwf/view/editorview/SaveLoadTimer", "vwf/view/editorview/TouchHandler", "vwf/view/editorview/SidePanel", "vwf/view/editorview/Toolbar", "vwf/view/editorview/ChatSystemGUI", "vwf/view/editorview/PrimitiveEditor", "vwf/view/editorview/MaterialEditor", "vwf/view/editorview/Notifier", "vwf/view/editorview/ScriptEditor", "vwf/view/editorview/Editor", "vwf/view/editorview/_3DRIntegration", "vwf/view/editorview/HeirarchyManager", "vwf/view/editorview/DataManager", "vwf/view/editorview/UserManager", "vwf/view/editorview/help", "vwf/view/editorview/SideTabs", "vwf/view/editorview/wireeditor", "vwf/view/editorview/selectionEditor", "vwf/view/editorview/UndoManager", "vwf/view/editorview/Publisher", "vwf/view/editorview/EntityLibrary", "vwf/view/editorview/PhysicsEditor","vwf/view/editorview/PerformanceManager","vwf/view/editorview/JSONPrompt","touch.js","vwf/view/editorview/panelEditor"], function(module, version, view, alertify, angular_app, Menubar) {
+define([
+	"module", "version", "vwf/view",
+
+	// dependencies
+	"vwf/view/editorview/lib/alertify.js-0.3.9/src/alertify",
+	"vwf/view/editorview/angular-app", 
+	"vwf/view/editorview/Menubar", 
+
+	// other things that need to be loaded first
+	"touch.js",
+	"vwf/view/editorview/ObjectPools", 
+	"vwf/view/editorview/LocationTools", 
+	"vwf/view/editorview/WindowResize", 
+	"vwf/view/editorview/_PermissionsManager", 
+	"vwf/view/editorview/InputSetup", 
+	"vwf/view/editorview/SaveLoadTimer", 
+	"vwf/view/editorview/TouchHandler", 
+	"vwf/view/editorview/SidePanel", 
+	"vwf/view/editorview/Toolbar", 
+	"vwf/view/editorview/ChatSystemGUI", 
+	//"vwf/view/editorview/PrimitiveEditor", 
+	//"vwf/view/editorview/MaterialEditor", 
+	"vwf/view/editorview/Notifier", 
+	"vwf/view/editorview/ScriptEditor", 
+	"vwf/view/editorview/Editor", 
+	"vwf/view/editorview/_3DRIntegration", 
+	//"vwf/view/editorview/HeirarchyManager", 
+	"vwf/view/editorview/DataManager", 
+	"vwf/view/editorview/UserManager", 
+	"vwf/view/editorview/help", 
+	//"vwf/view/editorview/SideTabs", 
+	"vwf/view/editorview/wireeditor", 
+	"vwf/view/editorview/selectionEditor", 
+	"vwf/view/editorview/UndoManager", 
+	"vwf/view/editorview/Publisher", 
+	"vwf/view/editorview/EntityLibrary", 
+	//"vwf/view/editorview/PhysicsEditor",
+	"vwf/view/editorview/PerformanceManager",
+	"vwf/view/editorview/JSONPrompt"
+	//"vwf/view/editorview/panelEditor",
+], function(module, version, view, alertify, angular_app, Menubar) {
     return view.load(module, {
         // == Module Definition ====================================================================
 
@@ -55,20 +95,18 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.
 					//$('#smoothmenu1').show();
                     $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/lib/ddsmoothmenu.js"></script>');
 
-
-                    require("vwf/view/editorview/SidePanel").initialize();
                     //initialize the primitive editor
 
                     //initialize the primitive editor
 
-                    window.HierarchyManager = require("vwf/view/editorview/HeirarchyManager").getSingleton();;
-                    window._PrimitiveEditor = require("vwf/view/editorview/PrimitiveEditor").getSingleton();
+                    //window.HierarchyManager = require("vwf/view/editorview/HeirarchyManager").getSingleton();;
+                    //window._PrimitiveEditor = require("vwf/view/editorview/PrimitiveEditor").getSingleton();
                     
-                    window._MaterialEditor = require("vwf/view/editorview/MaterialEditor").getSingleton();
-                    window._PhysicsEditor = require("vwf/view/editorview/PhysicsEditor").getSingleton();
+                    //window._MaterialEditor = require("vwf/view/editorview/MaterialEditor").getSingleton();
+                    //window._PhysicsEditor = require("vwf/view/editorview/PhysicsEditor").getSingleton();
                     //initialize the Material editor
                     
-                    window._MaterialEditor.hide();
+                    //window._MaterialEditor.hide();
                     window._Notifier = require("vwf/view/editorview/Notifier").getSingleton();
 					require('vwf/view/editorview/ScriptEditor').initialize();
                     window._ModelLibrary = require("vwf/view/editorview/_3DRIntegration").getSingleton();
@@ -85,13 +123,13 @@ define(["module", "version", "vwf/view", "vwf/view/editorview/lib/alertify.js-0.
                     this.addManager(_UndoManager);
                     this.addManager(_ModelLibrary);
                     this.addManager(_Notifier);
-                    this.addManager(_MaterialEditor);
-                    this.addManager(_PrimitiveEditor);
+                    //this.addManager(_MaterialEditor);
+                    //this.addManager(_PrimitiveEditor);
                     this.addManager(_PermissionsManager);
                     this.addManager(_WireEditor);
-                    this.addManager(HierarchyManager);
+                    //this.addManager(HierarchyManager);
                     this.addManager(_Publisher);
-                    this.addManager(_PhysicsEditor);
+                    //this.addManager(_PhysicsEditor);
                     
                 }
                 window._LocationTools = require("vwf/view/editorview/LocationTools").getSingleton();
@@ -269,13 +307,13 @@ function InitializeEditor() {
     require("vwf/view/editorview/ChatSystemGUI").initialize();
     
     if (_EditorView.needTools()) {
-        $('#sidepanel').css('height', $(window).height() - ($('#statusbar').height() + $('#toolbar').height() + $('#smoothmenu1').height()) + 'px')
-        $('#sidepanel').jScrollPane();
+        //$('#sidepanel').css('height', $(window).height() - ($('#statusbar').height() + $('#toolbar').height() + $('#smoothmenu1').height()) + 'px')
+        //$('#sidepanel').jScrollPane();
         require("vwf/view/editorview/Toolbar").initialize();
 
         require("vwf/view/editorview/Menubar").initialize();
         //_EditorView.addManager(require("vwf/view/editorview/Menubar"));
-        require("vwf/view/editorview/SideTabs").initialize();
+        //require("vwf/view/editorview/SideTabs").initialize();
         
 		$('#toolbarLevel').show();
 
