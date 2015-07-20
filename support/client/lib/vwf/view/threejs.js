@@ -2336,11 +2336,11 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
     function mouseXPos(e) {
 
-        return e.clientX - e.currentTarget.offsetLeft + (window.scrollX || 0);
+        return e.clientX - e.currentTarget.getClientRects()[0].left + (window.scrollX || 0);
     }
 
     function mouseYPos(e) {
-        return e.clientY - e.currentTarget.offsetTop + (window.scrollY || 0);
+        return e.clientY - e.currentTarget.getClientRects()[0].top + (window.scrollY || 0);
     }
 
 
