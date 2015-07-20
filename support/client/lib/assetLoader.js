@@ -96,7 +96,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                         cb(assetLoader.cache[type][url]);
                         return;
                     }
-                    assetLoader.load(type, url, function()
+                    assetLoader.load(url, type, function()
                     {
                         cb(assetLoader.cache[type][url]);
                     });
