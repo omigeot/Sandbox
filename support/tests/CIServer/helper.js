@@ -1,7 +1,6 @@
 var fs = require('fs');
 
 var exports = module.exports = {
-	DELIMITER: "$$",
 	files: []
 };
 
@@ -26,7 +25,6 @@ exports.state = {
 var cacheTests = {};
 var sandbox;
 var webdriverio;
-var is
 
 /*
 * Public Functions
@@ -35,8 +33,9 @@ var is
 exports.sendMessage = function(runner, command, param){
 	console.log("sending command...");
 	
-	if(param) runner.send(command + exports.DELIMITER + param);	
-	else runner.send(command);	
+	//if(param) 
+	runner.send([command, param]);	
+	//else runner.send([command]);	
 };
 
 exports.clearCache = function(){
@@ -116,15 +115,10 @@ exports.findFiles = function(nextStep, dir){
 	findFiles(nextStep, dir)
 };
 
-exports.initRunner = function(){
+exports.initWebdriver = function(browserOptions){
 	webdriverio = require('webdriverio');
-	var options = {
-		desiredCapabilities: {
-			browserName: 'firefox'
-		}
-	};
 	
-	global.browser = webdriverio.remote(options);
+	global.browser = webdriverio.remote(browserOptions);
 	console.log(Object.keys(global.browser));
 
 	global.testUtils = require('../utils/testutils');

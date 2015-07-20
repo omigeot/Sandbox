@@ -441,44 +441,6 @@ server.on('request', function(request, response) {
 			response.end();
 			
 			helper.sendMessage(runner, helper.command.RUN, tid);
-			for (var i in tests) {
-				var tid2 = tests[i].filename + ":" + tests[i].title;
-				
-				if (tid == tid2) {
-					
-					
-					/*
-					status = RUNNING;
-					async.series([
-						startup_tests,
-						startSandbox,
-						startBrowser,
-						function(cb) {
-							runTest(tests[i], cb)
-						},
-						function wait(cb) {
-							logger.log('Wait for browser close')
-							browser.end()
-							cb();
-						},
-						function(cb) {
-							killSandbox(function() {
-								logger.log('finised killing sandbox')
-								cb();
-							})
-						}
-
-					], function(err) {
-						console.log(err)
-						logger.log('Run one test exit')
-						status = COMPLETE;
-					});
-					return;
-					*/
-
-				}
-			}
-
 		});
 	}
 });
