@@ -166,6 +166,12 @@ var timeout = function(world)
     this.handle = global.setTimeout(this.time.bind(this), 6000);
 }
 
+var STATUS = {
+    DEFAULT:0,
+    PENDING_STATE:1,
+    PENDING_LOAD:2
+}
+
 function sandboxWorld(id, metadata)
 {
     this.id = id;
@@ -174,6 +180,7 @@ function sandboxWorld(id, metadata)
     this.state = {};
     this.metadata = metadata;
     this.allowAnonymous = false;
+    this.status = STATUS.DEFAULT;
     if (this.metadata.publishSettings && this.metadata.publishSettings.allowAnonymous)
         this.allowAnonymous = true;
     var log = null;
@@ -272,7 +279,23 @@ function sandboxWorld(id, metadata)
     this.messageClient = function(client, message, ignorePending, resolvePending)
     {
         if (!client.pending || ignorePending)
-            client.emit('message', message);
+        {
+            //simulate latency
+            if (global.latencySim > 0)
+            {
+                (function(__client, __message)
+                {
+                    global.setTimeout(function()
+                    {
+                        __client.emit('message', __message);
+                    }, global.latencySim)
+                })(client, message);
+            }
+            else
+            {
+                client.emit('message', message);
+            }
+        }
         else
         {
             client.pendingList.push(message)
@@ -286,6 +309,7 @@ function sandboxWorld(id, metadata)
                     client.emit('message', client.pendingList[j]);
                 }
                 client.pendingList = [];
+                client.pending = false;
             }
         }
     }
@@ -392,35 +416,36 @@ function sandboxWorld(id, metadata)
         //Now the server has a rough idea of what the simulation is
         var self = this;
         this.state = new sandboxState(this.id,this.metadata);
+        this.status = STATUS.PENDING_LOAD;
         this.state.on('loaded', function()
         {
+            self.status = STATUS.DEFAULT;
             var scene = self.state.getVWFDef();
-            socket.emit('message', messageCompress.pack(JSON.stringify(
-            {
+           
+            
+            self.messageClients({
                 "action": "status",
                 "parameters": ["State loaded, sending..."],
                 "time": self.time
-            })));
-            console.log('got  blank scene');
+            },true,false);
 
             //note: don't have to worry about pending status here, client is first
-            socket.emit('message', messageCompress.pack(JSON.stringify(
-            {
+            self.messageClients({
                 "action": "createNode",
                 "parameters": [scene],
                 "time": self.time
-            })));
-            socket.emit('message', messageCompress.pack(JSON.stringify(
-            {
+            },true,true);
+
+
+            self.messageClients({
                 "action": "fireEvent",
                 "parameters": ["loaded", []],
                 node: "index-vwf",
                 "time": self.time
-            })));
-            socket.pending = false;
+            },false,false);
+
             self.startTimer();
             cb();
-
         })
     }
     this.messagePeerConnected = function()
@@ -463,14 +488,20 @@ function sandboxWorld(id, metadata)
         //this client is not the first, we need to get the state and mark it pending
         else
         {
-            this.requestState();
-            //loadClient.pending = true;
-            client.emit('message', messageCompress.pack(JSON.stringify(
+            //if we're loading the files, or waiting for state, then this new client must be at least the 2nd,
+            //possilby the 3rd. Eitherway, state will come from either the load or the getState, so just
+            //place this client on the list
+            if(this.status == STATUS.DEFAULT)
             {
-                "action": "status",
-                "parameters": ["Requesting state from clients"],
-                "time": this.getStateTime
-            })));
+                this.requestState();
+                //loadClient.pending = true;
+                client.emit('message', messageCompress.pack(JSON.stringify(
+                {
+                    "action": "status",
+                    "parameters": ["Requesting state from clients"],
+                    "time": this.getStateTime
+                })));
+            }
             //the below message should now queue for the pending socket, fire off for others
             this.messageConnection(client.id, client.loginData ? client.loginData.Username : "", client.loginData ? client.loginData.UID : "");
         }
@@ -499,6 +530,8 @@ function sandboxWorld(id, metadata)
         this.Log('GetState from Client', 2);
         if (!this.requestTimer)
             this.requestTimer = new timeout(this);
+
+         this.status = STATUS.PENDING_STATE;
     }
     this.message = function(msg, sendingclient)
     {
@@ -596,7 +629,7 @@ function sandboxWorld(id, metadata)
             if (message.action == "createChild")
             {
                 var childComponent = JSON.parse(JSON.stringify(message.parameters[0]));
-                if (!this.state.validateCreate(message.node, childComponent, sendingclient))
+                if (!this.state.validateCreate(message.node, message.member, childComponent, sendingclient))
                 {
                     return;
                 }
@@ -618,25 +651,22 @@ function sandboxWorld(id, metadata)
                     if (this.requestTimer)
                         this.requestTimer.deleteMe();
                     var state = message.result;
+
+                    this.status = STATUS.DEFAULT;
+
                     this.state.setVWFDef(JSON.parse(JSON.stringify(state)));
-                    client.emit('message', messageCompress.pack(JSON.stringify(
-                    {
+
+                    this.messageClient(client,{
                         "action": "status",
                         "parameters": ["State Received, Transmitting"],
                         "time": this.getStateTime
-                    })));
-                    client.emit('message', messageCompress.pack(JSON.stringify(
-                    {
+                    },false,false)
+
+                    this.messageClient(client,{
                         "action": "setState",
                         "parameters": [state],
                         "time": this.getStateTime
-                    })));
-                    client.pending = false;
-                    for (var j = 0; j < client.pendingList.length; j++)
-                    {
-                        client.emit('message', client.pendingList[j]);
-                    }
-                    client.pendingList = [];
+                    },true,true)
                 }
                 else if (message.action == "activeResync")
                 {
@@ -664,30 +694,7 @@ function sandboxWorld(id, metadata)
                 }
                 else
                 {
-                    //just a regular message, so push if the client is pending a load, otherwise just send it.
-                    if (client.pending == true)
-                    {
-                        client.pendingList.push(compressedMessage);
-                        logger.debug('PENDING', 2);
-                    }
-                    else
-                    {
-                        //simulate latency
-                        if (global.latencySim > 0)
-                        {
-                            (function(__client, __message)
-                            {
-                                global.setTimeout(function()
-                                {
-                                    __client.emit('message', __message);
-                                }, global.latencySim)
-                            })(client, compressedMessage);
-                        }
-                        else
-                        {
-                            client.emit('message', compressedMessage);
-                        }
-                    }
+                    this.messageClient(client,compressedMessage,false,false);
                 }
             }
         }
@@ -698,6 +705,18 @@ function sandboxWorld(id, metadata)
             logger.error(e);
             logger.error(e.stack);
         }
+    }
+    this.clientCountForUser = function(userID)
+    {
+        var count = 0;
+        for(var i in this.clients)
+        {
+            if(this.clients[i] && this.clients[i].loginData && this.clients[i].loginData.UID == userID)
+            {
+                count++;
+            }
+        }
+        return count;
     }
     this.disconnect = function(client)
     {
@@ -725,13 +744,19 @@ function sandboxWorld(id, metadata)
                 if (loginData && loginData.clients)
                 {
                     console.log("Disconnect. Deleting node for user avatar " + loginData.UID);
-                    var avatarID = 'character-vwf-' + loginData.UID;
-                    this.messageClients(
+
+                    //only delete the avatar if this is the last client owned by the user
+                    if(this.clientCountForUser(loginData.UID) == 0)
                     {
-                        "action": "deleteNode",
-                        "node": avatarID,
-                        "time": this.time
-                    });
+                        var avatarID = 'character-vwf-' + loginData.UID;
+                        this.state.deleteNode(avatarID);
+                        this.messageClients(
+                        {
+                            "action": "deleteNode",
+                            "node": avatarID,
+                            "time": this.time
+                        });
+                    }
                     this.messageClients(
                     {
                         "action": "callMethod",

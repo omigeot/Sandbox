@@ -127,12 +127,8 @@ define(function() {
                         var userID = logindata.user_uid || logindata.UID;
 
 
-                        //only the first client from a given login should create the avatart
-                        if (vwf.models[0].model.nodes['character-vwf-' + userID.replace(/ /g, '-')] == undefined)
-                            this.Login(username, userID);
-                        else {
-                            alertify.alert('You are already logged into this space from another tab. This session will be an anonymous guest');
-                        }
+                        this.Login(username, userID);
+                    
 
 
                     }.bind(this),
@@ -172,11 +168,9 @@ define(function() {
 
                         //only the first client from a given login should create the avatart
                         //this is a poor way to detect that teh user is already in the space
-                        if (vwf.models[0].model.nodes['character-vwf-' + userID.replace(/ /g, '-')] == undefined)
+                        
                             this.Login(username, userID);
-                        else {
-                             this.Login(anonName,anonName);
-                        }
+                    
 
 
                     }.bind(this),
@@ -358,8 +352,8 @@ define(function() {
                     ShowProfile: null,
                     Message: null
                 },
-                scripts: ["this.ShowProfile = function(){if(vwf.client() != vwf.moniker()) return; _UserManager.showProfile(this.ownerClientID)     }; \n" +
-                    "this.Message = function(){if(vwf.client() != vwf.moniker()) return; setupPmWindow(this.ownerClientID)     }"
+                scripts: ["this.ShowProfile = function(){if(vwf.client() != vwf.moniker()) return; _UserManager.showProfile(this.ownerClientID[0])     }; \n" +
+                    "this.Message = function(){if(vwf.client() != vwf.moniker()) return; setupPmWindow(this.ownerClientID[0])     }"
                 ],
                 children: {
 
@@ -523,15 +517,12 @@ define(function() {
             this.PlayerProto.properties.standing = 0;
 
 
-            if (document.Players && document.Players.indexOf(userID) != -1) {
-                alert('User is already logged into this space');
-                return;
-            }
+          
             var newintersectxy = _LocationTools.getCurrentPlacemarkPosition() || _LocationTools.getPlacemarkPosition('Origin') || _Editor.GetInsertPoint();
             //vwf.models[0].model.nodes['index-vwf'].orbitPoint(newintersectxy);
             this.PlayerProto.properties.PlayerNumber = username;
             this.PlayerProto.properties.owner = userID;
-            this.PlayerProto.properties.ownerClientID = vwf.moniker();
+            this.PlayerProto.properties.ownerClientID = [vwf.moniker()];
             this.PlayerProto.properties.profile = profile;
             this.PlayerProto.properties.transform[12] = newintersectxy[0];
             this.PlayerProto.properties.transform[13] = newintersectxy[1];
@@ -540,16 +531,17 @@ define(function() {
 
             require("vwf/view/threejs/editorCameraController").getController('Orbit').orbitPoint(newintersectxy);
             require("vwf/view/threejs/editorCameraController").setCameraMode('Orbit');
-            document[username + 'link'] = null;
-            //this.PlayerProto.id = "player"+username;
-            document["PlayerNumber"] = username;
+            
             var parms = new Array();
             parms.push(JSON.stringify(this.PlayerProto));
 
-            //vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
+            
 
             if (createAvatar)
+            {
                 vwf_view.kernel.createChild('index-vwf', this.currentUsername, this.PlayerProto);
+                vwf_view.kernel.callMethod('character-vwf-' + this.currentUsername,'addControllingClient',[vwf.moniker()])
+            }
 
             //if no one has logged in before, this world is yours
             if (vwf.getProperty('index-vwf', 'owner') == null) vwf.setProperty('index-vwf', 'owner', this.currentUsername);
@@ -561,7 +553,7 @@ define(function() {
             var parms = new Array();
             parms.push(JSON.stringify({
                 sender: '*System*',
-                text: (document.PlayerNumber + " logging on")
+                text: (this.currentUsername + " logging on")
             }));
             vwf_view.kernel.callMethod('index-vwf', 'receiveChat', parms);
         }
@@ -570,7 +562,7 @@ define(function() {
             var name = 'NPC' + Math.floor(Math.SecureRandom() * 1000);
             this.PlayerProto.properties.PlayerNumber = name;
             this.PlayerProto.properties.owner = this.currentUsername;
-            this.PlayerProto.properties.ownerClientID = null;
+            this.PlayerProto.properties.ownerClientID = [null];
             this.PlayerProto.properties.profile = null;
             this.PlayerProto.id = "player" + name;
             var parms = new Array();
@@ -596,7 +588,7 @@ define(function() {
             }
             playerNodes.sort(function(a, b) {
 
-                if (a.ownerClientID > b.ownerClientID) return 1;
+                if (a.ownerClientID[0] > b.ownerClientID[0]) return 1;
                 return -1;
             })
             return playerNodes;
@@ -628,11 +620,9 @@ define(function() {
                     var logindata = JSON.parse(xhr.responseText);
                     var username = logindata.username;
 
-                    if (logindata.instances.indexOf(_DataManager.getCurrentSession()) != -1) {
-                        _Notifier.alert('You are already logged into this space from another tab, browser or computer. This session will be a guest.');
-                    } else {
+                
                         this.Login(username);
-                    }
+                
 
                 }.bind(this),
                 error: function(xhr, status, err) {
@@ -656,7 +646,7 @@ define(function() {
         this.GetAvatarForClientID = function(id) {
             for (var i in vwf.models[0].model.nodes) {
                 var node = vwf.models[0].model.nodes[i];
-                if (node.ownerClientID == id)
+                if (node.ownerClientID && node.ownerClientID.indexOf(id)>-1)
                     return node;
             }
         }
@@ -666,8 +656,6 @@ define(function() {
                 if (clients[i].UID == id) return clietns[i].cid;
             }
         }
-
-        
         this.satProperty = function(id,name,val)
         {
             if(name == 'permission')

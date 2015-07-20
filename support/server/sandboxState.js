@@ -254,12 +254,19 @@ var sandboxState = function(id, metadata)
             return;
         }
     }
-    this.validateCreate = function(nodeid, childComponent, client)
+    this.validateCreate = function(nodeid, childName, childComponent, client)
     {
         var node = this.findNode(nodeid);
         if (!node)
         {
             this.Error('server has no record of ' + nodeid, 1);
+            return;
+        }
+        var childID = this.getID(childName,childComponent)
+        var childNode = this.findNode(childID);
+        if(childNode)
+        {
+            this.Error("Node already exists");
             return;
         }
         if ((this.metadata.publishSettings || {}).allowAnonymous || checkOwner(node, client.loginData.UID) || childComponent.extends == 'character.vwf')
@@ -272,6 +279,14 @@ var sandboxState = function(id, metadata)
             return;
         }
     }
+    this.getID = function(name,childComponent)
+    {
+        var childName = name;
+        if (!childName) return;
+        var childID = childComponent.id || childComponent.uri || (childComponent["extends"]) + "." + childName.replace(/ /g, '-');
+        childID = childID.replace(/[^0-9A-Za-z_]+/g, "-");
+        return childID;
+    }
     this.createChild = function(nodeid, name, childComponent)
     {
         //Keep a record of the new node
@@ -279,12 +294,9 @@ var sandboxState = function(id, metadata)
         var node = this.findNode(nodeid);
 
         if (!childComponent) return;
-        var childName = name;
-        if (!childName) return;
-        var childID = childComponent.id || childComponent.uri || (childComponent["extends"]) + "." + childName.replace(/ /g, '-');
-        childID = childID.replace(/[^0-9A-Za-z_]+/g, "-");
-        childComponent.id = childID;
         if (!node.children) node.children = {};
+        var childID = this.getID(name,childComponent);
+        childComponent.id = childID;
         node.children[childID] = childComponent;
         node.children[childID].parent = node;
         if (!childComponent.properties)
