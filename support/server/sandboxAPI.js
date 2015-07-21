@@ -754,10 +754,11 @@ function CopyInstance(URL, SID, response)
 					],
 					function copyExampleComplete(err)
 					{
+						var displayID = newid.replace("_adl_sandbox",global.configuration.appPath.replace(/\//g,"_"));
 						if (err)
 							respond(response, 500, 'Error in trying to copy world');
 						else
-							respond(response, 200, newid);
+							respond(response, 200, displayID);
 					})
 			}
 		});
@@ -1335,9 +1336,10 @@ function createState(URL, data, response)
 		var id = "/adl/sandbox".replace(/\//g, "_") + '_' + makeid() + '_';
 		DAL.createInstance(id, statedata, function()
 		{
-			respond(response, 200, 'Created state ' + id);
-			mailTools.newWorld(URL.loginData.UID, data.title, id);
-			xapi.sendStatement(URL.loginData.UID, xapi.verbs.created, id, data.title, data.description);
+			var displayID = id.replace("_adl_sandbox",global.configuration.appPath.replace(/\//g,"_"));
+			respond(response, 200, displayID);
+			mailTools.newWorld(URL.loginData.UID, data.title, displayID);
+			xapi.sendStatement(URL.loginData.UID, xapi.verbs.created, displayID, data.title, data.description);
 		});
 	}
 	//Just return the state data, dont serve a response
@@ -1774,7 +1776,7 @@ function serve(request, response)
 					break;
 				case "saspath":
 					{
-						if(global.configuration.hostAssets || !global.configuration.remoteAssetServerURL){
+						if(global.configuration.hostAssets){
 							response.send(global.configuration.assetAppPath);
 						}
 						else {
