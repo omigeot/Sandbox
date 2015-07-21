@@ -1221,6 +1221,50 @@ function makeid()
 	return text;
 }
 
+
+function setState(URL, data, response)
+{
+	if (!URL.loginData)
+	{
+		respond(response, 401, 'Anonymous users cannot edit instances');
+		return;
+	}
+	try
+	{
+		data = JSON.parse(data);
+	}
+	catch (e)
+	{
+		logger.error(e);
+		respond(response, 500, 'parse error');
+		return;
+	}
+	var sid = URL.query.SID;
+	var statedata = {};
+	sid = sid.replace(/\//g, '_');
+	
+	DAL.getInstance(sid, function(state)
+	{
+		if (!state)
+		{
+			respond(response, 401, 'State not found. State ' + sid);
+			return;
+		}
+		if (state.owner == URL.loginData.UID || URL.loginData.UID == global.adminUID)
+		{
+			DAL.saveInstanceState(sid, data, function()
+			{
+				respond(response, 200, 'Saved world state ' + sid);
+			});
+		}
+		else
+		{
+			respond(response, 401, 'Not authorized to edit state ' + sid);
+		}
+	});
+}
+
+
 function setStateData(URL, data, response)
 {
 	if (!URL.loginData)
@@ -1730,7 +1774,7 @@ function serve(request, response)
 					break;
 				case "saspath":
 					{
-						if(global.configuration.hostAssets || !global.configuration.remoteAssetServerURL){
+						if(global.configuration.hostAssets){
 							response.send(global.configuration.assetAppPath);
 						}
 						else {
@@ -1809,6 +1853,11 @@ function serve(request, response)
 						setStateData(URL, body, response);
 					}
 					break;
+				case "state":
+					{
+						setState(URL, body, response);
+					}
+					break;	
 				case "globalasset":
 					{
 						addGlobalInventoryItem(URL, body, response);
