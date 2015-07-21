@@ -1335,7 +1335,7 @@ function createState(URL, data, response)
 		var id = "/adl/sandbox".replace(/\//g, "_") + '_' + makeid() + '_';
 		DAL.createInstance(id, statedata, function()
 		{
-			respond(response, 200, 'Created state ' + id);
+			respond(response, 200, id);
 			mailTools.newWorld(URL.loginData.UID, data.title, id);
 			xapi.sendStatement(URL.loginData.UID, xapi.verbs.created, id, data.title, data.description);
 		});
