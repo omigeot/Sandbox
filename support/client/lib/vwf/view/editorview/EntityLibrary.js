@@ -195,16 +195,19 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 		$scope.show = function()
 		{
-			$('#EntityLibraryMain').show();
-			$('#EntityLibrary').animate({width: '246px'});
+			//$('#EntityLibraryMain').show();
+			//$('#EntityLibrary').animate({width: '246px'});
+			$('#EntityLibrary').removeClass('hidden', 400);
 			$scope.isOpen = true;
 		}
 
 		$scope.hide = function()
 		{
-			$('#EntityLibrary').animate({width: '0px'}, 400, 'swing', function(){
+			/*$('#EntityLibrary').animate({width: '0px'}, 400, 'swing', function(){
 				$('#EntityLibraryMain').hide();
-			});
+			});*/
+
+			$('#EntityLibrary').addClass('hidden', 400);
 			$scope.isOpen = false;
 		}
 

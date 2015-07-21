@@ -446,13 +446,17 @@
 
 #EntityLibrary {
   position: relative;
-  width: 0;
+  width: 250px;
   -moz-flex-shrink: 0;
   -ms-flex-shrink: 0;
   -webkit-flex-shrink: 0;
   flex-shrink: 0;
   background: #515151 url(../../../../images/ui-bg_diagonals-thick_8_333333_40x40.png) 0% 0% repeat;
   background-size: 5%; }
+  #EntityLibrary.hidden {
+    display: block !important;
+    visibility: visible !important;
+    width: 0; }
   #EntityLibrary #EntityLibrarySideTab {
     z-index: 30;
     position: absolute;
@@ -476,9 +480,11 @@
     #EntityLibrary #EntityLibrarySideTab:hover {
       color: #82b8ff; }
   #EntityLibrary #EntityLibraryMain {
-    width: 245px;
-    margin-top: 3px;
-    padding-right: 3px; }
+    margin-top: 1px;
+    padding-right: 1px;
+    position: absolute;
+    right: 0px;
+    width: 248px; }
   #EntityLibrary #EntityLibraryAccordion {
     overflow-y: auto; }
   #EntityLibrary .libraryAsset {
