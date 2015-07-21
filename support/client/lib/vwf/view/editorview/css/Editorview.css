@@ -1,3 +1,4 @@
+/* line 2, _menubar.scss */
 .ddsmoothmenu {
   font: 12px "Open Sans";
   background: #424242;
@@ -6,12 +7,14 @@
   border-bottom: 1px solid #666666;
   /* ######### CSS classes applied to down and right arrow images  ######### */
   /* ######### CSS for shadow added to sub menus  ######### */ }
+  /* line 9, _menubar.scss */
   .ddsmoothmenu ul {
     z-index: 100;
     margin: 0;
     padding: 0;
     list-style-type: none;
     /*Top level list items*/ }
+    /* line 17, _menubar.scss */
     .ddsmoothmenu ul li {
       position: relative;
       display: inline;
@@ -19,13 +22,17 @@
       /* font-size: 1.1em; */
       /*Top level menu link items style*/
       /*1st sub level menu*/ }
+      /* line 24, _menubar.scss */
       .ddsmoothmenu ul li.divider {
         width: 175px;
         border-bottom: 3px solid grey; }
+      /* line 30, _menubar.scss */
       .ddsmoothmenu ul li.disabled {
         pointer-events: none; }
+        /* line 33, _menubar.scss */
         .ddsmoothmenu ul li.disabled a {
           color: grey; }
+      /* line 40, _menubar.scss */
       .ddsmoothmenu ul li a {
         display: block;
         background: #424242;
@@ -38,19 +45,24 @@
         padding-bottom: 3px;
         padding-top: 3px;
         /* text-shadow: 2px 2px 2px black; */ }
+        /* line 52, _menubar.scss */
         .ddsmoothmenu ul li a:link, .ddsmoothmenu ul li a:visited {
           color: white; }
+        /* line 56, _menubar.scss */
         .ddsmoothmenu ul li a.selected {
           /*CSS class that's dynamically added to the currently active menu items' LI A element*/
           background: #719ddd;
           color: white; }
+        /* line 62, _menubar.scss */
         .ddsmoothmenu ul li a:hover {
           background: #719ddd;
           /*background of menu items during onmouseover (hover state)*/
           color: white; }
+        /* line 67, _menubar.scss */
         .ddsmoothmenu ul li a:active {
           background-color: #7B7B7B;
           /*background of menu items during active (mouse down state)*/ }
+      /* line 74, _menubar.scss */
       .ddsmoothmenu ul li ul {
         position: absolute;
         left: 0;
@@ -58,11 +70,13 @@
         /*collapse all sub menus to begin with*/
         visibility: hidden;
         /*Sub level menu list items (undo style from Top level List Items)*/ }
+        /* line 82, _menubar.scss */
         .ddsmoothmenu ul li ul li {
           display: list-item;
           box-shadow: 3px 3px 5px;
           /* Sub level menu links style */
           /*All subsequent sub menu levels vertical offset after 1st level sub menu */ }
+          /* line 89, _menubar.scss */
           .ddsmoothmenu ul li ul li a {
             font: normal 13px "Open Sans";
             width: 160px;
@@ -72,16 +86,20 @@
             border-top-width: 0;
             /* border-bottom: 1px solid rgb(66, 66, 66); */
             background-color: #303030; }
+          /* line 100, _menubar.scss */
           .ddsmoothmenu ul li ul li ul {
             top: 0; }
+  /* line 109, _menubar.scss */
   .ddsmoothmenu .downarrowclass {
     position: absolute;
     top: 6px;
     right: 7px; }
+  /* line 115, _menubar.scss */
   .ddsmoothmenu .rightarrowclass {
     position: absolute;
     top: 6px;
     right: 5px; }
+  /* line 123, _menubar.scss */
   .ddsmoothmenu .ddshadow {
     /*shadow for NON CSS3 capable browsers*/
     position: absolute;
@@ -90,19 +108,23 @@
     width: 0;
     height: 0;
     background: silver; }
+  /* line 132, _menubar.scss */
   .ddsmoothmenu .toplevelshadow {
     /*shadow opacity for NON CSS3 capable browsers. Doesn't work in IE*/
     opacity: 0.8; }
 
+/* line 138, _menubar.scss */
 * html .ddsmoothmenu ul li a {
   /*IE6 hack to get sub menu links to behave correctly*/
   display: inline-block; }
 
 /* Holly Hack for IE \*/
+/* line 145, _menubar.scss */
 * html .ddsmoothmenu {
   height: 1%; }
 
 /*Holly Hack for IE7 and below*/
+/* line 4, _assets.scss */
 #manageAssetsDialog {
   display: -webkit-box;
   display: -moz-flex;
@@ -110,15 +132,19 @@
   display: -webkit-flex;
   display: flex;
   padding: 0; }
+  /* line 9, _assets.scss */
   #manageAssetsDialog > * {
     width: 50%;
     margin-top: 2px; }
+  /* line 14, _assets.scss */
   #manageAssetsDialog label {
     font-size: 11px; }
+  /* line 19, _assets.scss */
   #manageAssetsDialog #assetBrowser {
     border-right: solid grey 1px;
     margin-right: 2px;
     padding-right: 2px; }
+    /* line 25, _assets.scss */
     #manageAssetsDialog #assetBrowser #controls {
       -webkit-box-pack: justify;
       -moz-justify-content: space-between;
@@ -130,14 +156,17 @@
       -webkit-flex-shrink: 0;
       flex-shrink: 0;
       margin-bottom: 5px; }
+      /* line 31, _assets.scss */
       #manageAssetsDialog #assetBrowser #controls label#hideThumbs {
         -webkit-box-align: center;
         -moz-align-items: center;
         -ms-flex-align: center;
         -webkit-align-items: center;
         align-items: center; }
+      /* line 35, _assets.scss */
       #manageAssetsDialog #assetBrowser #controls input[type=search] {
         color: black; }
+    /* line 40, _assets.scss */
     #manageAssetsDialog #assetBrowser #assetList {
       overflow-y: auto;
       -moz-flex-grow: 1;
@@ -145,28 +174,36 @@
       -webkit-flex-grow: 1;
       flex-grow: 1;
       position: relative; }
+    /* line 47, _assets.scss */
     #manageAssetsDialog #assetBrowser .asset, #manageAssetsDialog #assetBrowser .newAsset {
       padding: 3px;
       margin-bottom: 2px;
       border-radius: 3px; }
+      /* line 53, _assets.scss */
       #manageAssetsDialog #assetBrowser .asset .info, #manageAssetsDialog #assetBrowser .newAsset .info {
         -moz-flex-grow: 1;
         -ms-flex: 1 1;
         -webkit-flex-grow: 1;
         flex-grow: 1; }
+        /* line 56, _assets.scss */
         #manageAssetsDialog #assetBrowser .asset .info .name, #manageAssetsDialog #assetBrowser .newAsset .info .name {
           margin: 2px 0;
           font-size: 16px;
           overflow-wrap: break-word; }
+        /* line 61, _assets.scss */
         #manageAssetsDialog #assetBrowser .asset .info .meta, #manageAssetsDialog #assetBrowser .newAsset .info .meta {
           margin: 2px 0;
           font-size: 12px; }
+      /* line 68, _assets.scss */
       #manageAssetsDialog #assetBrowser .asset.selected-asset, #manageAssetsDialog #assetBrowser .newAsset.selected-asset {
         background-color: rgba(62, 134, 215, 0.8) !important; }
+    /* line 75, _assets.scss */
     #manageAssetsDialog #assetBrowser .asset:nth-child(even) {
       background-color: rgba(48, 48, 48, 0.8); }
+    /* line 78, _assets.scss */
     #manageAssetsDialog #assetBrowser .asset:nth-child(odd) {
       background-color: rgba(60, 60, 60, 0.8); }
+    /* line 83, _assets.scss */
     #manageAssetsDialog #assetBrowser .asset .nonbs-thumbnail {
       width: 45px;
       height: 45px;
@@ -176,11 +213,14 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center; }
+    /* line 96, _assets.scss */
     #manageAssetsDialog #assetBrowser .newAsset {
       background-color: rgba(40, 67, 79, 0.8); }
+      /* line 99, _assets.scss */
       #manageAssetsDialog #assetBrowser .newAsset.sticky {
         position: relative;
         background-color: #20363f; }
+    /* line 106, _assets.scss */
     #manageAssetsDialog #assetBrowser #newAssetButton {
       -moz-flex-shrink: 0;
       -ms-flex-shrink: 0;
@@ -192,17 +232,23 @@
       background-color: rgba(40, 67, 79, 0.8);
       border: none;
       border-radius: 3px; }
+  /* line 119, _assets.scss */
   #manageAssetsDialog #propertyBrowser {
     margin-left: 2px;
     overflow: auto; }
+    /* line 123, _assets.scss */
     #manageAssetsDialog #propertyBrowser > * {
       margin: 2px 0; }
+    /* line 129, _assets.scss */
     #manageAssetsDialog #propertyBrowser input:not([disabled]), #manageAssetsDialog #propertyBrowser textarea:not([disabled]) {
       color: black; }
+    /* line 132, _assets.scss */
     #manageAssetsDialog #propertyBrowser input:not([type=button]):disabled, #manageAssetsDialog #propertyBrowser textarea:not([type=button]):disabled {
       background-color: #ccc; }
+    /* line 140, _assets.scss */
     #manageAssetsDialog #propertyBrowser p.fixed-height, #manageAssetsDialog #propertyBrowser span.fixed-height, #manageAssetsDialog #propertyBrowser label.fixed-height {
       min-height: 1.2em; }
+    /* line 146, _assets.scss */
     #manageAssetsDialog #propertyBrowser label#thumbnail {
       margin-top: 3px;
       -webkit-box-pack: justify;
@@ -215,6 +261,7 @@
       -ms-flex-align: center;
       -webkit-align-items: center;
       align-items: center; }
+    /* line 153, _assets.scss */
     #manageAssetsDialog #propertyBrowser #dragarea {
       border: dashed whitesmoke 2px;
       border-radius: 5px;
@@ -231,8 +278,10 @@
       -ms-flex-align: center;
       -webkit-align-items: center;
       align-items: center; }
+      /* line 164, _assets.scss */
       #manageAssetsDialog #propertyBrowser #dragarea p#filename {
         font-size: 16px; }
+      /* line 169, _assets.scss */
       #manageAssetsDialog #propertyBrowser #dragarea input#fileInput {
         position: absolute;
         width: 100%;
@@ -242,20 +291,26 @@
         left: 0;
         opacity: 0;
         cursor: pointer; }
+      /* line 182, _assets.scss */
       #manageAssetsDialog #propertyBrowser #dragarea #typeInput {
         z-index: 1; }
+        /* line 185, _assets.scss */
         #manageAssetsDialog #propertyBrowser #dragarea #typeInput input, #manageAssetsDialog #propertyBrowser #dragarea #typeInput select {
           direction: rtl; }
+        /* line 189, _assets.scss */
         #manageAssetsDialog #propertyBrowser #dragarea #typeInput select {
           width: 20px; }
+      /* line 194, _assets.scss */
       #manageAssetsDialog #propertyBrowser #dragarea span {
         margin: 20px;
         font-size: 18px;
         text-decoration: underline; }
+    /* line 202, _assets.scss */
     #manageAssetsDialog #propertyBrowser p#url {
       text-align: center;
       font-size: 18px;
       word-wrap: break-word; }
+    /* line 209, _assets.scss */
     #manageAssetsDialog #propertyBrowser #permissions {
       -webkit-box-align: center;
       -moz-align-items: center;
@@ -267,12 +322,16 @@
       -ms-flex-pack: justify;
       -webkit-justify-content: space-between;
       justify-content: space-between; }
+      /* line 212, _assets.scss */
       #manageAssetsDialog #propertyBrowser #permissions table {
         width: 100px; }
+        /* line 214, _assets.scss */
         #manageAssetsDialog #propertyBrowser #permissions table td {
           text-align: center; }
+        /* line 217, _assets.scss */
         #manageAssetsDialog #propertyBrowser #permissions table td:first-child {
           text-align: right; }
+    /* line 224, _assets.scss */
     #manageAssetsDialog #propertyBrowser #buttons {
       -webkit-box-lines: multiple;
       -moz-flex-wrap: wrap;
@@ -289,6 +348,7 @@
       -ms-flex-align: center;
       -webkit-align-items: center;
       align-items: center; }
+      /* line 230, _assets.scss */
       #manageAssetsDialog #propertyBrowser #buttons input {
         -moz-flex-grow: 1;
         -ms-flex: 1 1;
@@ -298,6 +358,7 @@
         min-width: 80px;
         max-width: 50%; }
 
+/* line 4, _toolbar.scss */
 #toolbar {
   background-color: #424242;
   /* background: #4c4c4c; */
@@ -320,14 +381,18 @@
   -ms-flex-align: center;
   -webkit-align-items: center;
   align-items: center; }
+  /* line 19, _toolbar.scss */
   #toolbar > * {
     zoom: 1.15; }
     @media only screen and (max-width: 1100px) {
+      /* line 19, _toolbar.scss */
       #toolbar > * {
         zoom: 1.0; } }
     @media only screen and (max-width: 1024px) {
+      /* line 19, _toolbar.scss */
       #toolbar > * {
         zoom: 0.8; } }
+  /* line 32, _toolbar.scss */
   #toolbar .icon {
     width: 25px;
     height: 25px;
@@ -339,20 +404,25 @@
     -ms-flex-shrink: 0;
     -webkit-flex-shrink: 0;
     flex-shrink: 0; }
+    /* line 46, _toolbar.scss */
     #toolbar .icon:hover {
       /*margin-top: 1px;
       margin-left: 1px;
       margin-right: 2px;
       margin-bottom: 2px;*/
       background-color: lightblue; }
+    /* line 54, _toolbar.scss */
     #toolbar .icon:active {
       background-color: #7B7B7B; }
+    /* line 58, _toolbar.scss */
     #toolbar .icon.iconselected {
       background-color: #3a8fff;
       padding: 2px; }
+    /* line 63, _toolbar.scss */
     #toolbar .icon.icondisabled {
       opacity: .1;
       pointer-events: none; }
+  /* line 70, _toolbar.scss */
   #toolbar .separator {
     vertical-align: middle;
     border-left: 3px outset #adadad;
@@ -360,18 +430,21 @@
     border-left-style: groove;
     height: 30px; }
 
+/* line 2, _statusbar.scss */
 .statusbar {
   height: 25px;
   z-index: 201;
   background: #444;
   white-space: nowrap; }
 
+/* line 11, _statusbar.scss */
 #statusbarinner {
   display: inline-block;
   width: 100%;
   background: #414141;
   /* Old browsers */ }
 
+/* line 18, _statusbar.scss */
 .statusbarElement {
   display: inline;
   height: 100%;
@@ -387,9 +460,11 @@
   /* text-shadow: 1px 1px 3px black; */
   border-left: 1px solid; }
 
+/* line 35, _statusbar.scss */
 .timeControlActive {
   background-color: blue; }
 
+/* line 39, _statusbar.scss */
 #TimeControl {
   height: 59px;
   display: inline-block;
@@ -399,24 +474,28 @@
   border: 1px solid #555555;
   padding: 4px 4px 4px 4px; }
 
+/* line 49, _statusbar.scss */
 #playButton {
   background-image: url(../images/icons/sprites.svg) !important;
   background-origin: content-box !important;
   background-position: -212px -56px;
   background-size: 646px; }
 
+/* line 56, _statusbar.scss */
 #pauseButton {
   background-image: url(../images/icons/sprites.svg) !important;
   background-origin: content-box !important;
   background-position: -262px -56px;
   background-size: 645px; }
 
+/* line 63, _statusbar.scss */
 #stopButton {
   background-image: url(../images/icons/sprites.svg) !important;
   background-origin: content-box !important;
   background-position: -349px -65px;
   background-size: 718px; }
 
+/* line 70, _statusbar.scss */
 .timeControl {
   text-indent: 0px;
   display: inline-block;
@@ -438,12 +517,15 @@
   margin-bottom: -4px;
   /* border-radius: 6px; */ }
 
+/* line 92, _statusbar.scss */
 .timeControl:hover {
   background-color: #dfdfdf; }
 
+/* line 96, _statusbar.scss */
 .timeControl:active {
   background-color: #dfdfff; }
 
+/* line 4, _EntityLibrary.scss */
 #EntityLibrary {
   position: relative;
   width: 250px;
@@ -453,10 +535,12 @@
   flex-shrink: 0;
   background: #515151 url(../../../../images/ui-bg_diagonals-thick_8_333333_40x40.png) 0% 0% repeat;
   background-size: 5%; }
+  /* line 13, _EntityLibrary.scss */
   #EntityLibrary.hidden {
     display: block !important;
     visibility: visible !important;
     width: 0; }
+  /* line 21, _EntityLibrary.scss */
   #EntityLibrary #EntityLibrarySideTab {
     z-index: 30;
     position: absolute;
@@ -477,16 +561,22 @@
     cursor: pointer;
     background: #4c4c4c;
     padding-left: 0px; }
+    /* line 45, _EntityLibrary.scss */
     #EntityLibrary #EntityLibrarySideTab:hover {
       color: #82b8ff; }
+  /* line 51, _EntityLibrary.scss */
   #EntityLibrary #EntityLibraryMain {
     margin-top: 1px;
     padding-right: 1px;
     position: absolute;
     right: 0px;
-    width: 248px; }
+    min-width: 248px;
+    max-height: 100%;
+    overflow-y: scroll; }
+  /* line 65, _EntityLibrary.scss */
   #EntityLibrary #EntityLibraryAccordion {
     overflow-y: auto; }
+  /* line 70, _EntityLibrary.scss */
   #EntityLibrary .libraryAsset {
     text-align: center;
     display: inline-block;
@@ -494,6 +584,7 @@
     width: 73px;
     height: 75px;
     margin-bottom: 9px; }
+    /* line 79, _EntityLibrary.scss */
     #EntityLibrary .libraryAsset div {
       color: whitesmoke;
       text-shadow: 1px 1px 5px black;
@@ -502,6 +593,7 @@
       position: relative;
       /* border-radius: 10px; */
       pointer-events: none; }
+    /* line 90, _EntityLibrary.scss */
     #EntityLibrary .libraryAsset img {
       width: 75px;
       height: 75px;
@@ -515,6 +607,7 @@
       /* For Safari 3.1 to 6.0 */
       transition: opactiy 2s; }
 
+/* line 4, _scripteditor.scss */
 #ScriptEditor {
   height: 400px;
   overflow: hidden;
@@ -524,13 +617,16 @@
   -ms-flex-shrink: 0;
   -webkit-flex-shrink: 0;
   flex-shrink: 0; }
+  /* line 5, _scripteditor.scss */
   #ScriptEditor.maximized {
     -moz-flex-grow: 1;
     -ms-flex: 1 1;
     -webkit-flex-grow: 1;
     flex-grow: 1; }
+  /* line 8, _scripteditor.scss */
   #ScriptEditor.minimized {
     height: 0; }
+  /* line 19, _scripteditor.scss */
   #ScriptEditor #scripteditortitle {
     padding: 3px 4px;
     font: 1.5em sans-serif;
@@ -539,6 +635,7 @@
     -ms-flex-shrink: 0;
     -webkit-flex-shrink: 0;
     flex-shrink: 0; }
+    /* line 26, _scripteditor.scss */
     #ScriptEditor #scripteditortitle .icon {
       float: right;
       text-align: center;
@@ -546,13 +643,16 @@
       margin-left: 3px;
       padding: 3px;
       cursor: pointer; }
+      /* line 34, _scripteditor.scss */
       #ScriptEditor #scripteditortitle .icon:hover {
         background-color: lightblue; }
+  /* line 41, _scripteditor.scss */
   #ScriptEditor #ScriptEditorTabs {
     -moz-flex-grow: 1;
     -ms-flex: 1 1;
     -webkit-flex-grow: 1;
     flex-grow: 1; }
+  /* line 46, _scripteditor.scss */
   #ScriptEditor .tabs-nav {
     -moz-flex-shrink: 0;
     -ms-flex-shrink: 0;
@@ -560,6 +660,7 @@
     flex-shrink: 0;
     border-bottom: solid #333333 1px;
     background-color: black; }
+    /* line 52, _scripteditor.scss */
     #ScriptEditor .tabs-nav label {
       font-size: 11px;
       font-weight: bold;
@@ -571,19 +672,24 @@
       background-color: #222222;
       margin: 3px 0 0 0;
       padding: 5.5px 11px; }
+      /* line 66, _scripteditor.scss */
       #ScriptEditor .tabs-nav label.selected {
         background-color: #aeaeae;
         color: black; }
+      /* line 71, _scripteditor.scss */
       #ScriptEditor .tabs-nav label:first-child {
         margin-left: 5px; }
+    /* line 76, _scripteditor.scss */
     #ScriptEditor .tabs-nav input {
       display: none; }
+  /* line 82, _scripteditor.scss */
   #ScriptEditor .tabs-panel {
     -moz-flex-grow: 1;
     -ms-flex: 1 1;
     -webkit-flex-grow: 1;
     flex-grow: 1;
     padding: 4px 0 0 0; }
+  /* line 88, _scripteditor.scss */
   #ScriptEditor .list {
     width: 190px;
     margin-right: 5px;
@@ -593,6 +699,7 @@
     -ms-flex-shrink: 0;
     -webkit-flex-shrink: 0;
     flex-shrink: 0; }
+    /* line 98, _scripteditor.scss */
     #ScriptEditor .list .listitem {
       display: block;
       cursor: pointer;
@@ -607,20 +714,28 @@
       border: 1px solid gray;
       border-radius: 2px;
       margin: 2px; }
+      /* line 115, _scripteditor.scss */
       #ScriptEditor .list .listitem input {
         display: none; }
+      /* line 119, _scripteditor.scss */
       #ScriptEditor .list .listitem:hover {
         color: #82b8ff; }
+      /* line 123, _scripteditor.scss */
       #ScriptEditor .list .listitem.selected {
         background-color: #2c425e; }
+      /* line 127, _scripteditor.scss */
       #ScriptEditor .list .listitem.suggestion {
         color: #B6B6B6; }
+      /* line 131, _scripteditor.scss */
       #ScriptEditor .list .listitem.dirty {
         border-color: red; }
+      /* line 135, _scripteditor.scss */
       #ScriptEditor .list .listitem:last-child {
         margin-bottom: 28px; }
+  /* line 142, _scripteditor.scss */
   #ScriptEditor .textinner {
     width: 100%; }
+    /* line 146, _scripteditor.scss */
     #ScriptEditor .textinner .content {
       position: relative;
       background: url(vwf/view/editorview/images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat;
@@ -629,8 +744,10 @@
       -ms-flex: 1 1;
       -webkit-flex-grow: 1;
       flex-grow: 1; }
+      /* line 152, _scripteditor.scss */
       #ScriptEditor .textinner .content.dirty {
         border-color: red; }
+    /* line 159, _scripteditor.scss */
     #ScriptEditor .textinner pre {
       padding: 0;
       margin: 0;
@@ -640,6 +757,7 @@
       width: 100%;
       height: 100%;
       position: absolute; }
+    /* line 172, _scripteditor.scss */
     #ScriptEditor .textinner .buttonPanel {
       -webkit-box-align: center;
       -moz-align-items: center;
@@ -650,22 +768,27 @@
       font-weight: bold;
       font-family: "Open Sans", Verdana, Arial, sans-serif;
       color: #eee; }
+      /* line 181, _scripteditor.scss */
       #ScriptEditor .textinner .buttonPanel input[type=button] {
         background: #222222 50% 50% repeat-x;
         border: 1px solid #444444;
         border-radius: 2px;
         font-size: inherit;
         margin: 4px; }
+        /* line 190, _scripteditor.scss */
         #ScriptEditor .textinner .buttonPanel input[type=button]:hover {
           color: #82b8ff; }
+        /* line 194, _scripteditor.scss */
         #ScriptEditor .textinner .buttonPanel input[type=button]:disabled, #ScriptEditor .textinner .buttonPanel input[type=button]:disabled:hover {
           color: grey; }
+  /* line 201, _scripteditor.scss */
   #ScriptEditor #options.tabs-panel {
     -webkit-box-align: flex-start;
     -moz-align-items: flex-start;
     -ms-flex-align: flex-start;
     -webkit-align-items: flex-start;
     align-items: flex-start; }
+  /* line 206, _scripteditor.scss */
   #ScriptEditor label.toggleButton {
     font-size: 11px;
     font-weight: bold;
@@ -676,16 +799,20 @@
     background-color: #222222;
     margin: 5px;
     padding: 5.5px 11px; }
+    /* line 219, _scripteditor.scss */
     #ScriptEditor label.toggleButton:hover {
       color: #82b8ff; }
+    /* line 223, _scripteditor.scss */
     #ScriptEditor label.toggleButton.checked {
       background-color: #aeaeae;
       color: black; }
+    /* line 228, _scripteditor.scss */
     #ScriptEditor label.toggleButton input {
       display: none; }
 
+/* line 4, _sidepanel.scss */
 #sidepanel {
-  width: 250px;
+  width: 320px;
   -moz-flex-shrink: 0;
   -ms-flex-shrink: 0;
   -webkit-flex-shrink: 0;
@@ -694,51 +821,81 @@
   background-size: 5%;
   outline: none;
   position: relative; }
+  /* line 14, _sidepanel.scss */
+  #sidepanel.hidden {
+    display: block !important;
+    visibility: visible !important;
+    width: 0; }
+  /* line 21, _sidepanel.scss */
   #sidepanel #sidetab {
     position: absolute;
     left: -49px;
     top: 10%;
+    padding: 3px 15px;
+    border: 2px solid #82b8ff;
+    border-bottom: none;
     -webkit-transform: rotate(-90deg);
     -ms-transform: rotate(-90deg);
     transform: rotate(-90deg);
     font-size: 12px;
     font-family: 'Open Sans',sans-serif;
+    color: white;
+    text-shadow: 1px 1px 3px black;
     background: #4c4c4c;
-    padding: 3px 15px;
     text-align: center;
     vertical-align: middle;
     /* border-radius: 7px; */
-    border: 2px solid #82b8ff;
-    border-bottom: none;
-    color: white;
-    text-shadow: 1px 1px 3px black;
     cursor: pointer; }
+    /* line 42, _sidepanel.scss */
     #sidepanel #sidetab:hover {
       color: #82b8ff; }
+  /* line 48, _sidepanel.scss */
+  #sidepanel .main {
+    position: absolute;
+    left: 1px;
+    min-width: 318px;
+    width: 318px;
+    overflow-y: auto; }
+  /* line 57, _sidepanel.scss */
+  #sidepanel .editorPanel {
+    width: 100%; }
+    /* line 61, _sidepanel.scss */
+    #sidepanel .editorPanel .title {
+      padding: 3px 4px;
+      font: 1.5em sans-serif;
+      font-weight: bold; }
+    /* line 68, _sidepanel.scss */
+    #sidepanel .editorPanel .content {
+      color: white;
+      background: url(vwf/view/editorview/css/images/ui-bg_hexagon_5_111111_12x10.png) 50% 50% repeat #242020; }
 
-@media only screen and (max-width: 1024px) {
-  #sidepanel {
-    width: 250px; } }
 @-webkit-keyframes pulsing {
+  /* line 12, Editorview.scss */
   0% {
     background-color: #20559b; }
 
+  /* line 16, Editorview.scss */
   50% {
     background-color: #669be1; }
 
+  /* line 20, Editorview.scss */
   100% {
     background-color: #84b9ff; } }
 
 @keyframes pulsing {
+  /* line 26, Editorview.scss */
   0% {
     background-color: #20559b; }
 
+  /* line 30, Editorview.scss */
   50% {
     background-color: #669be1; }
 
+  /* line 34, Editorview.scss */
   100% {
     background-color: #84b9ff; } }
 
+/* line 39, Editorview.scss */
 .pulsing {
   background-color: #3a8fff;
   /*
@@ -755,6 +912,7 @@
   -webkit-animation-timing-function: linear;
   -webkit-animation-play-state: running;*/ }
 
+/* line 56, Editorview.scss */
 .verticalLayout {
   display: -webkit-box;
   display: -moz-flex;
@@ -766,11 +924,14 @@
   -ms-flex-direction: column;
   -webkit-flex-direction: column;
   flex-direction: column; }
+  /* line 60, Editorview.scss */
   .verticalLayout#toolbarLevel, .verticalLayout#editorLevel {
     width: 100%; }
+  /* line 64, Editorview.scss */
   .verticalLayout#toolbarLevel {
     height: 100%; }
 
+/* line 68, Editorview.scss */
 .horizontalLayout {
   display: -webkit-box;
   display: -moz-flex;
@@ -782,15 +943,18 @@
   -ms-flex-direction: row;
   -webkit-flex-direction: row;
   flex-direction: row; }
+  /* line 72, Editorview.scss */
   .horizontalLayout#panelLevel {
     height: 100%; }
 
+/* line 77, Editorview.scss */
 .spacer {
   -moz-flex-grow: 1;
   -ms-flex: 1 1;
   -webkit-flex-grow: 1;
   flex-grow: 1; }
 
+/* line 81, Editorview.scss */
 #GlobalProgressBar {
   vertical-align: middle;
   display: inline-block;
@@ -802,6 +966,7 @@
   width: 200px;
   overflow: hidden; }
 
+/* line 93, Editorview.scss */
 #GlobalProgressBarInner {
   background: #82b8ff;
   display: block;
@@ -825,6 +990,7 @@
   max-width: 190px; }
 
 /* This button was generated using CSSButtonGenerator.com */
+/* line 117, Editorview.scss */
 #GlobalProgressBarBack {
   width: 200px;
   background: gray;
@@ -837,6 +1003,7 @@
   font-weight: bold;
   height: 15px; }
 
+/* line 130, Editorview.scss */
 #FunctionTip {
   top: 804.1875px;
   left: 295px;
@@ -851,6 +1018,7 @@
   color: white;
   margin: 0px; }
 
+/* line 145, Editorview.scss */
 .AutoCompleteOption {
   font-size: 1.5em;
   font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
@@ -858,13 +1026,16 @@
   color: #FFF;
   border-bottom: 1px dashed #ededed; }
 
+/* line 153, Editorview.scss */
 .AutoCompleteOption:hover {
   color: #5ab4e6; }
 
+/* line 157, Editorview.scss */
 .AutoCompleteOptionFunction {
   font-style: italic;
   color: orange; }
 
+/* line 162, Editorview.scss */
 #AutoComplete {
   position: absolute;
   z-index: 10000000;
@@ -876,16 +1047,20 @@
   overflow-x: hidden !important;
   margin: 0px; }
 
+/* line 174, Editorview.scss */
 input[type="text"]:focus, input[type="password"]:focus {
   box-shadow: 0px 0px 5px #82b8ff; }
 
+/* line 178, Editorview.scss */
 #alertify {
   font-size: 1.7em;
   top: 38%; }
 
+/* line 183, Editorview.scss */
 #alertify-logs {
   font-size: 2em; }
 
+/* line 187, Editorview.scss */
 .playerlabel {
   cursor: pointer;
   font-size: 1.3em;
@@ -898,6 +1073,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   color: #eee;
   font-family: 'Open Sans'; }
 
+/* line 200, Editorview.scss */
 .loadchoice {
   background-color: #DDD;
   border-radius: 3px;
@@ -905,14 +1081,17 @@ input[type="text"]:focus, input[type="password"]:focus {
   box-shadow: 3px 3px 7px grey;
   margin-bottom: 5px; }
 
+/* line 208, Editorview.scss */
 .SidePanelWindowTitle {
   padding: 3px 4px 3px 4px;
   font: 1.5em sans-serif; }
 
+/* line 213, Editorview.scss */
 .SidePanelWindowBottomBorder {
   border-bottom: 5px solid #444444;
   border-left: 2px solid #444444; }
 
+/* line 218, Editorview.scss */
 .loadchoice:hover {
   background-color: #DDF;
   border-radius: 3px;
@@ -920,6 +1099,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   box-shadow: 3px 3px 7px grey;
   margin-bottom: 5px; }
 
+/* line 226, Editorview.scss */
 .BigTextureThumb {
   margin-left: auto;
   margin-right: auto;
@@ -930,6 +1110,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   margin-bottom: 10px;
   cursor: pointer; }
 
+/* line 237, Editorview.scss */
 .BigTextureThumbSrc {
   margin-left: auto;
   margin-right: auto;
@@ -939,6 +1120,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   cursor: pointer;
   word-break: break-all; }
 
+/* line 247, Editorview.scss */
 #ContextMenu {
   position: fixed;
   z-index: 10000000;
@@ -955,6 +1137,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   border: 1px solid gray;
   cursor: default; }
 
+/* line 264, Editorview.scss */
 #ContextMenuName {
   border-bottom: 1px solid gray;
   height: 1em;
@@ -965,21 +1148,26 @@ input[type="text"]:focus, input[type="password"]:focus {
   padding-left: 6px;
   color: lightblue; }
 
+/* line 275, Editorview.scss */
 .ContextMenuAction {
   background: #404040;
   padding-left: 5px;
   color: lightgreen; }
 
+/* line 281, Editorview.scss */
 .ContextMenuAction:hover {
   background: #82b8ff; }
 
+/* line 285, Editorview.scss */
 .ContextMenuItem {
   background: #404040;
   padding-left: 5px; }
 
+/* line 290, Editorview.scss */
 .ContextMenuItem:hover {
   background: #4040A0; }
 
+/* line 294, Editorview.scss */
 .textureChoice {
   width: 50px;
   cursor: pointer;
@@ -994,12 +1182,14 @@ input[type="text"]:focus, input[type="password"]:focus {
   color: black;
   text-shadow: 1px 1px 3px white; }
 
+/* line 309, Editorview.scss */
 .editorCheck {
   margin: 0px 2px 0px 0px;
   text-align: center;
   vertical-align: middle;
   zoom: 1.5; }
 
+/* line 316, Editorview.scss */
 .editorSliderLabel {
   display: inline-block;
   margin-bottom: 3px;
@@ -1007,6 +1197,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   font-size: 1.2em;
   text-shadow: 1px 1px 3px #aaaaaa; }
 
+/* line 324, Editorview.scss */
 .nametagname {
   border-left: 2px ridge #6666ff;
   height: 100%;
@@ -1015,6 +1206,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   padding-right: 10px;
   cursor: pointer; }
 
+/* line 333, Editorview.scss */
 .nametag {
   /* pointer-events: none; */
   position: absolute;
@@ -1030,30 +1222,36 @@ input[type="text"]:focus, input[type="password"]:focus {
   opacity: .8;
   transition: background 1s, opacity 1s; }
 
+/* line 349, Editorview.scss */
 .nametag:hover {
   opacity: 1;
   background: #82b8ff;
   box-shadow: 3px 3px 3px rgba(52, 52, 52, 0.9), -3px -3px 3px #7777cc inset; }
 
+/* line 355, Editorview.scss */
 .glyph {
   position: absolute;
   left: 0px;
   right: 0px; }
 
+/* line 361, Editorview.scss */
 .textureChoice:hover {
   background: #4040A0;
   border: 1px inset blue;
   width: 48px;
   height: 48px; }
 
+/* line 368, Editorview.scss */
 .TransformEditorInput {
   width: 4em; }
 
+/* line 372, Editorview.scss */
 .usertable {
   width: 100%;
   margin-bottom: 5px;
   margin-left: 5px; }
 
+/* line 378, Editorview.scss */
 .headericon {
   vertical-align: middle;
   width: 25px;
@@ -1062,15 +1260,18 @@ input[type="text"]:focus, input[type="password"]:focus {
   zoom: 1.2;
   padding-right: 5px; }
 
+/* line 386, Editorview.scss */
 .usertable tr td {
   font: 8pt "Open Sans"; }
 
+/* line 390, Editorview.scss */
 .usertable tr {
   display: block;
   border-radius: 5px;
   width: 100%;
   padding-bottom: 1px; }
 
+/* line 397, Editorview.scss */
 .EditorDataSectionTitle {
   text-align: center;
   margin: 3em 0px 0px 0px;
@@ -1078,9 +1279,11 @@ input[type="text"]:focus, input[type="password"]:focus {
   font-size: 1.3em;
   text-shadow: 1px 1px 5px #888888; }
 
+/* line 405, Editorview.scss */
 .EditorDataSectionTitle:first-child {
   margin: 1em 0px 0px 0px; }
 
+/* line 411, Editorview.scss */
 .GLGEStat {
   z-index: 999999;
   background-color: black;
@@ -1089,9 +1292,11 @@ input[type="text"]:focus, input[type="password"]:focus {
   border-radius: 10px;
   opacity: .8; }
 
+/* line 420, Editorview.scss */
 .GLGEStat table tbody tr td {
   color: white; }
 
+/* line 424, Editorview.scss */
 .vectorinputfront {
   display: inline;
   padding: 0;
@@ -1104,6 +1309,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   height: 16px;
   margin: 1px 0px 1px -2px; }
 
+/* line 437, Editorview.scss */
 .vectorinput {
   display: inline;
   padding: 0;
@@ -1116,6 +1322,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   height: 16px;
   margin: 1px 0px 1px -2px; }
 
+/* line 450, Editorview.scss */
 .primeditorinputbox {
   display: inline;
   float: right;
@@ -1129,9 +1336,11 @@ input[type="text"]:focus, input[type="password"]:focus {
   height: 16px; }
 
 @media only screen and (max-width: 800px) {
+  /* line 465, Editorview.scss */
   #sidepanel {
     width: 200px; }
 
+  /* line 469, Editorview.scss */
   .primeditorinputbox {
     display: block;
     float: none;
@@ -1143,6 +1352,7 @@ input[type="text"]:focus, input[type="password"]:focus {
  * Include this stylesheet in your site or copy and paste the styles below into your stylesheet - jScrollPane
  * may not operate correctly without them.
  */
+/* line 482, Editorview.scss */
 .jspContainer {
   overflow: hidden;
   position: relative;
@@ -1152,10 +1362,12 @@ input[type="text"]:focus, input[type="password"]:focus {
   background-size: 5%;
   margin-top: 3px; }
 
+/* line 492, Editorview.scss */
 .jspPane {
   position: absolute;
   left: 0px !important; }
 
+/* line 497, Editorview.scss */
 .jspVerticalBar {
   position: absolute;
   top: 0;
@@ -1164,6 +1376,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   height: 100%;
   background: #424242; }
 
+/* line 506, Editorview.scss */
 .jspHorizontalBar {
   position: absolute;
   bottom: 0;
@@ -1173,25 +1386,31 @@ input[type="text"]:focus, input[type="password"]:focus {
   background: red;
   display: none; }
 
+/* line 516, Editorview.scss */
 .jspVerticalBar * {
   margin: 0;
   padding: 0; }
 
+/* line 521, Editorview.scss */
 .jspHorizontalBar * {
   margin: 0;
   padding: 0;
   display: none; }
 
+/* line 527, Editorview.scss */
 .jspCap {
   display: none; }
 
+/* line 531, Editorview.scss */
 .jspHorizontalBar .jspCap {
   float: left; }
 
+/* line 535, Editorview.scss */
 .jspTrack {
   background: rgba(0, 0, 0, 0);
   position: relative; }
 
+/* line 540, Editorview.scss */
 .jspDrag {
   box-shadow: 1px 1px 3px inset black;
   background: #3a8fff;
@@ -1203,41 +1422,50 @@ input[type="text"]:focus, input[type="password"]:focus {
   /* border-radius: 5px; */
   border-left: 1px solid black; }
 
+/* line 553, Editorview.scss */
 .jspHorizontalBar .jspTrack,
 .jspHorizontalBar .jspDrag {
   float: left;
   height: 100%; }
 
+/* line 558, Editorview.scss */
 .jspArrow {
   background: #50506d;
   text-indent: -20000px;
   display: block;
   cursor: pointer; }
 
+/* line 565, Editorview.scss */
 .jspArrow.jspDisabled {
   cursor: default;
   background: #80808d; }
 
+/* line 570, Editorview.scss */
 .jspVerticalBar .jspArrow {
   height: 16px; }
 
+/* line 574, Editorview.scss */
 .jspHorizontalBar .jspArrow {
   width: 16px;
   float: left;
   height: 100%; }
 
+/* line 580, Editorview.scss */
 .jspVerticalBar .jspArrow:focus {
   outline: none; }
 
+/* line 584, Editorview.scss */
 .jspCorner {
   background: #eeeef4;
   float: left;
   height: 100%; }
 
 /* Yuk! CSS Hack for IE6 3 pixel bug :( */
+/* line 591, Editorview.scss */
 * html .jspCorner {
   margin: 0 -3px 0 0; }
 
+/* line 595, Editorview.scss */
 .PrivateMessageWindow {
   background-image: -webkit-linear-gradient(top, white 0%, #d9eeef 100%);
   width: 99%;
@@ -1248,12 +1476,14 @@ input[type="text"]:focus, input[type="password"]:focus {
   position: absolute;
   overflow-y: auto; }
 
+/* line 606, Editorview.scss */
 .PrivateMessageTable {
   width: 100%;
   background-color: transparent;
   overflow-y: hidden;
   overflow-x: hidden; }
 
+/* line 613, Editorview.scss */
 .PrivateMessageWindowText {
   margin: 0px;
   padding: 0px;
@@ -1265,6 +1495,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   width: 98%;
   top: 0%; }
 
+/* line 625, Editorview.scss */
 .PrivateMessageWindow input {
   right: 1%;
   position: absolute;
@@ -1275,10 +1506,12 @@ input[type="text"]:focus, input[type="password"]:focus {
   box-shadow: 3px 2px 10px lightgrey inset;
   width: calc(98% - 1em); }
 
+/* line 636, Editorview.scss */
 .PrivateMessageWindow input:focus {
   border: 1px solid #82b8ff;
   box-shadow: 3px 2px 10px lightgrey inset; }
 
+/* line 641, Editorview.scss */
 .ChatFromOtherLabel {
   vertical-align: middle;
   color: #517890;
@@ -1291,6 +1524,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   font-style: italic;
   width: 100px; }
 
+/* line 654, Editorview.scss */
 .ChatFromOtherText {
   color: white;
   /* text-align: right; */
@@ -1309,6 +1543,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   vertical-align: middle;
   clear: both; }
 
+/* line 673, Editorview.scss */
 .ChatFromMeLabel {
   vertical-align: middle;
   color: #6ea1c0;
@@ -1321,6 +1556,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   font-style: italic;
   width: 100px; }
 
+/* line 686, Editorview.scss */
 .ChatFromMeText {
   color: white;
   /* text-align: right; */
@@ -1338,6 +1574,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   vertical-align: middle;
   clear: both; }
 
+/* line 704, Editorview.scss */
 .GlobalChatLabel {
   vertical-align: top;
   width: 25%;
@@ -1346,11 +1583,13 @@ input[type="text"]:focus, input[type="password"]:focus {
   color: darkred;
   display: table-cell; }
 
+/* line 713, Editorview.scss */
 .GlobalChatText {
   color: darkred;
   width: 75%;
   max-width: 75%; }
 
+/* line 719, Editorview.scss */
 #ChatInput {
   bottom: 0px;
   position: absolute;
@@ -1361,14 +1600,17 @@ input[type="text"]:focus, input[type="password"]:focus {
   width: 97%;
   box-sizing: border-box; }
 
+/* line 730, Editorview.scss */
 #ChatInput:focus {
   border: 1px solid #82b8ff;
   box-shadow: 3px 2px 10px lightgrey inset; }
 
+/* line 735, Editorview.scss */
 #ChatLog {
   width: 100%;
   background-color: transparent; }
 
+/* line 740, Editorview.scss */
 #ChatBodyInner {
   width: 99%;
   top: 0%;
@@ -1379,43 +1621,52 @@ input[type="text"]:focus, input[type="password"]:focus {
   bottom: 38px;
   border: none; }
 
+/* line 751, Editorview.scss */
 #ChatWindow {
   width: 100%;
   margin: 0px;
   padding: 0px; }
 
+/* line 757, Editorview.scss */
 .ChatFromOther {
   margin: 5px; }
 
+/* line 761, Editorview.scss */
 .ChatFromMe {
   width: 95%;
   border-radius: 10px;
   margin: 5px 5px 9px 5px;
   right: 1%; }
 
+/* line 768, Editorview.scss */
 .ChatFromMeText a {
   word-break: break-all; }
 
+/* line 772, Editorview.scss */
 .ChatFromOtherText a {
   word-break: break-all; }
 
+/* line 776, Editorview.scss */
 .targetpropchoice {
   padding-left: 1em;
   cursor: pointer;
   color: gray;
   border-bottom: 1px solid #eeeeee; }
 
+/* line 783, Editorview.scss */
 .sourcepropchoice {
   padding-left: 1em;
   cursor: pointer;
   border-bottom: 1px solid #eeeeee; }
 
+/* line 789, Editorview.scss */
 .wirepropselected {
   font-weight: bold;
   text-shadow: 1px 1px 1px #aaaaaa;
   color: blue;
   background: #DDF; }
 
+/* line 796, Editorview.scss */
 #WireEditorSelectedName {
   height: 1em;
   background: #EFEFEF;
@@ -1428,6 +1679,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   overflow: hidden;
   cursor: pointer; }
 
+/* line 809, Editorview.scss */
 #WireEditorSourceName {
   height: 1em;
   background: #EFEFEF;
@@ -1440,6 +1692,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   overflow: hidden;
   cursor: pointer; }
 
+/* line 822, Editorview.scss */
 #WireEditorSelectedProps {
   margin-left: 1em;
   overflow: auto;
@@ -1448,6 +1701,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   top: 5em;
   width: 94%; }
 
+/* line 831, Editorview.scss */
 #WireEditorSourceProps {
   margin-left: 1em;
   overflow: auto;
@@ -1456,11 +1710,13 @@ input[type="text"]:focus, input[type="password"]:focus {
   top: 5em;
   width: 94%; }
 
+/* line 840, Editorview.scss */
 #WireEditor {
   padding: 0px;
   margin: 0px;
   font-size: 1.2em; }
 
+/* line 846, Editorview.scss */
 .wireeditorleft {
   position: absolute;
   top: 0%;
@@ -1473,6 +1729,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   border-radius: 6px;
   box-shadow: 0px 0px 10px #cccccc inset; }
 
+/* line 859, Editorview.scss */
 .wireeditorright {
   position: absolute;
   width: 50%;
@@ -1484,12 +1741,14 @@ input[type="text"]:focus, input[type="password"]:focus {
   padding: 0em 0em 0em 0em;
   border-radius: 6px; }
 
+/* line 871, Editorview.scss */
 #wireeditorbuttons {
   position: absolute;
   top: 80%;
   width: 100%;
   text-align: center; }
 
+/* line 878, Editorview.scss */
 #wireeditorLink {
   height: 1em;
   background: #EFEFEF;
@@ -1507,9 +1766,11 @@ input[type="text"]:focus, input[type="password"]:focus {
   cursor: pointer;
   display: inline-block; }
 
+/* line 896, Editorview.scss */
 .wiredisabled {
   color: lightgray; }
 
+/* line 900, Editorview.scss */
 #wireeditordisable {
   position: absolute;
   top: 0%;
@@ -1519,10 +1780,12 @@ input[type="text"]:focus, input[type="password"]:focus {
   background: black;
   opacity: .05; }
 
+/* line 910, Editorview.scss */
 .wirepropwired {
   text-shadow: 1px 1px 1px gray;
   color: darkblue; }
 
+/* line 915, Editorview.scss */
 #SubExp2 {
   height: 1em;
   background: #EFEFEF;
@@ -1540,6 +1803,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   cursor: pointer;
   display: inline-block; }
 
+/* line 933, Editorview.scss */
 #SubExp1 {
   height: 1em;
   background: #EFEFEF;
@@ -1557,18 +1821,22 @@ input[type="text"]:focus, input[type="password"]:focus {
   cursor: pointer;
   display: inline-block; }
 
+/* line 951, Editorview.scss */
 .hierarchyItemSelected {
   background: #82b8ff url(../../../images/ui-bg_glass_75_cfe4ef_1x400.png) repeat;
   background-size: 100% 100%;
   /* border: 1px solid lightgray; */
   color: black; }
 
+/* line 958, Editorview.scss */
 .hierarchyicondisable {
   color: #444; }
 
+/* line 962, Editorview.scss */
 .hierarchyicon {
   color: #82b8ff; }
 
+/* line 966, Editorview.scss */
 #hierarchyDisplay {
   font: 1.5em sans-serif;
   padding-bottom: 5px;
@@ -1580,6 +1848,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
   padding-left: 5px; }
 
+/* line 978, Editorview.scss */
 .hierarchyItem {
   font-weight: normal;
   white-space: nowrap;
@@ -1590,20 +1859,24 @@ input[type="text"]:focus, input[type="password"]:focus {
   padding: .1em;
   font-size: 0.9em; }
 
+/* line 989, Editorview.scss */
 .hierarchyentry {
   margin-left: 1em;
   overflow: hidden;
   border-left: 1px dotted #444444; }
 
+/* line 995, Editorview.scss */
 .hierarchytoggle {
   margin-right: .5em;
   padding-left: 1.5em;
   font-size: .6em;
   display: inline; }
 
+/* line 1002, Editorview.scss */
 .hierarchyItem:hover {
   background: lightblue url(../../../images/ui-bg_glass_75_cfe4ef_1x400.png) repeat; }
 
+/* line 1006, Editorview.scss */
 .hierarchySpacer {
   padding-bottom: 5px;
   margin-right: 10px;
@@ -1612,6 +1885,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   height: 1.3em;
   white-space: nowrap; }
 
+/* line 1015, Editorview.scss */
 #preloadGUI {
   position: absolute;
   width: 30%;
@@ -1629,11 +1903,13 @@ input[type="text"]:focus, input[type="password"]:focus {
   font-family: 'Open Sans',sans-serif;
   font-size: 17px; }
 
+/* line 1033, Editorview.scss */
 #preloadGUI .preloadCenter {
   height: 60%;
   -webkit-margin-after: 0;
   -webkit-margin-before: 0; }
 
+/* line 1039, Editorview.scss */
 #preloadguiText {
   background: #F5F5F5;
   height: 40%;
@@ -1652,12 +1928,15 @@ input[type="text"]:focus, input[type="password"]:focus {
   color: #ccc;
   font-size: .7em; }
 
+/* line 1058, Editorview.scss */
 #fullscreenlink {
   cursor: pointer; }
 
+/* line 1062, Editorview.scss */
 #fullscreenlink:hover {
   color: blue; }
 
+/* line 1066, Editorview.scss */
 #preloadprogress {
   vertical-align: middle;
   margin-top: auto;
@@ -1668,6 +1947,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   top: 16%;
   left: 2.5%; }
 
+/* line 1077, Editorview.scss */
 .progress-label {
   position: absolute;
   font-weight: bold;
@@ -1678,6 +1958,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   height: 100%;
   margin: 0px; }
 
+/* line 1088, Editorview.scss */
 #preloadGUIBack {
   position: absolute;
   width: 100%;
@@ -1691,29 +1972,36 @@ input[type="text"]:focus, input[type="password"]:focus {
   font-size: 1.5em;
   font-family: 'Open Sans',sans-serif; }
 
+/* line 1102, Editorview.scss */
 .guinode {
   position: absolute; }
 
+/* line 1106, Editorview.scss */
 .guipick:hover {
   outline: 3px solid lightblue !important; }
 
+/* line 1110, Editorview.scss */
 .guiselected {
   outline: 3px solid blue !important; }
 
+/* line 1114, Editorview.scss */
 .guiselected:hover {
   outline: 3px solid blue !important; }
 
 /* Let's get this party started */
+/* line 1118, Editorview.scss */
 ::-webkit-scrollbar {
   width: 8px; }
 
 /* Track */
+/* line 1123, Editorview.scss */
 ::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
   -webkit-border-radius: 5px;
   border-radius: 5px; }
 
 /* Handle */
+/* line 1130, Editorview.scss */
 ::-webkit-scrollbar-thumb {
   /* -webkit-border-radius: 5px; */
   /* border-radius: 5px; */
@@ -1721,16 +2009,20 @@ input[type="text"]:focus, input[type="password"]:focus {
   /* -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); */
   width: 8px; }
 
+/* line 1138, Editorview.scss */
 ::-webkit-scrollbar-thumb:window-inactive {
   background: #82b8ff; }
 
+/* line 1142, Editorview.scss */
 .libraryAsset img:hover {
   /* box-shadow: 2px 2px 10px rgb(130, 184, 255), 9px 9px 10px black inset; */
   border: 3px solid #3a8fff; }
 
+/* line 1147, Editorview.scss */
 .BigTextureThumb:hover, .BigTextureThumbSrc:hover {
   border: 3px solid #8cb9ff; }
 
+/* line 1151, Editorview.scss */
 #loadingSplash {
   position: absolute;
   align-content: center;
@@ -1742,15 +2034,18 @@ input[type="text"]:focus, input[type="password"]:focus {
   box-shadow: 10px 10px 30px;
   border-radius: 15px; }
 
+/* line 1163, Editorview.scss */
 #GuestLogin {
   position: absolute;
   left: 20px;
   top: 20px; }
 
+/* line 1169, Editorview.scss */
 #JSONViewButtonBar {
   height: 2.5em;
   margin-left: -1em; }
 
+/* line 1174, Editorview.scss */
 #JSONViewButtonBarOk, #JSONViewButtonBarCancel, #JSONViewButtonBarLoad, #JSONViewButtonBarSave {
   border: 1px solid #444444;
   background: #222222 url(images/ui-bg_glass_15_222222_1x400.png) 50% 50% repeat-x;
@@ -1762,6 +2057,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   cursor: pointer;
   display: inline; }
 
+/* line 1186, Editorview.scss */
 #JSONViewButtonBarOk:hover, #JSONViewButtonBarCancel:hover, #JSONViewButtonBarLoad:hover, #JSONViewButtonBarSave:hover {
   border: 1px solid #26b3f7;
   background: #3a8fff url(images/ui-bg_glass_20_3a8fff_1x400.png) 50% 50% repeat-x;
@@ -1769,6 +2065,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   color: #fff;
   display: inline; }
 
+/* line 1194, Editorview.scss */
 #JSONLoadInput {
   position: absolute;
   opacity: 0;
@@ -1779,10 +2076,12 @@ input[type="text"]:focus, input[type="password"]:focus {
   padding: 0px;
   width: 5em; }
 
+/* line 1205, Editorview.scss */
 .playerlabelID {
   font-size: .6em;
   color: gray; }
 
+/* line 1210, Editorview.scss */
 .playerlabel .glyphicon {
   float: right;
   margin: 0px;
@@ -1791,27 +2090,34 @@ input[type="text"]:focus, input[type="password"]:focus {
   margin-left: 4px;
   font-size: 1.5em; }
 
+/* line 1219, Editorview.scss */
 .playerlabel .glyphicon:hover {
   color: #84b9ff; }
 
+/* line 1223, Editorview.scss */
 .playerlabelname {
   display: inline-block; }
 
+/* line 1227, Editorview.scss */
 * {
   box-sizing: content-box; }
 
+/* line 1231, Editorview.scss */
 * select {
   color: black; }
 
+/* line 1235, Editorview.scss */
 div#Translation .ui-spinner, div#Rotation .ui-spinner, div#Scale .ui-spinner {
   border-radius: 0px; }
 
+/* line 1239, Editorview.scss */
 div#otherprops input[type=text] {
   color: black;
   /* border-radius: 5px; */
   padding: 0px;
   margin: 2px; }
 
+/* line 1246, Editorview.scss */
 .ui-selectmenu-button {
   float: right;
   margin-top: 2px;
@@ -1819,43 +2125,55 @@ div#otherprops input[type=text] {
   border-radius: 3px;
   width: 30px; }
 
+/* line 1254, Editorview.scss */
 .ui-selectmenu-button span.ui-selectmenu-text {
   padding: 0px; }
 
+/* line 1258, Editorview.scss */
 .ui-spinner {
   border-radius: 3px;
   margin-top: 2px; }
 
+/* line 1263, Editorview.scss */
 .ui-spinner-input {
   margin: 0px 10px 0px 0px; }
 
+/* line 1267, Editorview.scss */
 .ui-button-text {
   display: inline-block !important; }
 
+/* line 1271, Editorview.scss */
 .ui-button-text-only img {
   width: 50px;
   height: 50px;
   display: inline-block; }
 
+/* line 1277, Editorview.scss */
 .ui-dialog .ui-dialog-titlebar-close {
   margin: -12px 0 0; }
 
+/* line 1281, Editorview.scss */
 #ModelSearchTerm {
   background: black; }
 
+/* line 1285, Editorview.scss */
 #InventoryRename {
   color: black; }
 
+/* line 1289, Editorview.scss */
 .jstree-default .jstree-wholerow-clicked {
   background: #274857; }
 
+/* line 1293, Editorview.scss */
 .jstree-default .jstree-wholerow-hovered {
   background: #5b89b6;
   /* color: black !important; */ }
 
+/* line 1298, Editorview.scss */
 #guioverlay_index-vwf {
   outline: none !important; }
 
+/* line 1302, Editorview.scss */
 #entitylibrarytray {
   margin-left: 1em;
   font-size: 22.2px;
@@ -1863,15 +2181,19 @@ div#otherprops input[type=text] {
   margin-bottom: 6px;
   cursor: pointer; }
 
+/* line 1310, Editorview.scss */
 #entitylibrarytray:hover {
   color: #84b9ff; }
 
+/* line 1314, Editorview.scss */
 ul li a .glyphicon {
   margin-right: 1em; }
 
+/* line 1318, Editorview.scss */
 .ui-slider {
   clear: both; }
 
+/* line 1322, Editorview.scss */
 .editorPanelDisableOverlay {
   position: absolute;
   top: 0;
@@ -1883,25 +2205,31 @@ ul li a .glyphicon {
   cursor: not-allowed;
   display: none; }
 
+/* line 1334, Editorview.scss */
 .editorPanelDisable {
   color: #5e5e5e !important;
   cursor: not-allowed;
   pointer-events: none;
   opacity: 0.85; }
 
+/* line 1341, Editorview.scss */
 .sidetab-editor-title {
   background: #3a8fff 50% 50% repeat-x;
   cursor: pointer;
   border-radius: 2px; }
 
+/* line 1347, Editorview.scss */
 .sidetab-editor-title:hover {
   text-decoration: underline; }
 
+/* line 1351, Editorview.scss */
 .sidetab-editor-title-active {
   background: #3a8fff 50% 50% repeat-x; }
 
+/* line 1355, Editorview.scss */
 .sidetab-editor-title-active:hover {
   text-decoration: underline; }
 
+/* line 1359, Editorview.scss */
 .downarrowclass {
   display: none; }

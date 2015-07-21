@@ -55,7 +55,10 @@
 
 		position: absolute;
 		right: 0px;
-		width: 248px;
+		min-width: 248px;
+
+		max-height: 100%;
+		overflow-y: scroll;
 	}
 
 	#EntityLibraryAccordion

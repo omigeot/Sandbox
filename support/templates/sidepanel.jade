@@ -4,4 +4,16 @@ mixin sidepanel_head
 mixin sidepanel_body
 
 	#sidepanel(ng-controller='SidePanelController')
-		#sidetab(ng-click='isOpen() ? hide() : show()') Editors
+		#sidetab(ng-click='isPanelOpen() ? hidePanel() : showPanel()') Editors
+
+		.main
+			include ./hierarchy
+			// hierarchy
+			// properties
+			// material
+			// physics
+			// players
+
+			// paintertool
+			// splinetool
+			// terraintool

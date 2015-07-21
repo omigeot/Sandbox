@@ -39,7 +39,7 @@ define([
 	"vwf/view/editorview/ScriptEditor", 
 	"vwf/view/editorview/Editor", 
 	"vwf/view/editorview/_3DRIntegration", 
-	//"vwf/view/editorview/HeirarchyManager", 
+	"vwf/view/editorview/HierarchyManager", 
 	"vwf/view/editorview/DataManager", 
 	"vwf/view/editorview/UserManager", 
 	"vwf/view/editorview/help", 
@@ -140,12 +140,12 @@ define([
                 if (this.needTools()) {
                     require("vwf/view/editorview/help").getSingleton();
 
-                    $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/PainterTool.js"></script>');
+                    //$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/PainterTool.js"></script>');
 
                     $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/AlignTool.js"></script>');
 
-                    $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/SplineTool.js"></script>');
-                    $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/TerrainTool.js"></script>');
+                    //$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/SplineTool.js"></script>');
+                    //$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/TerrainTool.js"></script>');
 
                     $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/lib/jquery.qtip-1.0.0-rc3.min.js"></script>');
                     $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/lib/beautify.module.js"></script>');

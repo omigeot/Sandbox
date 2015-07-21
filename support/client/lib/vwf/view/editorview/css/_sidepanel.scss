@@ -2,7 +2,7 @@
 
 #sidepanel
 {
-	width: 250px;
+	width: 320px;
 	@include flex-shrink(0);
 
 	background: #515151 url(../../../../images/ui-bg_diagonals-thick_8_333333_40x40.png) 0% 0% repeat;
@@ -10,35 +10,65 @@
 	outline: none;
 	position: relative;
 
-	#sidetab {
+	&.hidden
+	{
+		display: block !important;
+		visibility: visible !important;
+		width: 0;
+	}
+
+	#sidetab
+	{
 		position: absolute;
 		left: -49px;
 		top: 10%;
-
-		&:hover {
-			color: #82b8ff;
-		}
+		padding: 3px 15px;
+		border: 2px solid #82b8ff;
+		border-bottom: none;
 
 		@include transform(rotate(-90deg));
 
 		font-size: 12px;
 		font-family: 'Open Sans',sans-serif;
+		color: white;
+		text-shadow: 1px 1px 3px black;
+
 		background: #4c4c4c;
-		padding: 3px 15px;
 		text-align: center;
 		vertical-align: middle;
 		/* border-radius: 7px; */
-		border: 2px solid #82b8ff;
-		border-bottom: none;
-		color: white;
-		text-shadow: 1px 1px 3px black;
 		cursor: pointer;
+
+		&:hover {
+			color: #82b8ff;
+		}
+	}
+
+	.main
+	{
+		position: absolute;
+		left: 1px;
+		min-width: 318px;
+		width: 318px;
+		overflow-y: auto;
+	}
+
+	.editorPanel
+	{
+		width: 100%;
+
+		.title
+		{
+			padding: 3px 4px;
+			font: 1.5em sans-serif;
+			font-weight: bold;
+		}
+		
+		.content
+		{
+			color: white;
+			background: url(vwf/view/editorview/css/images/ui-bg_hexagon_5_111111_12x10.png) 50% 50% repeat rgb(36, 32, 32);
+		}
 	}
 }
 
-
-@media only screen and (max-width: 1024px) {
-	#sidepanel {
-		width: 250px;
-	}
-}

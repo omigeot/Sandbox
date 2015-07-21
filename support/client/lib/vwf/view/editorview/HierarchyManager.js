@@ -1,4 +1,17 @@
-define(function() {
+'use strict';
+
+define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], function(app, SidePanel)
+{
+	app.controller('HierarchyController', ['$scope', function($scope)
+	{
+		window._HierarchyManager = $scope;
+
+	}]);
+
+	return window._HierarchyManager;
+});
+
+var oldDefine = function() {
 	var HierarchyManager = {};
 	var isInitialized = false;
 	return {
@@ -480,4 +493,4 @@ define(function() {
 		
 		
 	}
-});
+};
