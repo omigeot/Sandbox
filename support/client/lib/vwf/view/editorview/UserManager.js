@@ -260,7 +260,7 @@ define(function() {
 
             $('#StatusUserName').text(username);
             var needlogin = true;
-            var createAvatar = true;
+            
             var statedata = _DataManager.getInstanceData();
 
             //published worlds may choose to allow anonymous users
@@ -268,281 +268,24 @@ define(function() {
             if (statedata && statedata.publishSettings && (statedata.publishSettings.allowAnonymous || statedata.publishSettings.singlePlayer))
                 needlogin = false;
 
-            if (statedata && statedata.publishSettings && statedata.publishSettings.createAvatar === false)
-                createAvatar = false;
-
 
             if (this.GetCurrentUserName()) return;
             //clear this. No reason to have it saved in the dom
 
             this.currentUsername = userID;
             //only take control of hte websocket if you have to log in. Don't do this for allow anon and or singleplayer
-            if (needlogin) {
-                //take ownership of the client connection
-                var S = _DataManager.getCurrentSession();
-                var data = jQuery.ajax({
-                    type: 'GET',
-                    url: PersistanceServer + "./vwfDataManager.svc/login?S=" + S + "&CID=" + vwf.moniker(),
-                    data: null,
-                    success: null,
-                    async: false,
-                    dataType: "json"
-                });
-
-                var profile = _DataManager.GetProfileForUser(userID, true);
-                if (!profile) {
-                    alert('There is no account with that username');
-                    return;
-                }
-                if (profile.constructor == String) {
-                    alert(profile);
-                    return;
-                }
-                if (data.status != 200) {
-                    alert(data.responseText);
-                    return;
-                }
-            }
+           
             $('#MenuLogInicon').addClass('icondisabled')
             $('#MenuLogOuticon').removeClass('icondisabled');
             $('#MenuLogIn').attr('disabled', 'disabled');
             $('#MenuLogOut').removeAttr('disabled');
 
 
-            this.PlayerProto = {
-                extends: 'character.vwf',
-                source: 'usmale.dae',
-                type: 'subDriver/threejs/asset/vnd.collada+xml',
-                properties: {
-                    PlayerNumber: 1,
-                    isDynamic: true,
-                    castShadows: true,
-                    receiveShadows: true,
-                    activeCycle: [],
-                    standingOnID: null,
-                    standingOnOffset: null,
-                    ___physics_activation_state: 4,
-                    ___physics_deactivation_time: 0,
-                    ___physics_velocity_linear: [0, 0, 0],
-                    ___physics_velocity_angular: [0, 0, 0],
-                    ___physics_factor_linear: [0, 0, 0],
-                    ___physics_factor_angular: [0, 0, 0],
-                    ___physics_enabled: true,
-                    ___physics_mass: 100,
-                    transform: [
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1
-                    ],
-                },
-                events: {
-                    ShowProfile: null,
-                    Message: null
-                },
-                scripts: ["this.ShowProfile = function(){if(vwf.client() != vwf.moniker()) return; _UserManager.showProfile(this.ownerClientID[0])     }; \n" +
-                    "this.Message = function(){if(vwf.client() != vwf.moniker()) return; setupPmWindow(this.ownerClientID[0])     }"
-                ],
-                children: {
-
-                }
-            };
-
-            var collision = {
-                "extends": "box2.vwf",
-                "source": "vwf/model/threejs/box.js",
-                "type": "subDriver/threejs",
-                "properties": {
-                    "___physics_activation_state": 1,
-                    "___physics_deactivation_time": 0,
-                    "___physics_velocity_linear": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "___physics_velocity_angular": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "DisplayName": "CharacterCollision",
-                    "_length": 0.8,
-                    "height": 1.54,
-                    "isSelectable": false,
-                    "owner": userID,
-                    "transform": [
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0.8009999394416809,
-                        1
-                    ],
-                    "type": "Primitive",
-                    "width": 0.62,
-                    "visible": false,
-                    "___physics_enabled": true
-                }
-            }
-            this.PlayerProto.children[GUID()] = collision;
-            //this.PlayerProto.source = 'usmale.dae'; //profile['Avatar'];
-
-            if (!profile) profile = {};
-
-            this.PlayerProto.source = profile.avatarModel || './avatars/VWS_Business_Male2.DAE';
-
-            this.PlayerProto.properties.cycles = {
-                stand: {
-                    start: 1,
-                    length: 0,
-                    speed: 1.25,
-                    current: 0,
-                    loop: true
-                },
-                walk: {
-                    start: 6,
-                    length: 27,
-                    speed: 1.0,
-                    current: 0,
-                    loop: true
-                },
-                straferight: {
-                    start: 108,
-                    length: 16,
-                    speed: 1.5,
-                    current: 0,
-                    loop: true
-                },
-                strafeleft: {
-                    start: 124,
-                    length: 16,
-                    speed: -1.5,
-                    current: 0,
-                    loop: true
-                },
-                walkback: {
-                    start: 0,
-                    length: 30,
-                    speed: -1.25,
-                    current: 0,
-                    loop: true
-                },
-                run: {
-                    start: 70,
-                    length: 36,
-                    speed: 1.25,
-                    current: 0,
-                    loop: true
-                },
-                jump: {
-                    start: 70,
-                    length: 36,
-                    speed: 1.25,
-                    current: 0,
-                    loop: false
-                },
-                runningjump: {
-                    start: 109,
-                    length: 48,
-                    speed: 1.25,
-                    current: 0,
-                    loop: false
-                }
-            };
-
-
-            this.PlayerProto.properties.materialDef = {
-                "color": {
-                    "r": 1,
-                    "g": 1,
-                    "b": 1
-                },
-                "ambient": {
-                    "r": 1,
-                    "g": 1,
-                    "b": 1
-                },
-                "emit": {
-                    "r": 0.27058823529411763,
-                    "g": 0.2549019607843137,
-                    "b": 0.2549019607843137
-                },
-                "specularColor": {
-                    "r": 0.2,
-                    "g": 0.2,
-                    "b": 0.2
-                },
-                "specularLevel": 1,
-                "alpha": 1,
-                "shininess": 0,
-                "side": 0,
-                "reflect": 0,
-                "layers": [{
-                    "mapTo": 1,
-                    "scalex": 1,
-                    "scaley": 1,
-                    "offsetx": 0,
-                    "offsety": 0,
-                    "alpha": 1,
-                    "src": profile.avatarTexture || "./avatars/VWS_B_Male2-3.jpg",
-                    "mapInput": 0
-                }],
-                "type": "phong",
-                "depthtest": true,
-                "morphTargets": true
-            }
-
-            this.PlayerProto.properties.standing = 0;
-
-
-          
             var newintersectxy = _LocationTools.getCurrentPlacemarkPosition() || _LocationTools.getPlacemarkPosition('Origin') || _Editor.GetInsertPoint();
-            //vwf.models[0].model.nodes['index-vwf'].orbitPoint(newintersectxy);
-            this.PlayerProto.properties.PlayerNumber = username;
-            this.PlayerProto.properties.owner = userID;
-            this.PlayerProto.properties.ownerClientID = [vwf.moniker()];
-            this.PlayerProto.properties.profile = profile;
-            this.PlayerProto.properties.transform[12] = newintersectxy[0];
-            this.PlayerProto.properties.transform[13] = newintersectxy[1];
-            this.PlayerProto.properties.transform[14] = newintersectxy[2];
-            this.PlayerProto.properties.scale = [profile.avatarHeight || 1.0, profile.avatarHeight || 1.0, profile.avatarHeight || 1.0];
-
+            
             require("vwf/view/threejs/editorCameraController").getController('Orbit').orbitPoint(newintersectxy);
             require("vwf/view/threejs/editorCameraController").setCameraMode('Orbit');
             
-            var parms = new Array();
-            parms.push(JSON.stringify(this.PlayerProto));
-
-            
-
-            if (createAvatar)
-            {
-                vwf_view.kernel.createChild('index-vwf', this.currentUsername, this.PlayerProto);
-                vwf_view.kernel.callMethod('character-vwf-' + this.currentUsername,'addControllingClient',[vwf.moniker()])
-            }
-
             //if no one has logged in before, this world is yours
             if (vwf.getProperty('index-vwf', 'owner') == null) vwf.setProperty('index-vwf', 'owner', this.currentUsername);
 
@@ -557,18 +300,7 @@ define(function() {
             }));
             vwf_view.kernel.callMethod('index-vwf', 'receiveChat', parms);
         }
-        this.CreateNPC = function(filename) {
-            this.PlayerProto.source = filename;
-            var name = 'NPC' + Math.floor(Math.SecureRandom() * 1000);
-            this.PlayerProto.properties.PlayerNumber = name;
-            this.PlayerProto.properties.owner = this.currentUsername;
-            this.PlayerProto.properties.ownerClientID = [null];
-            this.PlayerProto.properties.profile = null;
-            this.PlayerProto.id = "player" + name;
-            var parms = new Array();
-            parms.push(JSON.stringify(this.PlayerProto));
-            vwf_view.kernel.callMethod('index-vwf', 'newplayer', parms);
-        }
+        
         this.PlayerDeleted = function(e) {
 
             $("#" + e + "label").remove();

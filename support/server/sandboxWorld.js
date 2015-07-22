@@ -10,7 +10,7 @@ YAML = require('js-yaml');
 var logger = require('./logger');
 var xapi = require('./xapi');
 var sandboxState = require('./sandboxState').sandboxState;
-
+var GUID = require('node-uuid').v4;
 //***node, uses REGEX, escape properly!
 function strEndsWith(str, suffix)
 {
@@ -318,6 +318,8 @@ function sandboxWorld(id, metadata)
         if (message.constructor != String)
         {
             message.instance = this.id;
+            if(!message.time)
+                message.time = this.time;
             message = JSON.stringify(message);
         }
         //message to each user the join of the new client. Queue it up for the new guy, since he should not send it until after getstate
@@ -415,7 +417,7 @@ function sandboxWorld(id, metadata)
         //Get the state and load it.
         //Now the server has a rough idea of what the simulation is
         var self = this;
-        this.state = new sandboxState(this.id,this.metadata);
+        this.state = new sandboxState(this.id,this.metadata,this);
         this.status = STATUS.PENDING_LOAD;
         this.state.on('loaded', function()
         {
@@ -483,6 +485,7 @@ function sandboxWorld(id, metadata)
             {
                 //this must come after the client is added. Here, there is only one client
                 self.messageConnection(client.id, client.loginData ? client.loginData.Username : "", client.loginData ? client.loginData.UID : "");
+                self.state.createAvatar(client.loginData.UID,client.id);
             });
         }
         //this client is not the first, we need to get the state and mark it pending
@@ -504,6 +507,7 @@ function sandboxWorld(id, metadata)
             }
             //the below message should now queue for the pending socket, fire off for others
             this.messageConnection(client.id, client.loginData ? client.loginData.Username : "", client.loginData ? client.loginData.UID : "");
+            this.state.createAvatar(client.loginData.UID,client.id);
         }
     }
     this.requestState = function()
@@ -564,7 +568,7 @@ function sandboxWorld(id, metadata)
 
             //route callmessage to the state to it can respond to manip the server side copy
             if (message.action == 'callMethod')
-                this.state.callMethod(message.node, message.member, message.parameters);
+                this.state.calledMethod(message.node, message.member, message.parameters);
 
             if (message.action == 'callMethod' && message.node == 'index-vwf' && message.member == 'PM')
             {
@@ -616,12 +620,12 @@ function sandboxWorld(id, metadata)
 
             }
             if (message.action == "setProperty")
-                this.state.setProperty(message.node, message.member, message.parameters[0]);
+                this.state.satProperty(message.node, message.member, message.parameters[0]);
             //We'll only accept a deleteNode if the user has ownership of the object
             if (message.action == "deleteNode")
             {
                 var displayname = this.state.getProperty(message.node,'DisplayName');
-                this.state.deleteNode(message.node)
+                this.state.deletedNode(message.node)
                 xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, displayname || message.node, null, this.id);
             }
             //We'll only accept a createChild if the user has ownership of the object
@@ -633,7 +637,7 @@ function sandboxWorld(id, metadata)
                 {
                     return;
                 }
-                var childID = this.state.createChild(message.node, message.member, childComponent)
+                var childID = this.state.createdChild(message.node, message.member, childComponent)
                 xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties.DisplayName, null, this.id);
 
 
@@ -749,7 +753,7 @@ function sandboxWorld(id, metadata)
                     if(this.clientCountForUser(loginData.UID) == 0)
                     {
                         var avatarID = 'character-vwf-' + loginData.UID;
-                        this.state.deleteNode(avatarID);
+                        this.state.deletedNode(avatarID);
                         this.messageClients(
                         {
                             "action": "deleteNode",
@@ -776,7 +780,7 @@ function sandboxWorld(id, metadata)
                         "time": this.time,
                         client: socket.id
                     });
-                    this.state.deleteNode(avatarID);
+                    this.state.deletedNode(avatarID);
                 }
                 this.messageClients(
                 {

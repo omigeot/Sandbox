@@ -1,6 +1,8 @@
 var DAL = require('./DAL')
+    .DAL;
 var fs = require('fs');
 var YAML = require('js-yaml');
+var GUID = require('node-uuid').v4;
 
 //change up the ID of the loaded scene so that they match what the client will have
 var fixIDs = function(node)
@@ -111,11 +113,12 @@ function DBstateToVWFDef(state, instanceData, cb)
     });
 }
 
-var sandboxState = function(id, metadata)
+var sandboxState = function(id, metadata,world)
 {
     this.events = {};
     this.id = id;
     this.metadata = metadata;
+    this.world = world;
     if (this.metadata.publishSettings && this.metadata.publishSettings.allowAnonymous)
         this.allowAnonymous = true;
 
@@ -189,7 +192,7 @@ var sandboxState = function(id, metadata)
         }
         return ret;
     }
-    this.deleteNode = function(id, parent)
+    this.deletedNode = function(id, parent)
     {
         if (!parent) parent = this.nodes['index-vwf'];
         if (parent.children)
@@ -223,7 +226,7 @@ var sandboxState = function(id, metadata)
         var val = node.properties[prop];
         return val;
     }
-    this.setProperty = function(nodeid, prop, val)
+    this.satProperty = function(nodeid, prop, val)
     {
        
 
@@ -279,6 +282,32 @@ var sandboxState = function(id, metadata)
             return;
         }
     }
+    this.createAvatar = function(userID,client)
+    {
+        var self = this;
+        DAL.getUser(userID,function(user)
+        {
+            var avatar = null;
+            if(!user || !user.avatarDef)
+            {
+                avatar = require("./sandboxAvatar").getDefaultAvatarDef()
+            }else{
+                avatar = user.avatarDef;
+            }
+            console.log(avatar)
+            avatar.properties.ownerClientID = [client];
+            avatar.properties.PlayerNumber = userID;
+            avatar.children[GUID()] = avatar.children['collision']
+            delete avatar.children['collision'];
+
+            var message = {action:"createChild",
+                            node:"index-vwf",
+                            member:userID,
+                            parameters:[avatar]}
+            self.world.messageClients(message,false,false);
+            self.createdChild(message.node,message.member,avatar);                
+        })
+    }
     this.getID = function(name,childComponent)
     {
         var childName = name;
@@ -287,7 +316,7 @@ var sandboxState = function(id, metadata)
         childID = childID.replace(/[^0-9A-Za-z_]+/g, "-");
         return childID;
     }
-    this.createChild = function(nodeid, name, childComponent)
+    this.createdChild = function(nodeid, name, childComponent)
     {
         //Keep a record of the new node
         //remove allow for user to create new node on index-vwf. Must have permission!
@@ -309,7 +338,7 @@ var sandboxState = function(id, metadata)
     //The statebackup travels over the wire (though technically I guess we should have a copy of that data in our state already)
     //when it does, we can receive it here. Because the server is doing some tracking of state, we need to restore the server
     //side state.
-    this.callMethod = function(id, name, args)
+    this.calledMethod = function(id, name, args)
     {
         if (id == 'index-vwf' && name == 'restoreState')
         {
