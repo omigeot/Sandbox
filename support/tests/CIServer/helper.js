@@ -1,21 +1,24 @@
 var fs = require('fs');
 
-var exports = module.exports = {
-	files: []
-};
+exports.files = [];
 
 exports.command = {
-	RUN: "run",
-	STOP: "stop", 
-	TERMINATE: "terminate",
-	STATE: "state",
-	RESULT: "result"
+	/* Shared commands */
+	CANCEL: "/stop", 
+	STATE: "/status",
+	RUN_ONE: "/runOne",
+	QUIT: "/quit",
+
+	/* Server-only commands */
+	RUN: "/runTests",
+	RELOAD: "/reload",
+	RESULT: "result"	
 };
 
 exports.state = {
 	RUNNING: 1,
-	STOPPED: 2,
-	READY: 3
+	CANCELING: 2,
+	READY: 3,
 };
 
 /*

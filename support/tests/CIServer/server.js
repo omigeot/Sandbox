@@ -10,28 +10,25 @@ var stderrLog = "";
 var report = {};
 report.tests = {};
 var cancel = false;
-var RUNNING = 1;
-var COMPLETE = 0;
-var CANCELING = 2;
-var NOTSTARTED = 3;
-var status = NOTSTARTED;
+
+var RUNNING = helper.state.RUNNING;
+var READY = helper.state.READY;
+var COMPLETE = helper.state.READY;
+var CANCELING = helper.state.CANCELING;
+
+var status = READY;
 var tests = [];
+
 var files = helper.files;
 var findFiles = helper.findFiles;
 
 var runner = childprocess.fork("runner.js");
-runner.send("run");
 
-runner.on("message", function(nope, yup){
-	console.log("Message!!!: ", nope, yup);
+runner.on("message", handleIncomingMessage);
+runner.on("error", function(message, handle){
+	console.log("This is the error: ", message);
 });
-
-runner.on("error", function(a, b){
-	
-	console.log("This is the error: ", a, b);
-});
-
-runner.on("exit", function(a, b){
+runner.on("exit", function(message, handle){
 	console.log("Runner exited");
 });
 
@@ -62,151 +59,6 @@ function readFiles(nextStep) {
 	}, nextStep);
 }
 
-function runTest(test, nextTest) {
-
-	var id = test.filename + ":" + test.title;
-	
-	console.log(report.tests[id]);
-	
-	report.tests[id] = {
-		status: "running",
-		result: null,
-		message: null,
-		title: test.title,
-		filename: test.filename,
-		runs: []
-	}
-	var originalTitle = test.title;
-	webdriverio = require('webdriverio');
-	options = {
-		desiredCapabilities: {
-			browserName: 'firefox'
-		}
-	};
-	async.eachSeries(['chrome','firefox'/*,'ie11'*/], function(browserName, nextBrowser) {
-		async.series([
-			function initBrowser(cb) {
-				options.desiredCapabilities.browserName = browserName;
-				global.browser = webdriverio.remote(options);
-				global.testUtils.hookupUtils(browser);
-				browser.init().then(function() {
-					cb();
-				});
-			},
-			function runTheTest(cb) {
-				test.title = originalTitle ;
-				runTest_one_browser(test, options.desiredCapabilities.browserName, report.tests[id], cb)
-			},
-			function closeTheBrowser(cb)
-			{
-				browser.endAll();
-				cb();
-			}
-		], function finishedAllBrowsers() {
-			nextBrowser();
-		});
-	},function()
-	{
-		test.title = originalTitle;
-		report.tests[id].status = "complete";
-		nextTest();
-	})
-}
-
-function runTest_one_browser(thistest, browsername, report, next) {
-
-	//setup reporting data
-	var run = {
-		status: "running",
-		result: null,
-		message: null,
-		browsername:browsername
-	}
-	report.runs.push(run);
-	var timeoutID = null;
-	var handler = null;
-	//create an error context to catch exceptions and crashes in async code
-	var domain = require('domain').create();
-	domain.on('error', function(err) {
-		//log error and go to next test on error
-		var id = thistest.filename + ":" + thistest.title;
-		run.status = "error";
-		run.result = "error";
-		run.message = err.toString()
-		logger.log(id);
-		logger.log(err.stack);
-		logger.log("DOMAIN ERROR")
-
-		process.removeListener('uncaughtException', handler);
-		global.clearTimeout(timeoutID);
-		global.setTimeout(function() {
-			domain.exit();
-			next();
-		}, 500)
-	})
-	//logger.log("starting test " + id);
-	//run the test in the error handling context
-
-	handler = function(e) {
-		//should return false or true
-		logger.log("EXCEPTION", JSON.stringify(e))
-
-		run.status = "error";
-
-		run.result = "error"
-
-		run.message = " " + e.toString() + "; ";
-		global.clearTimeout(timeoutID);
-		domain.exit();
-		process.removeListener('uncaughtException', handler);
-		global.setTimeout(function() {
-
-			next();
-		}, 500)
-	}
-	var timeout = function(e) {
-		//should return false or true
-		logger.log("TIMEOUT")
-
-		run.status = "timeout";
-
-		run.result = "timeout"
-
-		run.message = e;
-		global.clearTimeout(timeoutID);
-		domain.exit();
-		process.removeListener('uncaughtException', handler);
-		global.setTimeout(function() {
-
-			next();
-		}, 500)
-	}
-	
-	//	timeoutID = global.setTimeout(timeout, 60 * 1000)
-	process.on('uncaughtException', handler);
-	
-	//the actual test
-	domain.bind(thistest.test)(global.browser, global.testUtils.completeTest(function(success, message) {
-		//should return false or true
-		logger.log("SUCCESS")
-
-		run.status = "complete";
-		if (success)
-			run.result = "passed"
-		else
-			run.result = "failed";
-		run.message = message;
-		global.clearTimeout(timeoutID);
-		domain.exit();
-		process.removeListener('uncaughtException', handler);
-		global.setTimeout(function() {
-
-			next();
-		}, 500)
-
-	}));
-}
-
 function updateAndRunTests(cb2) {
 	//bail if already running. This really should never happen
 	if (status == RUNNING) {
@@ -215,88 +67,41 @@ function updateAndRunTests(cb2) {
 	}
 
 	async.series([
-
-			startup_tests,
-
-			function getLog(cb) {
-				var log = childprocess.spawn("git", ["log", '-1'], {
-					cwd: "../../../"
-				});
-				log.stdout.on('data', function(data) {
-					//Wait for startup complete
-					report.gitLog += data.toString();
-				})
-				log.on('close', cb)
-			},
-			//do a get pull and update the dev branch
-			startSandbox,
-			// startBrowser,
-			//run the selenium tests
-			function findAndRunTests(cb) {
-				logger.log("findAndRunTests")
-				report.tests = {};
-				
-				//Remove all elements from files and tests arrays
-				//files.length = 0;
-				tests.length = 0;
-				
-				async.series([
-
-					helper.findFiles,
-					readFiles,
-					function runTests(nextStep) {
-						//for each test in this file
-						async.eachSeries(tests, function(thistest, nextTest) {
-
-
-							//bail out of all tests if canceling
-							if (status == CANCELING) {
-								logger.log("canceling run")
-								global.setTimeout(nextTest, 500)
-								return;
-							}
-							logger.log('browser starting')
-							startBrowser(function() {
-								runTest(thistest, function() {
-									logger.log('browser ending')
-									browser.end()
-									nextTest();
-								})
-							})
-
-						}, nextStep);
-					},
-				], function() {
-					cb();
-				})
-			},
-			/*   function wait(cb) {
-				logger.log('Wait for browser close')
-				browser.end()
-				cb();
-			},*/
-			killSandbox
-		],
-		function() {
-			status = COMPLETE;
-			logger.log('Run all tests exit')
-			if (cb2)
-				cb2();
-		})
+		function getLog(cb) {
+			var log = childprocess.spawn("git", ["log", '-1'], {
+				cwd: "../../../"
+			});
+			log.stdout.on('data', function(data) {
+				//Wait for startup complete
+				report.gitLog += data.toString();
+			})
+			log.on('close', cb)
+		},
+		//do a get pull and update the dev branch
+		startSandbox,
+		//run the selenium tests
+		function findAndRunTests(cb) {
+			
+		},
+		killSandbox
+	],
+	function() {
+		status = COMPLETE;
+		logger.log('Run all tests exit')
+		if (cb2) cb2();
+	});
 }
 
 function cancel_run(cancelComplete) {
-	cancelComplete();
-	return; 
-	
 	if (status == CANCELING) {
 		logger.log('already canceling')
 		return;
 	}
 	if (status == RUNNING)
 		status = CANCELING;
+	
 	async.until(function() {
-		return status == COMPLETE || status == NOTSTARTED;
+		return status == COMPLETE || status == READY;
 	}, function(cb) {
 		logger.log('waiting for cancel');
 		global.setTimeout(cb, 1000);
@@ -367,14 +172,81 @@ function restart() {
 	async.series([quit, gitPull, loadChildProcess.bind(paramObj)]);
 }
 
+function handleIncomingMessage(message, handler){
+	console.log("Server status", status);
+	var command = message[0];
+	var param = message[1];
+	
+	switch(status){
+		case RUNNING: handleRunningState(command, param); break;
+		case CANCELING: handleCancelingState(command, param); break;
+		case READY: handleReadyState(command, param); break;
+		case COMPLETE: handleReadyState(command, param); break;
+	}
+	
+	//Handle commands that don't depend on state and also close connection
+	if(param.isHTTP){
+
+	}
+}
+
+function handleReadyState(command, param){
+	console.log("We are in the ready state, command is:", command);
+	//command is http request
+	if(param.isHTTP){
+		var request = param.request;
+		var response = param.response;
+		
+		if(command == helper.command.RUN){
+			//already running... nothing to see here..	
+			console.log("Server is already running!");
+			
+		}
+	}
+}
+
+function handleRunningState(command, param){
+	//command is http request
+	if(param.isHTTP){
+		var request = param.request;
+		var response = param.response;
+		
+		if(command == helper.command.RUN || command == helper.command.RUN_ONE){
+			//already running... nothing to see here..	
+			console.log("Server is already running!");
+		}
+	}
+	
+	//command came from runner
+	else{
+		if(command == helper.command.RESULT){
+			console.log("The server received the results of the test!: ", param);
+		}
+		else if(command == helper.command.READY){
+			//get next item off of queue
+		}
+
+	}
+}
+
+function handleCancelingState(command, param){
+	if(command === helper.command.READY){
+		
+		
+	}
+	//else if(command === helper.command.){
+		
+	//}
+}
+
 var server = http.createServer();
 server.on('request', function(request, response) {
 	request.url = decodeURI(request.url);
-
-	if (request.url === "/ui/") {
-		request.url += 'tests.html'
-	}
 	if (request.url.indexOf("/ui/") == 0) {
+		if (request.url === "/ui/") {
+			request.url += 'tests.html'
+		}
+		
 		try {
 			var data = fs.readFileSync("." + request.url);
 			response.write(data)
@@ -383,7 +255,23 @@ server.on('request', function(request, response) {
 			response.write(e.toString())
 		}
 		response.end();
+		return;
 	}
+	
+	else if(request.url == helper.command.STATE) {
+		report.status = status;
+		report.log = logger._log;
+		response.write(JSON.stringify(report));
+		response.end();
+		return;
+	}
+
+	else{
+		handleIncomingMessage([request.url, {request: request, response: response, isHTTP: true}]);
+		response.end();
+		return;
+	}
+	
 	if (request.url == "/runTests") {
 
 		setTimeout(function() {
@@ -425,12 +313,6 @@ server.on('request', function(request, response) {
 		}, 5000)
 		cancel_run(reload);
 
-	}
-	if (request.url == "/status") {
-		report.status = status;
-		report.log = logger._log;
-		response.write(JSON.stringify(report));
-		response.end();
 	}
 	if (request.url.indexOf("/runOne") == 0) {
 		logger.log("Awesome stuff..");

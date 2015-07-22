@@ -5,12 +5,14 @@ var async  = require('async'),
 	currentTestID,
 	browsersList = ['chrome','firefox'/*,'ie11'*/];
 	
+//Initialize the web driver
 helper.initWebdriver({
 	desiredCapabilities: {
 		browserName: browsersList[0]
 	}
 });
 
+//Listen for messages from the server
 process.on("message", function(message, handle){
 	var command = message[0];
 	var param = message[1];
@@ -25,48 +27,43 @@ process.on("message", function(message, handle){
 	//Otherwise, switch through state machine logic 
 	else{
 		switch(state){
-			case helper.state.RUNNING: break;
-			case helper.state.STOPPED: break;
+			case helper.state.RUNNING: handleRunningState(command, param); break;
+			case helper.state.CANCELING: break;
 			case helper.state.READY: handleReadyState(command, param); break;
-			default: helper.sendMessage(process, helper.command.STATE, helper.state.READY);
+		}
+		
+		//"Remind" the server that we are ready if the state hasn't changed from ready
+		if(state === helper.state.READY){
+			updateState(helper.state.READY);
 		}
 	}
 });
 
 //Runner is in ready state; handle incoming commands
-function handleReadyState(command, param){
-	var outMsg = "";
-	
-	if(command === helper.command.RUN){
+function handleReadyState(command, param){	
+	if(command === helper.command.RUN_ONE){
 		doRunCommand(param);
 	}
-	else if(command == helper.command.TERMINATE){
-		outMsg = "We are shutting down";
-	}
-	else outMsg = "Error";
-	
-	return outMsg;
 }
 
 //Runner is currently executing a test; handle incoming commands
 function handleRunningState(command, param){
-	var outMsg = "";
-	if(command === helper){}
-	
-	return outMsg;
+	if(command === helper.command.CANCEL){
+		updateState(helper.status.CANCELING);
+	}
 }
 
 function doRunCommand(param){
-	console.log(param);
 	if(!param) return;
-	
-	console.log("Running test via external test runner...");
-	console.log("Param: ", param);
 	
 	currentTestID = param;
 	currentRun = {};
 	
-	//For each browser, run a single test. Send a message to server when all tests are complete.
+	//let server know about updated state, if necessary. 
+	//This must only happen once so we don't overwrite the cancel state
+	updateState(helper.state.RUNNING);
+	
+	//For each browser, run a single test, then send a message to server when all tests are complete.
 	async.eachSeries(browsersList, runSingleTest, function sendResults(){
 		helper.sendMessage(process, helper.command.RESULT, currentRun);
 		updateState(helper.state.READY);
@@ -74,38 +71,38 @@ function doRunCommand(param){
 }
 
 function runSingleTest(browserName, done){
-	//let server know about updated state, if necessary
-	updateState(helper.state.RUNNING);
-	global.browser.desiredCapabilities.browserName = browserName;
+	if(state === helper.state.RUNNING){
+		global.browser.desiredCapabilities.browserName = browserName;
 
-	//Start the browser and run the test
-	async.series([
-		startBrowser,
-		_executeActualTestAsync(browserName)
-	], done);
+		//Start the browser and run the test
+		async.series([
+			startBrowser,
+			_executeActualTestAsync
+		], done);
+	}
+	else done();
 }
 
-//This function assumes currentRun is an empty object and that
-//currentTestID is already set
-function _executeActualTestAsync(browserName){
-	//returns a function suitable to be passed into async.series.
-	return function(cb){
-		var testObj = helper.getSingleTestData(currentTestID);
+//Should not be called directly. Use runSingleTest instead.
+//Could move into runSingleTest function block, but this is cleaner.
+//This function returns a function suitable for passing into async.series.
+function _executeActualTestAsync(cb){
+	var browserName = global.browser.desiredCapabilities.browserName;
+	var testObj = helper.getSingleTestData(currentTestID);
+	
+	testObj.test(global.browser, global.testUtils.completeTest(function(success, message) {
+		logger.log("Finished running test using " + browserName);
 		
-		testObj.test(global.browser, global.testUtils.completeTest(function(success, message) {
-			logger.log("Finished running test using " + browserName);
-			
-			currentRun[browserName] = {
-				id: currentTestID,
-				status: "complete",
-				result: success ? "passed" : "failed",
-				message: message
-			};
+		currentRun[browserName] = {
+			id: currentTestID,
+			status: "complete",
+			result: success ? "passed" : "failed",
+			message: message
+		};
 
-			global.browser.end();
-			runLater(cb);
-		})
-	)};
+		global.browser.end();
+		runLater(cb);
+	}));
 }
 
 function startBrowser(cb){
@@ -116,10 +113,8 @@ function startBrowser(cb){
 
 function updateState(newState){
 	//Whenever there's a change in state, notify server
-	if(newState != state){
-		helper.sendMessage(process, helper.command.STATE, newState);
-		state = newState;
-	}
+	helper.sendMessage(process, helper.command.STATE, newState);
+	state = newState;
 }
 
 function runLater(fn, timeout){
@@ -127,4 +122,6 @@ function runLater(fn, timeout){
 	global.setTimeout(fn, timeout);
 }
 
+//Send server initial ready state
+updateState(helper.state.READY);
 console.log("I am running!");
