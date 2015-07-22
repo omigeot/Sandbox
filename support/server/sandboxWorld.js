@@ -315,6 +315,7 @@ function sandboxWorld(id, metadata)
     }
     this.messageClients = function(message, ignorePending, resolvePending)
     {
+        try{
         if (message.constructor != String)
         {
             message.instance = this.id;
@@ -327,6 +328,9 @@ function sandboxWorld(id, metadata)
         for (var i in this.clients)
         {
             this.messageClient(this.clients[i], packedMessage, ignorePending, resolvePending);
+        }}catch(e)
+        {
+            console.log(e)
         }
     }
     this.messageConnection = function(id, name, UID)
