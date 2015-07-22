@@ -489,7 +489,12 @@ function sandboxWorld(id, metadata)
             {
                 //this must come after the client is added. Here, there is only one client
                 self.messageConnection(client.id, client.loginData ? client.loginData.Username : "", client.loginData ? client.loginData.UID : "");
-                self.state.createAvatar(client.loginData.UID,client.id);
+                
+                var needAvatar = self.state.metadata.publishSettings.createAvatar;
+                if(!self.state.metadata.publishSettings.allowAnonymous && client.loginData.anonymous)
+                    needAvatar = false;
+                if(needAvatar && !self.state.getAvatarForClient(client.loginData.UID))
+                    self.state.createAvatar(client.loginData.UID,client.id);
             });
         }
         //this client is not the first, we need to get the state and mark it pending
@@ -511,7 +516,26 @@ function sandboxWorld(id, metadata)
             }
             //the below message should now queue for the pending socket, fire off for others
             this.messageConnection(client.id, client.loginData ? client.loginData.Username : "", client.loginData ? client.loginData.UID : "");
-            this.state.createAvatar(client.loginData.UID,client.id);
+            
+
+            var needAvatar = this.state.metadata.publishSettings.createAvatar;
+            if(!this.state.metadata.publishSettings.allowAnonymous && client.loginData.anonymous)
+                needAvatar = false;
+
+            if(needAvatar)
+            {
+                if(!this.state.getAvatarForClient(client.loginData.UID))
+                    this.state.createAvatar(client.loginData.UID,client.id);
+                else
+                {
+                    //note that we only do this for the second client, because it's impossible to have 2 clients 
+                    //control one avatar if there is only one client
+                    var avatar = this.state.getAvatarForClient(client.loginData.UID);
+                    var controller = avatar.properties.ownerClientID;
+                    controller.push(client.id);
+                    this.state.setProperty(avatar.id,'ownerClientID',controller);
+                }
+            }  
         }
     }
     this.requestState = function()
@@ -565,7 +589,7 @@ function sandboxWorld(id, metadata)
 
             //do not accept messages from clients that have not been claimed by a user
             //currently, allow getstate from anonymous clients
-            if (!this.allowAnonymous && !sendingclient.loginData && message.action != "getState" && message.member != "latencyTest")
+            if (!this.state.metadata.publishSettings.allowAnonymous && sendingclient.loginData.anonymous && message.action != "getState" && message.member != "latencyTest")
             {
                 return;
             }

@@ -118,9 +118,20 @@ var sandboxState = function(id, metadata,world)
     this.events = {};
     this.id = id;
     this.metadata = metadata;
+    
     this.world = world;
-    if (this.metadata.publishSettings && this.metadata.publishSettings.allowAnonymous)
-        this.allowAnonymous = true;
+    if(!this.metadata.publishSettings)
+    {
+        this.metadata.publishSettings = {
+            allowAnonymous:false,
+            createAvatar:true,
+            SinglePlayer:false,
+            persistence:true,
+            camera:null
+        }
+    }
+ 
+        
 
     this.on = function(name, callback)
     {
@@ -228,7 +239,7 @@ var sandboxState = function(id, metadata,world)
     }
     this.satProperty = function(nodeid, prop, val)
     {
-       
+      
 
         //We need to keep track internally of the properties
         //mostly just to check that the user has not messed with the ownership manually
@@ -239,6 +250,16 @@ var sandboxState = function(id, metadata,world)
         node.properties[prop] = val;
 
     }
+    this.setProperty = function(nodeid,prop,val)
+    {
+        this.satProperty(nodeid,prop,val)
+        var message = {action:"setProperty",
+                            node:nodeid,
+                            member:prop,
+                            parameters:[val]};
+        this.world.messageClients(message,false,false); 
+
+    }
     this.validate = function(type, nodeID, client)
     {
         var node = this.findNode(nodeID);
@@ -247,7 +268,7 @@ var sandboxState = function(id, metadata,world)
             console.log('server has no record of ' + nodeID, 1);
             return false;
         }
-        if ((this.metadata.publishSettings || {}).allowAnonymous || checkOwner(node, client.loginData.UID))
+        if (this.metadata.publishSettings.allowAnonymous || checkOwner(node, client.loginData.UID))
         {
             return true;
         }
@@ -272,7 +293,7 @@ var sandboxState = function(id, metadata,world)
             this.Error("Node already exists");
             return;
         }
-        if ((this.metadata.publishSettings || {}).allowAnonymous || checkOwner(node, client.loginData.UID) || childComponent.extends == 'character.vwf')
+        if (this.metadata.publishSettings.allowAnonymous || checkOwner(node, client.loginData.UID) || childComponent.extends == 'character.vwf')
         {
             return true;
         }
@@ -282,7 +303,11 @@ var sandboxState = function(id, metadata,world)
             return;
         }
     }
-    this.createAvatar = function(userID,client)
+    this.getAvatarForClient = function(userID)
+    {
+        return this.findNode('character-vwf-' + userID);
+    }
+    this.getAvatarDef = function(userID,client,cb)
     {
         var self = this;
         DAL.getUser(userID,function(user)
@@ -294,18 +319,35 @@ var sandboxState = function(id, metadata,world)
             }else{
                 avatar = user.avatarDef;
             }
-            console.log(avatar)
+            
             avatar.properties.ownerClientID = [client];
             avatar.properties.PlayerNumber = userID;
             avatar.children[GUID()] = avatar.children['collision']
             delete avatar.children['collision'];
 
+            var placemarks = self.getProperty("index-vwf","placemarks");
+            if(placemarks && placemarks.Origin)
+            {
+                avatar.properties.transform[12] = placemarks.Origin[0];
+                avatar.properties.transform[13] = placemarks.Origin[1];
+                avatar.properties.transform[14] = placemarks.Origin[2];
+            }
+
+
+            cb(avatar)       
+        })
+    }
+    this.createAvatar = function(userID,client)
+    {   
+        var self = this;
+        this.getAvatarDef(userID,client,function(avatar)
+        {
             var message = {action:"createChild",
                             node:"index-vwf",
                             member:userID,
-                            parameters:[avatar]}
+                            parameters:[avatar,null]} // last null is very important. Without, the ready callback will be added to the wrong place in the function arg list
             self.world.messageClients(message,false,false);
-            self.createdChild(message.node,message.member,avatar);                
+            self.createdChild(message.node,message.member,avatar);         
         })
     }
     this.getID = function(name,childComponent)

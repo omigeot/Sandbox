@@ -121,13 +121,44 @@ function ServeSinglePlayer(socket, namespace, instancedata)
                 "time": 0
             }));
             socket.emit('message', joinMessage);
-            socket.emit('message',
+
+            var tempState = (new(require('./sandboxState').sandboxState)("",
+            {}));
+
+
+            if (!instancedata.publishSettings || instancedata.publishSettings.createAvatar)
             {
-                "action": "goOffline",
-                "parameters": [scene],
-                "time": 0
-            });
-            socket.pending = false;
+                tempState.getAvatarDef(socket.loginData.UID, socket.id, function(avatar)
+                {
+                    var createAvatarMessage = {
+                        action: "createChild",
+                        node: "index-vwf",
+                        member: socket.loginData.UID,
+                        parameters: [avatar, null],
+                        time: 0
+                    };
+                    socket.emit('message', createAvatarMessage);
+                    socket.emit('message',
+                    {
+                        "action": "goOffline",
+                        "parameters": [scene],
+                        "time": 0
+                    });
+                    socket.pending = false;
+                });
+            }
+            else
+            {
+                socket.emit('message',
+                {
+                    "action": "goOffline",
+                    "parameters": [scene],
+                    "time": 0
+                });
+                socket.pending = false;
+            }
+
+
         });
     });
 }
@@ -144,7 +175,8 @@ function WebSocketConnection(socket, _namespace)
         {
             Username: "Anonymous",
             UID: "Anonymous",
-            clients: [socket.id]
+            clients: [socket.id],
+            anonymous: true
         };
         if (!socket.loginData.UID && socket.loginData.Username)
             socket.loginData.UID = socket.loginData.Username;
@@ -225,7 +257,7 @@ function runningInstanceList()
     this.remove = function(id)
     {
         //send a signal to the parent process that we are hosting this instance
-        if(global.configuration.cluster && this.instances[id])
+        if (global.configuration.cluster && this.instances[id])
         {
             var message = {};
             message.type = 'state';
@@ -272,10 +304,10 @@ exports.startup = startup;
 exports.closeInstance = function(id)
 {
     var instance = RunningInstances.get(id);
-    if(instance)
+    if (instance)
     {
         instance.shutdown();
         RunningInstances.remove(instance);
     }
-    
+
 }

@@ -24,6 +24,10 @@ var sandboxClient = function(socket)
         if (index != -1)
             this.events[name].splice(index, 1);
     }
+    this.disconnect = function()
+    {
+        this.socket.disconnect();
+    }
     this.trigger = function(name, e)
     {
         if (!this.events[name]) return;
