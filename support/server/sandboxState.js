@@ -22,6 +22,7 @@ var fixIDs = function(node)
         childComponent.id = childID;
         node.children[childID] = childComponent;
         node.children[childID].parent = node;
+        childComponent.name = childName;
         delete node.children[i];
         fixIDs(childComponent);
     }
@@ -205,7 +206,10 @@ var sandboxState = function(id, metadata,world)
     }
     this.deletedNode = function(id, parent)
     {
-        if (!parent) parent = this.nodes['index-vwf'];
+        var node = this.findNode(id);
+        if(!node) return;
+
+        if (!parent) parent = node.parent;
         if (parent.children)
         {
             for (var i in parent.children)
@@ -312,6 +316,13 @@ var sandboxState = function(id, metadata,world)
             {
                 walk(node.children[i])
             }
+            var childNames = {};
+            for(var i in node.children)
+            {
+                childNames[node.children[i].name] = node.children[i];
+            }
+            node.children = childNames;
+            delete node.id;
         }
 
         var node = this.findNode(nodeID);
@@ -333,14 +344,15 @@ var sandboxState = function(id, metadata,world)
             if(!user || !user.avatarDef)
             {
                 avatar = require("./sandboxAvatar").getDefaultAvatarDef()
+                avatar.children[GUID()] = avatar.children['collision']
+                delete avatar.children['collision'];
             }else{
                 avatar = user.avatarDef;
             }
             
             avatar.properties.ownerClientID = [client];
             avatar.properties.PlayerNumber = userID;
-            avatar.children[GUID()] = avatar.children['collision']
-            delete avatar.children['collision'];
+           
 
             var placemarks = self.getProperty("index-vwf","placemarks");
             if(placemarks && placemarks.Origin)
@@ -389,6 +401,7 @@ var sandboxState = function(id, metadata,world)
         node.children[childID].parent = node;
         if (!childComponent.properties)
             childComponent.properties = {};
+        childComponent.name = name;
         fixIDs(node.children[childID]);
         this.Log("created " + childID, 2);
         return childID;
