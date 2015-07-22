@@ -2,6 +2,48 @@
 
 define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], function(app, SidePanel)
 {
+	app.directive('treeNode', ['$compile', function($compile)
+	{
+		var template =
+			'<span>'+
+				'<span ng-class="getIcon()"/>'+
+				'{{info.id === "index-vwf" ? "Scene" : info.name || info.id}}'+
+				//'{{info.id}}'+
+			'</span>'+
+			'<ul>'+
+				'<li ng-repeat="child in info.children" ng-if="child.id !== \'http-vwf-example-com-camera-vwf-camera\'">'+
+					'<tree-node info="child"></TreeNode>'+
+				'</li>'+
+			'</ul>';
+
+		return {
+			restrict: 'E',
+			scope: {
+				info: '='
+			},
+			link: function($scope, elem, attrs)
+			{
+				$scope.open = false;
+
+				$scope.getIcon = function(){
+					var classes = ['hierarchyicon', 'glyphicon'];
+					if(!$scope.info || !$scope.info.children || $scope.info.children.length === 0)
+						classes.push('glyphicon-ban-circle');
+					else if($scope.open)
+						classes.push('glyphicon-triangle-bottom');
+					else
+						classes.push('glyphicon-triangle-right');
+
+					return classes;
+				}
+
+				$compile(template)($scope, function(e){
+					elem.html(e);
+				});
+			}
+		};
+	}]);
+
 	app.controller('HierarchyController', ['$scope', function($scope)
 	{
 		window._HierarchyManager = $scope;

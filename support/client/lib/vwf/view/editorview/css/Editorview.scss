@@ -7,6 +7,7 @@
 @import 'EntityLibrary';
 @import 'scripteditor';
 @import 'sidepanel';
+@import 'hierarchy';
 
 @-webkit-keyframes pulsing {
 	0% {
@@ -76,6 +77,29 @@
 
 .spacer {
 	@include flex-grow(1);
+}
+
+
+input[type=button]
+{
+	background: #222 50% 50% repeat-x;
+	border: 1px solid #444;
+	border-radius: 2px;
+
+	font-size: 11px;
+	font-weight: bold;
+	font-family: 'Open Sans', Verdana, Arial, sans-serif;
+	color: #eee;
+
+	margin: 4px;
+
+	&:hover {
+		color: #82b8ff;
+	}
+			
+	&:disabled, &:disabled:hover {
+		color: grey;
+	}
 }
 
 #GlobalProgressBar {
@@ -461,10 +485,6 @@ input[type="text"]:focus, input[type="password"]:focus {
 }
 
 @media only screen and (max-width: 800px) {
-
-	#sidepanel {
-		width: 200px;
-	}
 
 	.primeditorinputbox {
 		display: block;
@@ -946,70 +966,6 @@ input[type="text"]:focus, input[type="password"]:focus {
 	text-align: center;
 	cursor: pointer;
 	display: inline-block;
-}
-
-.hierarchyItemSelected {
-	background: #82b8ff url(../../../images/ui-bg_glass_75_cfe4ef_1x400.png) repeat;
-	background-size: 100% 100%;
-	/* border: 1px solid lightgray; */
-	color: black;
-}
-
-.hierarchyicondisable {
-	color: #444;
-}
-
-.hierarchyicon {
-	color: #82b8ff;
-}
-
-#hierarchyDisplay {
-	font: 1.5em sans-serif;
-	padding-bottom: 5px;
-	background: #E9E9E9;
-	border: 1px black solid;
-	margin: 3px 3px 3px 3px;
-	height: auto;
-	background-size: 1% 100%;
-	font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
-	padding-left: 5px;
-}
-
-.hierarchyItem {
-	font-weight: normal;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-	height: 1.3em;
-	overflow: hidden;
-	padding-left: 0px;
-	padding: .1em;
-	font-size: 0.9em;
-}
-
-.hierarchyentry {
-	margin-left: 1em;
-	overflow: hidden;
-	border-left: 1px dotted #444444;
-}
-
-.hierarchytoggle {
-	margin-right: .5em;
-	padding-left: 1.5em;
-	font-size: .6em;
-	display: inline;
-}
-
-.hierarchyItem:hover {
-	background: lightblue url(../../../images/ui-bg_glass_75_cfe4ef_1x400.png) repeat;
-}
-
-.hierarchySpacer {
-	padding-bottom: 5px;
-	margin-right: 10px;
-	margin-left: 0px;
-	display: inline;
-	height: 1.3em;
-	white-space: nowrap;
 }
 
 #preloadGUI {

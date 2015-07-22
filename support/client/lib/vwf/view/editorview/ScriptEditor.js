@@ -349,7 +349,6 @@ define(['vwf/view/editorview/angular-app'], function(app)
 		});
 
 		$scope.$watchCollection('fields.selectedNode.methods', function(){
-			console.log('methods updated');
 			methodsDirty = true;
 			if(!timeoutSet){
 				timeoutSet = $timeout(function(){
@@ -360,7 +359,6 @@ define(['vwf/view/editorview/angular-app'], function(app)
 		});
 
 		$scope.$watchCollection('fields.selectedNode.events', function(){
-			console.log('events updated');
 			eventsDirty = true;
 			if(!timeoutSet){
 				timeoutSet = $timeout(function(){
@@ -371,7 +369,6 @@ define(['vwf/view/editorview/angular-app'], function(app)
 		});
 
 		$scope.$watchCollection('fields.selectedNode.properties', function(){
-			console.log('properties updated');
 			propertiesDirty = true;
 			if(!timeoutSet){
 				timeoutSet = $timeout(function(){

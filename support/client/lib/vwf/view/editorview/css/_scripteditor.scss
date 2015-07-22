@@ -176,25 +176,6 @@
 			font-weight: bold;
 			font-family: 'Open Sans', Verdana, Arial, sans-serif;
 			color: #eee;
-
-			input[type=button]
-			{
-				background: #222 50% 50% repeat-x;
-				border: 1px solid #444;
-				border-radius: 2px;
-
-				font-size: inherit;
-
-				margin: 4px;
-
-				&:hover {
-					color: #82b8ff;
-				}
-			
-				&:disabled, &:disabled:hover {
-					color: grey;
-				}
-			}
 		}
 	}
 

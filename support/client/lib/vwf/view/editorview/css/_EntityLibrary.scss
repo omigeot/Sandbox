@@ -47,6 +47,10 @@
 		}
 	}
 
+	#entitylibrarytitle {
+		@include flex-shrink(0);
+	}
+
 	#EntityLibraryMain
 	{
 		//width: 245px;
@@ -58,12 +62,15 @@
 		min-width: 248px;
 
 		max-height: 100%;
-		overflow-y: scroll;
 	}
 
 	#EntityLibraryAccordion
 	{
 		overflow-y: auto;
+
+		& > h3:not(.ui-accordion-header-active):last-of-type, & > div:last-of-type {
+			margin-bottom: 28px;
+		}
 	}
 
 	.libraryAsset

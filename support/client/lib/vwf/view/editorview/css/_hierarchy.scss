@@ -1,0 +1,104 @@
+
+#hierarchyDisplay
+{
+	padding: 5px;
+	border: 1px grey solid;
+	margin: 3px;
+
+	font-size: 1.5em;
+	font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
+	line-height: 1.0;
+	white-space: nowrap;
+	overflow-x: auto;
+	overflow-y: auto;
+
+	span
+	{
+		cursor: default;
+
+		&:hover {
+			color: #82b8ff;
+		}
+	}
+
+	& > ul
+	{
+		//margin-left: 0 !important;
+		border-left: none !important;
+		padding-left: 5px !important;
+	}
+
+	ul
+	{
+		padding: 0;
+		list-style: none;
+
+		//margin-left: 10px;
+		border-left: solid grey 1px;
+		padding-left: 10px;
+	}
+
+	li
+	{
+		margin: 4px 0px 4px 12px;
+		text-indent: -8px;
+	}
+
+	.hierarchyicon
+	{
+		font-size: 10px;
+		margin-right: 5px;
+		color: #82b8ff;
+
+		&.glyphicon-ban-circle {
+			color: #444;
+		}
+	}
+
+}
+
+
+.hierarchyItem {
+	font-weight: normal;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	height: 1.3em;
+	overflow: hidden;
+	padding-left: 0px;
+	padding: .1em;
+	font-size: 0.9em;
+}
+
+.hierarchyentry {
+	margin-left: 1em;
+	overflow: hidden;
+	border-left: 1px dotted #444444;
+}
+
+.hierarchytoggle {
+	margin-right: .5em;
+	padding-left: 1.5em;
+	font-size: .6em;
+	display: inline;
+}
+
+.hierarchyItem:hover {
+	background: lightblue url(../../../images/ui-bg_glass_75_cfe4ef_1x400.png) repeat;
+}
+
+.hierarchySpacer {
+	padding-bottom: 5px;
+	margin-right: 10px;
+	margin-left: 0px;
+	display: inline;
+	height: 1.3em;
+	white-space: nowrap;
+}
+
+.hierarchyItemSelected {
+	background: #82b8ff url(../../../images/ui-bg_glass_75_cfe4ef_1x400.png) repeat;
+	background-size: 100% 100%;
+	/* border: 1px solid lightgray; */
+	color: black;
+}
+

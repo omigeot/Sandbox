@@ -4,4 +4,14 @@ block vars
 	- var settings = { name: 'hierarchyManager', controller: 'HierarchyController', title: 'Hierarchy', icon: 'hierarchy', requiresSelection: false };
 
 block content
-	div That's a spicy meatball!
+
+	#hierarchyDisplay
+		ul: li
+			tree-node(info='fields.nodes["index-vwf"]')
+		//#hierarchyParent(style='display:none;font-weight:bold;white-space: nowrap;text-overflow: ellipsis;overflow:hidden') &#x25B2 Parent ({{parentName()}})
+		//#VWFChildren(tabindex=0, style='font-weight:bold') Scene
+		//#THREEChildren(tabindex=1, style='font-weight:bold') SceneNode Children
+
+	input(type='button', value='Make VWF Node')
+	input(type='button', value='Select')
+	input(type='button', value='Explode')
