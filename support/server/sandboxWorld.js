@@ -759,6 +759,17 @@ function sandboxWorld(id, metadata)
 
         xapi.sendStatement(client.loginData.UID, xapi.verbs.left, this.id, this.metadata.title, this.metadata.description, this.id);
 
+
+        if(!client.anonymous)
+        {
+            var avatar = this.state.getAvatarForClient(client.loginData.UID);
+            if(avatar)
+            {
+                var avatarDef = this.state.getNodeDefinition(avatar.id);
+                client.updateAvatar(avatarDef);
+            }
+        }
+
         if (this.clientCount() == 0)
         {
             this.shutdown();

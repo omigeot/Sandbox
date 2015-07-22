@@ -303,6 +303,23 @@ var sandboxState = function(id, metadata,world)
             return;
         }
     }
+    this.getNodeDefinition = function(nodeID)
+    {
+        var walk = function(node)
+        {
+            delete node.parent;
+            for(var i in node.children)
+            {
+                walk(node.children[i])
+            }
+        }
+
+        var node = this.findNode(nodeID);
+        walk(node);
+        node = JSON.parse(JSON.stringify(node))
+        this.reattachParents(nodeID);
+        return node;
+    }
     this.getAvatarForClient = function(userID)
     {
         return this.findNode('character-vwf-' + userID);
