@@ -2,7 +2,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 {
 	var app = angular.module('SandboxEditor', []);
 
-	app.run(['$rootScope', function($rootScope)
+	app.run(['$timeout', '$rootScope', function($timeout, $rootScope)
 	{
 		app.root = $rootScope;
 		$rootScope.fields = {
@@ -11,8 +11,12 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 			nodes: {}
 		};
 
-		$(document).on('selectionChanged', function(e,node){
+		$(document).on('selectionChanged', function(e,node)
+		{
 			$rootScope.fields.selectedNode = node;
+			$rootScope.fields.selectedNodeIds = [];
+			for(var i=0; i<_Editor.getSelectionCount(); i++)
+				$rootScope.fields.selectedNodeIds.push(_Editor.GetSelectedVWFID(i));
 
 			if(node){
 				node.methods = node.methods || {};
@@ -20,12 +24,12 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				node.properties = node.properties || {};
 			}
 
-			$rootScope.$apply();
+			$timeout($rootScope.$apply.bind($rootScope));
 		});
 
 		$(document).on('setstatecomplete', function(){
 			$rootScope.fields.worldIsReady = true;
-			$rootScope.$apply();
+			$timeout($rootScope.$apply.bind($rootScope));
 		});
 	}]);
 

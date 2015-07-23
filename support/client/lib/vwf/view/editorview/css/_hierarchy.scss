@@ -14,10 +14,16 @@
 
 	span
 	{
-		cursor: default;
+		cursor: pointer;
 
 		&:hover {
 			color: #82b8ff;
+			text-decoration: underline;
+		}
+
+		&.selected {
+			background-color: #82b8ff;
+			color: black;
 		}
 	}
 

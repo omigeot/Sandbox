@@ -5,29 +5,29 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 	app.directive('treeNode', ['$compile', function($compile)
 	{
 		var template =
-			'<span>'+
-				'<span ng-class="getIcon()"/>'+
-				'{{info.id === "index-vwf" ? "Scene" : info.name || info.id}}'+
-				//'{{info.id}}'+
+			'<span ng-class="getIcon()"/>'+
+			'<span ng-click="select(node.id, $event)" ng-class=\'{"selected": fields.selectedNodeIds.indexOf(node.id) > -1}\'>'+
+				'{{node.id === "index-vwf" ? "Scene" : node.name || node.id}}'+
 			'</span>'+
 			'<ul>'+
-				'<li ng-repeat="child in info.children" ng-if="child.id !== \'http-vwf-example-com-camera-vwf-camera\'">'+
-					'<tree-node info="child"></TreeNode>'+
+				'<li ng-repeat="child in node.children" ng-if="child.id !== \'http-vwf-example-com-camera-vwf-camera\'">'+
+					'<tree-node node-id="{{child.id}}"></TreeNode>'+
 				'</li>'+
 			'</ul>';
 
 		return {
 			restrict: 'E',
-			scope: {
-				info: '='
-			},
+			scope: true,
 			link: function($scope, elem, attrs)
 			{
+				$scope.$watch('fields.nodes["'+attrs.nodeId+'"]', function(newval){
+					$scope.node = newval;
+				});
 				$scope.open = false;
 
 				$scope.getIcon = function(){
 					var classes = ['hierarchyicon', 'glyphicon'];
-					if(!$scope.info || !$scope.info.children || $scope.info.children.length === 0)
+					if(!$scope.node || !$scope.node.children || $scope.node.children.length === 0)
 						classes.push('glyphicon-ban-circle');
 					else if($scope.open)
 						classes.push('glyphicon-triangle-bottom');
@@ -48,6 +48,16 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 	{
 		window._HierarchyManager = $scope;
 
+		$scope.select = function(nodeId, evt)
+		{
+			// new selection = 0, add = 2, subtract = 3
+			if( !evt.ctrlKey )
+				_Editor.SelectObject(nodeId, 0);
+			else if( $scope.fields.selectedNodeIds.indexOf(nodeId) === -1 )
+				_Editor.SelectObject(nodeId, 2);
+			else
+				_Editor.SelectObject(nodeId, 3);
+		}
 	}]);
 
 	return window._HierarchyManager;

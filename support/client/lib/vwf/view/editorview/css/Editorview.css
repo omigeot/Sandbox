@@ -878,34 +878,39 @@
   overflow-y: auto; }
   /* line 16, _hierarchy.scss */
   #hierarchyDisplay span {
-    cursor: default; }
+    cursor: pointer; }
     /* line 19, _hierarchy.scss */
     #hierarchyDisplay span:hover {
-      color: #82b8ff; }
-  /* line 25, _hierarchy.scss */
+      color: #82b8ff;
+      text-decoration: underline; }
+    /* line 24, _hierarchy.scss */
+    #hierarchyDisplay span.selected {
+      background-color: #82b8ff;
+      color: black; }
+  /* line 31, _hierarchy.scss */
   #hierarchyDisplay > ul {
     border-left: none !important;
     padding-left: 5px !important; }
-  /* line 32, _hierarchy.scss */
+  /* line 38, _hierarchy.scss */
   #hierarchyDisplay ul {
     padding: 0;
     list-style: none;
     border-left: solid grey 1px;
     padding-left: 10px; }
-  /* line 42, _hierarchy.scss */
+  /* line 48, _hierarchy.scss */
   #hierarchyDisplay li {
     margin: 4px 0px 4px 12px;
     text-indent: -8px; }
-  /* line 48, _hierarchy.scss */
+  /* line 54, _hierarchy.scss */
   #hierarchyDisplay .hierarchyicon {
     font-size: 10px;
     margin-right: 5px;
     color: #82b8ff; }
-    /* line 53, _hierarchy.scss */
+    /* line 59, _hierarchy.scss */
     #hierarchyDisplay .hierarchyicon.glyphicon-ban-circle {
       color: #444; }
 
-/* line 61, _hierarchy.scss */
+/* line 67, _hierarchy.scss */
 .hierarchyItem {
   font-weight: normal;
   white-space: nowrap;
@@ -916,24 +921,24 @@
   padding: .1em;
   font-size: 0.9em; }
 
-/* line 72, _hierarchy.scss */
+/* line 78, _hierarchy.scss */
 .hierarchyentry {
   margin-left: 1em;
   overflow: hidden;
   border-left: 1px dotted #444444; }
 
-/* line 78, _hierarchy.scss */
+/* line 84, _hierarchy.scss */
 .hierarchytoggle {
   margin-right: .5em;
   padding-left: 1.5em;
   font-size: .6em;
   display: inline; }
 
-/* line 85, _hierarchy.scss */
+/* line 91, _hierarchy.scss */
 .hierarchyItem:hover {
   background: lightblue url(../../../images/ui-bg_glass_75_cfe4ef_1x400.png) repeat; }
 
-/* line 89, _hierarchy.scss */
+/* line 95, _hierarchy.scss */
 .hierarchySpacer {
   padding-bottom: 5px;
   margin-right: 10px;
@@ -942,7 +947,7 @@
   height: 1.3em;
   white-space: nowrap; }
 
-/* line 98, _hierarchy.scss */
+/* line 104, _hierarchy.scss */
 .hierarchyItemSelected {
   background: #82b8ff url(../../../images/ui-bg_glass_75_cfe4ef_1x400.png) repeat;
   background-size: 100% 100%;
