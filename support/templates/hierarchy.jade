@@ -5,13 +5,12 @@ block vars
 
 block content
 
+	input#filter(type='search', placeholder='Search')
+
 	#hierarchyDisplay
+
+		input#makeNode(type='button', value='Three.js Node > VWF', scroll-fixed='top right', style='top: 0px; right: 0px;')
+
 		ul: li
 			tree-node(node-id='index-vwf')
-		//#hierarchyParent(style='display:none;font-weight:bold;white-space: nowrap;text-overflow: ellipsis;overflow:hidden') &#x25B2 Parent ({{parentName()}})
-		//#VWFChildren(tabindex=0, style='font-weight:bold') Scene
-		//#THREEChildren(tabindex=1, style='font-weight:bold') SceneNode Children
 
-	input(type='button', value='Make VWF Node')
-	input(type='button', value='Select')
-	input(type='button', value='Explode')

@@ -20,21 +20,46 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 			scope: true,
 			link: function($scope, elem, attrs)
 			{
-				$scope.$watch('fields.nodes["'+attrs.nodeId+'"]', function(newval){
-					$scope.node = newval;
-				});
-				$scope.open = false;
+				$scope.node = {};
+
+				if( attrs.nodeId )
+				{
+					$scope.threeMap = {};
+
+					$scope.$watch('fields.nodes["'+attrs.nodeId+'"]', function(newval){
+						if(newval){
+							$scope.node = newval;
+							$scope.threeMap = $scope.getThreeDescendants(newval.id);
+						}
+					});
+				}
+				else if( attrs.threeId )
+				{
+					//console.log(attrs.threeId, $scope.threeMap);
+					$scope.node = $scope.threeMap[attrs.threeId];
+				}
+
+				$scope.open = function(){
+					return !elem.hasClass('collapsed');
+				}
 
 				$scope.getIcon = function(){
 					var classes = ['hierarchyicon', 'glyphicon'];
 					if(!$scope.node || !$scope.node.children || $scope.node.children.length === 0)
 						classes.push('glyphicon-ban-circle');
-					else if($scope.open)
+					else if($scope.open())
 						classes.push('glyphicon-triangle-bottom');
 					else
 						classes.push('glyphicon-triangle-right');
 
 					return classes;
+				}
+
+				$scope.toggleCollapse = function(){
+					if( elem.hasClass('collapsed') )
+						elem.removeClass('collapsed');
+					else
+						elem.addClass('collapsed');
 				}
 
 				$compile(template)($scope, function(e){
@@ -43,6 +68,43 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 			}
 		};
 	}]);
+
+	app.directive('scrollFixed', function()
+	{
+		return {
+			restrict: 'A',
+			scope: {
+				fixedProps: '@scrollFixed'
+			},
+			link: function($scope, elem, attrs)
+			{
+				$scope.fixedProps = $scope.fixedProps.split(' ');
+
+				var initialVals = {};
+				for(var i=0; i<$scope.fixedProps.length; i++){
+					var propName = $scope.fixedProps[i];
+					initialVals[propName] = parseInt(elem[0].style[propName]) || 0;
+				}
+
+				var parent = elem.parent()[0];
+				elem.parent().scroll(function(evt)
+				{
+					if( initialVals.top !== undefined ){
+						elem[0].style.top = (parent.scrollTop + initialVals.top) + 'px';
+					}
+					if( initialVals.bottom !== undefined ){
+						elem[0].style.bottom = (-parent.scrollTop + initialVals.bottom) + 'px';
+					}
+					if( initialVals.left !== undefined ){
+						elem[0].style.left = (parent.scrollLeft + initialVals.left) + 'px';
+					}
+					if( initialVals.right !== undefined ){
+						elem[0].style.right = (-parent.scrollLeft + initialVals.right) + 'px';
+					}
+				});
+			}
+		};
+	});
 
 	app.controller('HierarchyController', ['$scope', function($scope)
 	{
@@ -57,6 +119,37 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 				_Editor.SelectObject(nodeId, 2);
 			else
 				_Editor.SelectObject(nodeId, 3);
+		}
+
+		$scope.getThreeDescendants = function(nodeId)
+		{
+			var threenode = _Editor.findviewnode(nodeId);
+			var threeMap = {};
+
+			if( $scope.fields.nodes[nodeId].prototype === 'asset-vwf' && threenode ){
+				buildTree(threenode, 'threejs_root', '<Unbound Three.js Nodes>');
+				console.log(threeMap);
+			}
+
+			return threeMap;
+
+			function buildTree(threenode, idOverride, nameOverride)
+			{
+				var id = idOverride || threenode.uuid;
+				threeMap[id] = {children: []};
+				threeMap[id].prototype = 'threejs_node';
+				threeMap[id].id = id;
+				threeMap[id].name = nameOverride || threenode.name || id || 'No Name';
+				
+				for(var i=0; i<threenode.children.length; i++)
+				{
+					var childnode = threenode.children[i];
+					if( !childnode.VWFID ){
+						threeMap[id].children.push( childnode.uuid );
+						buildTree(childnode);
+					}
+				}
+			}
 		}
 	}]);
 
