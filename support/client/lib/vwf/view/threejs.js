@@ -2122,6 +2122,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                             
                             sceneView.lastData = eData;
                             sceneView.kernel.dispatchEvent(pointerDownID, "pointerMove", eData.eventData, eData.eventNodeData);
+                           
                         
                     }
                 } else {

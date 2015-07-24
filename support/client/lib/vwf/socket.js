@@ -7,6 +7,8 @@ var PONG = 5;
 var CONSOLE = 6;
 var ID = 7;
 
+var totalMessages = 0;
+var lastTime = 0;
 function socketThreadProxy(host, options)
 {
     this.host = host;
@@ -56,6 +58,14 @@ function socketThreadProxy(host, options)
             type: SEND,
             message: message
         });
+        totalMessages ++;
+        var now = performance.now();
+        if ( now - lastTime  > 1000)
+        {
+            console.log("Messages per second: " + totalMessages)
+            totalMessages = 0;
+            lastTime = now;
+        }
     }
     this.ping = function(message)
     {
