@@ -30,7 +30,7 @@ var avatarDef = {
             "type": "subDriver/threejs"
         },
         "N6581f10c": {
-            "extends": "asset.vwf",
+            "extends": "phantomAsset.vwf",
             "properties": {
                 "DisplayName": "./avatars/Male_Jeans.DAE1",
                 "___physics_activation_state": 1,
@@ -97,11 +97,11 @@ var avatarDef = {
                 "s2": 0.135632110526785
             },
             "sequence": 0,
-            "source": "./avatars/Male_Jeans.DAE",
-            "type": "subDriver/threejs/asset/vnd.collada+xml"
+            "source": "./avatars/Male_Jeans.json",
+            "type": "subDriver/threejs/asset/vnd.gltf+json"
         },
         "Nf714e4e8": {
-            "extends": "asset.vwf",
+            "extends": "phantomAsset.vwf",
             "properties": {
                 "DisplayName": "./avatars/Male_Tennis_Shoes.DAE1",
                 "___physics_activation_state": 1,
@@ -169,11 +169,11 @@ var avatarDef = {
                 "s2": 0.988476545317098
             },
             "sequence": 0,
-            "source": "./avatars/Male_Tennis_Shoes.DAE",
-            "type": "subDriver/threejs/asset/vnd.collada+xml"
+            "source": "./avatars/Male_Tennis_Shoes.json",
+            "type": "subDriver/threejs/asset/vnd.gltf+json"
         },
         "Nfa92f98": {
-            "extends": "asset.vwf",
+            "extends": "phantomAsset.vwf",
             "properties": {
                 "DisplayName": "./avatars/Male_T_Shirt.DAE1",
                 "___physics_activation_state": 1,
@@ -240,8 +240,8 @@ var avatarDef = {
                 "s2": 0.720442588208243
             },
             "sequence": 0,
-            "source": "./avatars/Male_T_Shirt.DAE",
-            "type": "subDriver/threejs/asset/vnd.collada+xml"
+            "source": "./avatars/Male_T_Shirt.json",
+            "type": "subDriver/threejs/asset/vnd.gltf+json"
         }
     },
     "events": {
@@ -328,7 +328,7 @@ var avatarDef = {
                 "start": 6
             }
         },
-        "isDynamic": true,
+        "isDynamic": false,
         "materialDef": {
             "alpha": 1,
             "ambient": {
@@ -397,8 +397,8 @@ var avatarDef = {
         "s2": 0.428785639815032
     },
     "sequence": 0,
-    "source": "./avatars/Male_Avatar_Base.DAE",
-    "type": "subDriver/threejs/asset/vnd.collada+xml"
+    "source": "./avatars/Male_Avatar_Base.json",
+    "type": "subDriver/threejs/asset/vnd.gltf+json"
 }
 
 function randomNames(node)
