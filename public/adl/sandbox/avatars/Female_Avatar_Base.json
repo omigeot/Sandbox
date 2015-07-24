@@ -1,29 +1,29 @@
 {
     "accessors": {
-        "accessor_195": {
-            "bufferView": "bufferView_209",
-            "byteOffset": 332864,
+        "accessor_180": {
+            "bufferView": "bufferView_188",
+            "byteOffset": 358592,
             "byteStride": 16,
-            "count": 10402,
+            "count": 11206,
             "max": [
                 1,
                 1,
-                1,
-                1
+                0.988192,
+                0.984956
             ],
             "min": [
-                0,
+                5.45517e-009,
                 0,
                 0,
                 0
             ],
             "type": 35666
         },
-        "accessor_198": {
-            "bufferView": "bufferView_209",
-            "byteOffset": 499296,
+        "accessor_183": {
+            "bufferView": "bufferView_188",
+            "byteOffset": 537888,
             "byteStride": 16,
-            "count": 10402,
+            "count": 11206,
             "max": [
                 29,
                 30,
@@ -38,56 +38,25 @@
             ],
             "type": 35666
         },
-        "accessor_201": {
-            "bufferView": "bufferView_209",
-            "byteOffset": 691456,
-            "byteStride": 16,
-            "count": 804,
-            "max": [
-                1,
-                1,
-                0,
-                0
-            ],
-            "min": [
-                0,
-                0,
-                0,
-                0
-            ],
-            "type": 35666
-        },
-        "accessor_204": {
-            "bufferView": "bufferView_209",
-            "byteOffset": 704320,
-            "byteStride": 16,
-            "count": 804,
-            "max": [
-                29,
-                29,
-                0,
-                0
-            ],
-            "min": [
-                0,
-                0,
-                0,
-                0
-            ],
-            "type": 35666
-        },
-        "accessor_21": {
-            "bufferView": "bufferView_208",
+        "accessor_38": {
+            "bufferView": "bufferView_187",
             "byteOffset": 0,
             "byteStride": 0,
             "count": 54918,
             "type": 5123
         },
-        "accessor_23": {
-            "bufferView": "bufferView_209",
+        "accessor_41": {
+            "bufferView": "bufferView_187",
+            "byteOffset": 109836,
+            "byteStride": 0,
+            "count": 4560,
+            "type": 5123
+        },
+        "accessor_43": {
+            "bufferView": "bufferView_188",
             "byteOffset": 0,
             "byteStride": 12,
-            "count": 10402,
+            "count": 11206,
             "max": [
                 0.89011,
                 0.131523,
@@ -100,11 +69,11 @@
             ],
             "type": 35665
         },
-        "accessor_25": {
-            "bufferView": "bufferView_209",
-            "byteOffset": 124824,
+        "accessor_45": {
+            "bufferView": "bufferView_188",
+            "byteOffset": 134472,
             "byteStride": 12,
-            "count": 10402,
+            "count": 11206,
             "max": [
                 0.999954,
                 0.999659,
@@ -117,638 +86,582 @@
             ],
             "type": 35665
         },
-        "accessor_27": {
-            "bufferView": "bufferView_209",
-            "byteOffset": 249648,
+        "accessor_47": {
+            "bufferView": "bufferView_188",
+            "byteOffset": 268944,
             "byteStride": 8,
-            "count": 10402,
+            "count": 11206,
             "max": [
                 0.99247,
                 0.99191
             ],
             "min": [
                 0.00499,
-                0.00214398
-            ],
-            "type": 35664
-        },
-        "accessor_48": {
-            "bufferView": "bufferView_208",
-            "byteOffset": 109836,
-            "byteStride": 0,
-            "count": 4560,
-            "type": 5123
-        },
-        "accessor_50": {
-            "bufferView": "bufferView_209",
-            "byteOffset": 665728,
-            "byteStride": 12,
-            "count": 804,
-            "max": [
-                0.0475851,
-                -0.0657099,
-                1.66721
-            ],
-            "min": [
-                -0.0475857,
-                -0.0994464,
-                1.63332
-            ],
-            "type": 35665
-        },
-        "accessor_52": {
-            "bufferView": "bufferView_209",
-            "byteOffset": 675376,
-            "byteStride": 12,
-            "count": 804,
-            "max": [
-                0.999785,
-                0.999761,
-                0.999228
-            ],
-            "min": [
-                -0.999785,
-                -0.997221,
-                -0.999232
-            ],
-            "type": 35665
-        },
-        "accessor_54": {
-            "bufferView": "bufferView_209",
-            "byteOffset": 685024,
-            "byteStride": 8,
-            "count": 804,
-            "max": [
-                0.598325,
-                0.296081
-            ],
-            "min": [
-                0.501675,
                 0.00170201
             ],
             "type": 35664
         },
         "animAccessor_0": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 3968,
+            "bufferView": "bufferView_186",
+            "byteOffset": 1984,
             "count": 260,
             "type": 5126
         },
         "animAccessor_1": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 5008,
+            "bufferView": "bufferView_186",
+            "byteOffset": 3024,
             "count": 260,
             "type": 35665
         },
         "animAccessor_10": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 36208,
+            "bufferView": "bufferView_186",
+            "byteOffset": 34224,
             "count": 260,
             "type": 35665
         },
         "animAccessor_11": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 39328,
+            "bufferView": "bufferView_186",
+            "byteOffset": 37344,
             "count": 260,
             "type": 35665
         },
         "animAccessor_12": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 42448,
+            "bufferView": "bufferView_186",
+            "byteOffset": 40464,
             "count": 260,
             "type": 35666
         },
         "animAccessor_13": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 46608,
+            "bufferView": "bufferView_186",
+            "byteOffset": 44624,
             "count": 260,
             "type": 35665
         },
         "animAccessor_14": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 49728,
+            "bufferView": "bufferView_186",
+            "byteOffset": 47744,
             "count": 260,
             "type": 35665
         },
         "animAccessor_15": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 52848,
+            "bufferView": "bufferView_186",
+            "byteOffset": 50864,
             "count": 260,
             "type": 35666
         },
         "animAccessor_16": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 57008,
+            "bufferView": "bufferView_186",
+            "byteOffset": 55024,
             "count": 260,
             "type": 35665
         },
         "animAccessor_17": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 60128,
+            "bufferView": "bufferView_186",
+            "byteOffset": 58144,
             "count": 260,
             "type": 35665
         },
         "animAccessor_18": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 63248,
+            "bufferView": "bufferView_186",
+            "byteOffset": 61264,
             "count": 260,
             "type": 35666
         },
         "animAccessor_19": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 67408,
+            "bufferView": "bufferView_186",
+            "byteOffset": 65424,
             "count": 260,
             "type": 35665
         },
         "animAccessor_2": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 8128,
+            "bufferView": "bufferView_186",
+            "byteOffset": 6144,
             "count": 260,
             "type": 35665
         },
         "animAccessor_20": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 70528,
+            "bufferView": "bufferView_186",
+            "byteOffset": 68544,
             "count": 260,
             "type": 35665
         },
         "animAccessor_21": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 73648,
+            "bufferView": "bufferView_186",
+            "byteOffset": 71664,
             "count": 260,
             "type": 35666
         },
         "animAccessor_22": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 77808,
+            "bufferView": "bufferView_186",
+            "byteOffset": 75824,
             "count": 260,
             "type": 35665
         },
         "animAccessor_23": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 80928,
+            "bufferView": "bufferView_186",
+            "byteOffset": 78944,
             "count": 260,
             "type": 35665
         },
         "animAccessor_24": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 84048,
+            "bufferView": "bufferView_186",
+            "byteOffset": 82064,
             "count": 260,
             "type": 35666
         },
         "animAccessor_25": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 88208,
+            "bufferView": "bufferView_186",
+            "byteOffset": 86224,
             "count": 260,
             "type": 35665
         },
         "animAccessor_26": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 91328,
+            "bufferView": "bufferView_186",
+            "byteOffset": 89344,
             "count": 260,
             "type": 35665
         },
         "animAccessor_27": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 94448,
+            "bufferView": "bufferView_186",
+            "byteOffset": 92464,
             "count": 260,
             "type": 35666
         },
         "animAccessor_28": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 98608,
+            "bufferView": "bufferView_186",
+            "byteOffset": 96624,
             "count": 260,
             "type": 35665
         },
         "animAccessor_29": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 101728,
+            "bufferView": "bufferView_186",
+            "byteOffset": 99744,
             "count": 260,
             "type": 35665
         },
         "animAccessor_3": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 11248,
+            "bufferView": "bufferView_186",
+            "byteOffset": 9264,
             "count": 260,
             "type": 35666
         },
         "animAccessor_30": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 104848,
+            "bufferView": "bufferView_186",
+            "byteOffset": 102864,
             "count": 260,
             "type": 35666
         },
         "animAccessor_31": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 109008,
+            "bufferView": "bufferView_186",
+            "byteOffset": 107024,
             "count": 260,
             "type": 35665
         },
         "animAccessor_32": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 112128,
+            "bufferView": "bufferView_186",
+            "byteOffset": 110144,
             "count": 260,
             "type": 35665
         },
         "animAccessor_33": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 115248,
+            "bufferView": "bufferView_186",
+            "byteOffset": 113264,
             "count": 260,
             "type": 35666
         },
         "animAccessor_34": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 119408,
+            "bufferView": "bufferView_186",
+            "byteOffset": 117424,
             "count": 260,
             "type": 35665
         },
         "animAccessor_35": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 122528,
+            "bufferView": "bufferView_186",
+            "byteOffset": 120544,
             "count": 260,
             "type": 35665
         },
         "animAccessor_36": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 125648,
+            "bufferView": "bufferView_186",
+            "byteOffset": 123664,
             "count": 260,
             "type": 35666
         },
         "animAccessor_37": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 129808,
+            "bufferView": "bufferView_186",
+            "byteOffset": 127824,
             "count": 260,
             "type": 35665
         },
         "animAccessor_38": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 132928,
+            "bufferView": "bufferView_186",
+            "byteOffset": 130944,
             "count": 260,
             "type": 35665
         },
         "animAccessor_39": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 136048,
+            "bufferView": "bufferView_186",
+            "byteOffset": 134064,
             "count": 260,
             "type": 35666
         },
         "animAccessor_4": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 15408,
+            "bufferView": "bufferView_186",
+            "byteOffset": 13424,
             "count": 260,
             "type": 35665
         },
         "animAccessor_40": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 140208,
+            "bufferView": "bufferView_186",
+            "byteOffset": 138224,
             "count": 260,
             "type": 35665
         },
         "animAccessor_41": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 143328,
+            "bufferView": "bufferView_186",
+            "byteOffset": 141344,
             "count": 260,
             "type": 35665
         },
         "animAccessor_42": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 146448,
+            "bufferView": "bufferView_186",
+            "byteOffset": 144464,
             "count": 260,
             "type": 35666
         },
         "animAccessor_43": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 150608,
+            "bufferView": "bufferView_186",
+            "byteOffset": 148624,
             "count": 260,
             "type": 35665
         },
         "animAccessor_44": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 153728,
+            "bufferView": "bufferView_186",
+            "byteOffset": 151744,
             "count": 260,
             "type": 35665
         },
         "animAccessor_45": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 156848,
+            "bufferView": "bufferView_186",
+            "byteOffset": 154864,
             "count": 260,
             "type": 35666
         },
         "animAccessor_46": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 161008,
+            "bufferView": "bufferView_186",
+            "byteOffset": 159024,
             "count": 260,
             "type": 35665
         },
         "animAccessor_47": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 164128,
+            "bufferView": "bufferView_186",
+            "byteOffset": 162144,
             "count": 260,
             "type": 35665
         },
         "animAccessor_48": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 167248,
+            "bufferView": "bufferView_186",
+            "byteOffset": 165264,
             "count": 260,
             "type": 35666
         },
         "animAccessor_49": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 171408,
+            "bufferView": "bufferView_186",
+            "byteOffset": 169424,
             "count": 260,
             "type": 35665
         },
         "animAccessor_5": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 18528,
+            "bufferView": "bufferView_186",
+            "byteOffset": 16544,
             "count": 260,
             "type": 35665
         },
         "animAccessor_50": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 174528,
+            "bufferView": "bufferView_186",
+            "byteOffset": 172544,
             "count": 260,
             "type": 35665
         },
         "animAccessor_51": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 177648,
+            "bufferView": "bufferView_186",
+            "byteOffset": 175664,
             "count": 260,
             "type": 35666
         },
         "animAccessor_52": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 181808,
+            "bufferView": "bufferView_186",
+            "byteOffset": 179824,
             "count": 260,
             "type": 35665
         },
         "animAccessor_53": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 184928,
+            "bufferView": "bufferView_186",
+            "byteOffset": 182944,
             "count": 260,
             "type": 35665
         },
         "animAccessor_54": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 188048,
+            "bufferView": "bufferView_186",
+            "byteOffset": 186064,
             "count": 260,
             "type": 35666
         },
         "animAccessor_55": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 192208,
+            "bufferView": "bufferView_186",
+            "byteOffset": 190224,
             "count": 260,
             "type": 35665
         },
         "animAccessor_56": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 195328,
+            "bufferView": "bufferView_186",
+            "byteOffset": 193344,
             "count": 260,
             "type": 35665
         },
         "animAccessor_57": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 198448,
+            "bufferView": "bufferView_186",
+            "byteOffset": 196464,
             "count": 260,
             "type": 35666
         },
         "animAccessor_58": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 202608,
+            "bufferView": "bufferView_186",
+            "byteOffset": 200624,
             "count": 260,
             "type": 35665
         },
         "animAccessor_59": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 205728,
+            "bufferView": "bufferView_186",
+            "byteOffset": 203744,
             "count": 260,
             "type": 35665
         },
         "animAccessor_6": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 21648,
+            "bufferView": "bufferView_186",
+            "byteOffset": 19664,
             "count": 260,
             "type": 35666
         },
         "animAccessor_60": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 208848,
+            "bufferView": "bufferView_186",
+            "byteOffset": 206864,
             "count": 260,
             "type": 35666
         },
         "animAccessor_61": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 213008,
+            "bufferView": "bufferView_186",
+            "byteOffset": 211024,
             "count": 260,
             "type": 35665
         },
         "animAccessor_62": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 216128,
+            "bufferView": "bufferView_186",
+            "byteOffset": 214144,
             "count": 260,
             "type": 35665
         },
         "animAccessor_63": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 219248,
+            "bufferView": "bufferView_186",
+            "byteOffset": 217264,
             "count": 260,
             "type": 35666
         },
         "animAccessor_64": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 223408,
+            "bufferView": "bufferView_186",
+            "byteOffset": 221424,
             "count": 260,
             "type": 35665
         },
         "animAccessor_65": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 226528,
+            "bufferView": "bufferView_186",
+            "byteOffset": 224544,
             "count": 260,
             "type": 35665
         },
         "animAccessor_66": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 229648,
+            "bufferView": "bufferView_186",
+            "byteOffset": 227664,
             "count": 260,
             "type": 35666
         },
         "animAccessor_67": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 233808,
+            "bufferView": "bufferView_186",
+            "byteOffset": 231824,
             "count": 260,
             "type": 35665
         },
         "animAccessor_68": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 236928,
+            "bufferView": "bufferView_186",
+            "byteOffset": 234944,
             "count": 260,
             "type": 35665
         },
         "animAccessor_69": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 240048,
+            "bufferView": "bufferView_186",
+            "byteOffset": 238064,
             "count": 260,
             "type": 35666
         },
         "animAccessor_7": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 25808,
+            "bufferView": "bufferView_186",
+            "byteOffset": 23824,
             "count": 260,
             "type": 35665
         },
         "animAccessor_70": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 244208,
+            "bufferView": "bufferView_186",
+            "byteOffset": 242224,
             "count": 260,
             "type": 35665
         },
         "animAccessor_71": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 247328,
+            "bufferView": "bufferView_186",
+            "byteOffset": 245344,
             "count": 260,
             "type": 35665
         },
         "animAccessor_72": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 250448,
+            "bufferView": "bufferView_186",
+            "byteOffset": 248464,
             "count": 260,
             "type": 35666
         },
         "animAccessor_73": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 254608,
+            "bufferView": "bufferView_186",
+            "byteOffset": 252624,
             "count": 260,
             "type": 35665
         },
         "animAccessor_74": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 257728,
+            "bufferView": "bufferView_186",
+            "byteOffset": 255744,
             "count": 260,
             "type": 35665
         },
         "animAccessor_75": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 260848,
+            "bufferView": "bufferView_186",
+            "byteOffset": 258864,
             "count": 260,
             "type": 35666
         },
         "animAccessor_76": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 265008,
+            "bufferView": "bufferView_186",
+            "byteOffset": 263024,
             "count": 260,
             "type": 35665
         },
         "animAccessor_77": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 268128,
+            "bufferView": "bufferView_186",
+            "byteOffset": 266144,
             "count": 260,
             "type": 35665
         },
         "animAccessor_78": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 271248,
+            "bufferView": "bufferView_186",
+            "byteOffset": 269264,
             "count": 260,
             "type": 35666
         },
         "animAccessor_79": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 275408,
+            "bufferView": "bufferView_186",
+            "byteOffset": 273424,
             "count": 260,
             "type": 35665
         },
         "animAccessor_8": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 28928,
+            "bufferView": "bufferView_186",
+            "byteOffset": 26944,
             "count": 260,
             "type": 35665
         },
         "animAccessor_80": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 278528,
+            "bufferView": "bufferView_186",
+            "byteOffset": 276544,
             "count": 260,
             "type": 35665
         },
         "animAccessor_81": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 281648,
+            "bufferView": "bufferView_186",
+            "byteOffset": 279664,
             "count": 260,
             "type": 35666
         },
         "animAccessor_82": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 285808,
+            "bufferView": "bufferView_186",
+            "byteOffset": 283824,
             "count": 260,
             "type": 35665
         },
         "animAccessor_83": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 288928,
+            "bufferView": "bufferView_186",
+            "byteOffset": 286944,
             "count": 260,
             "type": 35665
         },
         "animAccessor_84": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 292048,
+            "bufferView": "bufferView_186",
+            "byteOffset": 290064,
             "count": 260,
             "type": 35666
         },
         "animAccessor_85": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 296208,
+            "bufferView": "bufferView_186",
+            "byteOffset": 294224,
             "count": 260,
             "type": 35665
         },
         "animAccessor_86": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 299328,
+            "bufferView": "bufferView_186",
+            "byteOffset": 297344,
             "count": 260,
             "type": 35665
         },
         "animAccessor_87": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 302448,
+            "bufferView": "bufferView_186",
+            "byteOffset": 300464,
             "count": 260,
             "type": 35666
         },
         "animAccessor_88": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 306608,
+            "bufferView": "bufferView_186",
+            "byteOffset": 304624,
             "count": 260,
             "type": 35665
         },
         "animAccessor_89": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 309728,
+            "bufferView": "bufferView_186",
+            "byteOffset": 307744,
             "count": 260,
             "type": 35665
         },
         "animAccessor_9": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 32048,
+            "bufferView": "bufferView_186",
+            "byteOffset": 30064,
             "count": 260,
             "type": 35666
         },
         "animAccessor_90": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 312848,
+            "bufferView": "bufferView_186",
+            "byteOffset": 310864,
             "count": 260,
             "type": 35666
         },
         "animAccessor_91": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 317008,
+            "bufferView": "bufferView_186",
+            "byteOffset": 315024,
             "count": 260,
             "type": 35665
         },
         "animAccessor_92": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 320128,
+            "bufferView": "bufferView_186",
+            "byteOffset": 318144,
             "count": 260,
             "type": 35665
         },
         "animAccessor_93": {
-            "bufferView": "bufferView_207",
-            "byteOffset": 323248,
+            "bufferView": "bufferView_186",
+            "byteOffset": 321264,
             "count": 260,
             "type": 35666
         }
@@ -2281,27 +2194,27 @@
         "version": 0.6
     },
     "bufferViews": {
-        "bufferView_207": {
+        "bufferView_186": {
             "buffer": "Female_Avatar_Base",
-            "byteLength": 327408,
+            "byteLength": 325424,
             "byteOffset": 0
         },
-        "bufferView_208": {
+        "bufferView_187": {
             "buffer": "Female_Avatar_Base",
             "byteLength": 118956,
-            "byteOffset": 327408,
+            "byteOffset": 325424,
             "target": 34963
         },
-        "bufferView_209": {
+        "bufferView_188": {
             "buffer": "Female_Avatar_Base",
             "byteLength": 717184,
-            "byteOffset": 446364,
+            "byteOffset": 444380,
             "target": 34962
         }
     },
     "buffers": {
         "Female_Avatar_Base": {
-            "byteLength": 1163548,
+            "byteLength": 1161564,
             "path": "Female_Avatar_Base.bin",
             "type": "arraybuffer"
         }
@@ -2309,9 +2222,6 @@
     "images": {
         "Female_Avatar_Clothing_packed0_specular_png": {
             "path": "/E:/AVATAR_PIPELINE/Sandbox_Base_Female_Avatar/Female_Avatar_OBJ/Female_Avatar_Clothing/Female_Avatar_Clothing_packed0_specular.png"
-        },
-        "Female_Base_Avatar_Body_diffuse_jpg": {
-            "path": "/C:/VWS/Sandbox/public/adl/sandbox/Avatar_work/Female_Complete_Avatar/Female_Base_Avatar_Body_diffuse.jpg"
         },
         "Female_Base_Avatar_Body_diffuse_png": {
             "path": "/E:/AVATAR_PIPELINE/Sandbox_Base_Female_Avatar/Female_Base_Avatar.fbm/Female_Base_Avatar_Body_diffuse.png"
@@ -2324,6 +2234,9 @@
         },
         "Female_Base_Avatar_Body_specular_png": {
             "path": "/E:/AVATAR_PIPELINE/Sandbox_Base_Female_Avatar/Female_Base_Avatar.fbm/Female_Base_Avatar_Body_specular.png"
+        },
+        "Female_Base_Color_jpg": {
+            "path": "/C:/VWS/Sandbox/public/adl/sandbox/Avatar_work/Female_Complete_Avatar/Female_Base_Color.jpg"
         }
     },
     "lights": {
@@ -2361,8 +2274,8 @@
             "instanceTechnique": {
                 "technique": "technique0",
                 "values": {
-                    "ambient": "texture_Female_Base_Avatar_Body_diffuse_jpg",
-                    "diffuse": "texture_Female_Base_Avatar_Body_diffuse_jpg",
+                    "ambient": "texture_Female_Base_Color_jpg",
+                    "diffuse": "texture_Female_Base_Color_jpg",
                     "emission": [
                         0,
                         0,
@@ -2382,30 +2295,25 @@
             "primitives": [
                 {
                     "attributes": {
-                        "JOINT": "accessor_198",
-                        "NORMAL": "accessor_25",
-                        "POSITION": "accessor_23",
-                        "TEXCOORD_0": "accessor_27",
-                        "WEIGHT": "accessor_195"
+                        "JOINT": "accessor_183",
+                        "NORMAL": "accessor_45",
+                        "POSITION": "accessor_43",
+                        "TEXCOORD_0": "accessor_47",
+                        "WEIGHT": "accessor_180"
                     },
-                    "indices": "accessor_21",
+                    "indices": "accessor_38",
                     "material": "PackedMaterial0",
                     "primitive": 4
-                }
-            ]
-        },
-        "geom-Eyes": {
-            "name": "Eyes",
-            "primitives": [
+                },
                 {
                     "attributes": {
-                        "JOINT": "accessor_204",
-                        "NORMAL": "accessor_52",
-                        "POSITION": "accessor_50",
-                        "TEXCOORD_0": "accessor_54",
-                        "WEIGHT": "accessor_201"
+                        "JOINT": "accessor_183",
+                        "NORMAL": "accessor_45",
+                        "POSITION": "accessor_43",
+                        "TEXCOORD_0": "accessor_47",
+                        "WEIGHT": "accessor_180"
                     },
-                    "indices": "accessor_48",
+                    "indices": "accessor_41",
                     "material": "Bodymat",
                     "primitive": 4
                 }
@@ -2455,7 +2363,7 @@
             ],
             "translation": [
                 0.0644418,
-                2.98023e-008,
+                -2.98023e-008,
                 0
             ]
         },
@@ -2512,7 +2420,7 @@
             "name": "Bip003_L_Clavicle",
             "rotation": [
                 0.636033,
-                -0.0947385,
+                -0.0947384,
                 0.765824,
                 2.77126
             ],
@@ -2523,7 +2431,7 @@
             ],
             "translation": [
                 -0.0776829,
-                0.00441056,
+                0.00441054,
                 0.0393316
             ]
         },
@@ -2705,7 +2613,7 @@
             ],
             "translation": [
                 0.282559,
-                0,
+                -2.98023e-008,
                 0
             ]
         },
@@ -2729,8 +2637,8 @@
             ],
             "translation": [
                 0.257767,
-                2.98023e-008,
-                -5.96046e-008
+                1.49012e-008,
+                0
             ]
         },
         "node-Bip003_L_Thigh": {
@@ -2846,7 +2754,7 @@
             "translation": [
                 0.148952,
                 -4.72069e-005,
-                -6.74278e-007
+                -6.78003e-007
             ]
         },
         "node-Bip003_Pelvis": {
@@ -2936,7 +2844,7 @@
                 1
             ],
             "translation": [
-                0.0747896,
+                0.0747897,
                 0.0104855,
                 0.0612533
             ]
@@ -3006,7 +2914,7 @@
             "translation": [
                 0.107403,
                 -0.00695798,
-                -5.55813e-006
+                -5.55068e-006
             ]
         },
         "node-Bip003_R_Finger11": {
@@ -3096,7 +3004,7 @@
             ],
             "translation": [
                 0.282559,
-                0,
+                -2.98023e-008,
                 0
             ]
         },
@@ -3120,7 +3028,7 @@
             ],
             "translation": [
                 0.257767,
-                -7.45058e-009,
+                -2.23517e-008,
                 0
             ]
         },
@@ -3211,7 +3119,7 @@
             ],
             "translation": [
                 0.111699,
-                7.45058e-009,
+                -7.45058e-009,
                 -1.19209e-007
             ]
         },
@@ -3224,7 +3132,7 @@
             "jointId": "joint2",
             "name": "Bip003_Spine",
             "rotation": [
-                -1.49287e-005,
+                -1.49325e-005,
                 -1.45229e-005,
                 -1,
                 0.122793
@@ -3259,7 +3167,7 @@
             ],
             "translation": [
                 0.148939,
-                -0.000118315,
+                -0.00011833,
                 -2.49967e-006
             ]
         },
@@ -3270,7 +3178,7 @@
             "jointId": "joint0",
             "name": "Bip003_Spine2",
             "rotation": [
-                0.0683719,
+                0.068372,
                 0.805879,
                 0.588119,
                 0.0343633
@@ -3282,7 +3190,7 @@
             ],
             "translation": [
                 0.148934,
-                -0.000118561,
+                -0.000118576,
                 -3.15718e-007
             ]
         },
@@ -3316,37 +3224,6 @@
                 1
             ],
             "name": "Body"
-        },
-        "node-Eyes": {
-            "children": [],
-            "instanceSkin": {
-                "skeletons": [
-                    "node-Bip003"
-                ],
-                "skin": "geom-Eyes-skin1",
-                "sources": [
-                    "geom-Eyes"
-                ]
-            },
-            "matrix": [
-                1,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                0,
-                0,
-                0,
-                1
-            ],
-            "name": "Eyes"
         },
         "node_0": {
             "children": [],
@@ -3399,7 +3276,6 @@
             "nodes": [
                 "node_0",
                 "node-Body",
-                "node-Eyes",
                 "node-Bip003"
             ]
         }
@@ -3435,67 +3311,8 @@
                 1
             ],
             "inverseBindMatrices": {
-                "bufferView": "bufferView_207",
+                "bufferView": "bufferView_186",
                 "byteOffset": 0,
-                "count": 31,
-                "type": 35676
-            },
-            "joints": [
-                "joint0",
-                "joint1",
-                "joint2",
-                "joint3",
-                "joint4",
-                "joint5",
-                "joint6",
-                "joint7",
-                "joint8",
-                "joint9",
-                "joint10",
-                "joint11",
-                "joint12",
-                "joint13",
-                "joint14",
-                "joint15",
-                "joint16",
-                "joint17",
-                "joint18",
-                "joint19",
-                "joint20",
-                "joint21",
-                "joint22",
-                "joint23",
-                "joint24",
-                "joint25",
-                "joint26",
-                "joint27",
-                "joint28",
-                "joint29",
-                "joint30"
-            ]
-        },
-        "geom-Eyes-skin1": {
-            "bindShapeMatrix": [
-                1,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                0,
-                0,
-                0,
-                1,
-                0,
-                0,
-                0,
-                0,
-                1
-            ],
-            "inverseBindMatrices": {
-                "bufferView": "bufferView_207",
-                "byteOffset": 1984,
                 "count": 31,
                 "type": 35676
             },
@@ -3657,14 +3474,6 @@
             "target": 3553,
             "type": 5121
         },
-        "texture_Female_Base_Avatar_Body_diffuse_jpg": {
-            "format": 6408,
-            "internalFormat": 6408,
-            "sampler": "sampler_0",
-            "source": "Female_Base_Avatar_Body_diffuse_jpg",
-            "target": 3553,
-            "type": 5121
-        },
         "texture_Female_Base_Avatar_Body_diffuse_png": {
             "format": 6408,
             "internalFormat": 6408,
@@ -3678,6 +3487,14 @@
             "internalFormat": 6408,
             "sampler": "sampler_0",
             "source": "Female_Base_Avatar_Body_specular_png",
+            "target": 3553,
+            "type": 5121
+        },
+        "texture_Female_Base_Color_jpg": {
+            "format": 6408,
+            "internalFormat": 6408,
+            "sampler": "sampler_0",
+            "source": "Female_Base_Color_jpg",
             "target": 3553,
             "type": 5121
         }
