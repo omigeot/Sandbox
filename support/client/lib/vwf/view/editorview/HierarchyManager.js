@@ -5,13 +5,19 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 	app.directive('treeNode', ['$compile', function($compile)
 	{
 		var template =
-			'<span ng-class="getIcon()"/>'+
+			'<span ng-class="getIcon()" ng-click="toggleCollapse()"/>'+
 			'<span ng-click="select(node.id, $event)" ng-class=\'{"selected": fields.selectedNodeIds.indexOf(node.id) > -1}\'>'+
 				'{{node.id === "index-vwf" ? "Scene" : node.name || node.id}}'+
+				//'{{node.id}}'+
 			'</span>'+
 			'<ul>'+
 				'<li ng-repeat="child in node.children" ng-if="child.id !== \'http-vwf-example-com-camera-vwf-camera\'">'+
-					'<tree-node node-id="{{child.id}}"></TreeNode>'+
+					'<tree-node node-id="{{node.prototype !== \'threejs_node\' ? child.id : \'\'}}" '+
+						'three-id="{{node.prototype === \'threejs_node\' ? child : \'\'}}"></tree-node>'+
+				'</li>'+
+				'<li ng-if="node.prototype !== \'threejs_node\' && threeMap.threejs_root && threeMap.threejs_root.children.length > 0">'+
+					//'{{threeMap.threejs_root | json}}'+
+					'<tree-node three-id="threejs_root" class="collapsed"></tree-node>'+
 				'</li>'+
 			'</ul>';
 
