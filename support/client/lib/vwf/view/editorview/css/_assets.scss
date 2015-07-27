@@ -124,12 +124,12 @@
 			margin: 2px 0;
 		}
 
-		input, textarea
+		input[type=text], textarea
 		{
 			&:not([disabled]) {
 				color: black;
 			}
-			&:not([type=button]):disabled {
+			&:disabled {
 				background-color: #ccc;
 			}
 		}

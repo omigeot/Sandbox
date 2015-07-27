@@ -6,8 +6,8 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 	{
 		var template =
 			'<span ng-class="getIcon()" ng-click="toggleCollapse()"/>'+
-			'<span ng-click="vwfNode.threeId !== node.id ? select(node.id, $event) : null" '+
-				'ng-class=\'{"selected": fields.selectedNodeIds.indexOf(node.id) > -1 || selectedThreeNodes.indexOf(node.id) > -1, '+
+			'<span class="name" ng-click="vwfNode.threeId !== node.id ? select(node, $event) : null" '+
+				'ng-class=\'{"selected": fields.selectedNodeIds.indexOf(node.id) > -1 || selectedThreeNode === node, '+
 					'"nonselectable": vwfNode.threeId === node.id }\'>'+
 				'{{label || node.name || node.id}}'+
 				//'{{node.subtype}}'+
@@ -56,7 +56,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 
 				$scope.getIcon = function(){
 					var classes = ['hierarchyicon', 'glyphicon'];
-					if(!$scope.node || !$scope.node.children || $scope.node.children.length === 0)
+					if( $('ul li', elem).length === 0 )
 						classes.push('glyphicon-ban-circle');
 					else if($scope.open())
 						classes.push('glyphicon-triangle-bottom');
@@ -138,41 +138,39 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 	{
 		window._HierarchyManager = $scope;
 
-		$scope.selectedThreeNodes = [];
+		$scope.selectedThreeNode = null;
+		var selectionBounds = null;
 
-		$scope.select = function(nodeId, evt)
+		$scope.select = function(node, evt)
 		{
 			// vwf nodes
-			if( $scope.fields.nodes[nodeId] )
+			if( $scope.fields.nodes[node.id] )
 			{
 				// new selection = 0, add = 2, subtract = 3
 				if( !evt.ctrlKey )
 				{
-					if( $scope.fields.selectedNodeIds[0] !== nodeId )
-						_Editor.SelectObject(nodeId, 0);
+					if( $scope.fields.selectedNodeIds[0] !== node.id )
+						_Editor.SelectObject(node.id, 0);
 					else
 						_Editor.SelectObject();
 				}
-				else if( $scope.fields.selectedNodeIds.indexOf(nodeId) === -1 )
-					_Editor.SelectObject(nodeId, 2);
+				else if( $scope.fields.selectedNodeIds.indexOf(node.id) === -1 )
+					_Editor.SelectObject(node.id, 2);
 				else
-					_Editor.SelectObject(nodeId, 3);
+					_Editor.SelectObject(node.id, 3);
 			}
 
 			// three.js nodes
 			else
 			{
-				if( !evt.ctrlKey )
-				{
-					if( $scope.selectedThreeNodes[0] !== nodeId )
-						$scope.selectedThreeNodes = [nodeId];
-					else
-						$scope.selectedThreeNodes = [];
+				if( $scope.selectedThreeNode !== node ){
+					$scope.selectedThreeNode = node;
+					$scope.makeBounds(node.node);
 				}
-				else if( $scope.selectedThreeNodes.indexOf(nodeId) === -1 )
-					$scope.selectedThreeNodes.push(nodeId);
-				else
-					$scope.selectedThreeNodes.splice( $scope.selectedThreeNodes.indexOf(nodeId), 1 );
+				else {
+					$scope.selectedThreeNode = null;
+					$scope.makeBounds();
+				}
 			}
 		}
 
@@ -194,6 +192,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 				threeMap[id] = {children: []};
 				threeMap[id].prototype = 'threejs_node';
 				threeMap[id].id = id;
+				threeMap[id].node = threenode;
 				threeMap[id].name = nameOverride || threenode.name || id || threenode.vwfID || 'No Name';
 				
 				for(var i=0; i<threenode.children.length; i++)
@@ -203,6 +202,98 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 					buildTree(childnode);
 				}
 			}
+		}
+
+		$scope.makeBounds = function(node)
+		{
+			if(node)
+			{
+				if (selectionBounds != null) {
+					selectionBounds.parent.remove(selectionBounds);
+					selectionBounds = null;
+				}
+
+				var box = node.GetBoundingBox(true);
+				box.max[0] += .05;
+				box.max[1] += .05;
+				box.max[2] += .05;
+				box.min[0] -= .05;
+				box.min[1] -= .05;
+				box.min[2] -= .05;
+				var mat = new THREE.Matrix4();
+				mat.copy(node.matrixWorld);
+
+				selectionBounds = _Editor.BuildWireBox(
+					[
+						box.max[0] - box.min[0],
+						box.max[1] - box.min[1],
+						box.max[2] - box.min[2]
+					],
+					[
+						box.min[0] + (box.max[0] - box.min[0]) / 2,
+						box.min[1] + (box.max[1] - box.min[1]) / 2,
+						box.min[2] + (box.max[2] - box.min[2]) / 2
+					],
+					[0, 1, 0.5, 1]
+				);
+				selectionBounds.matrixAutoUpdate = false;
+				selectionBounds.matrix = mat;
+				selectionBounds.updateMatrixWorld(true);
+				selectionBounds.material = new THREE.LineBasicMaterial();
+				selectionBounds.material.color.r = 0;
+				selectionBounds.material.color.g = 1;
+				selectionBounds.material.color.b = .5;
+				selectionBounds.material.wireframe = true;
+				selectionBounds.renderDepth = 10000 - 3;
+				selectionBounds.material.depthTest = true;
+				selectionBounds.material.depthWrite = false;
+				selectionBounds.PickPriority = -1;
+				_Editor.findscene().add(selectionBounds);
+			}
+			else if( selectionBounds != null )
+			{
+				selectionBounds.parent.remove(selectionBounds);
+				selectionBounds = null;
+			}
+		}
+
+		$scope.makeVWFNode = function()
+		{
+			if($scope.selectedThreeNode)
+			{
+				var node = $scope.selectedThreeNode.node;
+				var childname = node.name || node.id;
+				var mat = new THREE.Matrix4();
+				mat.copy( node.matrix );
+
+				var parent = node;
+				while( !parent.vwfID && parent.id !== 'index-vwf' ){
+					parent = parent.parent;
+				}
+				parent = parent.vwfID;
+
+				var proto = {
+					extends: 'asset.vwf',
+					type: "link_existing/threejs",
+					source: childname,
+					properties: {
+						owner: document.PlayerNumber,
+						type: '3DR Object',
+						DisplayName: childname,
+						transform: mat
+					}
+				};
+				var newname = GUID();
+				_UndoManager.recordCreate(parent, newname, proto);
+				vwf_view.kernel.createChild(parent, newname, proto, null);
+
+				$scope.makeBounds();
+				_Editor.SelectOnNextCreate([newname]);
+			}
+			else {
+				alertify.alert('Select a "SceneNode" to become a "VWF" node.')
+			}
+
 		}
 
 	}]);

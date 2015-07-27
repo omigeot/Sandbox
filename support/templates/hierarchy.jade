@@ -9,7 +9,7 @@ block content
 
 	#hierarchyDisplay
 
-		input#makeNode(type='button', value='Three.js Node > VWF', scroll-fixed='top right', style='top: 0px; right: 0px;')
+		input#makeNode(type='button', ng-show='selectedThreeNode', ng-click='makeVWFNode()', value='Three.js > VWF', scroll-fixed='top right', style='top: 0px; right: 0px;')
 
 		ul: li
 			tree-node(node-id='index-vwf', label='Scene')
