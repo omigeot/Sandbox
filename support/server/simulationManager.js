@@ -63,8 +63,30 @@ var simulationManager = function(world)
     this.postLearnedMappings = function(){
         for(var i in this.clientControlTable)
         {
+            if(!this.getClientForNode(i))
+            {
+                console.log(i);
+                continue;
+            }
             for(var j in this.clientControlTable[i])
                 this.clientControlTable[i][j] = Math.pow(this.clientControlTable[i][j],.99); // approach 0
+            var max = 0;
+            var controllingClient = null;
+            for(var j in this.clientControlTable[i])
+                {
+                    if(this.clientControlTable[i][j] > max)
+                    {
+                        max = this.clientControlTable[i][j];
+                        controllingClient = j;
+                    }
+                    
+                }
+            if(controllingClient !== this.getClientForNode(i).sandboxClient.id)
+            {   
+             //   this.getClientForNode(i).stopSimulatingNode(i);
+             //   this.clients[controllingClient].startSimulatingNode(i)
+                console.log('moving ' + i + " to " + controllingClient);
+            }    
         }
        
 

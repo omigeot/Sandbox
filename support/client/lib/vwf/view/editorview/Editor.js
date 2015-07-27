@@ -935,11 +935,11 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             //here, we update the selection bounds rect when the selction transforms
             if (window._Editor && propname == _Editor.transformPropertyName && _Editor.isSelected(id)) {
                 _Editor.updateBoundsTransform(id);
-                if (vwf.client() == vwf.moniker()) {
+               
                     if (_Editor.waitingForSet.length)
                         _Editor.waitingForSet.splice(_Editor.waitingForSet.indexOf(id), 1);
 
-                }
+                
                 if (_Editor.waitingForSet.length == 0 || vwf.client() != vwf.moniker()) {
                     _Editor.updateGizmoLocation();
                     _Editor.updateGizmoSize();

@@ -488,9 +488,41 @@ function sandboxWorld(id, metadata)
         //this client is not the first, we need to get the state and mark it pending
         else
         {
+
+
             //if we're loading the files, or waiting for state, then this new client must be at least the 2nd,
             //possilby the 3rd. Eitherway, state will come from either the load or the getState, so just
             //place this client on the list
+
+
+             //the below message should now queue for the pending socket, fire off for others
+            this.messageConnection(client.id, client.loginData ? client.loginData.Username : "", client.loginData ? client.loginData.UID : "");
+
+            function setupAvatar()
+            {
+                var needAvatar = this.state.metadata.publishSettings.createAvatar;
+                if (!this.state.metadata.publishSettings.allowAnonymous && client.loginData.anonymous)
+                    needAvatar = false;
+                if (needAvatar)
+                {
+                    if (!this.state.getAvatarForClient(client.loginData.UID))
+                        this.state.createAvatar(client.loginData.UID, client.id, function(avatarID)
+                        {
+                            self.simulationManager.nodeCreated(avatarID, client);
+                        });
+                    else
+                    {
+                        //note that we only do this for the second client, because it's impossible to have 2 clients 
+                        //control one avatar if there is only one client
+                        var avatar = this.state.getAvatarForClient(client.loginData.UID);
+                        var controller = avatar.properties.ownerClientID;
+                        controller.push(client.id);
+                        this.state.setProperty(avatar.id, 'ownerClientID', controller);
+                    }
+                }
+            }
+
+
             if (this.status == STATUS.DEFAULT)
             {
                 this.requestState();
@@ -499,6 +531,7 @@ function sandboxWorld(id, metadata)
                 {
                     self.simulationManager.addClient(client);
                     this.removeListener('stateSent', distributeSim);
+                    setupAvatar.apply(self);
                 }
                 this.on('stateSent', distributeSim)
                     //loadClient.pending = true;
@@ -508,26 +541,10 @@ function sandboxWorld(id, metadata)
                     "parameters": ["Requesting state from clients"],
                     "time": this.getStateTime
                 })));
+            }else{
+                setupAvatar(); //this should then mark pending
             }
-            //the below message should now queue for the pending socket, fire off for others
-            this.messageConnection(client.id, client.loginData ? client.loginData.Username : "", client.loginData ? client.loginData.UID : "");
-            var needAvatar = this.state.metadata.publishSettings.createAvatar;
-            if (!this.state.metadata.publishSettings.allowAnonymous && client.loginData.anonymous)
-                needAvatar = false;
-            if (needAvatar)
-            {
-                if (!this.state.getAvatarForClient(client.loginData.UID))
-                    this.state.createAvatar(client.loginData.UID, client.id);
-                else
-                {
-                    //note that we only do this for the second client, because it's impossible to have 2 clients 
-                    //control one avatar if there is only one client
-                    var avatar = this.state.getAvatarForClient(client.loginData.UID);
-                    var controller = avatar.properties.ownerClientID;
-                    controller.push(client.id);
-                    this.state.setProperty(avatar.id, 'ownerClientID', controller);
-                }
-            }
+
         }
     }
     this.requestState = function()

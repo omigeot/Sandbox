@@ -1199,7 +1199,7 @@ this.receive = function( nodeID, actionName, memberName, parameters, respond, or
         var paused = this.getProperty(vwf.application(),'playMode');
         if(paused === 'paused' || paused === 'stop')
         {
-            if(actionName == 'tick' ||
+            if(
                 actionName == 'dispatchEvent')
                 return false;
         }}
@@ -1332,6 +1332,8 @@ this.tick = function() {
 
     // Call ticking() on each model.
 
+    if(this.getProperty(vwf.application(),'playMode') == 'play')
+    {
     this.models.forEach( function( model ) {
         model.ticking && model.ticking( this.now ); // TODO: maintain a list of tickable models and only call those
     }, this );
@@ -1348,7 +1350,7 @@ this.tick = function() {
     this.views.forEach( function( view ) {
         view.ticked && view.ticked( this.now ); // TODO: maintain a list of tickable views and only call those
     }, this );
-
+    }
     this.tickCount ++;
     this.postSimulationStateUpdates(this.tickCount % 20 != 0 ? ['transform','animationFrame'] : null);
 };
