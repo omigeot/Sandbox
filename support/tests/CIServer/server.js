@@ -7,8 +7,7 @@ var childprocess = require("child_process");
 var fs = require('fs');
 var stdoutLog = "";
 var stderrLog = "";
-var report = {};
-report.tests = {};
+var report = { tests: {} };
 var cancel = false;
 
 var RUNNING = helper.state.RUNNING;
@@ -18,6 +17,7 @@ var CANCELING = helper.state.CANCELING;
 
 var status = READY;
 var tests = [];
+var testQueue = [];
 
 var files = helper.files;
 var findFiles = helper.findFiles;
@@ -196,11 +196,24 @@ function handleReadyState(command, param){
 	if(param.isHTTP){
 		var request = param.request;
 		var response = param.response;
-		
 		if(command == helper.command.RUN){
-			//already running... nothing to see here..	
-			console.log("Server is already running!");
-			
+			var allIDs = Object.keys(report.tests);
+			setTestQueue(allIDs);
+			doRunCommand();
+		}
+		else if(command === helper.command.RUN_ONE){
+			addTestToQueue(tid);
+			doRunCommand();
+		}
+		
+		response.end();
+	}
+	
+	//Response from runner.. test is complete
+	else{
+		//if runner is updating state to ready...
+		if(checkState(command, param, READY)){ 
+			doRunCommand();
 		}
 	}
 }
@@ -210,7 +223,7 @@ function handleRunningState(command, param){
 	if(param.isHTTP){
 		var request = param.request;
 		var response = param.response;
-		
+
 		if(command == helper.command.RUN || command == helper.command.RUN_ONE){
 			//already running... nothing to see here..	
 			console.log("Server is already running!");
@@ -221,11 +234,15 @@ function handleRunningState(command, param){
 	else{
 		if(command == helper.command.RESULT){
 			console.log("The server received the results of the test!: ", param);
+			updateReport(param);
 		}
-		else if(command == helper.command.READY){
+		else if(checkState(command, param, READY)){
+			status = READY;
+			console.log("The runner is ready again... run next test... ", param);
+			
 			//get next item off of queue
+			doRunCommand();
 		}
-
 	}
 }
 
@@ -237,6 +254,59 @@ function handleCancelingState(command, param){
 	//else if(command === helper.command.){
 		
 	//}
+}
+
+function doRunCommand(){
+	if(testQueue.length > 0){
+		//get item at front of "queue"
+		var tid = testQueue.shift();
+		status = RUNNING;
+		helper.sendMessage(runner, helper.command.RUN_ONE, tid);
+	}
+}
+
+function doQuit(){
+	setTimeout(function() {
+		logger.log('killing server');
+		process.kill(process.pid);
+		process.exit();
+	}, 5000)
+
+	cancel_run(function() {
+		process.exit();
+	});
+
+	logger.log('killing server');
+	process.kill(process.pid);
+	process.exit();
+}
+
+function setTestQueue(arr){
+	testQueue.length = 0;
+	testQueue.push.apply(testQueue, arr);
+}
+
+function addTestToQueue(tid){
+	var testIds = Array.isArray(tid) ? tid : [tid];
+	
+	for(var i = 0; i < testIds.length; i++){
+		var tid = decodeURIComponent(testIds[i]);
+		if(testQueue.indexOf(tid) < 0){
+			testQueue.push(tid);
+			logger.log(tid, "added to queue");
+		}
+		else{
+			logger.log(tid, "is already in queue");
+		}
+	}
+}
+
+function checkState(command, test, state){
+	return command === helper.command.STATE && test === state;
+}
+
+function updateReport(update){
+	report.tests[update.id] = update;
 }
 
 var server = http.createServer();
@@ -267,7 +337,10 @@ server.on('request', function(request, response) {
 	}
 
 	else{
-		handleIncomingMessage([request.url, {request: request, response: response, isHTTP: true}]);
+		var tempArr = request.url.split("?");
+		var command = tempArr[0];
+		var param = tempArr[1];
+		handleIncomingMessage([command, {request: request, response: response, isHTTP: true, query: param}]);
 		response.end();
 		return;
 	}
@@ -284,27 +357,10 @@ server.on('request', function(request, response) {
 
 	}
 	if (request.url == "/quit") {
-
-		setTimeout(function() {
-			logger.log('killing server');
-			process.kill(process.pid);
-			process.exit();
-		}, 5000)
-
-		cancel_run(function() {
-			process.exit();
-		});
-
-		logger.log('killing server');
-		process.kill(process.pid);
-		process.exit();
-
+		doQuit();
 	}
 	if (request.url == "/stop") {
-
-		cancel_run(function() {
-
-		});
+		cancel_run(function(){});
 	}
 	if (request.url == "/reload") {
 
@@ -312,10 +368,8 @@ server.on('request', function(request, response) {
 			reload();
 		}, 5000)
 		cancel_run(reload);
-
 	}
 	if (request.url.indexOf("/runOne") == 0) {
-		logger.log("Awesome stuff..");
 		cancel_run(function() {
 			var tid = request.url.substr(request.url.indexOf('?') + 1)
 			tid = decodeURIComponent(tid)

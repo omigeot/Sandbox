@@ -16,9 +16,9 @@ exports.command = {
 };
 
 exports.state = {
-	RUNNING: 1,
-	CANCELING: 2,
-	READY: 3,
+	RUNNING: "running",
+	CANCELING: "canceling",
+	READY: "ready",
 };
 
 /*
@@ -75,11 +75,16 @@ exports.getAllTestData = function(filename){
 		if (newtest instanceof Function){
 			testData = [{
 				title: title,
-				test: newtest
+				test: newtest,
 			}];
 		}
 	}
 	
+	//Add the filename to each of the tests
+	for(var i = 0; i < testData.length; i++){
+		testData[i].filename = filename;
+	}
+
 	cacheTests[filename] = testData;
 	return testData;
 };

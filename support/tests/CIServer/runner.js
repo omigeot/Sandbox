@@ -56,8 +56,18 @@ function handleRunningState(command, param){
 function doRunCommand(param){
 	if(!param) return;
 	
+	var testObj = helper.getSingleTestData(param);
 	currentTestID = param;
-	currentRun = {};
+	
+	currentRun = {
+		id: currentTestID,
+		status: 'complete',
+		result: null,
+		message: null,
+		filename: testObj.filename,	
+		title: testObj.title,
+		runs: [],
+	};
 	
 	//let server know about updated state, if necessary. 
 	//This must only happen once so we don't overwrite the cancel state
@@ -93,12 +103,12 @@ function _executeActualTestAsync(cb){
 	testObj.test(global.browser, global.testUtils.completeTest(function(success, message) {
 		logger.log("Finished running test using " + browserName);
 		
-		currentRun[browserName] = {
-			id: currentTestID,
+		currentRun.runs.push({
 			status: "complete",
 			result: success ? "passed" : "failed",
-			message: message
-		};
+			message: message,
+			browsername: browserName
+		});
 
 		global.browser.end();
 		runLater(cb);
