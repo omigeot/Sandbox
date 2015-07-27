@@ -2117,7 +2117,8 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
             if (eData) {
                 if (mouseLeftDown || mouseRightDown || mouseMiddleDown) {
                     // lets begin filtering this - it should be possible to only send the data when the change is greater than some value
-                    if (pointerDownID) {
+                    if (pointerDownID && pointerDownID != vwf.application()) {  //don't allow sending of mouse motion on whole scene
+                        //this is too much data, and can't be efficiently routed by the server since the scene is co-simulated
 
                         
                             
