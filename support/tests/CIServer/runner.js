@@ -3,7 +3,7 @@
 var async  = require('async'),
 	helper = require('./helper.js'),
 	state  = helper.state.READY,
-	currentRun = {},
+	currentReport = {},
 	currentTestID,
 	browsersList = ['chrome','firefox'/*,'ie11'*/];
 
@@ -66,7 +66,7 @@ function doRunCommand(param){
 	var testObj = helper.getSingleTestData(param);
 	currentTestID = param;
 	
-	currentRun = {
+	currentReport = {
 		id: currentTestID,
 		status: 'complete',
 		result: null,
@@ -82,7 +82,7 @@ function doRunCommand(param){
 	
 	//For each browser, run a single test, then send a message to server when all tests are complete.
 	async.eachSeries(browsersList, runSingleTest, function sendResults(){
-		helper.sendMessage(process, helper.command.RESULT, currentRun);
+		helper.sendMessage(process, helper.command.RESULT, currentReport);
 		updateState(helper.state.READY);
 	});
 }
@@ -111,7 +111,7 @@ function _executeActualTestAsync(cb){
 	handledTest(global.browser, global.testUtils.completeTest(function(success, message) {
 		console.log("Finished running test using ", browserName, message);
 		
-		currentRun.runs.push({
+		currentReport.runs.push({
 			status: "complete",
 			result: success ? "passed" : "failed",
 			message: "" + message,
@@ -143,14 +143,14 @@ function runLater(fn, timeout){
 function handleException(e){
 	var browserName = global.browser.desiredCapabilities.browserName;
 	
-	currentRun.runs.push({
+	currentReport.runs.push({
 		status: "error",
 		result: "error",
 		message: " " + e.toString() + "; ",
 		browsername: browserName
 	});
 	
-	helper.sendMessage(process, helper.command.ERROR, currentRun);
+	helper.sendMessage(process, helper.command.ERROR, currentReport);
 	
 	global.browser.endAll().then(exitWithError);
 	runLater(exitWithError, 10000);

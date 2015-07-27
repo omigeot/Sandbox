@@ -7,6 +7,14 @@
 <script> 
 $(document).ready(function()
 		{
+		
+			var consts = {
+				RUNNING: "running",
+				CANCELING: "canceling",
+				READY: "ready",
+				ERROR: "error"
+			};
+			
 			$("#runTests").button();
 			$("#runTests").click(function()
 			{
@@ -41,14 +49,14 @@ $(document).ready(function()
 					//$("#status").text(JSON.stringify(status));		
 					//$("#tests").empty();
 					$("#gitLog").text(status.gitLog);
-					if(status.status == 1)
+					if(status.status == consts.RUNNING)
 						$("#test_status").text('Running');
-					if(status.status == 0)
-						$("#test_status").text('Complete');
-					if(status.status == 2)
+					if(status.status == consts.ERROR)
+						$("#test_status").text('Error');
+					if(status.status == consts.CANCELING)
 						$("#test_status").text('Canceling');
-					if(status.status == 3)
-						$("#test_status").text('Not Started');
+					if(status.status == consts.READY)
+						$("#test_status").text('Ready');
 					var tests = status.tests;
 					$("#tests").empty();
 					for (var j in Object.keys(tests).sort())
@@ -133,8 +141,9 @@ $(document).ready(function()
 					$(".testresult:contains('null')").css("background-color",'');
 
 					$("#test_status:contains('Running')").css("background-color",'lightgreen');
-					$("#test_status:contains('Complete')").css("background-color",'green');
+					$("#test_status:contains('Ready')").css("background-color",'green');
 					$("#test_status:contains('Canceling')").css("background-color",'orange');
+					$("#test_status:contains('Error')").css("background-color",'red');
 
 				});
 			}
@@ -142,10 +151,10 @@ $(document).ready(function()
 			window.setInterval(function()
 			{
 				display();
-			}, 500)
+			}, 2000)
 			window.setInterval(function()
 			{
-				window.location.reload();
+				//window.location.reload();
 			}, 60000) 
 })
 </script>

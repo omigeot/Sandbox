@@ -1,14 +1,12 @@
 "use strict";
 
-var helper = require('./helper.js');
+var helper = require('./helper.js'),
+	async = require("async"),
+	http = require("http"),
+	path = require("path"),
+	childprocess = require("child_process"),
+	fs = require('fs');
 
-var async = require("async")
-var http = require("http");
-var path = require("path");
-var childprocess = require("child_process");
-var fs = require('fs');
-var stdoutLog = "";
-var stderrLog = "";
 var report = { tests: {} };
 
 var RUNNING = helper.state.RUNNING,
@@ -25,6 +23,7 @@ var files = helper.files;
 var findFiles = helper.findFiles;
 var runner;
 
+gitLog();
 createRunner();
 
 function readFiles(nextStep) {
@@ -54,36 +53,14 @@ function readFiles(nextStep) {
 	}, nextStep);
 }
 
-function updateAndRunTests(cb2) {
-	//bail if already running. This really should never happen
-	if (status == RUNNING) {
-		cb2();
-		return;
-	}
-
-	async.series([
-		function getLog(cb) {
-			var log = childprocess.spawn("git", ["log", '-1'], {
-				cwd: "../../../"
-			});
-			log.stdout.on('data', function(data) {
-				//Wait for startup complete
-				report.gitLog += data.toString();
-			})
-			log.on('close', cb)
-		},
-		//do a get pull and update the dev branch
-		startSandbox,
-		//run the selenium tests
-		function findAndRunTests(cb) {
-			
-		},
-		killSandbox
-	],
-	function() {
-		status = COMPLETE;
-		logger.log('Run all tests exit')
-		if (cb2) cb2();
+function gitLog() {
+	var log = childprocess.spawn("git", ["log", '-1'], {
+		cwd: "../../../"
+	});
+	
+	log.stdout.on('data', function(data) {
+		//Wait for startup complete
+		report.gitLog += data.toString();
 	});
 }
 
