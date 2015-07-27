@@ -11,6 +11,7 @@ var logger = require('./logger');
 var xapi = require('./xapi');
 var sandboxState = require('./sandboxState').sandboxState;
 var _simulationManager = require('./simulationManager').simulationManager;
+var GUID = require('node-uuid').v4;
 //***node, uses REGEX, escape properly!
 function strEndsWith(str, suffix)
 {
@@ -166,6 +167,12 @@ var timeout = function(world)
     this.handle = global.setTimeout(this.time.bind(this), 6000);
 }
 
+var STATUS = {
+    DEFAULT:0,
+    PENDING_STATE:1,
+    PENDING_LOAD:2
+}
+
 function sandboxWorld(id, metadata)
 {
     this.id = id;
@@ -175,6 +182,7 @@ function sandboxWorld(id, metadata)
     this.metadata = metadata;
     this.allowAnonymous = false;
     this.simulationManager = new _simulationManager(this);
+	this.status = STATUS.DEFAULT;
     if (this.metadata.publishSettings && this.metadata.publishSettings.allowAnonymous)
         this.allowAnonymous = true;
     var log = null;
@@ -273,7 +281,23 @@ function sandboxWorld(id, metadata)
     this.messageClient = function(client, message, ignorePending, resolvePending)
     {
         if (!client.pending || ignorePending)
-            client.emit('message', message);
+        {
+            //simulate latency
+            if (global.latencySim > 0)
+            {
+                (function(__client, __message)
+                {
+                    global.setTimeout(function()
+                    {
+                        __client.emit('message', __message);
+                    }, global.latencySim)
+                })(client, message);
+            }
+            else
+            {
+                client.emit('message', message);
+            }
+        }
         else
         {
             client.pendingList.push(message)
@@ -287,17 +311,28 @@ function sandboxWorld(id, metadata)
                     client.emit('message', client.pendingList[j]);
                 }
                 client.pendingList = [];
+                client.pending = false;
             }
         }
     }
     this.messageClients = function(message, ignorePending, resolvePending)
     {
-        
+        try{
+        if (message.constructor != String)
+        {
+            message.instance = this.id;
+            if(!message.time)
+                message.time = this.time;
+            message = JSON.stringify(message);
+        }
         //message to each user the join of the new client. Queue it up for the new guy, since he should not send it until after getstate
         var packedMessage = messageCompress.pack(message);
         for (var i in this.clients)
         {
             this.messageClient(this.clients[i], packedMessage, ignorePending, resolvePending);
+        }}catch(e)
+        {
+            console.log(e)
         }
     }
     this.messageConnection = function(id, name, UID)
@@ -371,41 +406,38 @@ function sandboxWorld(id, metadata)
         //Get the state and load it.
         //Now the server has a rough idea of what the simulation is
         var self = this;
-        this.state = new sandboxState(this.id, this.metadata);
-        this.simulationManager.addClient(socket);
+        this.state = new sandboxState(this.id,this.metadata,this);
+        this.status = STATUS.PENDING_LOAD;
+		this.simulationManager.addClient(socket);
         this.state.on('loaded', function()
         {
+            self.status = STATUS.DEFAULT;
             var scene = self.state.getVWFDef();
-            socket.emit('message', messageCompress.pack(
-            {
+           
+            
+            self.messageClients({
                 "action": "status",
                 "parameters": ["State loaded, sending..."],
                 "time": self.time
-            }));
-            console.log('got  blank scene');
+            },true,false);
 
             //note: don't have to worry about pending status here, client is first
-            socket.emit('message', messageCompress.pack(
-            {
+            self.messageClients({
                 "action": "createNode",
                 "parameters": [scene],
                 "time": self.time
-            }));
+            },true,true);
 
-
-            self.simulationManager.startScene();
-
-            socket.emit('message', messageCompress.pack(
-            {
+			self.simulationManager.startScene();
+            self.messageClients({
                 "action": "fireEvent",
                 "parameters": ["loaded", []],
                 node: "index-vwf",
                 "time": self.time
-            }));
-            socket.pending = false;
+            },false,false);
+
             self.startTimer();
             cb();
-
         })
     }
     this.messagePeerConnected = function()
@@ -443,11 +475,22 @@ function sandboxWorld(id, metadata)
             {
                 //this must come after the client is added. Here, there is only one client
                 self.messageConnection(client.id, client.loginData ? client.loginData.Username : "", client.loginData ? client.loginData.UID : "");
+                
+                var needAvatar = self.state.metadata.publishSettings.createAvatar;
+                if(!self.state.metadata.publishSettings.allowAnonymous && client.loginData.anonymous)
+                    needAvatar = false;
+                if(needAvatar && !self.state.getAvatarForClient(client.loginData.UID))
+                    self.state.createAvatar(client.loginData.UID,client.id);
             });
         }
         //this client is not the first, we need to get the state and mark it pending
         else
         {
+            //if we're loading the files, or waiting for state, then this new client must be at least the 2nd,
+            //possilby the 3rd. Eitherway, state will come from either the load or the getState, so just
+            //place this client on the list
+            if(this.status == STATUS.DEFAULT)
+            {
             this.requestState();
 
             var self = this;
@@ -458,14 +501,35 @@ function sandboxWorld(id, metadata)
             }
             this.on('stateSent',distributeSim)
             //loadClient.pending = true;
-            client.emit('message', messageCompress.pack(
+                client.emit('message', messageCompress.pack(JSON.stringify(
             {
                 "action": "status",
                 "parameters": ["Requesting state from clients"],
                 "time": this.getStateTime
-            }));
+                })));
+            }
             //the below message should now queue for the pending socket, fire off for others
             this.messageConnection(client.id, client.loginData ? client.loginData.Username : "", client.loginData ? client.loginData.UID : "");
+            
+
+            var needAvatar = this.state.metadata.publishSettings.createAvatar;
+            if(!this.state.metadata.publishSettings.allowAnonymous && client.loginData.anonymous)
+                needAvatar = false;
+
+            if(needAvatar)
+            {
+                if(!this.state.getAvatarForClient(client.loginData.UID))
+                    this.state.createAvatar(client.loginData.UID,client.id);
+                else
+                {
+                    //note that we only do this for the second client, because it's impossible to have 2 clients 
+                    //control one avatar if there is only one client
+                    var avatar = this.state.getAvatarForClient(client.loginData.UID);
+                    var controller = avatar.properties.ownerClientID;
+                    controller.push(client.id);
+                    this.state.setProperty(avatar.id,'ownerClientID',controller);
+                }
+            }  
         }
     }
     this.requestState = function()
@@ -492,6 +556,8 @@ function sandboxWorld(id, metadata)
         this.Log('GetState from Client', 2);
         if (!this.requestTimer)
             this.requestTimer = new timeout(this);
+
+         this.status = STATUS.PENDING_STATE;
     }
     this.message = function(msg, sendingclient)
     {
@@ -517,14 +583,14 @@ function sandboxWorld(id, metadata)
 
             //do not accept messages from clients that have not been claimed by a user
             //currently, allow getstate from anonymous clients
-            if (!this.allowAnonymous && !sendingclient.loginData && message.action != "getState" && message.member != "latencyTest")
+            if (!this.state.metadata.publishSettings.allowAnonymous && sendingclient.loginData.anonymous && message.action != "getState" && message.member != "latencyTest")
             {
                 return;
             }
 
             //route callmessage to the state to it can respond to manip the server side copy
             if (message.action == 'callMethod')
-                this.state.callMethod(message.node, message.member, message.parameters);
+                this.state.calledMethod(message.node, message.member, message.parameters);
 
             if (message.action == 'callMethod' && message.node == 'index-vwf' && message.member == 'PM')
             {
@@ -576,26 +642,24 @@ function sandboxWorld(id, metadata)
 
             }
             if (message.action == "setProperty")
-                this.state.setProperty(message.node, message.member, message.parameters[0]);
+                this.state.satProperty(message.node, message.member, message.parameters[0]);
             //We'll only accept a deleteNode if the user has ownership of the object
             if (message.action == "deleteNode")
             {
-               
-                var node = this.state.findNode(message.node) || {};
-                this.simulationManager.nodeDeleted(message.node);
-                xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, node.properties ? node.properties.DisplayName : "", null, this.id);
-                 this.state.deleteNode(message.node)
+                var displayname = this.state.getProperty(message.node,'DisplayName');
+                this.state.deletedNode(message.node)
+                xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, displayname || message.node, null, this.id);
             }
             //We'll only accept a createChild if the user has ownership of the object
             //Note that you now must share a scene with a user!!!!
             if (message.action == "createChild")
             {
                 var childComponent = JSON.parse(JSON.stringify(message.parameters[0]));
-                if (!this.state.validateCreate(message.node, childComponent, sendingclient))
+                if (!this.state.validateCreate(message.node, message.member, childComponent, sendingclient))
                 {
                     return;
                 }
-                var childID = this.state.createChild(message.node, message.member, childComponent)
+                var childID = this.state.createdChild(message.node, message.member, childComponent)
                 xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties.DisplayName, null, this.id);
 
 
@@ -613,53 +677,29 @@ function sandboxWorld(id, metadata)
                     if (this.requestTimer)
                         this.requestTimer.deleteMe();
                     var state = message.result;
+
+                    this.status = STATUS.DEFAULT;
+
                     this.state.setVWFDef(JSON.parse(JSON.stringify(state)));
-                    client.emit('message', messageCompress.pack(
-                    {
+
+                    this.messageClient(client,{
                         "action": "status",
                         "parameters": ["State Received, Transmitting"],
                         "time": this.getStateTime
-                    }));
-                    client.emit('message', messageCompress.pack(
-                    {
+                    },false,false)
+
+                    this.messageClient(client,{
                         "action": "setState",
                         "parameters": [state],
                         "time": this.getStateTime
-                    }));
+                     },true,true)
                     client.pending = false;
                     this.trigger('stateSent');
-                    for (var j = 0; j < client.pendingList.length; j++)
-                    {
-                        client.emit('message', client.pendingList[j]);
-                    }
-                    client.pendingList = [];
+                    
                 }
                 else
                 {
-                    //just a regular message, so push if the client is pending a load, otherwise just send it.
-                    if (client.pending == true)
-                    {
-                        client.pendingList.push(compressedMessage);
-                        logger.debug('PENDING', 2);
-                    }
-                    else
-                    {
-                        //simulate latency
-                        if (global.latencySim > 0)
-                        {
-                            (function(__client, __message)
-                            {
-                                global.setTimeout(function()
-                                {
-                                    __client.emit('message', __message);
-                                }, global.latencySim)
-                            })(client, compressedMessage);
-                        }
-                        else
-                        {
-                            client.emit('message', compressedMessage);
-                        }
-                    }
+                    this.messageClient(client,compressedMessage,false,false);
                 }
             }
             if (message.action == "createChild")
@@ -677,6 +717,18 @@ function sandboxWorld(id, metadata)
             logger.error(e.stack);
         }
     }
+    this.clientCountForUser = function(userID)
+    {
+        var count = 0;
+        for(var i in this.clients)
+        {
+            if(this.clients[i] && this.clients[i].loginData && this.clients[i].loginData.UID == userID)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
     this.disconnect = function(client)
     {
         logger.info(client.id);
@@ -685,6 +737,17 @@ function sandboxWorld(id, metadata)
         logger.info(this.clientCount());
 
         xapi.sendStatement(client.loginData.UID, xapi.verbs.left, this.id, this.metadata.title, this.metadata.description, this.id);
+
+
+        if(!client.anonymous)
+        {
+            var avatar = this.state.getAvatarForClient(client.loginData.UID);
+            if(avatar)
+            {
+                var avatarDef = this.state.getNodeDefinition(avatar.id);
+                client.updateAvatar(avatarDef);
+            }
+        }
 
         if (this.clientCount() == 0)
         {
@@ -704,13 +767,19 @@ function sandboxWorld(id, metadata)
                 if (loginData && loginData.clients)
                 {
                     console.log("Disconnect. Deleting node for user avatar " + loginData.UID);
-                    var avatarID = 'character-vwf-' + loginData.UID;
-                    this.messageClients(
+
+                    //only delete the avatar if this is the last client owned by the user
+                    if(this.clientCountForUser(loginData.UID) == 0)
                     {
-                        "action": "deleteNode",
-                        "node": avatarID,
-                        "time": this.time
-                    });
+                        var avatarID = 'character-vwf-' + loginData.UID;
+                        this.state.deletedNode(avatarID);
+                        this.messageClients(
+                        {
+                            "action": "deleteNode",
+                            "node": avatarID,
+                            "time": this.time
+                        });
+                    }
                     this.messageClients(
                     {
                         "action": "callMethod",
@@ -730,7 +799,7 @@ function sandboxWorld(id, metadata)
                         "time": this.time,
                         client: socket.id
                     });
-                    this.state.deleteNode(avatarID);
+                    this.state.deletedNode(avatarID);
                 }
                 this.messageClients(
                 {

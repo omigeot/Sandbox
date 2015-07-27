@@ -1,6 +1,8 @@
 var connect = require('connect'),
     parseSignedCookie = connect.utils.parseSignedCookie,
     cookie = require('express/node_modules/cookie');
+    var DAL = require('./DAL')
+    .DAL;
 var sessions = require('./sessions.js');
 
 
@@ -24,6 +26,10 @@ var sandboxClient = function(socket)
         if (index != -1)
             this.events[name].splice(index, 1);
     }
+    this.disconnect = function()
+    {
+        this.socket.disconnect();
+    }
     this.trigger = function(name, e)
     {
         if (!this.events[name]) return;
@@ -37,6 +43,14 @@ var sandboxClient = function(socket)
     this.emit = function(type, message)
     {
         this.socket.emit(type, message);
+    }
+    this.updateAvatar = function(avatarDef)
+    {
+        if(this.loginData.anonymous) return;
+        DAL.updateUser(this.loginData.UID,{avatarDef:avatarDef},function()
+        {
+            console.log('Avatar saved');
+        })
     }
 
     var self = this;

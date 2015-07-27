@@ -1,6 +1,8 @@
 var DAL = require('./DAL')
+    .DAL;
 var fs = require('fs');
 var YAML = require('js-yaml');
+var GUID = require('node-uuid').v4;
 
 //change up the ID of the loaded scene so that they match what the client will have
 var fixIDs = function(node)
@@ -20,6 +22,7 @@ var fixIDs = function(node)
         childComponent.id = childID;
         node.children[childID] = childComponent;
         node.children[childID].parent = node;
+        childComponent.name = childName;
         delete node.children[i];
         fixIDs(childComponent);
     }
@@ -111,13 +114,25 @@ function DBstateToVWFDef(state, instanceData, cb)
     });
 }
 
-var sandboxState = function(id, metadata)
+var sandboxState = function(id, metadata,world)
 {
     this.events = {};
     this.id = id;
     this.metadata = metadata;
-    if (this.metadata.publishSettings && this.metadata.publishSettings.allowAnonymous)
-        this.allowAnonymous = true;
+    
+    this.world = world;
+    if(!this.metadata.publishSettings)
+    {
+        this.metadata.publishSettings = {
+            allowAnonymous:false,
+            createAvatar:true,
+            SinglePlayer:false,
+            persistence:true,
+            camera:null
+        }
+    }
+ 
+        
 
     this.on = function(name, callback)
     {
@@ -217,9 +232,12 @@ var sandboxState = function(id, metadata)
         }
         return ret;
     }
-    this.deleteNode = function(id, parent)
+    this.deletedNode = function(id, parent)
     {
-        if (!parent) parent = this.nodes['index-vwf'];
+        var node = this.findNode(id);
+        if(!node) return;
+
+        if (!parent) parent = node.parent;
         if (parent.children)
         {
             for (var i in parent.children)
@@ -243,9 +261,17 @@ var sandboxState = function(id, metadata)
             }
         }
     }
-    this.setProperty = function(nodeid, prop, val)
+    this.getProperty = function(nodeID,prop)
     {
-       
+        var node = this.findNode(nodeID);
+        if(!node)
+            return;
+        var val = node.properties[prop];
+        return val;
+    }
+    this.satProperty = function(nodeid, prop, val)
+    {
+      
 
         //We need to keep track internally of the properties
         //mostly just to check that the user has not messed with the ownership manually
@@ -256,6 +282,16 @@ var sandboxState = function(id, metadata)
         node.properties[prop] = val;
 
     }
+    this.setProperty = function(nodeid,prop,val)
+    {
+        this.satProperty(nodeid,prop,val)
+        var message = {action:"setProperty",
+                            node:nodeid,
+                            member:prop,
+                            parameters:[val]};
+        this.world.messageClients(message,false,false); 
+
+    }
     this.validate = function(type, nodeID, client)
     {
         var node = this.findNode(nodeID);
@@ -264,7 +300,7 @@ var sandboxState = function(id, metadata)
             console.log('server has no record of ' + nodeID, 1);
             return false;
         }
-        if ((this.metadata.publishSettings || {}).allowAnonymous || checkOwner(node, client.loginData.UID))
+        if (this.metadata.publishSettings.allowAnonymous || checkOwner(node, client.loginData.UID))
         {
             return true;
         }
@@ -274,7 +310,7 @@ var sandboxState = function(id, metadata)
             return;
         }
     }
-    this.validateCreate = function(nodeid, childComponent, client)
+    this.validateCreate = function(nodeid, childName, childComponent, client)
     {
         var node = this.findNode(nodeid);
         if (!node)
@@ -282,7 +318,14 @@ var sandboxState = function(id, metadata)
             this.Error('server has no record of ' + nodeid, 1);
             return;
         }
-        if ((this.metadata.publishSettings || {}).allowAnonymous || checkOwner(node, client.loginData.UID) || childComponent.extends == 'character.vwf')
+        var childID = this.getID(childName,childComponent)
+        var childNode = this.findNode(childID);
+        if(childNode)
+        {
+            this.Error("Node already exists");
+            return;
+        }
+        if (this.metadata.publishSettings.allowAnonymous || checkOwner(node, client.loginData.UID) || childComponent.extends == 'character.vwf')
         {
             return true;
         }
@@ -292,23 +335,101 @@ var sandboxState = function(id, metadata)
             return;
         }
     }
-    this.createChild = function(nodeid, name, childComponent)
+    this.getNodeDefinition = function(nodeID)
+    {
+        var walk = function(node)
+        {
+            delete node.parent;
+            for(var i in node.children)
+            {
+                walk(node.children[i])
+            }
+            var childNames = {};
+            for(var i in node.children)
+            {
+                childNames[node.children[i].name] = node.children[i];
+            }
+            node.children = childNames;
+            delete node.id;
+        }
+
+        var node = this.findNode(nodeID);
+        walk(node);
+        node = JSON.parse(JSON.stringify(node))
+        this.reattachParents(nodeID);
+        return node;
+    }
+    this.getAvatarForClient = function(userID)
+    {
+        return this.findNode('character-vwf-' + userID);
+    }
+    this.getAvatarDef = function(userID,client,cb)
+    {
+        var self = this;
+        DAL.getUser(userID,function(user)
+        {
+            var avatar = null;
+            if(!user || !user.avatarDef)
+            {
+                avatar = require("./sandboxAvatar").getDefaultAvatarDef()
+                avatar.children[GUID()] = avatar.children['collision']
+                delete avatar.children['collision'];
+            }else{
+                avatar = user.avatarDef;
+            }
+            
+            avatar.properties.ownerClientID = [client];
+            avatar.properties.PlayerNumber = userID;
+           
+
+            var placemarks = self.getProperty("index-vwf","placemarks");
+            if(placemarks && placemarks.Origin)
+            {
+                avatar.properties.transform[12] = placemarks.Origin[0];
+                avatar.properties.transform[13] = placemarks.Origin[1];
+                avatar.properties.transform[14] = placemarks.Origin[2];
+            }
+
+
+            cb(avatar)       
+        })
+    }
+    this.createAvatar = function(userID,client)
+    {   
+        var self = this;
+        this.getAvatarDef(userID,client,function(avatar)
+        {
+            var message = {action:"createChild",
+                            node:"index-vwf",
+                            member:userID,
+                            parameters:[avatar,null]} // last null is very important. Without, the ready callback will be added to the wrong place in the function arg list
+            self.world.messageClients(message,false,false);
+            self.createdChild(message.node,message.member,avatar);         
+        })
+    }
+    this.getID = function(name,childComponent)
+    {
+        var childName = name;
+        if (!childName) return;
+        var childID = childComponent.id || childComponent.uri || (childComponent["extends"]) + "." + childName.replace(/ /g, '-');
+        childID = childID.replace(/[^0-9A-Za-z_]+/g, "-");
+        return childID;
+    }
+    this.createdChild = function(nodeid, name, childComponent)
     {
         //Keep a record of the new node
         //remove allow for user to create new node on index-vwf. Must have permission!
         var node = this.findNode(nodeid);
 
         if (!childComponent) return;
-        var childName = name;
-        if (!childName) return;
-        var childID = childComponent.id || childComponent.uri || (childComponent["extends"]) + "." + childName.replace(/ /g, '-');
-        childID = childID.replace(/[^0-9A-Za-z_]+/g, "-");
-        childComponent.id = childID;
         if (!node.children) node.children = {};
+        var childID = this.getID(name,childComponent);
+        childComponent.id = childID;
         node.children[childID] = childComponent;
         node.children[childID].parent = node;
         if (!childComponent.properties)
             childComponent.properties = {};
+        childComponent.name = name;
         fixIDs(node.children[childID]);
         this.Log("created " + childID, 2);
         return childID;
@@ -317,7 +438,7 @@ var sandboxState = function(id, metadata)
     //The statebackup travels over the wire (though technically I guess we should have a copy of that data in our state already)
     //when it does, we can receive it here. Because the server is doing some tracking of state, we need to restore the server
     //side state.
-    this.callMethod = function(id, name, args)
+    this.calledMethod = function(id, name, args)
     {
         if (id == 'index-vwf' && name == 'restoreState')
         {
