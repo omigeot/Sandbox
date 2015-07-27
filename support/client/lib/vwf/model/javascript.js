@@ -1305,7 +1305,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 if (!phase || listener.phases && listener.phases.indexOf(phase) >= 0) {
 
                     //var result = listener.handler.apply(listener.context || jsDriverSelf.nodes[0], eventParameters); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
-                    var result = jsDriverSelf.tryExec(listener.context || jsDriverSelf.nodes[0],listener.context,eventParameters)
+                    var result = jsDriverSelf.tryExec(listener.context || jsDriverSelf.nodes[0],listener.handler,eventParameters)
                     return handled || result === true || result === undefined; // interpret no return as "return true"
                 }
                 return handled;

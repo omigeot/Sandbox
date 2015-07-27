@@ -141,8 +141,8 @@ function getAllDrawables(threeObject, list) {
                     skin.matrixWorldNeedsUpdate = true;
                 }
                 //need to set this to update bone handle positions
-                if (this.setAnimationFrameInternal)
-                    this.setAnimationFrameInternal(this.gettingProperty('animationFrame'), true);
+               // if (this.setAnimationFrameInternal)
+               //     this.setAnimationFrameInternal(this.gettingProperty('animationFrame'), true);
 
 
                 //removed as of threejs r67

@@ -46,6 +46,7 @@ var simClient = function(sandboxClient, simulationManager)
     }
     this.sendStartSimMessage = function(nodeID)
     {
+        console.log('sendStartSimMessage')
         this.sandboxClient.emit('message', messageCompress.pack(JSON.stringify(
         {
             "action": "startSimulating",

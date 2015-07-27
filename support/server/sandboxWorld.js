@@ -480,7 +480,10 @@ function sandboxWorld(id, metadata)
                 if(!self.state.metadata.publishSettings.allowAnonymous && client.loginData.anonymous)
                     needAvatar = false;
                 if(needAvatar && !self.state.getAvatarForClient(client.loginData.UID))
-                    self.state.createAvatar(client.loginData.UID,client.id);
+                {
+                    var avatarID = self.state.createAvatar(client.loginData.UID,client.id);
+                    self.simulationManager.nodeCreated(avatarID,client);
+                }
             });
         }
         //this client is not the first, we need to get the state and mark it pending

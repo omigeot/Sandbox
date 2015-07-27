@@ -405,6 +405,7 @@ var sandboxState = function(id, metadata,world)
             self.world.messageClients(message,false,false);
             self.createdChild(message.node,message.member,avatar);         
         })
+        return 'character-vwf-' + userID;
     }
     this.getID = function(name,childComponent)
     {
