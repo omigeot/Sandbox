@@ -44,7 +44,7 @@
 		@include flex-grow(1);
 
 		font-size: 1.5em;
-		font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
+		//font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
 		line-height: 1.0;
 		white-space: nowrap;
 		overflow-x: auto;
@@ -54,7 +54,17 @@
 			display: none;
 		}
 
-		span:not(.hierarchyicon)
+		.three
+		{
+			font-style: italic;
+			color: #fcff90;
+
+			span:not(.hierarchyicon).selected {
+				background-color: #fcff90;
+			}
+		}
+
+		span:not(.hierarchyicon):not(.nonselectable)
 		{
 			cursor: pointer;
 
@@ -67,6 +77,10 @@
 				background-color: #82b8ff;
 				color: black;
 			}
+		}
+
+		span.nonselectable {
+			cursor: default;
 		}
 
 		& > ul

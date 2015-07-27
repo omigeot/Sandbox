@@ -85,33 +85,40 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		app.root.$apply();
 	}
 
-	app.createdNode = function(parentId, newId, newExtends, newImplements, newSource)
+	app.createdNode = function(parentId, newId, newExtends, newImplements, newSource, newType)
 	{
-		var node = app.root.fields.nodes[newId] = app.root.fields.nodes[newId] || {};
+		var node = app.root.fields.nodes[newId] = {};
 		node.id = newId;
 		node.prototype = newExtends;
+		node.subtype = newType;
 		node.name = '';
-		node.children = node.children || [];
+		node.children = [];
 
-		if( parentId )
-		{
-			if( !app.root.fields.nodes[parentId] )
-				app.root.fields.nodes[parentId] = {id: parentId, children: []};
-
-			node.parent = app.root.fields.nodes[parentId];
-			node.parent.children.push(node);
+		if( parentId ){
+			node.parent = parentId;
+			app.root.fields.nodes[parentId].children.push(newId);
 		}
 
 		app.root.$apply();
 	}
 
+	/*app.initializedNode = function(nodeId)
+	{
+		if(app.root.fields.nodes[nodeId]){
+			console.log('Initialized', nodeId);
+			app.root.fields.nodes[nodeId].childrenBound = true;
+			app.root.$apply();
+		}
+	}*/
+
 	app.deletedNode = function(nodeId)
 	{
 		var node = app.root.fields.nodes[nodeId];
+		var parent = app.root.fields.nodes[node.parent];
 
-		for(var i=0; i<node.parent.children.length; i++){
-			if( node.parent.children[i] === node ){
-				node.parent.children.splice(i, 1);
+		for(var i=0; i<parent.children.length; i++){
+			if( parent.children[i] === node.id ){
+				parent.children.splice(i, 1);
 				break;
 			}
 		}

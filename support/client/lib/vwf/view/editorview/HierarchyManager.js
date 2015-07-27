@@ -6,18 +6,23 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 	{
 		var template =
 			'<span ng-class="getIcon()" ng-click="toggleCollapse()"/>'+
-			'<span ng-click="select(node.id, $event)" ng-class=\'{"selected": fields.selectedNodeIds.indexOf(node.id) > -1}\'>'+
-				'{{node.id === "index-vwf" ? "Scene" : node.name || node.id}}'+
-				//'{{node.id}}'+
+			'<span ng-click="vwfNode.threeId !== node.id ? select(node.id, $event) : null" '+
+				'ng-class=\'{"selected": fields.selectedNodeIds.indexOf(node.id) > -1 || selectedThreeNodes.indexOf(node.id) > -1, '+
+					'"nonselectable": vwfNode.threeId === node.id }\'>'+
+				'{{label || node.name || node.id}}'+
+				//'{{node.subtype}}'+
 			'</span>'+
 			'<ul>'+
-				'<li ng-repeat="child in node.children" ng-if="child.id !== \'http-vwf-example-com-camera-vwf-camera\'">'+
-					'<tree-node node-id="{{node.prototype !== \'threejs_node\' ? child.id : \'\'}}" '+
-						'three-id="{{node.prototype === \'threejs_node\' ? child : \'\'}}"></tree-node>'+
+				'<li ng-repeat="child in node.children" '+
+					'ng-if="child !== \'http-vwf-example-com-camera-vwf-camera\' && !isBound(child)">'+
+					'<tree-node class="collapsed" '+
+						'node-id="{{node.prototype !== \'threejs_node\' ? child : \'\'}}" '+
+						'three-id="{{node.prototype === \'threejs_node\' ? child : \'\'}}">'+
+					'</tree-node>'+
 				'</li>'+
-				'<li ng-if="node.prototype !== \'threejs_node\' && threeMap.threejs_root && threeMap.threejs_root.children.length > 0">'+
+				'<li ng-if="node.prototype !== \'threejs_node\' && threeMap[node.threeId] && threeMap[node.threeId].children.length > 0">'+
 					//'{{threeMap.threejs_root | json}}'+
-					'<tree-node three-id="threejs_root" class="collapsed"></tree-node>'+
+					'<tree-node three-id="{{node.threeId}}" label="unbound-nodes" class="collapsed" ng-class="{\'three\': node.prototype === \'threejs_node\'}"></tree-node>'+
 				'</li>'+
 			'</ul>';
 
@@ -26,22 +31,22 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 			scope: true,
 			link: function($scope, elem, attrs)
 			{
+				$scope.label = attrs.label;
 				$scope.node = {};
 
 				if( attrs.nodeId )
 				{
-					$scope.threeMap = {};
-
 					$scope.$watch('fields.nodes["'+attrs.nodeId+'"]', function(newval){
 						if(newval){
-							$scope.node = newval;
-							$scope.threeMap = $scope.getThreeDescendants(newval.id);
+							$scope.node = $scope.vwfNode = newval;
+							var threeMap = $scope.getThreeDescendants($scope.node);
+							if( threeMap )
+								$scope.threeMap = threeMap;
 						}
 					});
 				}
 				else if( attrs.threeId )
 				{
-					//console.log(attrs.threeId, $scope.threeMap);
 					$scope.node = $scope.threeMap[attrs.threeId];
 				}
 
@@ -66,6 +71,23 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 						elem.removeClass('collapsed');
 					else
 						elem.addClass('collapsed');
+				}
+
+				$scope.isBound = function(id)
+				{
+					if( $scope.fields.nodes[id] ){
+						return false;
+					}
+					else
+					{
+						for(var i=0; i<$scope.vwfNode.children.length; i++)
+						{
+							var vwfChild = $scope.fields.nodes[$scope.vwfNode.children[i]];
+							if( vwfChild.threeId && id && vwfChild.threeId === id )
+								return true;
+						}
+						return false;
+					}
 				}
 
 				$compile(template)($scope, function(e){
@@ -116,28 +138,55 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 	{
 		window._HierarchyManager = $scope;
 
+		$scope.selectedThreeNodes = [];
+
 		$scope.select = function(nodeId, evt)
 		{
-			// new selection = 0, add = 2, subtract = 3
-			if( !evt.ctrlKey )
-				_Editor.SelectObject(nodeId, 0);
-			else if( $scope.fields.selectedNodeIds.indexOf(nodeId) === -1 )
-				_Editor.SelectObject(nodeId, 2);
-			else
-				_Editor.SelectObject(nodeId, 3);
-		}
-
-		$scope.getThreeDescendants = function(nodeId)
-		{
-			var threenode = _Editor.findviewnode(nodeId);
-			var threeMap = {};
-
-			if( $scope.fields.nodes[nodeId].prototype === 'asset-vwf' && threenode ){
-				buildTree(threenode, 'threejs_root', '<Unbound Three.js Nodes>');
-				console.log(threeMap);
+			// vwf nodes
+			if( $scope.fields.nodes[nodeId] )
+			{
+				// new selection = 0, add = 2, subtract = 3
+				if( !evt.ctrlKey )
+				{
+					if( $scope.fields.selectedNodeIds[0] !== nodeId )
+						_Editor.SelectObject(nodeId, 0);
+					else
+						_Editor.SelectObject();
+				}
+				else if( $scope.fields.selectedNodeIds.indexOf(nodeId) === -1 )
+					_Editor.SelectObject(nodeId, 2);
+				else
+					_Editor.SelectObject(nodeId, 3);
 			}
 
-			return threeMap;
+			// three.js nodes
+			else
+			{
+				if( !evt.ctrlKey )
+				{
+					if( $scope.selectedThreeNodes[0] !== nodeId )
+						$scope.selectedThreeNodes = [nodeId];
+					else
+						$scope.selectedThreeNodes = [];
+				}
+				else if( $scope.selectedThreeNodes.indexOf(nodeId) === -1 )
+					$scope.selectedThreeNodes.push(nodeId);
+				else
+					$scope.selectedThreeNodes.splice( $scope.selectedThreeNodes.indexOf(nodeId), 1 );
+			}
+		}
+
+		$scope.getThreeDescendants = function(node)
+		{
+			var threenode = _Editor.findviewnode(node.id);
+			node.threeId = threenode.uuid;
+
+			if( node.prototype === 'asset-vwf' && threenode )
+			{
+				var threeMap = {};
+				buildTree(threenode);
+				return threeMap;
+			}
 
 			function buildTree(threenode, idOverride, nameOverride)
 			{
@@ -145,18 +194,17 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 				threeMap[id] = {children: []};
 				threeMap[id].prototype = 'threejs_node';
 				threeMap[id].id = id;
-				threeMap[id].name = nameOverride || threenode.name || id || 'No Name';
+				threeMap[id].name = nameOverride || threenode.name || id || threenode.vwfID || 'No Name';
 				
 				for(var i=0; i<threenode.children.length; i++)
 				{
 					var childnode = threenode.children[i];
-					if( !childnode.VWFID ){
-						threeMap[id].children.push( childnode.uuid );
-						buildTree(childnode);
-					}
+					threeMap[id].children.push( childnode.uuid );
+					buildTree(childnode);
 				}
 			}
 		}
+
 	}]);
 
 	return window._HierarchyManager;
