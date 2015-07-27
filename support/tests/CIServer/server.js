@@ -1,3 +1,5 @@
+"use strict";
+
 var helper = require('./helper.js');
 
 var async = require("async")
@@ -8,12 +10,12 @@ var fs = require('fs');
 var stdoutLog = "";
 var stderrLog = "";
 var report = { tests: {} };
-var cancel = false;
 
-var RUNNING = helper.state.RUNNING;
-var READY = helper.state.READY;
-var COMPLETE = helper.state.READY;
-var CANCELING = helper.state.CANCELING;
+var RUNNING = helper.state.RUNNING,
+	READY = helper.state.READY,
+	COMPLETE = helper.state.READY,
+	CANCELING = helper.state.CANCELING,
+	ERROR = helper.state.ERROR;
 
 var status = READY;
 var tests = [];
@@ -21,16 +23,9 @@ var testQueue = [];
 
 var files = helper.files;
 var findFiles = helper.findFiles;
+var runner;
 
-var runner = childprocess.fork("runner.js");
-
-runner.on("message", handleIncomingMessage);
-runner.on("error", function(message, handle){
-	console.log("This is the error: ", message);
-});
-runner.on("exit", function(message, handle){
-	console.log("Runner exited");
-});
+createRunner();
 
 function readFiles(nextStep) {
 	logger.log("readFiles")
@@ -182,6 +177,7 @@ function handleIncomingMessage(message, handler){
 		case CANCELING: handleCancelingState(command, param); break;
 		case READY: handleReadyState(command, param); break;
 		case COMPLETE: handleReadyState(command, param); break;
+		case ERROR: handleErrorState(command, param); break;
 	}
 	
 	//Handle commands that don't depend on state and also close connection
@@ -190,6 +186,14 @@ function handleIncomingMessage(message, handler){
 	}
 }
 
+function handleErrorState(command, param){
+	//Ignore all commands from client if we are in an error state
+	if(!param.isHTTP){
+		if(checkState(command, param, READY)){
+			doRunCommand();
+		}
+	}
+}
 function handleReadyState(command, param){
 	console.log("We are in the ready state, command is:", command);
 	//command is http request
@@ -202,7 +206,7 @@ function handleReadyState(command, param){
 			doRunCommand();
 		}
 		else if(command === helper.command.RUN_ONE){
-			addTestToQueue(tid);
+			addTestToQueue(param.query);
 			doRunCommand();
 		}
 		
@@ -211,7 +215,7 @@ function handleReadyState(command, param){
 	
 	//Response from runner.. test is complete
 	else{
-		//if runner is updating state to ready...
+		//if runner is "updating" state to ready...
 		if(checkState(command, param, READY)){ 
 			doRunCommand();
 		}
@@ -236,8 +240,12 @@ function handleRunningState(command, param){
 			console.log("The server received the results of the test!: ", param);
 			updateReport(param);
 		}
+		else if(command == helper.command.ERROR){
+			logger.log(param);
+			updateReport(param);
+			status = ERROR;
+		}
 		else if(checkState(command, param, READY)){
-			status = READY;
 			console.log("The runner is ready again... run next test... ", param);
 			
 			//get next item off of queue
@@ -261,8 +269,11 @@ function doRunCommand(){
 		//get item at front of "queue"
 		var tid = testQueue.shift();
 		status = RUNNING;
+		
+		report.tests[tid].status = "running";
 		helper.sendMessage(runner, helper.command.RUN_ONE, tid);
 	}
+	else status = READY;
 }
 
 function doQuit(){
@@ -307,6 +318,19 @@ function checkState(command, test, state){
 
 function updateReport(update){
 	report.tests[update.id] = update;
+}
+
+function createRunner(){
+	runner = childprocess.fork("runner.js");
+	runner.on("message", handleIncomingMessage);
+	runner.on("error", function(message, handle){
+		console.log("Server received error from runner: ", message);
+	});
+	runner.on("exit", function(message, handle){
+		console.log("Runner exited");
+		status = ERROR;
+		createRunner();
+	});
 }
 
 var server = http.createServer();

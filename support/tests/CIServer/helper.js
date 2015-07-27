@@ -1,3 +1,5 @@
+"use strict";
+
 var fs = require('fs');
 
 exports.files = [];
@@ -12,13 +14,17 @@ exports.command = {
 	/* Server-only commands */
 	RUN: "/runTests",
 	RELOAD: "/reload",
-	RESULT: "result"	
+	RESULT: "result",
+
+	/* Runner-only command */
+	ERROR: "error",
 };
 
 exports.state = {
 	RUNNING: "running",
 	CANCELING: "canceling",
 	READY: "ready",
+	ERROR: "error"
 };
 
 /*
@@ -34,7 +40,7 @@ var webdriverio;
 */
 
 exports.sendMessage = function(runner, command, param){
-	console.log("sending command...");
+	console.log("sending command...", command);
 	
 	//if(param) 
 	runner.send([command, param]);	

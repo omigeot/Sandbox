@@ -1,9 +1,16 @@
+"use strict";
+
 var async  = require('async'),
 	helper = require('./helper.js'),
 	state  = helper.state.READY,
 	currentRun = {},
 	currentTestID,
 	browsersList = ['chrome','firefox'/*,'ie11'*/];
+
+//Set up error handlers
+var domain = require('domain').create();
+process.on('uncaughtException', handleException);
+domain.on('error', handleException);
 	
 //Initialize the web driver
 helper.initWebdriver({
@@ -100,13 +107,14 @@ function _executeActualTestAsync(cb){
 	var browserName = global.browser.desiredCapabilities.browserName;
 	var testObj = helper.getSingleTestData(currentTestID);
 	
-	testObj.test(global.browser, global.testUtils.completeTest(function(success, message) {
-		logger.log("Finished running test using " + browserName);
+	var handledTest = domain.bind(testObj.test);
+	handledTest(global.browser, global.testUtils.completeTest(function(success, message) {
+		console.log("Finished running test using ", browserName, message);
 		
 		currentRun.runs.push({
 			status: "complete",
 			result: success ? "passed" : "failed",
-			message: message,
+			message: "" + message,
 			browsername: browserName
 		});
 
@@ -130,6 +138,28 @@ function updateState(newState){
 function runLater(fn, timeout){
 	timeout = timeout ? timeout : 500;
 	global.setTimeout(fn, timeout);
+}
+
+function handleException(e){
+	var browserName = global.browser.desiredCapabilities.browserName;
+	
+	currentRun.runs.push({
+		status: "error",
+		result: "error",
+		message: " " + e.toString() + "; ",
+		browsername: browserName
+	});
+	
+	helper.sendMessage(process, helper.command.ERROR, currentRun);
+	
+	global.browser.endAll().then(exitWithError);
+	runLater(exitWithError, 10000);
+}
+
+function exitWithError(){
+	process.removeListener('uncaughtException', handleException);
+	domain.exit();
+	process.exit(1);
 }
 
 //Send server initial ready state
