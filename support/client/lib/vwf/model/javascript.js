@@ -20,8 +20,14 @@ function defaultContext()
     this.setProperty = function(id,name,val)
     {
         var now = performance.now();
-       vwf.setProperty(id,name,val);
-       if(!propertiesSet[name])
+        
+        //here's the magic. If we are not the client simulating the node, send over the reflector
+        if(vwf.isSimulating(id))
+            vwf.setProperty(id,name,val);
+        else
+            vwf_view.kernel.setProperty(id,name,val);
+
+        if(!propertiesSet[name])
         propertiesSet[name] = 0;
         propertiesSet[name]+= (performance.now() - now);
     }
@@ -34,6 +40,21 @@ function defaultContext()
     {
         throw new Error('Should never get here!')
     }
+    this.callMethod = function(id,methodname,params)
+    {
+        if(vwf.isSimulating(id))
+            vwf.callMethod(id,methodname,params);
+        else
+            vwf.callMethod(id,methodname,params);
+    }
+    this.fireEvent = function(id,eventName,params)
+    {
+        if(vwf.isSimulating(id))
+            vwf_view.kernel.fireEvent(id,eventName,params);
+        else
+            vwf_view.kernel.callMethod(id,methodname,params);
+    }
+    //this is also where we should be notifiying the refelector of new methods, events, properties and nodes
 }
 //when a function is called, a context is created to observe changes. When the funtion return, we post changes to VWF.
 function executionContext(parentContext)
@@ -76,6 +97,14 @@ function executionContext(parentContext)
             if(!(Object.deepEquals(this.touchedProperties[i].val,this.touchedProperties[i].originalVal)))
                 this.parent.setProperty(this.touchedProperties[i].id,this.touchedProperties[i].name,this.touchedProperties[i].val);
         }
+    }
+    this.callMethod = function(id,methodname,params)
+    {
+        this.parent.callMethod(id,methodname,params);
+    }
+    this.fireEvent = function(id,eventName,params)
+    {
+        this.parent.fireEvent(id,eventName,params);
     }
 }
 
@@ -701,11 +730,12 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
            
             Object.defineProperty(node.properties, propertyName, { // "this" is node.properties in get/set
+                //allow the code to get the property without marking it for possible set
                 get: function() {
                     return vwf.getProperty(this.id,propertyName)
                 },
                 set: function(value) {
-                    return vwf.setProperty(this.id,propertyName,value)
+                    return jsDriverSelf.getTopContext().setProperty(this.id,propertyName,value)
                 },
                 enumerable: true
             });
@@ -887,7 +917,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             Object.defineProperty(node.methods, methodName, { // "this" is node.methods in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node.methods
-                        return jsDriverSelf.kernel.callMethod(this.id, methodName, arguments);
+                        return jsDriverSelf.getTopContext().callMethod(this.id, methodName, arguments);
                     };
                 },
                 set: function(value) {
@@ -903,7 +933,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             Object.defineProperty(node, methodName, { // "this" is node in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node
-                        return jsDriverSelf.kernel.callMethod(this.id, methodName, arguments);
+                        return jsDriverSelf.getTopContext().callMethod(this.id, methodName, arguments);
                     };
                 },
                 set: function(value) {
@@ -1116,10 +1146,12 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             Object.defineProperty(node.events, eventName, { // "this" is node.events in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node.events
-                        return jsDriverSelf.kernel.fireEvent(this.node.id, eventName, arguments);
+                        return jjsDriverSelf.getTopContext().fireEvent(this.node.id, eventName, arguments);
                     };
                 },
                 set: function(value) {
+                    //here we need to filter for nodes that are children of the current node. Cant cross simulation island bounds. Possilby server
+                    //could repartition simulation based on bound handlers....
                     var listeners = this.node.private.listeners[eventName] ||
                         (this.node.private.listeners[eventName] = []); // array of { handler: function, context: node, phases: [ "phase", ... ] }
                     if (typeof value == "function" || value instanceof Function) {
@@ -1159,7 +1191,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             Object.defineProperty(node, eventName, { // "this" is node in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node
-                        return jsDriverSelf.kernel.fireEvent(this.id, eventName, arguments);
+                        return jsDriverSelf.getTopContext().fireEvent(this.id, eventName, arguments);
                     };
                 },
                 set: function(value) {
@@ -1273,7 +1305,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
         ticking: function() {
             propertiesSet = {}
             this.callMethodTraverse(this.nodes['index-vwf'], 'tick', []);
-            console.log(propertiesSet);
+           // console.log(propertiesSet);
         },
         isBehavior: function(node) {
             if (!node)
