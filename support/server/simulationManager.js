@@ -57,6 +57,21 @@ var simulationManager = function(world)
 {
     this.world = world;
     this.clients = {};
+    this.clientControlTable = {}; //learn which clients need to simulate locally most
+
+    //once a second look for client that most needs to simulate a node, and change owners
+    this.postLearnedMappings = function(){
+        for(var i in this.clientControlTable)
+        {
+            for(var j in this.clientControlTable[i])
+                this.clientControlTable[i][j] = Math.pow(this.clientControlTable[i][j],.99); // approach 0
+        }
+       
+
+
+    }.bind(this);
+    setInterval(this.postLearnedMappings,1000);
+
     this.addClient = function(sandboxClient)
     {
         var newClient = new simClient(sandboxClient, this);
@@ -127,7 +142,10 @@ var simulationManager = function(world)
         //careful to keep objects in islands by their root
         var rootID = this.world.state.ancestors(nodeid)[1];
         if (!rootID)
+        {
             this.clients[creatingClient.id].startSimulatingNode(nodeid);
+            console.log(creatingClient.id + " start simulation " + nodeid);
+        }
         else
             this.getClientForNode(rootID).startSimulatingNode(nodeid);
     }
@@ -135,7 +153,19 @@ var simulationManager = function(world)
     {
         this.getClientForNode(nodeid).stopSimulatingNode(nodeid);
     }
-    this.getClientsForMessage = function(type, nodeid)
+    this.updateClientControlTable = function(nodeid,sendingClient)
+    {
+        if(nodeid == "index-vwf") return;
+        var record = this.clientControlTable[nodeid];
+        if(! record)
+        {
+            record = this.clientControlTable[nodeid] = {};
+        }
+        if(!record[sendingClient.id])
+            record[sendingClient.id] = 0;
+        record[sendingClient.id]++;
+    }
+    this.getClientsForMessage = function(type, nodeid , sendingClient)
     {
         // ancestors[0] should be index-vwf. 1 is the root. 
         //remember that we assign simulation by the root under scene
@@ -147,12 +177,15 @@ var simulationManager = function(world)
             {
                 if (this.clients[i].isSimulating(nodeid) || nodeid == 'index-vwf')
                     clients.push(this.clients[i].sandboxClient)
+                
+                this.updateClientControlTable(nodeid,sendingClient)
             }else
             {
                 clients.push(this.clients[i].sandboxClient);
             }
         }
-      
+        
+           
         return clients;
     }
 }

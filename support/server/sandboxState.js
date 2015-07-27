@@ -405,7 +405,7 @@ var sandboxState = function(id, metadata,world)
             cb(avatar)       
         })
     }
-    this.createAvatar = function(userID,client)
+    this.createAvatar = function(userID,client,cb)
     {   
         var self = this;
         this.getAvatarDef(userID,client,function(avatar)
@@ -415,9 +415,11 @@ var sandboxState = function(id, metadata,world)
                             member:userID,
                             parameters:[avatar,null]} // last null is very important. Without, the ready callback will be added to the wrong place in the function arg list
             self.world.messageClients(message,false,false);
-            self.createdChild(message.node,message.member,avatar);         
+            self.createdChild(message.node,message.member,avatar);
+            if(cb)
+            cb('character-vwf-' + userID)         
         })
-        return 'character-vwf-' + userID;
+        
     }
     this.getID = function(name,childComponent)
     {
