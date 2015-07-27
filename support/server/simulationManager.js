@@ -91,8 +91,8 @@ var simulationManager = function(world)
             }
             if (controllingClient !== this.getClientForNode(i).sandboxClient.id)
             {
-                //this.getClientForNode(i).stopSimulatingNode(i);
-                //this.clients[controllingClient].startSimulatingNode(i)
+                this.getClientForNode(i).stopSimulatingNode(i);
+                this.clients[controllingClient].startSimulatingNode(i)
                 console.log('moving ' + i + " to " + controllingClient);
             }
         }
@@ -111,7 +111,7 @@ var simulationManager = function(world)
         //divide up work distribute until new client shares load
         while (newClient.nodesSimulating.length < average -1)
         {
-            console.log('line 114')
+            
             var nextClient = this.clients[Object.keys(this.clients)[counter]];
             var node = nextClient.nodesSimulating[0];
             if (node)
@@ -213,7 +213,7 @@ var simulationManager = function(world)
             {
                 if (this.clients[i].isSimulating(nodeid) || nodeid == 'index-vwf')
                     clients.push(this.clients[i].sandboxClient)
-                    //this.updateClientControlTable(nodeid,sendingClient)
+                    this.updateClientControlTable(nodeid,sendingClient)
             }
             else
             {
