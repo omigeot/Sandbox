@@ -372,8 +372,7 @@ var sandboxState = function(id, metadata,world)
             if(!user || !user.avatarDef)
             {
                 avatar = require("./sandboxAvatar").getDefaultAvatarDef()
-                avatar.children[GUID()] = avatar.children['collision']
-                delete avatar.children['collision'];
+                
             }else{
                 avatar = user.avatarDef;
             }
