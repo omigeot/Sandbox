@@ -596,7 +596,6 @@ function sandboxWorld(id, metadata)
                     return;
                 }
                 var childID = this.state.createChild(message.node, message.member, childComponent)
-                console.log("created: " + childID)
                 xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties.DisplayName, null, this.id);
 
 
