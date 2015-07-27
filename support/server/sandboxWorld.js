@@ -670,6 +670,7 @@ function sandboxWorld(id, metadata)
 
             var compressedMessage = messageCompress.pack(message);
                 //distribute message to all clients on given instance
+            var concernedClients = this.simulationManager.getClientsForMessage(message.action,message.node)    
             for (var i in this.clients)
             {
                 var client = this.clients[i];
@@ -702,7 +703,8 @@ function sandboxWorld(id, metadata)
                 }
                 else
                 {
-                    this.messageClient(client,compressedMessage,false,false);
+                    if(concernedClients.indexOf(client) != -1)
+                        this.messageClient(client,compressedMessage,false,false);
                 }
             }
             if (message.action == "createChild")

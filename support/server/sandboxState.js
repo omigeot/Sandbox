@@ -188,6 +188,18 @@ var sandboxState = function(id, metadata,world)
     {
         this.VWFDef = newDef;
     }
+    this.ancestors = function(nodeID, list)
+    {
+        if(!list) list = [];
+        var root = this.findNode(nodeID);
+        if(!root) return [];
+        if(root.parent)
+        {
+            list.unshift(root.parent.id);
+            return this.ancestors(root.parent.id,list)
+        }
+        else return list;
+    }
     this.children = function(nodeid)
     {
         var root = this.findNode(nodeid);

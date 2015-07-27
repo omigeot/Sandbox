@@ -8,7 +8,7 @@ var simClient = function(sandboxClient, simulationManager)
     this.startSimulatingScene = function()
     {
         var nodes = this.manager.world.state.children('index-vwf')
-        for (var i =0; i < nodes.length; i++)
+        for (var i = 0; i < nodes.length; i++)
         {
             if (this.nodesSimulating.indexOf(nodes[i]) == -1)
                 this.nodesSimulating.push(nodes[i])
@@ -20,19 +20,17 @@ var simClient = function(sandboxClient, simulationManager)
         if (this.manager.world.state.findNode(nodeID))
             if (this.nodesSimulating.indexOf(nodeID) == -1)
                 this.nodesSimulating.push(nodeID)
-
         this.sendStartSimMessage(nodeID);
     }
     this.isSimulating = function(nodeid)
     {
-    	return this.nodesSimulating.indexOf(nodeid) !== -1;
+        return this.nodesSimulating.indexOf(nodeid) !== -1;
     }
     this.stopSimulatingNode = function(nodeID)
     {
         if (this.manager.world.state.findNode(nodeID))
             if (this.nodesSimulating.indexOf(nodeID) != -1)
                 this.nodesSimulating.splice(this.nodesSimulating.indexOf(nodeID), 1)
-
         this.sendStopSimMessage(nodeID);
     }
     this.sendStopSimMessage = function(nodeID)
@@ -61,17 +59,15 @@ var simulationManager = function(world)
     this.clients = {};
     this.addClient = function(sandboxClient)
     {
-        
-        var newClient = new simClient(sandboxClient,this);
+        var newClient = new simClient(sandboxClient, this);
         //must add to list to get proper average load, then remove so we don't keep distributing
         //nodes from new client to new client
         this.clients[sandboxClient.id] = newClient;
         var average = this.clientAverageLoad();
         delete this.clients[sandboxClient.id];
-
         var counter = 0;
         //divide up work distribute until new client shares load
-        while (newClient.nodesSimulating.length < average )
+        while (newClient.nodesSimulating.length < average)
         {
             var nextClient = this.clients[Object.keys(this.clients)[counter]];
             var node = nextClient.nodesSimulating[0];
@@ -108,10 +104,10 @@ var simulationManager = function(world)
             }
         }
     }
-    this.getClientForNode = function(nodeID)
+    this.getClientForNode = function(nodeid)
     {
         for (var i in this.clients)
-            if (this.clients[i].isSimulating(nodeID))
+            if (this.clients[i].isSimulating(nodeid))
                 return this.clients[i];
         return null;
     }
@@ -128,12 +124,36 @@ var simulationManager = function(world)
     }
     this.nodeCreated = function(nodeid, creatingClient)
     {
-        this.clients[creatingClient.id].startSimulatingNode(nodeid);
+        //careful to keep objects in islands by their root
+        var rootID = this.world.state.ancestors(nodeid)[1];
+        if (!rootID)
+            this.clients[creatingClient.id].startSimulatingNode(nodeid);
+        else
+            this.getClientForNode(rootID).startSimulatingNode(nodeid);
     }
     this.nodeDeleted = function(nodeid)
     {
         this.getClientForNode(nodeid).stopSimulatingNode(nodeid);
     }
+    this.getClientsForMessage = function(type, nodeid)
+    {
+        // ancestors[0] should be index-vwf. 1 is the root. 
+        //remember that we assign simulation by the root under scene
+        var nodeid = this.world.state.ancestors(nodeid)[1] || nodeid;
+        var clients = [];
+        for (var i in this.clients)
+        {
+            if (type == 'setProperty' || type == 'callMethod' || type == 'fireEvent')
+            {
+                if (this.clients[i].isSimulating(nodeid) || nodeid == 'index-vwf')
+                    clients.push(this.clients[i].sandboxClient)
+            }else
+            {
+                clients.push(this.clients[i].sandboxClient);
+            }
+        }
+      
+        return clients;
+    }
 }
-
 exports.simulationManager = simulationManager;
