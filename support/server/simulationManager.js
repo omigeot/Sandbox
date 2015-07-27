@@ -18,9 +18,13 @@ var simClient = function(sandboxClient, simulationManager)
     this.startSimulatingNode = function(nodeID)
     {
         if (this.manager.world.state.findNode(nodeID))
+        {
             if (this.nodesSimulating.indexOf(nodeID) == -1)
+            {
                 this.nodesSimulating.push(nodeID)
-        this.sendStartSimMessage(nodeID);
+                this.sendStartSimMessage(nodeID);
+            }
+        }
     }
     this.isSimulating = function(nodeid)
     {
@@ -29,9 +33,14 @@ var simClient = function(sandboxClient, simulationManager)
     this.stopSimulatingNode = function(nodeID)
     {
         if (this.manager.world.state.findNode(nodeID))
+        {
             if (this.nodesSimulating.indexOf(nodeID) != -1)
+            {
                 this.nodesSimulating.splice(this.nodesSimulating.indexOf(nodeID), 1)
-        this.sendStopSimMessage(nodeID);
+                this.sendStopSimMessage(nodeID);
+            }
+        }
+        
     }
     this.sendStopSimMessage = function(nodeID)
     {
@@ -58,54 +67,51 @@ var simulationManager = function(world)
     this.world = world;
     this.clients = {};
     this.clientControlTable = {}; //learn which clients need to simulate locally most
-
     //once a second look for client that most needs to simulate a node, and change owners
-    this.postLearnedMappings = function(){
-        for(var i in this.clientControlTable)
+    this.postLearnedMappings = function()
+    {
+        for (var i in this.clientControlTable)
         {
-            if(!this.getClientForNode(i))
+            if (!this.getClientForNode(i))
             {
                 console.log(i);
                 continue;
             }
-            for(var j in this.clientControlTable[i])
-                this.clientControlTable[i][j] = Math.pow(this.clientControlTable[i][j],.99); // approach 0
+            for (var j in this.clientControlTable[i])
+                this.clientControlTable[i][j] = Math.pow(this.clientControlTable[i][j], .99); // approach 0
             var max = 0;
             var controllingClient = null;
-            for(var j in this.clientControlTable[i])
+            for (var j in this.clientControlTable[i])
+            {
+                if (this.clientControlTable[i][j] > max)
                 {
-                    if(this.clientControlTable[i][j] > max)
-                    {
-                        max = this.clientControlTable[i][j];
-                        controllingClient = j;
-                    }
-                    
+                    max = this.clientControlTable[i][j];
+                    controllingClient = j;
                 }
-            if(controllingClient !== this.getClientForNode(i).sandboxClient.id)
-            {   
-             //   this.getClientForNode(i).stopSimulatingNode(i);
-             //   this.clients[controllingClient].startSimulatingNode(i)
+            }
+            if (controllingClient !== this.getClientForNode(i).sandboxClient.id)
+            {
+                //this.getClientForNode(i).stopSimulatingNode(i);
+                //this.clients[controllingClient].startSimulatingNode(i)
                 console.log('moving ' + i + " to " + controllingClient);
-            }    
+            }
         }
-       
-
-
     }.bind(this);
-    setInterval(this.postLearnedMappings,1000);
-
+    setInterval(this.postLearnedMappings, 1000);
     this.addClient = function(sandboxClient)
     {
         var newClient = new simClient(sandboxClient, this);
         //must add to list to get proper average load, then remove so we don't keep distributing
         //nodes from new client to new client
         this.clients[sandboxClient.id] = newClient;
+       
         var average = this.clientAverageLoad();
         delete this.clients[sandboxClient.id];
         var counter = 0;
         //divide up work distribute until new client shares load
-        while (newClient.nodesSimulating.length < average)
+        while (newClient.nodesSimulating.length < average -1)
         {
+            console.log('line 114')
             var nextClient = this.clients[Object.keys(this.clients)[counter]];
             var node = nextClient.nodesSimulating[0];
             if (node)
@@ -128,11 +134,18 @@ var simulationManager = function(world)
         delete this.clients[sandboxClient.id];
         //redistribute the nodes the client had been simulating
         this.distribute(oldNodes);
+        for (var i in this.clientControlTable)
+        {
+            delete this.clientControlTable[i][sandboxClient.id];
+        }
     }
     this.distribute = function(nodes)
     {
+        console.log("distribute");
         while (nodes.length)
         {
+            console.log(nodes.length)
+            console.log()
             for (var i in this.clients)
             {
                 var node = nodes.shift();
@@ -174,20 +187,21 @@ var simulationManager = function(world)
     this.nodeDeleted = function(nodeid)
     {
         this.getClientForNode(nodeid).stopSimulatingNode(nodeid);
+        delete this.clientControlTable[nodeid];
     }
-    this.updateClientControlTable = function(nodeid,sendingClient)
+    this.updateClientControlTable = function(nodeid, sendingClient)
     {
-        if(nodeid == "index-vwf") return;
+        if (nodeid == "index-vwf") return;
         var record = this.clientControlTable[nodeid];
-        if(! record)
+        if (!record)
         {
             record = this.clientControlTable[nodeid] = {};
         }
-        if(!record[sendingClient.id])
+        if (!record[sendingClient.id])
             record[sendingClient.id] = 0;
-        record[sendingClient.id]++;
+        record[sendingClient.id] ++;
     }
-    this.getClientsForMessage = function(type, nodeid , sendingClient)
+    this.getClientsForMessage = function(type, nodeid, sendingClient)
     {
         // ancestors[0] should be index-vwf. 1 is the root. 
         //remember that we assign simulation by the root under scene
@@ -199,15 +213,13 @@ var simulationManager = function(world)
             {
                 if (this.clients[i].isSimulating(nodeid) || nodeid == 'index-vwf')
                     clients.push(this.clients[i].sandboxClient)
-                
-                this.updateClientControlTable(nodeid,sendingClient)
-            }else
+                    //this.updateClientControlTable(nodeid,sendingClient)
+            }
+            else
             {
                 clients.push(this.clients[i].sandboxClient);
             }
         }
-        
-           
         return clients;
     }
 }

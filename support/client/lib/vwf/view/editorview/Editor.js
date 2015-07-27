@@ -1643,6 +1643,9 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
                                 transform[13] = y;
                                 transform[14] = z;
                                 lastpos[s] = [x, y, z];
+
+
+
                                 if (SelectedVWFNodes.length == 1) {
                                     var success = this.setTransformCallback(SelectedVWFNodes[s].id, transform);
                                 }
@@ -2270,6 +2273,12 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             return [sx, sy, sz];
         }
         this.setTransform = function(id, val) {
+
+            //don't bother if the value did not actually change
+            if(matComploose(vwf.getProperty(SelectedVWFNodes[i].id,'transform'),val))
+            {
+                return true;
+            }
             this.waitingForSet.push(id);
             var success = this.setProperty(id, this.transformPropertyName, val);
             if (!success) this.waitingForSet.pop();

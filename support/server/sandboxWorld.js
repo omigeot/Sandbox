@@ -411,6 +411,7 @@ function sandboxWorld(id, metadata)
         this.simulationManager.addClient(socket);
         this.state.on('loaded', function()
         {
+            console.log('loaded');
             self.status = STATUS.DEFAULT;
             var scene = self.state.getVWFDef();
             self.messageClients(

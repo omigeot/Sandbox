@@ -1074,6 +1074,7 @@ this.stopSimulating = function(nodeID)
 {
     var nodes = this.decendants(nodeID);
     nodes.push(nodeID);
+    for (var i =0; i < nodes.length; i++)
     if(this.nodesSimulating.indexOf(nodes[i]) != -1)
     {
         this.nodesSimulating.splice(this.nodesSimulating.indexOf(nodes[i]),1);
