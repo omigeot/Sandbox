@@ -167,9 +167,8 @@ function handleRunningState(command, param){
 	//command from client
 	if(param.isHTTP){
 		if(command == helper.command.RUN){
-			//already running... nothing to see here..	
-			var allIDs = Object.keys(report.tests);
-			setTestQueue(allIDs);
+			queueAllTests();
+			status = UPDATING;
 		}
 		else if(command == helper.command.RUN_ONE){
 			addTestToQueue(param.query);
