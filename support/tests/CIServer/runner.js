@@ -51,6 +51,9 @@ function handleReadyState(command, param){
 	if(command === helper.command.RUN_ONE){
 		doRunCommand(param);
 	}
+	else if(command === helper.command.QUIT){
+		exit();
+	}
 }
 
 //Runner is currently executing a test; handle incoming commands
@@ -157,9 +160,12 @@ function handleException(e){
 }
 
 function exitWithError(){
+	exit(1);
+}
+function exit(errorCode){
 	process.removeListener('uncaughtException', handleException);
 	domain.exit();
-	process.exit(1);
+	process.exit(errorCode?errorCode:0);
 }
 
 //Send server initial ready state

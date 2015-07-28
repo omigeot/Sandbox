@@ -7,13 +7,14 @@ var helper = require('./helper.js'),
 	childprocess = require("child_process"),
 	fs = require('fs');
 
-var report = { tests: {} };
+var report = { tests: {}, gitLog: "" };
 
 var RUNNING = helper.state.RUNNING,
 	READY = helper.state.READY,
 	COMPLETE = helper.state.READY,
 	CANCELING = helper.state.CANCELING,
-	ERROR = helper.state.ERROR;
+	ERROR = helper.state.ERROR,
+	UPDATING = helper.state.UPDATING;
 
 var status = READY;
 var tests = [];
@@ -64,24 +65,6 @@ function gitLog() {
 	});
 }
 
-function cancel_run(cancelComplete) {
-	if (status == CANCELING) {
-		logger.log('already canceling')
-		return;
-	}
-	if (status == RUNNING)
-		status = CANCELING;
-	
-	async.until(function() {
-		return status == COMPLETE || status == READY;
-	}, function(cb) {
-		logger.log('waiting for cancel');
-		global.setTimeout(cb, 1000);
-	}, function() {
-		cancelComplete();
-	})
-}
-
 function gitPull(pullComplete) {
 	logger.log("Git Pull");
 	var gitpull = childprocess.spawn("git", ["pull"], {
@@ -104,46 +87,6 @@ function gitPull(pullComplete) {
 	});
 };
 
-function quit(done){
-	logger.log("staring run")
-	server._connections = 0;
-	server.close(done);
-}
-
-function loadChildProcess(done){
-	var params = this.params ? this.params : ['server.js'];
-	
-	logger.log('restart');
-	global.setTimeout(function() {
-		logger.log('spawn');
-		var child = require('child_process').spawn('node', params, {
-			detached: true,
-			stdio: 'ignore'
-		});
-		child.unref();
-		logger.log('close');
-		done();
-		
-		global.setTimeout(function() {
-			logger.log('killing server');
-			process.kill(process.pid);
-			process.exit();
-		}, 1000);
-	}, 500);
-}
-
-function reload() {
-	//quit, then do a git pull, then (re)load the child process, binding it to a parameters object
-	var paramObj = {params: ['server.js']};
-	async.series([quit, gitPull, loadChildProcess.bind(paramObj)]);
-}
-
-function restart() {
-	//quit, then do a git pull, then (re)start the child process, binding it to a parameters object
-	var paramObj = {params: ['server.js', 'start']};
-	async.series([quit, gitPull, loadChildProcess.bind(paramObj)]);
-}
-
 function handleIncomingMessage(message, handler){
 	console.log("Server status", status);
 	var command = message[0];
@@ -155,17 +98,53 @@ function handleIncomingMessage(message, handler){
 		case READY: handleReadyState(command, param); break;
 		case COMPLETE: handleReadyState(command, param); break;
 		case ERROR: handleErrorState(command, param); break;
+		case UPDATING: handleUpdatingState(command, param); break;
+		case BUSY: handleBusyState(command, param); break;
 	}
 	
-	//Handle commands that don't depend on state and also close connection
+	//Handle client commands that don't depend on state
 	if(param.isHTTP){
+		if(command === helper.command.RELOAD){
+			//Change status, do actual reload when runner is ready
+			status = UPDATING;
+		}
+		else if(command === helper.command.STOP){
+			status = BUSY;
+			testQueue.length = 0;
+		}
+		
+		param.response.end();
+	}
+}
 
+function handleBusyState(command, param){
+	//If command is from runner and runner is ready, then we can leave busy state
+	if(!param.isHTTP && checkState(command, param, READY)){
+		status = READY;
+		doRunCommand();
+	}
+}
+function handleUpdatingState(command, param){
+	if(!param.isHTTP){
+		if(checkState(command, param, READY)){
+			doReload();
+		}
+	}
+}
+
+function handleCancelingState(command, param){
+	if(!param.isHTTP){
+		if(checkState(command, param, READY)){
+			doReload();
+		}
 	}
 }
 
 function handleErrorState(command, param){
-	//Ignore all commands from client if we are in an error state
+	//This ensures that we ignore all client commands until the runner is back up and running
 	if(!param.isHTTP){
+		
+		//If runner is ready, continue running tests...
 		if(checkState(command, param, READY)){
 			doRunCommand();
 		}
@@ -186,8 +165,9 @@ function handleReadyState(command, param){
 			addTestToQueue(param.query);
 			doRunCommand();
 		}
-		
-		response.end();
+		else if(command === helper.command.QUIT){
+			quitRunner();
+		}
 	}
 	
 	//Response from runner.. test is complete
@@ -200,7 +180,7 @@ function handleReadyState(command, param){
 }
 
 function handleRunningState(command, param){
-	//command is http request
+	//command from client
 	if(param.isHTTP){
 		var request = param.request;
 		var response = param.response;
@@ -211,12 +191,13 @@ function handleRunningState(command, param){
 		}
 	}
 	
-	//command came from runner
+	//command from runner
 	else{
 		if(command == helper.command.RESULT){
 			console.log("The server received the results of the test!: ", param);
 			updateReport(param);
 		}
+		//The runner is going to exit. Handle final report.
 		else if(command == helper.command.ERROR){
 			logger.log(param);
 			updateReport(param);
@@ -231,16 +212,6 @@ function handleRunningState(command, param){
 	}
 }
 
-function handleCancelingState(command, param){
-	if(command === helper.command.READY){
-		
-		
-	}
-	//else if(command === helper.command.){
-		
-	//}
-}
-
 function doRunCommand(){
 	if(testQueue.length > 0){
 		//get item at front of "queue"
@@ -253,20 +224,21 @@ function doRunCommand(){
 	else status = READY;
 }
 
-function doQuit(){
-	setTimeout(function() {
-		logger.log('killing server');
-		process.kill(process.pid);
-		process.exit();
-	}, 5000)
+function doReload(){
+	status = helper.state.BUSY;
+	
+	async.series([
+		gitPull,
+		quitRunner
+	]);
+}
 
-	cancel_run(function() {
-		process.exit();
-	});
-
-	logger.log('killing server');
-	process.kill(process.pid);
-	process.exit();
+function quitRunner(cb){
+	//Do not accept any commands from other states until reload is complete
+	status = helper.state.BUSY;
+	
+	helper.sendMessage(runner, helper.command.QUIT);
+	if(cb) cb();
 }
 
 function setTestQueue(arr){
@@ -304,7 +276,10 @@ function createRunner(){
 		console.log("Server received error from runner: ", message);
 	});
 	runner.on("exit", function(message, handle){
-		console.log("Runner exited");
+		console.log("Runner exited with message: " + message);
+		
+		//If necessary, we can check message to determine if this actually was an error.
+		//As of now, it doesn't really matter since the flow is more or less the same.
 		status = ERROR;
 		createRunner();
 	});
@@ -356,12 +331,6 @@ server.on('request', function(request, response) {
 		cancel_run(restart);
 
 
-	}
-	if (request.url == "/quit") {
-		doQuit();
-	}
-	if (request.url == "/stop") {
-		cancel_run(function(){});
 	}
 	if (request.url == "/reload") {
 

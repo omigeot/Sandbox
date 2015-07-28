@@ -15,6 +15,7 @@ exports.command = {
 	RUN: "/runTests",
 	RELOAD: "/reload",
 	RESULT: "result",
+	STOP: "/stop",
 
 	/* Runner-only command */
 	ERROR: "error",
@@ -24,7 +25,9 @@ exports.state = {
 	RUNNING: "running",
 	CANCELING: "canceling",
 	READY: "ready",
-	ERROR: "error"
+	ERROR: "error",
+	UPDATING: "updating",
+	BUSY: "busy",
 };
 
 /*
