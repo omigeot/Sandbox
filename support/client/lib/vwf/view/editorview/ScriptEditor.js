@@ -201,7 +201,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 				$('textarea.ace_text-input', elem).keydown(function(e)
 				{
 					// implement ctrl-s to save
-					if(e.which == 83 && e.ctrlKey == true)
+					if((e.key === 's' || e.which == 83) && e.ctrlKey == true)
 					{
 						e.preventDefault();
 						$scope.save();

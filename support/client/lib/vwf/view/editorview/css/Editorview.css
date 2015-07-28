@@ -926,54 +926,56 @@
   overflow-x: auto;
   overflow-y: auto; }
   /* line 53, _hierarchy.scss */
-  #hierarchyManager #hierarchyDisplay .collapsed ul {
+  #hierarchyManager #hierarchyDisplay .hidden, #hierarchyManager #hierarchyDisplay .collapsed ul {
     display: none; }
   /* line 58, _hierarchy.scss */
   #hierarchyManager #hierarchyDisplay span.name {
     cursor: pointer; }
-    /* line 61, _hierarchy.scss */
+    /* line 62, _hierarchy.scss */
     #hierarchyManager #hierarchyDisplay span.name:not(.nonselectable):hover {
-      color: #82b8ff;
       text-decoration: underline; }
-    /* line 66, _hierarchy.scss */
+      /* line 63, _hierarchy.scss */
+      #hierarchyManager #hierarchyDisplay span.name:not(.nonselectable):hover:not(.selected) {
+        color: #82b8ff; }
+    /* line 70, _hierarchy.scss */
     #hierarchyManager #hierarchyDisplay span.name.nonselectable {
       cursor: default; }
-    /* line 70, _hierarchy.scss */
+    /* line 74, _hierarchy.scss */
     #hierarchyManager #hierarchyDisplay span.name.selected {
       background-color: #82b8ff;
       color: black; }
-  /* line 79, _hierarchy.scss */
+  /* line 83, _hierarchy.scss */
   #hierarchyManager #hierarchyDisplay .three span.name {
     font-style: italic;
     color: #fcff90; }
-    /* line 83, _hierarchy.scss */
+    /* line 87, _hierarchy.scss */
     #hierarchyManager #hierarchyDisplay .three span.name.selected {
       color: black;
       background-color: #fcff90; }
-  /* line 92, _hierarchy.scss */
+  /* line 96, _hierarchy.scss */
   #hierarchyManager #hierarchyDisplay > ul {
     border-left: none !important;
     padding-left: 5px !important; }
-  /* line 99, _hierarchy.scss */
+  /* line 103, _hierarchy.scss */
   #hierarchyManager #hierarchyDisplay ul {
     padding: 0;
     list-style: none;
     border-left: solid grey 1px;
     padding-left: 10px; }
-  /* line 109, _hierarchy.scss */
+  /* line 113, _hierarchy.scss */
   #hierarchyManager #hierarchyDisplay li {
     margin: 4px 0px 4px 12px;
     text-indent: -8px; }
-  /* line 115, _hierarchy.scss */
+  /* line 119, _hierarchy.scss */
   #hierarchyManager #hierarchyDisplay .hierarchyicon {
     font-size: 10px;
     margin-right: 5px;
     color: #82b8ff; }
-    /* line 120, _hierarchy.scss */
+    /* line 124, _hierarchy.scss */
     #hierarchyManager #hierarchyDisplay .hierarchyicon.glyphicon-ban-circle {
       color: #444; }
 
-/* line 129, _hierarchy.scss */
+/* line 133, _hierarchy.scss */
 .hierarchyItem {
   font-weight: normal;
   white-space: nowrap;
@@ -984,24 +986,24 @@
   padding: .1em;
   font-size: 0.9em; }
 
-/* line 140, _hierarchy.scss */
+/* line 144, _hierarchy.scss */
 .hierarchyentry {
   margin-left: 1em;
   overflow: hidden;
   border-left: 1px dotted #444444; }
 
-/* line 146, _hierarchy.scss */
+/* line 150, _hierarchy.scss */
 .hierarchytoggle {
   margin-right: .5em;
   padding-left: 1.5em;
   font-size: .6em;
   display: inline; }
 
-/* line 153, _hierarchy.scss */
+/* line 157, _hierarchy.scss */
 .hierarchyItem:hover {
   background: lightblue url(../../../images/ui-bg_glass_75_cfe4ef_1x400.png) repeat; }
 
-/* line 157, _hierarchy.scss */
+/* line 161, _hierarchy.scss */
 .hierarchySpacer {
   padding-bottom: 5px;
   margin-right: 10px;
@@ -1010,7 +1012,7 @@
   height: 1.3em;
   white-space: nowrap; }
 
-/* line 166, _hierarchy.scss */
+/* line 170, _hierarchy.scss */
 .hierarchyItemSelected {
   background: #82b8ff url(../../../images/ui-bg_glass_75_cfe4ef_1x400.png) repeat;
   background-size: 100% 100%;

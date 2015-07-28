@@ -113,6 +113,8 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 
 	app.createdNode = function(parentId, newId, newExtends, newImplements, newSource, newType)
 	{
+		if( newId === 'http-vwf-example-com-camera-vwf-camera' ) return;
+
 		var node = app.root.fields.nodes[newId] = {};
 		node.id = newId;
 		node.prototype = newExtends;

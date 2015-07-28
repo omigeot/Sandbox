@@ -50,7 +50,7 @@
 		overflow-x: auto;
 		overflow-y: auto;
 
-		.collapsed ul {
+		.hidden, .collapsed ul {
 			display: none;
 		}
 
@@ -58,8 +58,12 @@
 		{
 			cursor: pointer;
 
-			&:not(.nonselectable):hover {
-				color: #82b8ff;
+			&:not(.nonselectable):hover
+			{
+				&:not(.selected) {
+					color: #82b8ff;
+				}
+
 				text-decoration: underline;
 			}
 
