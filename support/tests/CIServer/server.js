@@ -25,12 +25,10 @@ var files = helper.files;
 var findFiles = helper.findFiles;
 var runner;
 
-gitLog();
-createRunner();
-
 function readFiles(nextStep) {
 	logger.log("readFiles")
 	//for each file
+	nextStep = nextStep ? nextStep : function(){};
 	async.eachSeries(files, function(filename, nextfile) {
 		logger.log(filename);
 		try {
@@ -101,11 +99,7 @@ function handleIncomingMessage(message, handler){
 
 function handleStateless(command, param){
 	if(param.isHTTP){
-		//Change status, do actual reload when runner is ready
-		if(command === helper.command.RELOAD && status != BUSY){
-			status = UPDATING;
-		}
-		else if(command === helper.command.STOP){
+		if(command === helper.command.STOP){
 			testQueue.length = 0;
 		}
 		
@@ -127,10 +121,8 @@ function handleBusyState(command, param){
 	}
 }
 function handleUpdatingState(command, param){
-	if(!param.isHTTP){
-		if(checkState(command, param, READY)){
-			doReload();
-		}
+	if(!param.isHTTP && checkState(command, param, READY)){
+		doReload();
 	}
 }
 
@@ -145,9 +137,8 @@ function handleReadyState(command, param){
 	//command is http request
 	if(param.isHTTP){
 		if(command == helper.command.RUN){
-			var allIDs = Object.keys(report.tests);
-			setTestQueue(allIDs);
-			doRunCommand();
+			queueAllTests();
+			doRunCommand();	
 		}
 		else if(command === helper.command.RUN_ONE){
 			addTestToQueue(param.query);
@@ -155,6 +146,11 @@ function handleReadyState(command, param){
 		}
 		else if(command === helper.command.QUIT){
 			quitRunner();
+		}
+		//Change status, do actual reload when runner is ready
+		else if(command === helper.command.RELOAD){
+			status = UPDATING;
+			doReload();
 		}
 	}
 	
@@ -177,6 +173,10 @@ function handleRunningState(command, param){
 		}
 		else if(command == helper.command.RUN_ONE){
 			addTestToQueue(param.query);
+		}
+		//Change status, do actual reload when runner is ready
+		else if(command === helper.command.RELOAD){
+			status = UPDATING;
 		}
 	}
 	
@@ -214,6 +214,8 @@ function doReload(){
 	
 	async.series([
 		gitPull,
+		helper.findFiles,
+		readFiles,
 		quitRunner
 	]);
 }
@@ -254,7 +256,7 @@ function updateReport(update){
 	report.tests[update.id] = update;
 }
 
-function createRunner(){
+function createRunner(cb){
 	runner = childprocess.fork("runner.js");
 	runner.on("message", handleIncomingMessage);
 	runner.on("error", function(message, handle){
@@ -268,6 +270,8 @@ function createRunner(){
 		status = ERROR;
 		createRunner();
 	});
+	
+	if(cb) cb();
 }
 
 var server = http.createServer();
@@ -306,15 +310,31 @@ server.on('request', function(request, response) {
 		return;
 	}
 });
+
+function queueAllTests(cb){
+	var allIDs = Object.keys(report.tests);
+	setTestQueue(allIDs);
+
+	if(cb) cb();
+}
+
+function listen(){
+	global.setTimeout(function(){
+		console.log("Server is listening");
+		server.listen(port);
+	}, 3000);
+}
+
+gitLog();
 var port = 8181;
 
 var p = process.argv.indexOf('-p');
 port = p >= 0 ? parseInt(process.argv[p + 1]) : 8181;
 
-server.listen(port);
-if (process.argv.indexOf('start') > -1)
-	updateAndRunTests(function() {})
-else
-	helper.findFiles(function() {
-		readFiles(function() {})
-	})
+
+if (process.argv.indexOf('start') > -1){
+	async.series([gitPull, helper.findFiles, readFiles, queueAllTests, createRunner], listen);
+}
+else{
+	async.series([helper.findFiles, readFiles, createRunner], listen);
+}
