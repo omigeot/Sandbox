@@ -166,6 +166,9 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 			// vwf nodes
 			if( $scope.fields.nodes[node.id] )
 			{
+				$scope.selectedThreeNode = null;
+				$scope.makeBounds();
+
 				// new selection = 0, add = 2, subtract = 3
 				if( !evt.ctrlKey )
 				{
@@ -180,6 +183,8 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 			// three.js nodes
 			else
 			{
+				_Editor.SelectObject();
+
 				if( $scope.selectedThreeNode !== node ){
 					$scope.selectedThreeNode = node;
 					$scope.makeBounds(node.node);
@@ -251,9 +256,11 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 			// select first child
 			else if( 'ArrowRight' === evt.key || evt.which === 39 )
 			{
-				if( $scope.fields.selectedNode ){
+				if( $scope.fields.selectedNode )
+				{
 					var curNode = $scope.fields.nodes[$scope.fields.selectedNode.id];
-					$('#hierarchyDisplay .selected:not(.three *)').closest('tree-node').removeClass('collapsed');
+					var domNode = $('#hierarchyDisplay .selected:not(.three *)').closest('tree-node').removeClass('collapsed');
+
 					if( curNode.children[0] ){
 						_Editor.SelectObject(curNode.children[0]);
 					}
@@ -359,10 +366,44 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 
 		$scope.makeVWFNode = function()
 		{
+			function getDescendantVWFNodes(threeNode)
+			{
+				if( threeNode.vwfID ){
+					return [threeNode.vwfID];
+				}
+				else {
+					return threeNode.children.reduce(
+						function(prevResults, child){
+							return prevResults.concat( getDescendantVWFNodes(child) );
+						},
+						[]
+					);
+				}
+			}
+
+			function reparentTo(nodeId, parentId)
+			{
+				var val = vwf.getNode(nodeId);
+
+				_UndoManager.startCompoundEvent();
+
+				_UndoManager.recordDelete(nodeId);
+				vwf_view.kernel.deleteNode(nodeId);
+
+				var deregister = $scope.$watch('fields.nodes["'+nodeId+'"]', function(newval){
+					if( !newval ){
+						deregister();
+						_UndoManager.recordCreate(parentId, nodeId, val);
+						vwf_view.kernel.createChild(parentId, nodeId, val);
+						_UndoManager.stopCompoundEvent();
+					}
+				});
+			}
+
 			if($scope.selectedThreeNode)
 			{
 				var node = $scope.selectedThreeNode.node;
-				var childname = node.name || node.id;
+				var childname = node.name || node.uuid;
 				var mat = new THREE.Matrix4();
 				mat.copy( node.matrix );
 
@@ -370,7 +411,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 				while( !parent.vwfID && parent.id !== 'index-vwf' ){
 					parent = parent.parent;
 				}
-				parent = parent.vwfID;
+				var parentId = parent.vwfID;
 
 				var proto = {
 					extends: 'asset.vwf',
@@ -384,8 +425,29 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 					}
 				};
 				var newname = GUID();
-				_UndoManager.recordCreate(parent, newname, proto);
-				vwf_view.kernel.createChild(parent, newname, proto, null);
+
+				_UndoManager.startCompoundEvent();
+
+				_UndoManager.recordCreate(parentId, newname, proto);
+				vwf_view.kernel.createChild(parentId, newname, proto, null);
+
+				var deregister = null;
+				deregister = $scope.$watch('fields.nodes["'+newname+'"]', function(newval)
+				{
+					if(newval)
+					{
+						deregister();
+
+						// check for siblings that should be children
+						var toBeMoved = getDescendantVWFNodes(node);
+						for(var i=0; i<toBeMoved.length; i++){
+							reparentTo(toBeMoved[i], newname);
+						}
+
+						_UndoManager.stopCompoundEvent();
+					}
+				});
+
 
 				$scope.makeBounds();
 				_Editor.SelectOnNextCreate([newname]);
