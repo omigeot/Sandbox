@@ -26,23 +26,15 @@ process.on("message", function(message, handle){
 	
 	console.log("Runner received a message:", message);
 	
-	//If the server is asking for the current state...
-	if(command === helper.command.STATE){
-		helper.sendMessage(process, helper.command.STATE, state);
+	switch(state){
+		//for now, runner does not accept commands while running
+		case helper.state.RUNNING: break;
+		case helper.state.READY: handleReadyState(command, param); break;
 	}
 	
-	//Otherwise, switch through state machine logic 
-	else{
-		switch(state){
-			case helper.state.RUNNING: handleRunningState(command, param); break;
-			case helper.state.CANCELING: break;
-			case helper.state.READY: handleReadyState(command, param); break;
-		}
-		
-		//"Remind" the server that we are ready if the state hasn't changed from ready
-		if(state === helper.state.READY){
-			updateState(helper.state.READY);
-		}
+	//"Remind" the server that we are ready if the state hasn't changed from ready
+	if(state === helper.state.READY){
+		updateState(helper.state.READY);
 	}
 });
 
@@ -53,13 +45,6 @@ function handleReadyState(command, param){
 	}
 	else if(command === helper.command.QUIT){
 		exit();
-	}
-}
-
-//Runner is currently executing a test; handle incoming commands
-function handleRunningState(command, param){
-	if(command === helper.command.CANCEL){
-		updateState(helper.status.CANCELING);
 	}
 }
 

@@ -6,7 +6,6 @@ exports.files = [];
 
 exports.command = {
 	/* Shared commands */
-	CANCEL: "/stop", 
 	STATE: "/status",
 	RUN_ONE: "/runOne",
 	QUIT: "/quit",
@@ -23,7 +22,6 @@ exports.command = {
 
 exports.state = {
 	RUNNING: "running",
-	CANCELING: "canceling",
 	READY: "ready",
 	ERROR: "error",
 	UPDATING: "updating",

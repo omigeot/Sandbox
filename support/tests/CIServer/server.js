@@ -12,9 +12,10 @@ var report = { tests: {}, gitLog: "" };
 var RUNNING = helper.state.RUNNING,
 	READY = helper.state.READY,
 	COMPLETE = helper.state.READY,
-	CANCELING = helper.state.CANCELING,
 	ERROR = helper.state.ERROR,
-	UPDATING = helper.state.UPDATING;
+	UPDATING = helper.state.UPDATING,
+	BUSY = helper.state.BUSY;
+	
 
 var status = READY;
 var tests = [];
@@ -32,12 +33,6 @@ function readFiles(nextStep) {
 	//for each file
 	async.eachSeries(files, function(filename, nextfile) {
 		logger.log(filename);
-		//bail out of all tests if canceling
-		if (status == CANCELING) {
-			logger.log("canceling run")
-			global.setTimeout(nextStep, 50)
-			return;
-		}
 		try {
 			var newTests = helper.getAllTestData(filename);
 			tests = tests.concat(newTests)
@@ -94,7 +89,6 @@ function handleIncomingMessage(message, handler){
 	
 	switch(status){
 		case RUNNING: handleRunningState(command, param); break;
-		case CANCELING: handleCancelingState(command, param); break;
 		case READY: handleReadyState(command, param); break;
 		case COMPLETE: handleReadyState(command, param); break;
 		case ERROR: handleErrorState(command, param); break;
@@ -102,18 +96,26 @@ function handleIncomingMessage(message, handler){
 		case BUSY: handleBusyState(command, param); break;
 	}
 	
-	//Handle client commands that don't depend on state
+	handleStateless(command, param);
+}
+
+function handleStateless(command, param){
 	if(param.isHTTP){
-		if(command === helper.command.RELOAD){
-			//Change status, do actual reload when runner is ready
+		//Change status, do actual reload when runner is ready
+		if(command === helper.command.RELOAD && status != BUSY){
 			status = UPDATING;
 		}
 		else if(command === helper.command.STOP){
-			status = BUSY;
 			testQueue.length = 0;
 		}
 		
 		param.response.end();
+	}
+	
+	//It doesn't matter when we get results... always update report.
+	if(command == helper.command.RESULT){
+		console.log("The server received the results of the test!: ", param);
+		updateReport(param);
 	}
 }
 
@@ -132,30 +134,16 @@ function handleUpdatingState(command, param){
 	}
 }
 
-function handleCancelingState(command, param){
-	if(!param.isHTTP){
-		if(checkState(command, param, READY)){
-			doReload();
-		}
-	}
-}
-
 function handleErrorState(command, param){
-	//This ensures that we ignore all client commands until the runner is back up and running
-	if(!param.isHTTP){
-		
-		//If runner is ready, continue running tests...
-		if(checkState(command, param, READY)){
-			doRunCommand();
-		}
+	//This ensures that we ignore all commands until the runner is back up and running
+	if(!param.isHTTP && checkState(command, param, READY)){
+		doRunCommand();
 	}
 }
 function handleReadyState(command, param){
 	console.log("We are in the ready state, command is:", command);
 	//command is http request
 	if(param.isHTTP){
-		var request = param.request;
-		var response = param.response;
 		if(command == helper.command.RUN){
 			var allIDs = Object.keys(report.tests);
 			setTestQueue(allIDs);
@@ -182,23 +170,20 @@ function handleReadyState(command, param){
 function handleRunningState(command, param){
 	//command from client
 	if(param.isHTTP){
-		var request = param.request;
-		var response = param.response;
-
-		if(command == helper.command.RUN || command == helper.command.RUN_ONE){
+		if(command == helper.command.RUN){
 			//already running... nothing to see here..	
-			console.log("Server is already running!");
+			var allIDs = Object.keys(report.tests);
+			setTestQueue(allIDs);
+		}
+		else if(command == helper.command.RUN_ONE){
+			addTestToQueue(param.query);
 		}
 	}
 	
 	//command from runner
 	else{
-		if(command == helper.command.RESULT){
-			console.log("The server received the results of the test!: ", param);
-			updateReport(param);
-		}
 		//The runner is going to exit. Handle final report.
-		else if(command == helper.command.ERROR){
+		if(command == helper.command.ERROR){
 			logger.log(param);
 			updateReport(param);
 			status = ERROR;
@@ -319,35 +304,6 @@ server.on('request', function(request, response) {
 		handleIncomingMessage([command, {request: request, response: response, isHTTP: true, query: param}]);
 		response.end();
 		return;
-	}
-	
-	if (request.url == "/runTests") {
-
-		setTimeout(function() {
-			restart();
-		}, 5000)
-		response.end();
-		request.connection.destroy();
-		cancel_run(restart);
-
-
-	}
-	if (request.url == "/reload") {
-
-		setTimeout(function() {
-			reload();
-		}, 5000)
-		cancel_run(reload);
-	}
-	if (request.url.indexOf("/runOne") == 0) {
-		cancel_run(function() {
-			var tid = request.url.substr(request.url.indexOf('?') + 1)
-			tid = decodeURIComponent(tid)
-			logger.log(tid);
-			response.end();
-			
-			helper.sendMessage(runner, helper.command.RUN, tid);
-		});
 	}
 });
 var port = 8181;
