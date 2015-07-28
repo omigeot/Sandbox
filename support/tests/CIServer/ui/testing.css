@@ -1,6 +1,37 @@
-
 body {
     font-family: sans-serif;
+	margin: 0;
+}
+
+#status{
+	margin: 8px;
+}
+#header{
+	position: fixed;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	top: 0;
+	left: 0;
+	
+}
+#gitlog
+{
+    text-align: center;
+	padding: 5px;
+	color: white;
+	background: black;
+}
+#test_status
+{
+	background: green;
+	color: white;
+	padding: 15px;
+	font-size: 50px;
+	text-align: center;
+}
+#status{
+	margin-top: 120px;
 }
 .testrow
 {
@@ -30,6 +61,7 @@ body {
 }
 .teststatus
 {
+	
     display: inline-block;
     
     width: 5%;
@@ -68,21 +100,6 @@ body {
 .runtest
 {
     width:80px;
-}
-
-#test_status
-{
-      background: green;
-      color: white;
-      padding: 1em;
-      margin: 1em;
-      font-size: 3em;
-      text-align: center;
-}
-
-#gitlog
-{
-    text-align: center
 }
 
 pre

@@ -10,9 +10,9 @@ $(document).ready(function()
 		
 			var consts = {
 				RUNNING: "running",
-				CANCELING: "canceling",
 				READY: "ready",
-				ERROR: "error"
+				ERROR: "error",
+				BUSY: "busy",
 			};
 			
 			$("#runTests").button();
@@ -48,15 +48,9 @@ $(document).ready(function()
 				{
 					//$("#status").text(JSON.stringify(status));		
 					//$("#tests").empty();
-					$("#gitLog").text(status.gitLog);
-					if(status.status == consts.RUNNING)
-						$("#test_status").text('Running');
-					if(status.status == consts.ERROR)
-						$("#test_status").text('Error');
-					if(status.status == consts.CANCELING)
-						$("#test_status").text('Canceling');
-					if(status.status == consts.READY)
-						$("#test_status").text('Ready');
+					$("#gitLog").text(status.gitLog.substr(0, 200) + "...");
+					$("#test_status").text(status.status);
+					
 					var tests = status.tests;
 					$("#tests").empty();
 					for (var j in Object.keys(tests).sort())
@@ -140,18 +134,24 @@ $(document).ready(function()
 					$(".teststatus:contains('not started')").css("background-color",'');
 					$(".testresult:contains('null')").css("background-color",'');
 
-					$("#test_status:contains('Running')").css("background-color",'lightgreen');
-					$("#test_status:contains('Ready')").css("background-color",'green');
-					$("#test_status:contains('Canceling')").css("background-color",'orange');
-					$("#test_status:contains('Error')").css("background-color",'red');
-
+					var text = $("#test_status").text().toLowerCase().trim();
+					var color;
+					switch(text){
+						case consts.RUNNING: color = "lightgreen"; break;
+						case consts.READY: color = "green"; break;
+						case consts.ERROR: color = "red"; break;
+						case consts.BUSY: color = "orange"; break;
+						default: color = "gray";
+					}
+					
+					$("#test_status").css("background-color", color);
 				});
 			}
 			display();
 			window.setInterval(function()
 			{
 				display();
-			}, 2000)
+			}, 1500)
 			window.setInterval(function()
 			{
 				//window.location.reload();
@@ -160,10 +160,12 @@ $(document).ready(function()
 </script>
 </head>
 <body>
-	
-	<div id = "status"> <div id="gitLog" ></div><div id="test_status" ></div> <div id="tests" ></div><div id = "runTests">Run</div>
+	<div id = "status">  <div id="tests" ></div><div id = "runTests">Run</div>
 	<div id = "quitTests">Quit</div>
-	<div id = "stopTests">Stop</div>
+	<div id = "stopTests">Clear Queue</div>
 	<div id = "reloadTests">Reload</div><pre id="log" ></pre>
+	<div id="header">
+		<div id="gitLog"></div><div id="test_status"></div>
+	</div>
 </body>
 </html>
