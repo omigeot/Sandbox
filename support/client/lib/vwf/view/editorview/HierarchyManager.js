@@ -165,11 +165,11 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 			{
 				if( $scope.selectedThreeNode !== node ){
 					$scope.selectedThreeNode = node;
-					$scope.makeBounds(node.node);
+					makeBounds(node.node);
 				}
 				else {
 					$scope.selectedThreeNode = null;
-					$scope.makeBounds();
+					makeBounds();
 				}
 			}
 		}
@@ -200,11 +200,24 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 					var childnode = threenode.children[i];
 					threeMap[id].children.push( childnode.uuid );
 					buildTree(childnode);
+
+					threeMap[id].children.sort(function(a,b)
+					{
+						a = threeMap[a];
+						b = threeMap[b];
+
+						if( !b || !b.name && a.name || a.name.toLowerCase() < b.name.toLowerCase() )
+							return -1;
+						else if( !a || !a.name && b.name || b.name.toLowerCase() < a.name.toLowerCase() )
+							return 1;
+						else
+							return 0;
+					});
 				}
 			}
 		}
 
-		$scope.makeBounds = function(node)
+		function makeBounds(node)
 		{
 			if(node)
 			{
@@ -287,7 +300,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 				_UndoManager.recordCreate(parent, newname, proto);
 				vwf_view.kernel.createChild(parent, newname, proto, null);
 
-				$scope.makeBounds();
+				makeBounds();
 				_Editor.SelectOnNextCreate([newname]);
 			}
 			else {

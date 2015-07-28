@@ -2088,38 +2088,33 @@ input[type="text"]:focus, input[type="password"]:focus {
 /* Let's get this party started */
 /* line 1074, Editorview.scss */
 ::-webkit-scrollbar {
-  width: 8px; }
-
-/* Track */
-/* line 1079, Editorview.scss */
-::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-  -webkit-border-radius: 5px;
-  border-radius: 5px; }
+  width: 8px;
+  height: 8px; }
 
 /* Handle */
-/* line 1086, Editorview.scss */
+/* line 1081, Editorview.scss */
 ::-webkit-scrollbar-thumb {
-  /* -webkit-border-radius: 5px; */
-  /* border-radius: 5px; */
-  background: #5284c7;
-  /* -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); */
-  width: 8px; }
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  background: #5284c7; }
+  /* line 1086, Editorview.scss */
+  ::-webkit-scrollbar-thumb:window-inactive {
+    background: #82b8ff; }
 
-/* line 1094, Editorview.scss */
-::-webkit-scrollbar-thumb:window-inactive {
-  background: #82b8ff; }
+/* line 1091, Editorview.scss */
+::-webkit-scrollbar-corner {
+  background-color: inherit; }
 
-/* line 1098, Editorview.scss */
+/* line 1095, Editorview.scss */
 .libraryAsset img:hover {
   /* box-shadow: 2px 2px 10px rgb(130, 184, 255), 9px 9px 10px black inset; */
   border: 3px solid #3a8fff; }
 
-/* line 1103, Editorview.scss */
+/* line 1100, Editorview.scss */
 .BigTextureThumb:hover, .BigTextureThumbSrc:hover {
   border: 3px solid #8cb9ff; }
 
-/* line 1107, Editorview.scss */
+/* line 1104, Editorview.scss */
 #loadingSplash {
   position: absolute;
   align-content: center;
@@ -2131,18 +2126,18 @@ input[type="text"]:focus, input[type="password"]:focus {
   box-shadow: 10px 10px 30px;
   border-radius: 15px; }
 
-/* line 1119, Editorview.scss */
+/* line 1116, Editorview.scss */
 #GuestLogin {
   position: absolute;
   left: 20px;
   top: 20px; }
 
-/* line 1125, Editorview.scss */
+/* line 1122, Editorview.scss */
 #JSONViewButtonBar {
   height: 2.5em;
   margin-left: -1em; }
 
-/* line 1130, Editorview.scss */
+/* line 1127, Editorview.scss */
 #JSONViewButtonBarOk, #JSONViewButtonBarCancel, #JSONViewButtonBarLoad, #JSONViewButtonBarSave {
   border: 1px solid #444444;
   background: #222222 url(images/ui-bg_glass_15_222222_1x400.png) 50% 50% repeat-x;
@@ -2154,7 +2149,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   cursor: pointer;
   display: inline; }
 
-/* line 1142, Editorview.scss */
+/* line 1139, Editorview.scss */
 #JSONViewButtonBarOk:hover, #JSONViewButtonBarCancel:hover, #JSONViewButtonBarLoad:hover, #JSONViewButtonBarSave:hover {
   border: 1px solid #26b3f7;
   background: #3a8fff url(images/ui-bg_glass_20_3a8fff_1x400.png) 50% 50% repeat-x;
@@ -2162,7 +2157,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   color: #fff;
   display: inline; }
 
-/* line 1150, Editorview.scss */
+/* line 1147, Editorview.scss */
 #JSONLoadInput {
   position: absolute;
   opacity: 0;
@@ -2173,12 +2168,12 @@ input[type="text"]:focus, input[type="password"]:focus {
   padding: 0px;
   width: 5em; }
 
-/* line 1161, Editorview.scss */
+/* line 1158, Editorview.scss */
 .playerlabelID {
   font-size: .6em;
   color: gray; }
 
-/* line 1166, Editorview.scss */
+/* line 1163, Editorview.scss */
 .playerlabel .glyphicon {
   float: right;
   margin: 0px;
@@ -2187,34 +2182,34 @@ input[type="text"]:focus, input[type="password"]:focus {
   margin-left: 4px;
   font-size: 1.5em; }
 
-/* line 1175, Editorview.scss */
+/* line 1172, Editorview.scss */
 .playerlabel .glyphicon:hover {
   color: #84b9ff; }
 
-/* line 1179, Editorview.scss */
+/* line 1176, Editorview.scss */
 .playerlabelname {
   display: inline-block; }
 
-/* line 1183, Editorview.scss */
+/* line 1180, Editorview.scss */
 * {
   box-sizing: content-box; }
 
-/* line 1187, Editorview.scss */
+/* line 1184, Editorview.scss */
 * select {
   color: black; }
 
-/* line 1191, Editorview.scss */
+/* line 1188, Editorview.scss */
 div#Translation .ui-spinner, div#Rotation .ui-spinner, div#Scale .ui-spinner {
   border-radius: 0px; }
 
-/* line 1195, Editorview.scss */
+/* line 1192, Editorview.scss */
 div#otherprops input[type=text] {
   color: black;
   /* border-radius: 5px; */
   padding: 0px;
   margin: 2px; }
 
-/* line 1202, Editorview.scss */
+/* line 1199, Editorview.scss */
 .ui-selectmenu-button {
   float: right;
   margin-top: 2px;
@@ -2222,55 +2217,55 @@ div#otherprops input[type=text] {
   border-radius: 3px;
   width: 30px; }
 
-/* line 1210, Editorview.scss */
+/* line 1207, Editorview.scss */
 .ui-selectmenu-button span.ui-selectmenu-text {
   padding: 0px; }
 
-/* line 1214, Editorview.scss */
+/* line 1211, Editorview.scss */
 .ui-spinner {
   border-radius: 3px;
   margin-top: 2px; }
 
-/* line 1219, Editorview.scss */
+/* line 1216, Editorview.scss */
 .ui-spinner-input {
   margin: 0px 10px 0px 0px; }
 
-/* line 1223, Editorview.scss */
+/* line 1220, Editorview.scss */
 .ui-button-text {
   display: inline-block !important; }
 
-/* line 1227, Editorview.scss */
+/* line 1224, Editorview.scss */
 .ui-button-text-only img {
   width: 50px;
   height: 50px;
   display: inline-block; }
 
-/* line 1233, Editorview.scss */
+/* line 1230, Editorview.scss */
 .ui-dialog .ui-dialog-titlebar-close {
   margin: -12px 0 0; }
 
-/* line 1237, Editorview.scss */
+/* line 1234, Editorview.scss */
 #ModelSearchTerm {
   background: black; }
 
-/* line 1241, Editorview.scss */
+/* line 1238, Editorview.scss */
 #InventoryRename {
   color: black; }
 
-/* line 1245, Editorview.scss */
+/* line 1242, Editorview.scss */
 .jstree-default .jstree-wholerow-clicked {
   background: #274857; }
 
-/* line 1249, Editorview.scss */
+/* line 1246, Editorview.scss */
 .jstree-default .jstree-wholerow-hovered {
   background: #5b89b6;
   /* color: black !important; */ }
 
-/* line 1254, Editorview.scss */
+/* line 1251, Editorview.scss */
 #guioverlay_index-vwf {
   outline: none !important; }
 
-/* line 1258, Editorview.scss */
+/* line 1255, Editorview.scss */
 #entitylibrarytray {
   margin-left: 1em;
   font-size: 22.2px;
@@ -2278,19 +2273,19 @@ div#otherprops input[type=text] {
   margin-bottom: 6px;
   cursor: pointer; }
 
-/* line 1266, Editorview.scss */
+/* line 1263, Editorview.scss */
 #entitylibrarytray:hover {
   color: #84b9ff; }
 
-/* line 1270, Editorview.scss */
+/* line 1267, Editorview.scss */
 ul li a .glyphicon {
   margin-right: 1em; }
 
-/* line 1274, Editorview.scss */
+/* line 1271, Editorview.scss */
 .ui-slider {
   clear: both; }
 
-/* line 1278, Editorview.scss */
+/* line 1275, Editorview.scss */
 .editorPanelDisableOverlay {
   position: absolute;
   top: 0;
@@ -2302,31 +2297,31 @@ ul li a .glyphicon {
   cursor: not-allowed;
   display: none; }
 
-/* line 1290, Editorview.scss */
+/* line 1287, Editorview.scss */
 .editorPanelDisable {
   color: #5e5e5e !important;
   cursor: not-allowed;
   pointer-events: none;
   opacity: 0.85; }
 
-/* line 1297, Editorview.scss */
+/* line 1294, Editorview.scss */
 .sidetab-editor-title {
   background: #3a8fff 50% 50% repeat-x;
   cursor: pointer;
   border-radius: 2px; }
 
-/* line 1303, Editorview.scss */
+/* line 1300, Editorview.scss */
 .sidetab-editor-title:hover {
   text-decoration: underline; }
 
-/* line 1307, Editorview.scss */
+/* line 1304, Editorview.scss */
 .sidetab-editor-title-active {
   background: #3a8fff 50% 50% repeat-x; }
 
-/* line 1311, Editorview.scss */
+/* line 1308, Editorview.scss */
 .sidetab-editor-title-active:hover {
   text-decoration: underline; }
 
-/* line 1315, Editorview.scss */
+/* line 1312, Editorview.scss */
 .downarrowclass {
   display: none; }

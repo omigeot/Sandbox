@@ -37,6 +37,27 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		angular.bootstrap( document.body, ['SandboxEditor'] );
 	}
 
+	function sortChildren(nodeId)
+	{
+		var parent = app.root.fields.nodes[nodeId];
+
+		if(parent)
+		{
+			parent.children.sort(function(a,b)
+			{
+				a = app.root.fields.nodes[a];
+				b = app.root.fields.nodes[b];
+
+				if( !b || !b.name && a.name || a.name.toLowerCase() < b.name.toLowerCase() )
+					return -1;
+				else if( !a || !a.name && b.name || b.name.toLowerCase() < a.name.toLowerCase() )
+					return 1;
+				else
+					return 0;
+			});
+		}
+	}
+
 	app.createdMethod = function(id, name, params, body)
 	{
 		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
@@ -80,7 +101,12 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 			app.root.fields.selectedNode.properties[prop] = val;
 
 		if(prop === 'DisplayName')
+		{
 			app.root.fields.nodes[id].name = val;
+
+			// name has just been set, so update position in parent's children array
+			sortChildren( app.root.fields.nodes[id].parent );
+		}
 
 		app.root.$apply();
 	}
@@ -91,12 +117,13 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		node.id = newId;
 		node.prototype = newExtends;
 		node.subtype = newType;
-		node.name = '';
+		node.name = newId;
 		node.children = [];
 
 		if( parentId ){
 			node.parent = parentId;
 			app.root.fields.nodes[parentId].children.push(newId);
+			sortChildren( parentId );
 		}
 
 		app.root.$apply();
@@ -117,7 +144,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		var parent = app.root.fields.nodes[node.parent];
 
 		for(var i=0; i<parent.children.length; i++){
-			if( parent.children[i] === node.id ){
+			if( parent && parent.children[i] === node.id ){
 				parent.children.splice(i, 1);
 				break;
 			}
