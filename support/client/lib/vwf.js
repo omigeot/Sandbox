@@ -763,7 +763,7 @@
         {
 
 
-            var loadBalancerAddress = {{loadBalancerAddress}};
+            var loadBalancerAddress = 'undefined';
         var instance = window.location.pathname;
 
         var instanceHost = $.ajax({
@@ -785,7 +785,7 @@
             var space = window.location.pathname.slice( 1,
                 window.location.pathname.lastIndexOf("/") );
             var protocol = window.location.protocol;
-            var host = {{host}};
+            var host = window.location.protocol +'//'+ window.location.host;
         
             var socketProxy = require('vwf/socket')
             if ( window.location.protocol === "https:" )
@@ -1105,7 +1105,8 @@ this.postSimulationStateUpdates = function(freqlist)
     for(var i = 0; i < this.nodesSimulating.length; i++)
     {
         var nodeID = this.nodesSimulating[i];
-        var props = this.propertyDataUpdates[nodeID];
+        if(!this.propertyDataUpdates[nodeID]) continue;
+        var props = JSON.parse(JSON.stringify(this.propertyDataUpdates[nodeID]));
         if(props)
         {
         var keys = Object.keys(this.propertyDataUpdates[nodeID]);
@@ -1129,6 +1130,7 @@ this.postSimulationStateUpdates = function(freqlist)
     {
         var payload = updates;//JSON.stringify(updates);
         this.send(vwf.application(),action,"null",payload);
+        console.log(payload);
     }
     this.lastPropertyDataUpdates = this.propertyDataUpdates;
     var keys = Object.keys(this.lastPropertyDataUpdates)
