@@ -548,7 +548,7 @@ function sandboxWorld(id, metadata)
                 })));
             }else{
 
-                self.simulationManager.addClient(client);
+                this.simulationManager.addClient(client);
                 setupAvatar.apply(this);//this should then mark pending
             }
 
