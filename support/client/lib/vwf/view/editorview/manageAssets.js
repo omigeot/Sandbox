@@ -170,7 +170,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 			},
 			link: function(scope,element,attr)
 			{
-				var elem = element[0], parent = element.parent()[0];
+				var elem = element[0], parent = element.scrollParent()[0];
 
 				scope.$watch('scrollTo', function(newval){
 					if( newval )
@@ -178,13 +178,20 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 						// delay until next cycle, when elem.offset* will evaluate
 						$timeout(function()
 						{
-							var elemBottom = elem.offsetTop+elem.clientHeight;
+							var elemBottom = elem.offsetTop+$(elem).height();
+							var elemRight = elem.offsetLeft+$(elem).width();
 							var parentBottom = parent.scrollTop+parent.clientHeight;
+							var parentRight = parent.scrollLeft+parent.clientWidth;
 
 							if( elem.offsetTop < parent.scrollTop )
 								parent.scrollTop = elem.offsetTop;
 							else if( elemBottom > parentBottom )
 								parent.scrollTop = parent.scrollTop + (elemBottom - parentBottom) + 3;
+
+							if( elem.offsetLeft < parent.scrollLeft )
+								parent.scrollLeft = elem.offsetLeft;
+							else if( elem.offsetLeft > parentRight-100 )
+								parent.scrollLeft = Math.min(elemRight, elem.offsetLeft+100, parent.scrollWidth) - parent.clientWidth + 3;
 						});
 					}
 				});

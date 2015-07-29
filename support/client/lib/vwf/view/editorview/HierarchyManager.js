@@ -1,6 +1,6 @@
 'use strict';
 
-define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], function(app, SidePanel)
+define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf/view/editorview/manageAssets'], function(app, SidePanel)
 {
 	app.directive('treeNode', ['$compile','$timeout', function($compile, $timeout)
 	{
@@ -21,7 +21,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 							$scope.node = $scope.vwfNode = newval;
 							var threeMap = $scope.getThreeDescendants($scope.node);
 							if( threeMap )
-								$scope.threeMap = threeMap;
+								$scope.node.threeMap = $scope.threeMap = threeMap;
 						}
 					});
 				}
@@ -106,6 +106,19 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 						}
 						return false;
 					}
+				}
+
+				$scope.hasUnboundChild = function(node)
+				{
+					if(node)
+					{
+						for(var i=0; i<node.children.length; i++){
+							if( !$scope.isBound(node.children[i]) )
+								return true;
+						}
+					}
+					else
+						return false;
 				}
 
 				$compile(template)($scope, function(e){
@@ -216,12 +229,20 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 		{
 			evt.preventDefault();
 
+			var curNode = $scope.fields.selectedNode && $scope.fields.nodes[$scope.fields.selectedNode.id]
+				|| $scope.selectedThreeNode || null;
+			var threeMap = curNode.map || null;
+			var parent = $scope.fields.nodes[curNode.parent] || threeMap && threeMap[curNode.parent] || null;
+
 			// delete selection on del key
-			if( /^Del/.test(evt.key) || evt.which === 127 ){
+			if( /^Del/.test(evt.key) || evt.which === 46 ){
 				_Editor.DeleteSelection();
 			}
 			else if( /^Esc/.test(evt.key) || evt.which === 27 ){
 				_Editor.SelectObject();
+			}
+			else if( 'Space' === evt.key || evt.which === 32 ){
+				$('#hierarchyDisplay .selected').closest('tree-node').toggleClass('collapsed');
 			}
 
 			// select previous sibling
@@ -229,12 +250,26 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 			{
 				if( $scope.fields.selectedNode )
 				{
-					var curNode = $scope.fields.nodes[$scope.fields.selectedNode.id];
-					var parent = $scope.fields.nodes[curNode.parent];
 					var previousSiblingId = parent ? parent.children[ parent.children.indexOf(curNode.id)-1 ] : null;
 
 					if(previousSiblingId)
 						_Editor.SelectObject(previousSiblingId);
+				}
+				else if( $scope.selectedThreeNode )
+				{
+					var previousSiblingId = parent ? parent.children[ parent.children.indexOf(curNode.id)-1 ] : null;
+					while( previousSiblingId && threeMap[previousSiblingId].node.vwfID )
+						previousSiblingId = parent.children[ parent.children.indexOf(previousSiblingId)-1 ];
+
+					if(previousSiblingId)
+						$scope.selectedThreeNode = threeMap[previousSiblingId];
+
+					// transition from three.js to vwf nodes
+					else if(curNode.node.vwfID && $scope.fields.nodes[curNode.node.vwfID].children.length > 0){
+						$scope.selectedThreeNode = null;
+						var vwfSiblings = $scope.fields.nodes[curNode.node.vwfID].children;
+						_Editor.SelectObject(vwfSiblings[vwfSiblings.length-1]);
+					}
 				}
 			}
 
@@ -243,35 +278,68 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 			{
 				if( $scope.fields.selectedNode )
 				{
-					var curNode = $scope.fields.nodes[$scope.fields.selectedNode.id];
-					var parent = $scope.fields.nodes[curNode.parent];
-					var nextSiblingId = parent.children[ parent.children.indexOf(curNode.id)+1 ];
+					var nextSiblingId = parent ? parent.children[ parent.children.indexOf(curNode.id)+1 ] : null;
 
 					if(nextSiblingId)
 						_Editor.SelectObject(nextSiblingId);
+
+					// transition from vwf nodes to three nodes
+					else if(parent && parent.threeMap){
+						_Editor.SelectObject();
+						$scope.selectedThreeNode = parent.threeMap[parent.threeId];
+					}
+				}
+				else if( $scope.selectedThreeNode )
+				{
+					var nextSiblingId = parent ? parent.children[ parent.children.indexOf(curNode.id)+1 ] : null;
+					while( nextSiblingId && threeMap[nextSiblingId].node.vwfID )
+						nextSiblingId = parent.children[ parent.children.indexOf(nextSiblingId)+1 ];
+
+					if(nextSiblingId)
+						$scope.selectedThreeNode = threeMap[nextSiblingId];
 				}
 			}
 
 			// select parent
 			else if( 'ArrowLeft' === evt.key || evt.which === 37 )
 			{
-				if( $scope.fields.selectedNode ){
-					var curNode = $scope.fields.nodes[$scope.fields.selectedNode.id];
-					if( curNode.parent )
-						_Editor.SelectObject(curNode.parent);
+				$('#hierarchyDisplay .selected').closest('tree-node').addClass('collapsed');
+
+				if( $scope.fields.selectedNode && parent)
+				{
+					_Editor.SelectObject(parent.id);
+				}
+				else if( $scope.selectedThreeNode )
+				{
+					if( parent )
+						$scope.selectedThreeNode = parent;
+					else if( curNode.node.vwfID ){
+						$scope.selectedThreeNode = null;
+						_Editor.SelectObject(curNode.node.vwfID);
+					}
 				}
 			}
 
 			// select first child
 			else if( 'ArrowRight' === evt.key || evt.which === 39 )
 			{
+				$('#hierarchyDisplay .selected').closest('tree-node').removeClass('collapsed');
+
 				if( $scope.fields.selectedNode )
 				{
-					var curNode = $scope.fields.nodes[$scope.fields.selectedNode.id];
-					var domNode = $('#hierarchyDisplay .selected:not(.three *)').closest('tree-node').removeClass('collapsed');
-
 					if( curNode.children[0] ){
 						_Editor.SelectObject(curNode.children[0]);
+					}
+					else if( curNode.threeMap ){
+						_Editor.SelectObject();
+						$scope.selectedThreeNode = threeMap[curNode.threeId];
+					}
+				}
+				else if( $scope.selectedThreeNode )
+				{
+					for(var i=0; i<curNode.children.length && threeMap[curNode.children[i]].node.vwfID; i++);
+					if( curNode.children[i] ){
+						$scope.selectedThreeNode = threeMap[curNode.children[i]];
 					}
 				}
 			}
@@ -289,34 +357,39 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 				return threeMap;
 			}
 
-			function buildTree(threenode, idOverride, nameOverride)
+			function buildTree(threenode)
 			{
-				var id = idOverride || threenode.uuid;
-				threeMap[id] = {children: []};
-				threeMap[id].prototype = 'threejs_node';
-				threeMap[id].id = id;
-				threeMap[id].node = threenode;
-				threeMap[id].name = nameOverride || threenode.name || id || threenode.vwfID || 'No Name';
+				var id = threenode.uuid;
+				threeMap[threenode.uuid] = {
+					id: threenode.uuid,
+					name: threenode.name || threenode.uuid || threenode.vwfID || 'No Name',
+					prototype: 'threejs_node',
+					children: [],
+
+					node: threenode,
+					map: threeMap
+				};
 				
 				for(var i=0; i<threenode.children.length; i++)
 				{
 					var childnode = threenode.children[i];
 					threeMap[id].children.push( childnode.uuid );
 					buildTree(childnode);
-
-					threeMap[id].children.sort(function(a,b)
-					{
-						a = threeMap[a];
-						b = threeMap[b];
-
-						if( !b || !b.name && a.name || a.name.toLowerCase() < b.name.toLowerCase() )
-							return -1;
-						else if( !a || !a.name && b.name || b.name.toLowerCase() < a.name.toLowerCase() )
-							return 1;
-						else
-							return 0;
-					});
+					threeMap[childnode.uuid].parent = id;
 				}
+
+				threeMap[id].children.sort(function(a,b)
+				{
+					a = threeMap[a];
+					b = threeMap[b];
+
+					if( !b || !b.name && a.name || a.name.toLowerCase() < b.name.toLowerCase() )
+						return -1;
+					else if( !a || !a.name && b.name || b.name.toLowerCase() < a.name.toLowerCase() )
+						return 1;
+					else
+						return 0;
+				});
 			}
 		}
 
@@ -438,12 +511,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 				vwf_view.kernel.createChild(parentId, newname, proto, null);
 
 				var nodeName = 'asset-vwf-'+newname;
-				console.log('Watching for fields.nodes["'+nodeName+'"] creation');
 				var deregister = $scope.$watch('fields.nodes["'+nodeName+'"]', function(newval)
 				{
 					if(newval)
 					{
-						console.log('Moving siblings');
 						deregister();
 
 						// check for siblings that should be children
@@ -465,53 +536,3 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel'], fun
 	return window._HierarchyManager;
 });
 
-var oldDefine = function() {
-
-	function initialize() {
-		var self = this;
-		this.ready = false;
-		
-
-		this.BuildGUI = function() {
-
-			//move the selection up or down with a keypress
-			$('#VWFChildren, #THREEChildren').keyup(function(evt,ui)
-			{
-				console.log(evt.keyCode);
-				if(evt.keyCode == 27)
-				{
-					$('#heirarchyParent').dblclick();
-					$($($('#VWFChildren').children()[1]).children()[1]).click();
-					$('#VWFChildren').focus();
-				}
-				if(evt.keyCode == 32)
-				{
-					$(this).find('[name="' + HierarchyManager.selectedName +'"]').dblclick()
-					$($($('#VWFChildren').children()[1]).children()[1]).click();
-					$('#VWFChildren').focus();
-				}
-				//find and click the next node and click it; The click handlers should deal the bounds checking the list;
-				if(evt.keyCode == 40)
-				{
-					if($(this).find('[name="' + HierarchyManager.selectedName +'"]').parent().children()[3] && $($(this).find('[name="' + HierarchyManager.selectedName +'"]').parent().children()[0]).text() == '-')
-						$($($(this).find('[name="' + HierarchyManager.selectedName +'"]').parent().children()[3]).children()[1]).click()
-					else
-						$($(this).find('[name="' + HierarchyManager.selectedName +'"]').parent().next().children()[1]).click();
-				}
-				if(evt.keyCode == 38)
-				{
-					if($(this).find('[name="' + HierarchyManager.selectedName +'"]').parent().prev().children()[1])
-						$($(this).find('[name="' + HierarchyManager.selectedName +'"]').parent().prev().children()[1]).click();
-					else
-						$($(this).find('[name="' + HierarchyManager.selectedName +'"]').parent().parent().children()[1]).click()
-				}
-				if(evt.keyCode == 39 || evt.keyCode == 37)
-				{
-					$(this).find('[name="' + HierarchyManager.selectedName +'"]').prev().click();
-				}
-				
-			})
-		}
-		
-	}
-};
