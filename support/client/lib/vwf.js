@@ -1132,7 +1132,7 @@ this.postSimulationStateUpdates = function(freqlist)
     {
         var payload = updates;//JSON.stringify(updates);
         this.send(vwf.application(),action,"null",payload);
-        console.log(payload);
+        
     }
     this.lastPropertyDataUpdates = this.propertyDataUpdates;
     var keys = Object.keys(this.lastPropertyDataUpdates)

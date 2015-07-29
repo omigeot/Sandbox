@@ -544,7 +544,7 @@ function sandboxWorld(id, metadata)
                     "time": this.getStateTime
                 })));
             }else{
-                setupAvatar(); //this should then mark pending
+                setupAvatar.apply(this);//this should then mark pending
             }
 
         }
