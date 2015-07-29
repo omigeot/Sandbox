@@ -5,7 +5,21 @@ block vars
 
 block content
 
-	input#filter(type='search', placeholder='Filter', ng-model='searchTerms')
+	.horizontalLayout
+		input#filter(type='search', placeholder='Filter', ng-model='filter.text')
+
+		custom-select(model='filter.type')
+			.selectedOption
+			.menu
+				.icon.selectnone(title='Any Type', value='any')
+				.icon.light(title='Lights', value='SandboxLight-vwf')
+				.icon.models(title='Models', value='asset-vwf')
+				.icon.script(title='Behaviors', value='http-vwf-example-com-behavior-vwf')
+				.icon.cube(title='Primitives', value='prim2-vwf')
+				.icon.hierarchy(title='Modifiers')
+				.icon.camera(title='Cameras', value='SandboxCamera-vwf')
+				.icon.plane(title='Splines', value='spline-vwf')
+			
 
 	#hierarchyDisplay(tabindex='0', ng-keydown='handleKeyPress($event)')
 

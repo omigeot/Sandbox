@@ -16,6 +16,28 @@
 		font-size: 12px;
 		color: black;
 		@include flex-shrink(0);
+		@include flex-grow(1);
+	}
+
+	custom-select
+	{
+		width: 25px;
+		height: 25px;
+
+		@include display-flex();
+		@include flex-direction(column);
+
+		& > * {
+			@include flex-shrink(0);
+		}
+
+		& > .selected, &.expanded > * {
+			display: block;
+		}
+
+		&:not(.expanded) > :not(.selected) {
+			display: none;
+		}
 	}
 
 	input#makeNode
@@ -128,49 +150,5 @@
 
 	}
 
-}
-
-.hierarchyItem {
-	font-weight: normal;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-	height: 1.3em;
-	overflow: hidden;
-	padding-left: 0px;
-	padding: .1em;
-	font-size: 0.9em;
-}
-
-.hierarchyentry {
-	margin-left: 1em;
-	overflow: hidden;
-	border-left: 1px dotted #444444;
-}
-
-.hierarchytoggle {
-	margin-right: .5em;
-	padding-left: 1.5em;
-	font-size: .6em;
-	display: inline;
-}
-
-.hierarchyItem:hover {
-	background: lightblue url(../../../images/ui-bg_glass_75_cfe4ef_1x400.png) repeat;
-}
-
-.hierarchySpacer {
-	padding-bottom: 5px;
-	margin-right: 10px;
-	margin-left: 0px;
-	display: inline;
-	height: 1.3em;
-	white-space: nowrap;
-}
-
-.hierarchyItemSelected {
-	background: #82b8ff url(../../../images/ui-bg_glass_75_cfe4ef_1x400.png) repeat;
-	background-size: 100% 100%;
-	/* border: 1px solid lightgray; */
-	color: black;
 }
 

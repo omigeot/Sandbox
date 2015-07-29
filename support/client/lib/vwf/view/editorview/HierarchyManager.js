@@ -33,15 +33,15 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 				$scope.isSearchResult = function(nodeId)
 				{
 					var node = $scope.fields.nodes[nodeId];
-					if( $scope.searchTerms )
-						return node && node.name && node.name.toLowerCase().indexOf($scope.searchTerms.toLowerCase()) > -1;
+					if( $scope.filter.text )
+						return node && node.name && node.name.toLowerCase().indexOf($scope.filter.text.toLowerCase()) > -1;
 					else
 						return true;
 				}
 
 				$scope.isSearchResultAncestor = function(nodeId)
 				{
-					if( $scope.searchTerms )
+					if( $scope.filter.text )
 						return $scope.fields.nodes[nodeId] && $scope.fields.nodes[nodeId].children.reduce(
 							function(oldResult, childId){
 								return oldResult || $scope.isSearchResult(childId) || $scope.isSearchResultAncestor(childId);
@@ -53,7 +53,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 				}
 
 				var cancel = null;
-				$scope.$watch('searchTerms', function(newval)
+				$scope.$watch('filter.text', function(newval)
 				{
 					if(cancel) $timeout.cancel(cancel);
 
@@ -63,7 +63,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 						var isResult = $scope.isSearchResult($scope.node.id);
 
 						elem.toggleClass('hidden', !isAncestor && !isResult);
-						if( $scope.searchTerms && isAncestor )
+						if( $scope.filter.text && isAncestor )
 							elem.removeClass('collapsed');
 					}, 200);
 				});
@@ -128,43 +128,6 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 		};
 	}]);
 
-	app.directive('scrollFixed', function()
-	{
-		return {
-			restrict: 'A',
-			scope: {
-				fixedProps: '@scrollFixed'
-			},
-			link: function($scope, elem, attrs)
-			{
-				$scope.fixedProps = $scope.fixedProps.split(' ');
-
-				var initialVals = {};
-				for(var i=0; i<$scope.fixedProps.length; i++){
-					var propName = $scope.fixedProps[i];
-					initialVals[propName] = parseInt(elem[0].style[propName]) || 0;
-				}
-
-				var parent = elem.parent()[0];
-				elem.parent().scroll(function(evt)
-				{
-					if( initialVals.top !== undefined ){
-						elem[0].style.top = (parent.scrollTop + initialVals.top) + 'px';
-					}
-					if( initialVals.bottom !== undefined ){
-						elem[0].style.bottom = (-parent.scrollTop + initialVals.bottom) + 'px';
-					}
-					if( initialVals.left !== undefined ){
-						elem[0].style.left = (parent.scrollLeft + initialVals.left) + 'px';
-					}
-					if( initialVals.right !== undefined ){
-						elem[0].style.right = (-parent.scrollLeft + initialVals.right) + 'px';
-					}
-				});
-			}
-		};
-	});
-
 	app.controller('HierarchyController', ['$scope', function($scope)
 	{
 		window._HierarchyManager = $scope;
@@ -172,7 +135,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 		$scope.selectedThreeNode = null;
 		var selectionBounds = null;
 
-		$scope.searchTerms = '';
+		$scope.filter = {
+			text: '',
+			type: 'any'
+		};
 
 		$scope.$watch('fields.selectedNode', function(newval){
 			if( newval )
@@ -532,6 +498,83 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 		}
 
 	}]);
+
+	app.directive('customSelect', function()
+	{
+		return {
+			restrict: 'E',
+			scope: {
+				selected: '=model'
+			},
+			link: function($scope, elem, attrs)
+			{
+				var options = {};
+				var optionsInOrder = $('.menu', elem).children();
+
+				$scope.selected = options.attr('value');
+				$scope.expanded = false;
+
+				for(var i=0; i<optionsInOrder.length; i++){
+					options[ $(optionsInOrder[i]).attr('value') ] = $(optionsInOrder[i]);
+				}
+
+				$scope.$watch('selected', function(newval, oldval)
+				{
+					options[oldval].removeClass('selected');
+					$('.selectedOption', elem).html( options[newval].clone() );
+					options[newval].addClass('selected');
+				});
+
+				$('.selectedOption', elem).click(function(){
+					elem.addClass('expanded');
+				});
+
+				optionsInOrder.click(function(evt)
+				{
+					$scope.selected = $(evt.currentTarget).attr('value');
+					elem.removeClass('expanded');
+				});
+			}
+		};
+	});
+
+	app.directive('scrollFixed', function()
+	{
+		return {
+			restrict: 'A',
+			scope: {
+				fixedProps: '@scrollFixed'
+			},
+			link: function($scope, elem, attrs)
+			{
+				$scope.fixedProps = $scope.fixedProps.split(' ');
+
+				var initialVals = {};
+				for(var i=0; i<$scope.fixedProps.length; i++){
+					var propName = $scope.fixedProps[i];
+					initialVals[propName] = parseInt(elem[0].style[propName]) || 0;
+				}
+
+				var parent = elem.parent()[0];
+				elem.parent().scroll(function(evt)
+				{
+					if( initialVals.top !== undefined ){
+						elem[0].style.top = (parent.scrollTop + initialVals.top) + 'px';
+					}
+					if( initialVals.bottom !== undefined ){
+						elem[0].style.bottom = (-parent.scrollTop + initialVals.bottom) + 'px';
+					}
+					if( initialVals.left !== undefined ){
+						elem[0].style.left = (parent.scrollLeft + initialVals.left) + 'px';
+					}
+					if( initialVals.right !== undefined ){
+						elem[0].style.right = (-parent.scrollLeft + initialVals.right) + 'px';
+					}
+				});
+			}
+		};
+	});
+
 
 	return window._HierarchyManager;
 });
