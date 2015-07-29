@@ -318,13 +318,14 @@ function sandboxWorld(id, metadata)
         {
             if (message.constructor != String)
             {
-                message.instance = this.id;
+                //message.instance = this.id;
                 if (!message.time)
                     message.time = this.time;
-                message = JSON.stringify(message);
+               
             }
             //message to each user the join of the new client. Queue it up for the new guy, since he should not send it until after getstate
             var packedMessage = messageCompress.pack(message);
+            
             for (var i in this.clients)
             {
                 this.messageClient(this.clients[i], packedMessage, ignorePending, resolvePending);
