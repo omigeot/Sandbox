@@ -757,8 +757,7 @@ function sandboxWorld(id, metadata)
         }
         else
         {
-            try
-            {
+            
                 var loginData = client.loginData;
                 logger.debug(client.id, loginData, 2)
                     //thisInstance.clients[socket.id] = null;
@@ -787,7 +786,7 @@ function sandboxWorld(id, metadata)
                         "node": 'index-vwf',
                         member: 'cameraBroadcastEnd',
                         "time": this.time,
-                        client: socket.id
+                        client: client.id
                     });
                     this.messageClients(
                     {
@@ -798,7 +797,7 @@ function sandboxWorld(id, metadata)
                             []
                         ],
                         "time": this.time,
-                        client: socket.id
+                        client: client.id
                     });
                     this.state.deletedNode(avatarID);
                 }
@@ -810,12 +809,7 @@ function sandboxWorld(id, metadata)
                 });
                 console.log('clientcount is ' + this.clientCount());
                 console.log(this.getClientList());
-            }
-            catch (e)
-            {
-                logger.error('error in reflector disconnect')
-                logger.error(e);
-            }
+            
         }
     }
 }

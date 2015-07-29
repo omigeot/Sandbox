@@ -18,8 +18,8 @@ properties:
   rotZ: 0
   oldRotZ: 0         
   test:  
-  motionStack: []
-  activeCycle: []
+  motionStack: 
+  activeCycle: 
   standingOnID: 
   standingOnOffset: 
   ___physics_activation_state: 4
@@ -31,6 +31,7 @@ properties:
   ___physics_enabled: true
   ___physics_mass: 158.5
   animationPaused: false
+  jumpcounter: 0
 methods:
   tick:
   attached:
@@ -77,7 +78,10 @@ scripts:
 
 
         if (this.id == 'character-vwf') return;
-
+        if(!this.motionStack)
+          this.motionStack = [];
+        if(!this.activeCycle)  
+          this.activeCycle = [];
         this.DownKeys = [];
         // this.motionStack= [];
         this.jumpcounter = 0;

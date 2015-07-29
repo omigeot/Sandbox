@@ -74,7 +74,7 @@ var simulationManager = function(world)
         {
             if (!this.getClientForNode(i))
             {
-                console.log(i);
+                console.log("no client for " + i);
                 continue;
             }
             for (var j in this.clientControlTable[i])
@@ -108,8 +108,9 @@ var simulationManager = function(world)
         var average = this.clientAverageLoad();
         delete this.clients[sandboxClient.id];
         var counter = 0;
+        var errorTimeout = this.world.state.nodes.length;
         //divide up work distribute until new client shares load
-        while (newClient.nodesSimulating.length < average -1)
+        while (newClient.nodesSimulating.length < average -1 && errorTimeout)
         {
             
             var nextClient = this.clients[Object.keys(this.clients)[counter]];
@@ -118,9 +119,14 @@ var simulationManager = function(world)
             {
                 nextClient.stopSimulatingNode(node);
                 newClient.startSimulatingNode(node);
+                counter++;
+                counter = counter % this.clientCount();
             }
-            counter++;
-            counter = counter % this.clientCount();
+            errorTimeout--;
+        }
+        if(errorTimeout == 0)
+        {
+            console.log("Error redistributing nodes");
         }
         this.clients[sandboxClient.id] = newClient;
     }
@@ -133,11 +139,12 @@ var simulationManager = function(world)
         var oldNodes = this.clients[sandboxClient.id].nodesSimulating;
         delete this.clients[sandboxClient.id];
         //redistribute the nodes the client had been simulating
-        this.distribute(oldNodes);
+        
         for (var i in this.clientControlTable)
         {
             delete this.clientControlTable[i][sandboxClient.id];
         }
+        this.distribute(oldNodes);
     }
     this.distribute = function(nodes)
     {
@@ -200,6 +207,8 @@ var simulationManager = function(world)
         if (!record[sendingClient.id])
             record[sendingClient.id] = 0;
         record[sendingClient.id] ++;
+        console.log(nodeid);
+        console.log(record)
     }
     this.getClientsForMessage = function(type, nodeid, sendingClient)
     {

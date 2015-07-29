@@ -182,17 +182,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
             // Get the behavior nodes.
 
-            var behaviors = (childImplementsIDs || []).map(function(childImplementsID) {
-                return jsDriverSelf.nodes[childImplementsID];
-            });
-
-            // For each behavior, create a proxy for this node to the behavior and attach it above
-            // the prototype, or above the most recently-attached behavior.
-
-            behaviors.forEach(function(behavior) {
-                prototype = proxiedBehavior.call(jsDriverSelf, prototype, behavior);
-            });
-
+            
             // Create the node. It's prototype is the most recently-attached behavior, or the
             // specific prototype if no behaviors are attached.
 
@@ -421,46 +411,8 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 configurable: false
             });
 
-            // Define a "future" proxy so that for any this.property, this.method, or this.event, we
-            // can reference this.future( when, callback ).property/method/event and have the
-            // expression evaluated at the future time.
 
-            Object.defineProperty(node, "in", { // TODO: only define on shared "node" prototype?
-                value: function(when, callback) { // "this" is node
-                    return refreshedFuture.call(jsDriverSelf, this, -when, callback); // relative time
-                },
-                enumerable: true,
-            });
-
-            Object.defineProperty(node, "at", { // TODO: only define on shared "node" prototype?
-                value: function(when, callback) { // "this" is node
-                    return refreshedFuture.call(jsDriverSelf, this, when, callback); // absolute time
-                },
-                enumerable: true,
-            });
-
-            Object.defineProperty(node, "future", { // same as "in"  // TODO: only define on shared "node" prototype?
-                get: function() {
-                    return this.in;
-                },
-                enumerable: true,
-            });
-
-
-
-            node.private.future = Object.create(prototype.private ?
-                prototype.private.future : Object.prototype
-            );
-
-            Object.defineProperty(node.private.future, "private", {
-                value: {
-                    when: 0,
-                    callback: undefined,
-                    change: 0,
-                }
-            });
-
-            node.private.change = 1; // incremented whenever "future"-related changes occur
+           
 
             if (nodeID)
                 this.addingChild(nodeID, childID, childName);
@@ -917,6 +869,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             Object.defineProperty(node.methods, methodName, { // "this" is node.methods in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node.methods
+                        if(!vwf.isSimulating(this.id)) return;
                         return jsDriverSelf.getTopContext().callMethod(this.id, methodName, arguments);
                     };
                 },
@@ -933,6 +886,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             Object.defineProperty(node, methodName, { // "this" is node in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node
+                        if(!vwf.isSimulating(this.id)) return;
                         return jsDriverSelf.getTopContext().callMethod(this.id, methodName, arguments);
                     };
                 },
@@ -1337,6 +1291,9 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 if (!phase || listener.phases && listener.phases.indexOf(phase) >= 0) {
 
                     //var result = listener.handler.apply(listener.context || jsDriverSelf.nodes[0], eventParameters); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
+
+                    var contextID = listener.context.id;
+                    if(!vwf.isSimulating(contextID)) return; // be careful not to fire handlers on nodes that are simulated elsewhere
                     var result = jsDriverSelf.tryExec(listener.context || jsDriverSelf.nodes[0],listener.handler,eventParameters)
                     return handled || result === true || result === undefined; // interpret no return as "return true"
                 }
@@ -1389,371 +1346,8 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
     // -- proxiedBehavior --------------------------------------------------------------------------
 
-    function proxiedBehavior(prototype, behavior) { // invoke with the model as "this"  // TODO: this is a lot like createProperty()/createMethod()/createEvent(), and refreshedFuture(). Find a way to merge.
+    
 
-
-
-        var proxy = Object.create(prototype);
-
-        Object.defineProperty(proxy, "private", {
-            value: Object.create(behavior.private || Object.prototype)
-        });
-
-        proxy.private.origin = behavior; // the node we're the proxy for
-
-        proxy.id = behavior.id; // TODO: move to vwf/model/object
-
-        proxy.name = behavior.name;
-
-        proxy.parent = behavior.parent;
-
-        proxy.source = behavior.source;
-        proxy.type = behavior.type;
-
-        proxy.properties = Object.create(prototype.properties || Object.prototype, {
-            node: {
-                value: proxy
-            } // for proxy.properties accessors (non-enumerable)  // TODO: hide this better
-        });
-
-        for (var propertyName in behavior.properties) {
-
-            if (behavior.properties.hasOwnProperty(propertyName)) {
-
-                (function(propertyName) {
-
-                    Object.defineProperty(proxy.properties, propertyName, { // "this" is proxy.properties in get/set
-                        get: function() {
-                            return jsDriverSelf.kernel.getProperty(this.node.id, propertyName)
-                        },
-                        set: function(value) {
-                            jsDriverSelf.kernel.setProperty(this.node.id, propertyName, value)
-                        },
-                        enumerable: true
-                    });
-
-                    proxy.hasOwnProperty(propertyName) || // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                    Object.defineProperty(proxy, propertyName, { // "this" is proxy in get/set
-                        get: function() {
-                            return jsDriverSelf.kernel.getProperty(this.id, propertyName)
-                        },
-                        set: function(value) {
-                            jsDriverSelf.kernel.setProperty(this.id, propertyName, value)
-                        },
-                        enumerable: true
-                    });
-
-                })(propertyName);
-
-            }
-
-        }
-
-        proxy.methods = Object.create(prototype.methods || Object.prototype, {
-            node: {
-                value: proxy
-            } // for proxy.methods accessors (non-enumerable)  // TODO: hide this better
-        });
-
-        for (var methodName in behavior.methods) {
-
-            if (behavior.methods.hasOwnProperty(methodName)) {
-
-                (function(methodName) {
-
-                    Object.defineProperty(proxy.methods, methodName, { // "this" is proxy.methods in get/set
-                        get: function() {
-                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.methods
-                                return jsDriverSelf.kernel.callMethod(this.node.id, methodName, arguments);
-                            };
-                        },
-                        set: function(value) {
-                            this.node.methods.hasOwnProperty(methodName) ||
-                                jsDriverSelf.kernel.createMethod(this.node.id, methodName);
-                            this.node.private.bodies[methodName] = value;
-                        },
-                        enumerable: true,
-                    });
-
-                    proxy.hasOwnProperty(methodName) || // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                    Object.defineProperty(proxy, methodName, { // "this" is proxy in get/set
-                        get: function() {
-                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy
-                                return jsDriverSelf.kernel.callMethod(this.id, methodName, arguments);
-                            };
-                        },
-                        set: function(value) {
-                            this.methods.hasOwnProperty(methodName) ||
-                                jsDriverSelf.kernel.createMethod(this.id, methodName);
-                            this.private.bodies[methodName] = value;
-                        },
-                        enumerable: true,
-                    });
-
-                })(methodName);
-
-            }
-
-        }
-
-        proxy.events = Object.create(prototype.events || Object.prototype, {
-            node: {
-                value: proxy
-            } // for proxy.events accessors (non-enumerable)  // TODO: hide this better
-        });
-
-        for (var eventName in behavior.events) {
-
-            if (behavior.events.hasOwnProperty(eventName)) {
-
-                (function(eventName) {
-
-                    Object.defineProperty(proxy.events, eventName, { // "this" is proxy.events in get/set
-                        get: function() {
-                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.events
-                                return jsDriverSelf.kernel.fireEvent(this.node.id, eventName, arguments);
-                            };
-                        },
-                        set: function(value) {
-                            var listeners = this.node.private.listeners[eventName] ||
-                                (this.node.private.listeners[eventName] = []); // array of { handler: function, context: node, phases: [ "phase", ... ] }
-                            if (typeof value == "function" || value instanceof Function) {
-                                listeners.push({
-                                    handler: value,
-                                    context: this.node
-                                }); // for node.events.*event* = function() { ... }, context is the target node
-                            } else if (value.add) {
-                                if (!value.phases || value.phases instanceof Array) {
-                                    listeners.push({
-                                        handler: value.handler,
-                                        context: value.context,
-                                        phases: value.phases
-                                    });
-                                } else {
-                                    listeners.push({
-                                        handler: value.handler,
-                                        context: value.context,
-                                        phases: [value.phases]
-                                    });
-                                }
-                            } else if (value.remove) {
-                                this.node.private.listeners[eventName] = listeners.filter(function(listener) {
-                                    return listener.handler !== value.handler;
-                                });
-                            } else if (value.flush) {
-                                this.node.private.listeners[eventName] = listeners.filter(function(listener) {
-                                    return listener.context !== value.context;
-                                });
-                            }
-                        },
-                        enumerable: true,
-                    });
-
-                    proxy.hasOwnProperty(eventName) || // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
-                    Object.defineProperty(proxy, eventName, { // "this" is proxy in get/set
-                        get: function() {
-                            return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy
-                                return jsDriverSelf.kernel.fireEvent(this.id, eventName, arguments);
-                            };
-                        },
-                        set: function(value) {
-                            var listeners = this.private.listeners[eventName] ||
-                                (this.private.listeners[eventName] = []); // array of { handler: function, context: node, phases: [ "phase", ... ] }
-                            if (typeof value == "function" || value instanceof Function) {
-                                listeners.push({
-                                    handler: value,
-                                    context: this
-                                }); // for node.*event* = function() { ... }, context is the target node
-                            } else if (value.add) {
-                                if (!value.phases || value.phases instanceof Array) {
-                                    listeners.push({
-                                        handler: value.handler,
-                                        context: value.context,
-                                        phases: value.phases
-                                    });
-                                } else {
-                                    listeners.push({
-                                        handler: value.handler,
-                                        context: value.context,
-                                        phases: [value.phases]
-                                    });
-                                }
-                            } else if (value.remove) {
-                                this.private.listeners[eventName] = listeners.filter(function(listener) {
-                                    return listener.handler !== value.handler;
-                                });
-                            } else if (value.flush) {
-                                this.private.listeners[eventName] = listeners.filter(function(listener) {
-                                    return listener.context !== value.context;
-                                });
-                            }
-                        },
-                        enumerable: true,
-                    });
-
-                })(eventName);
-
-            }
-
-        }
-
-        return proxy;
-    }
-
-    // -- refreshedFuture --------------------------------------------------------------------------
-
-    function refreshedFuture(node, when, callback) { // invoke with the model as "this"
-
-
-
-        if (Object.getPrototypeOf(node).private) {
-            refreshedFuture.call(this, Object.getPrototypeOf(node));
-        }
-
-        var future = node.private.future;
-
-        future.private.when = when;
-        future.private.callback = callback; // TODO: would like to be able to remove this reference after the future call has completed
-
-        if (future.private.change < node.private.change) { // only if out of date
-
-            future.id = node.id;
-
-            future.properties = Object.create(Object.getPrototypeOf(future).properties || Object.prototype, {
-                future: {
-                    value: future
-                } // for future.properties accessors (non-enumerable)  // TODO: hide this better
-            });
-
-            for (var propertyName in node.properties) {
-
-                if (node.properties.hasOwnProperty(propertyName)) {
-
-                    (function(propertyName) {
-
-                        Object.defineProperty(future.properties, propertyName, { // "this" is future.properties in get/set
-                            get: function() {
-                                return jsDriverSelf.kernel.getProperty(this.future.id,
-                                    propertyName, this.future.private.when, this.future.private.callback
-                                )
-                            },
-                            set: function(value) {
-                                jsDriverSelf.kernel.setProperty(this.future.id,
-                                    propertyName, value, this.future.private.when, this.future.private.callback
-                                )
-                            },
-                            enumerable: true
-                        });
-
-                        future.hasOwnProperty(propertyName) || // TODO: calculate so that properties take precedence over methods over events, for example
-                        Object.defineProperty(future, propertyName, { // "this" is future in get/set
-                            get: function() {
-                                return jsDriverSelf.kernel.getProperty(this.id,
-                                    propertyName, this.private.when, this.private.callback
-                                )
-                            },
-                            set: function(value) {
-                                jsDriverSelf.kernel.setProperty(this.id,
-                                    propertyName, value, this.private.when, this.private.callback
-                                )
-                            },
-                            enumerable: true
-                        });
-
-                    })(propertyName);
-
-                }
-
-            }
-
-            future.methods = Object.create(Object.getPrototypeOf(future).methods || Object.prototype, {
-                future: {
-                    value: future
-                } // for future.methods accessors (non-enumerable)  // TODO: hide this better
-            });
-
-            for (var methodName in node.methods) {
-
-                if (node.methods.hasOwnProperty(methodName)) {
-
-                    (function(methodName) {
-
-                        Object.defineProperty(future.methods, methodName, { // "this" is future.methods in get/set
-                            get: function() {
-                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future.methods
-                                    return jsDriverSelf.kernel.callMethod(this.future.id,
-                                        methodName, arguments, this.future.private.when, this.future.private.callback
-                                    );
-                                }
-                            },
-                            enumerable: true
-                        });
-
-                        future.hasOwnProperty(methodName) || // TODO: calculate so that properties take precedence over methods over events, for example
-                        Object.defineProperty(future, methodName, { // "this" is future in get/set
-                            get: function() {
-                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future
-                                    return jsDriverSelf.kernel.callMethod(this.id,
-                                        methodName, arguments, this.private.when, this.private.callback
-                                    );
-                                }
-                            },
-                            enumerable: true
-                        });
-
-                    })(methodName);
-
-                }
-
-            }
-
-            future.events = Object.create(Object.getPrototypeOf(future).events || Object.prototype, {
-                future: {
-                    value: future
-                } // for future.events accessors (non-enumerable)  // TODO: hide this better
-            });
-
-            for (var eventName in node.events) {
-
-                if (node.events.hasOwnProperty(eventName)) {
-
-                    (function(eventName) {
-
-                        Object.defineProperty(future.events, eventName, { // "this" is future.events in get/set
-                            get: function() {
-                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future.events
-                                    return jsDriverSelf.kernel.fireEvent(this.future.id,
-                                        eventName, arguments, this.future.private.when, this.future.private.callback
-                                    );
-                                };
-                            },
-                            enumerable: true,
-                        });
-
-                        future.hasOwnProperty(eventName) || // TODO: calculate so that properties take precedence over methods over events, for example
-                        Object.defineProperty(future, eventName, { // "this" is future in get/set
-                            get: function() {
-                                return function( /* parameter1, parameter2, ... */ ) { // "this" is future
-                                    return jsDriverSelf.kernel.fireEvent(this.id,
-                                        eventName, arguments, this.private.when, this.private.callback
-                                    );
-                                };
-                            },
-                            enumerable: true,
-                        });
-
-                    })(eventName);
-
-                }
-
-            }
-
-            future.private.change = node.private.change;
-
-        }
-
-        return future;
-    }
 
     // -- getterScript -----------------------------------------------------------------------------
 
