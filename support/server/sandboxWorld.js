@@ -547,6 +547,8 @@ function sandboxWorld(id, metadata)
                     "time": this.getStateTime
                 })));
             }else{
+
+                self.simulationManager.addClient(client);
                 setupAvatar.apply(this);//this should then mark pending
             }
 
