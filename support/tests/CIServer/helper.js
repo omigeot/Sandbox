@@ -42,10 +42,10 @@ var webdriverio;
 
 exports.sendMessage = function(runner, command, param){
 	console.log("sending command...", command);
-	
-	//if(param) 
-	runner.send([command, param]);	
-	//else runner.send([command]);	
+
+	//if(param)
+	runner.send([command, param]);
+	//else runner.send([command]);
 };
 
 exports.clearCache = function(){
@@ -58,7 +58,7 @@ exports.clearCache = function(){
 	}
 };
 
-exports.getAllTestData = function(filename){	
+exports.getAllTestData = function(filename){
 	//each test can be a function that returns an array of tests, or a single test
 	if(cacheTests[filename]){
 		return cacheTests[filename];
@@ -66,15 +66,15 @@ exports.getAllTestData = function(filename){
 
 	var test = require("../client/" + filename);
 	var testData = null;
-	
+
 	//the module is a function that returns an array of tests
 	if (test instanceof Function)
 		testData = test();
-	
+
 	//the module is a test
 	else if (test.test instanceof Function)
 		testData = [test]
-	
+
 	else //the module is a nightwatch style test
 	{
 		var title = Object.keys(test)[0]
@@ -86,7 +86,7 @@ exports.getAllTestData = function(filename){
 			}];
 		}
 	}
-	
+
 	//Add the filename to each of the tests
 	for(var i = 0; i < testData.length; i++){
 		testData[i].filename = filename;
@@ -96,21 +96,23 @@ exports.getAllTestData = function(filename){
 	return testData;
 };
 
-exports.getSingleTestData = function(testId){	
+exports.getSingleTestData = function(testId){
 	var tempArr = testId.split(":");
-	var filename = tempArr[0];
-	var title = tempArr[1];
-	
+
+	//Doing this allows colons to appear in the title
+	var filename = tempArr.shift();
+	var title = tempArr.join(":");
+
 	//Given a filename, get an array of test objects
 	var allTests = exports.getAllTestData(filename);
-	
+
 	//Search for single test with matching title and return it if found
 	for(var i = 0; i < allTests.length; i++){
 		if(title === allTests[i].title){
 			return allTests[i];
 		}
 	}
-	
+
 	return null;
 };
 
@@ -132,7 +134,7 @@ exports.findFiles = function(nextStep, dir){
 
 exports.initWebdriver = function(browserOptions){
 	webdriverio = require('webdriverio');
-	
+
 	global.browser = webdriverio.remote(browserOptions);
 	console.log(Object.keys(global.browser));
 
@@ -151,7 +153,7 @@ function findFiles(nextStep, dir) {
 	var dirList = [];
 
 	dir = dir ? dir : "";
-	
+
 	try {
 		foundFiles = fs.readdirSync(baseDir + dir);
 	} catch (e) {
@@ -172,7 +174,7 @@ function findFiles(nextStep, dir) {
 	for (var i = 0; i < dirList.length; i++)
 		findFiles(null, dirList[i]);
 
-	if (nextStep) nextStep();	
+	if (nextStep) nextStep();
 }
 
 /*

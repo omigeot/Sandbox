@@ -3,7 +3,7 @@
 var async  = require('async'),
 	helper = require('./helper.js'),
 	state  = helper.state.READY,
-	currentReport = {},
+	currentReport = {runs: []},
 	currentTestID,
 	browsersList = ['chrome','firefox'/*,'ie11'*/];
 
@@ -11,7 +11,7 @@ var async  = require('async'),
 var domain = require('domain').create();
 process.on('uncaughtException', handleException);
 domain.on('error', handleException);
-	
+
 //Initialize the web driver
 helper.initWebdriver({
 	desiredCapabilities: {
@@ -23,15 +23,15 @@ helper.initWebdriver({
 process.on("message", function(message, handle){
 	var command = message[0];
 	var param = message[1];
-	
+
 	console.log("Runner received a message:", message);
-	
+
 	switch(state){
 		//for now, runner does not accept commands while running
 		case helper.state.RUNNING: break;
 		case helper.state.READY: handleReadyState(command, param); break;
 	}
-	
+
 	//"Remind" the server that we are ready if the state hasn't changed from ready
 	if(state === helper.state.READY){
 		updateState(helper.state.READY);
@@ -39,7 +39,7 @@ process.on("message", function(message, handle){
 });
 
 //Runner is in ready state; handle incoming commands
-function handleReadyState(command, param){	
+function handleReadyState(command, param){
 	if(command === helper.command.RUN_ONE){
 		doRunCommand(param);
 	}
@@ -50,24 +50,24 @@ function handleReadyState(command, param){
 
 function doRunCommand(param){
 	if(!param) return;
-	
+
 	var testObj = helper.getSingleTestData(param);
 	currentTestID = param;
-	
+
 	currentReport = {
 		id: currentTestID,
 		status: 'complete',
 		result: null,
 		message: null,
-		filename: testObj.filename,	
+		filename: testObj.filename,
 		title: testObj.title,
 		runs: [],
 	};
-	
-	//let server know about updated state, if necessary. 
+
+	//let server know about updated state, if necessary.
 	//This must only happen once so we don't overwrite the cancel state
 	updateState(helper.state.RUNNING);
-	
+
 	//For each browser, run a single test, then send a message to server when all tests are complete.
 	async.eachSeries(browsersList, runSingleTest, function sendResults(){
 		helper.sendMessage(process, helper.command.RESULT, currentReport);
@@ -90,15 +90,14 @@ function runSingleTest(browserName, done){
 
 //Should not be called directly. Use runSingleTest instead.
 //Could move into runSingleTest function block, but this is cleaner.
-//This function returns a function suitable for passing into async.series.
 function _executeActualTestAsync(cb){
 	var browserName = global.browser.desiredCapabilities.browserName;
 	var testObj = helper.getSingleTestData(currentTestID);
-	
+
 	var handledTest = domain.bind(testObj.test);
 	handledTest(global.browser, global.testUtils.completeTest(function(success, message) {
 		console.log("Finished running test using ", browserName, message);
-		
+
 		currentReport.runs.push({
 			status: "complete",
 			result: success ? "passed" : "failed",
@@ -137,9 +136,9 @@ function handleException(e){
 		message: " " + e.toString() + "; ",
 		browsername: browserName
 	});
-	
+
 	helper.sendMessage(process, helper.command.ERROR, currentReport);
-	
+
 	global.browser.endAll().then(exitWithError);
 	runLater(exitWithError, 10000);
 }

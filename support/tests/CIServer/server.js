@@ -15,7 +15,7 @@ var RUNNING = helper.state.RUNNING,
 	ERROR = helper.state.ERROR,
 	UPDATING = helper.state.UPDATING,
 	BUSY = helper.state.BUSY;
-	
+
 
 var status = READY;
 var tests = [];
@@ -24,6 +24,7 @@ var testQueue = [];
 var files = helper.files;
 var findFiles = helper.findFiles;
 var runner;
+var sandbox;
 
 function readFiles(nextStep) {
 	logger.log("readFiles")
@@ -51,7 +52,7 @@ function gitLog() {
 	var log = childprocess.spawn("git", ["log", '-1'], {
 		cwd: "../../../"
 	});
-	
+
 	log.stdout.on('data', function(data) {
 		//Wait for startup complete
 		report.gitLog += data.toString();
@@ -62,7 +63,7 @@ function gitPull(pullComplete) {
 	logger.log("Git Pull");
 	var gitpull = childprocess.spawn("git", ["pull"], {
 		cwd: "../../../",
-		//stdio:'inherit' 
+		//stdio:'inherit'
 	});
 	//log errors
 	gitpull.stdout.on('data', function(data) {
@@ -78,13 +79,61 @@ function gitPull(pullComplete) {
 		}
 		pullComplete();
 	});
-};
+}
+
+function startSandbox(cb) {
+	logger.log("Sandbox start");
+	//start the sandbox server
+	sandbox = childprocess.spawn("node", ["app.js"], {
+		cwd: "../../../"
+	});
+	var startupGood = false;
+	sandbox.stdout.on('data', function(data) {
+		//Wait for startup complete
+		if (data.toString().indexOf("Startup complete") > -1) {
+			startupGood = true;
+			sandbox.removeAllListeners('exit')
+			cb();
+		}
+	})
+	sandbox.on('exit', function(code) {
+		if (sandbox && startupGood == false) {
+			logger.log('sandbox exit without good start')
+			sandbox = null;
+			cb();
+		}
+	});
+}
+
+function killSandbox(cb) {
+	logger.log("Sandbox stop");
+	var called = false;
+	if (sandbox) {
+		var timeoutid = setTimeout(function() {
+			called = true;
+			logger.log('exiting calling callback')
+			cb();
+		}, 2000)
+		sandbox.on('exit', function(code) {
+			sandbox = null;
+			if (!called) {
+				clearTimeout(timeoutid)
+				called = true;
+				logger.log('exiting calling callback')
+				cb();
+			}
+		});
+		sandbox.kill();
+	} else {
+		cb()
+	}
+}
 
 function handleIncomingMessage(message, handler){
 	console.log("Server status", status);
 	var command = message[0];
 	var param = message[1];
-	
+
 	switch(status){
 		case RUNNING: handleRunningState(command, param); break;
 		case READY: handleReadyState(command, param); break;
@@ -93,7 +142,7 @@ function handleIncomingMessage(message, handler){
 		case UPDATING: handleUpdatingState(command, param); break;
 		case BUSY: handleBusyState(command, param); break;
 	}
-	
+
 	handleStateless(command, param);
 }
 
@@ -102,10 +151,10 @@ function handleStateless(command, param){
 		if(command === helper.command.STOP){
 			testQueue.length = 0;
 		}
-		
+
 		param.response.end();
 	}
-	
+
 	//It doesn't matter when we get results... always update report.
 	if(command == helper.command.RESULT){
 		console.log("The server received the results of the test!: ", param);
@@ -138,7 +187,7 @@ function handleReadyState(command, param){
 	if(param.isHTTP){
 		if(command == helper.command.RUN){
 			queueAllTests();
-			doRunCommand();	
+			doRunCommand();
 		}
 		else if(command === helper.command.RUN_ONE){
 			addTestToQueue(param.query);
@@ -153,11 +202,11 @@ function handleReadyState(command, param){
 			doReload();
 		}
 	}
-	
+
 	//Response from runner.. test is complete
 	else{
 		//if runner is "updating" state to ready...
-		if(checkState(command, param, READY)){ 
+		if(checkState(command, param, READY)){
 			doRunCommand();
 		}
 	}
@@ -178,7 +227,7 @@ function handleRunningState(command, param){
 			status = UPDATING;
 		}
 	}
-	
+
 	//command from runner
 	else{
 		//The runner is going to exit. Handle final report.
@@ -189,7 +238,7 @@ function handleRunningState(command, param){
 		}
 		else if(checkState(command, param, READY)){
 			console.log("The runner is ready again... run next test... ", param);
-			
+
 			//get next item off of queue
 			doRunCommand();
 		}
@@ -201,7 +250,7 @@ function doRunCommand(){
 		//get item at front of "queue"
 		var tid = testQueue.shift();
 		status = RUNNING;
-		
+
 		report.tests[tid].status = "running";
 		helper.sendMessage(runner, helper.command.RUN_ONE, tid);
 	}
@@ -210,11 +259,13 @@ function doRunCommand(){
 
 function doReload(){
 	status = helper.state.BUSY;
-	
+
 	async.series([
 		gitPull,
 		helper.findFiles,
 		readFiles,
+		killSandbox,
+		startSandbox,
 		quitRunner
 	]);
 }
@@ -222,7 +273,7 @@ function doReload(){
 function quitRunner(cb){
 	//Do not accept any commands from other states until reload is complete
 	status = helper.state.BUSY;
-	
+
 	helper.sendMessage(runner, helper.command.QUIT);
 	if(cb) cb();
 }
@@ -234,7 +285,7 @@ function setTestQueue(arr){
 
 function addTestToQueue(tid){
 	var testIds = Array.isArray(tid) ? tid : [tid];
-	
+
 	for(var i = 0; i < testIds.length; i++){
 		var tid = decodeURIComponent(testIds[i]);
 		if(testQueue.indexOf(tid) < 0){
@@ -263,13 +314,13 @@ function createRunner(cb){
 	});
 	runner.on("exit", function(message, handle){
 		console.log("Runner exited with message: " + message);
-		
+
 		//If necessary, we can check message to determine if this actually was an error.
 		//As of now, it doesn't really matter since the flow is more or less the same.
 		status = ERROR;
 		createRunner();
 	});
-	
+
 	if(cb) cb();
 }
 
@@ -280,7 +331,7 @@ server.on('request', function(request, response) {
 		if (request.url === "/ui/") {
 			request.url += 'tests.html'
 		}
-		
+
 		try {
 			var data = fs.readFileSync("." + request.url);
 			response.write(data)
@@ -291,7 +342,7 @@ server.on('request', function(request, response) {
 		response.end();
 		return;
 	}
-	
+
 	else if(request.url == helper.command.STATE) {
 		report.status = status;
 		report.log = logger._log;
@@ -332,8 +383,8 @@ port = p >= 0 ? parseInt(process.argv[p + 1]) : 8181;
 
 
 if (process.argv.indexOf('start') > -1){
-	async.series([gitPull, helper.findFiles, readFiles, queueAllTests, createRunner], listen);
+	async.series([gitPull, startSandbox, helper.findFiles, readFiles, queueAllTests, createRunner], listen);
 }
 else{
-	async.series([helper.findFiles, readFiles, createRunner], listen);
+	async.series([helper.findFiles, startSandbox, readFiles, createRunner], listen);
 }
