@@ -510,7 +510,7 @@ function sandboxWorld(id, metadata)
                     if (!this.state.getAvatarForClient(client.loginData.UID))
                         this.state.createAvatar(client.loginData.UID, client.id, function(avatarID)
                         {
-                            self.simulationManager.nodeCreated(avatarID, client);
+                            this.simulationManager.nodeCreated(avatarID, client);
                         });
                     else
                     {
