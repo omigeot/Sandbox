@@ -348,6 +348,7 @@
                 { library: "messageCompress", active: true },
                 { library: "vwf/view/xapi", active: true },
                 { library: "vwf/view/SAVE/SAVE", active: true },
+                { library: "vwf/model/SAVE/SAVE", active: true }
 
             ];
 
@@ -360,7 +361,8 @@
                     { library: "vwf/model/cesium", active: false },
                     { library: "vwf/model/object", active: true },
                     { library: "vwf/model/wires", active: true },
-                    { library: "vwf/model/jqueryui", active: true }
+                    { library: "vwf/model/jqueryui", active: true },
+                    { library: "vwf/model/SAVE/SAVE", active: true }
                 ],
                 view: [
                     { library: "vwf/view/glge", parameters: {"application-root":"#vwf-root"}, active: false },
@@ -497,6 +499,7 @@
                         "vwf/model/wires",
                         "vwf/model/threejs",
                         "vwf/model/jqueryui",
+                        "vwf/model/SAVE/SAVE",
                         "vwf/model/object",
                     ];
 

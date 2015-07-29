@@ -20,7 +20,7 @@ define(["module", "vwf/model"], function(module, model)
         initialize: function()
         {
             this.nodes = {};
-        }
+        },
         callingMethod: function(nodeID, method, args) {
 
         },
@@ -65,6 +65,7 @@ define(["module", "vwf/model"], function(module, model)
         },
         gettingProperties: function(nodeID, properties)
         {
+            if(!this.nodes[nodeID]) return;
             return this.nodes[nodeID].properties;
         },
 
