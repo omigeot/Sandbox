@@ -508,10 +508,13 @@ function sandboxWorld(id, metadata)
                 if (needAvatar)
                 {
                     if (!this.state.getAvatarForClient(client.loginData.UID))
+                    {
+                        var self = this;
                         this.state.createAvatar(client.loginData.UID, client.id, function(avatarID)
                         {
-                            this.simulationManager.nodeCreated(avatarID, client);
+                            self.simulationManager.nodeCreated(avatarID, client);
                         });
+                    }
                     else
                     {
                         //note that we only do this for the second client, because it's impossible to have 2 clients 
