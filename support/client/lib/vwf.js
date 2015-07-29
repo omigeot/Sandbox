@@ -1082,6 +1082,8 @@ this.stopSimulating = function(nodeID)
 }
 this.isSimulating = function(nodeID)
 {
+    if(socket === null) ///we are in offline mode
+        return true;
     return nodeID == "index-vwf" ||
      (this.nodesSimulating.indexOf(nodeID) != -1)
 }
