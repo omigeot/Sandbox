@@ -546,7 +546,7 @@
     position: absolute;
     right: -50px;
     width: 73px;
-    top: 10%;
+    top: 5%;
     height: 21px;
     -webkit-transform: rotate(90deg);
     -ms-transform: rotate(90deg);
@@ -825,7 +825,7 @@
   #sidepanel #sidetab {
     position: absolute;
     left: -49px;
-    top: 10%;
+    top: 5%;
     padding: 3px 15px;
     border: 2px solid #82b8ff;
     border-bottom: none;

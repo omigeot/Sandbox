@@ -33,8 +33,8 @@ define([
 	"vwf/view/editorview/SidePanel", 
 	"vwf/view/editorview/Toolbar", 
 	"vwf/view/editorview/ChatSystemGUI", 
-	//"vwf/view/editorview/PrimitiveEditor", 
-	//"vwf/view/editorview/MaterialEditor", 
+	"vwf/view/editorview/PrimitiveEditor", 
+	"vwf/view/editorview/MaterialEditor", 
 	"vwf/view/editorview/Notifier", 
 	"vwf/view/editorview/ScriptEditor", 
 	"vwf/view/editorview/Editor", 
@@ -49,7 +49,7 @@ define([
 	"vwf/view/editorview/UndoManager", 
 	"vwf/view/editorview/Publisher", 
 	"vwf/view/editorview/EntityLibrary", 
-	//"vwf/view/editorview/PhysicsEditor",
+	"vwf/view/editorview/PhysicsEditor",
 	"vwf/view/editorview/PerformanceManager",
 	"vwf/view/editorview/JSONPrompt"
 	//"vwf/view/editorview/panelEditor",
@@ -100,10 +100,10 @@ define([
                     //initialize the primitive editor
 
                     //window.HierarchyManager = require("vwf/view/editorview/HeirarchyManager").getSingleton();;
-                    //window._PrimitiveEditor = require("vwf/view/editorview/PrimitiveEditor").getSingleton();
+                    window._PrimitiveEditor = require("vwf/view/editorview/PrimitiveEditor").getSingleton();
                     
-                    //window._MaterialEditor = require("vwf/view/editorview/MaterialEditor").getSingleton();
-                    //window._PhysicsEditor = require("vwf/view/editorview/PhysicsEditor").getSingleton();
+                    window._MaterialEditor = require("vwf/view/editorview/MaterialEditor").getSingleton();
+                    window._PhysicsEditor = require("vwf/view/editorview/PhysicsEditor").getSingleton();
                     //initialize the Material editor
                     
                     //window._MaterialEditor.hide();
@@ -123,13 +123,13 @@ define([
                     this.addManager(_UndoManager);
                     this.addManager(_ModelLibrary);
                     this.addManager(_Notifier);
-                    //this.addManager(_MaterialEditor);
-                    //this.addManager(_PrimitiveEditor);
+                    this.addManager(_MaterialEditor);
+                    this.addManager(_PrimitiveEditor);
                     this.addManager(_PermissionsManager);
                     this.addManager(_WireEditor);
                     //this.addManager(HierarchyManager);
                     this.addManager(_Publisher);
-                    //this.addManager(_PhysicsEditor);
+                    this.addManager(_PhysicsEditor);
                     
                 }
                 window._LocationTools = require("vwf/view/editorview/LocationTools").getSingleton();
@@ -140,12 +140,12 @@ define([
                 if (this.needTools()) {
                     require("vwf/view/editorview/help").getSingleton();
 
-                    //$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/PainterTool.js"></script>');
+                    $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/PainterTool.js"></script>');
 
                     $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/AlignTool.js"></script>');
 
-                    //$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/SplineTool.js"></script>');
-                    //$(document.head).append('<script type="text/javascript" src="vwf/view/editorview/TerrainTool.js"></script>');
+                    $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/SplineTool.js"></script>');
+                    $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/TerrainTool.js"></script>');
 
                     $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/lib/jquery.qtip-1.0.0-rc3.min.js"></script>');
                     $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/lib/beautify.module.js"></script>');
