@@ -610,6 +610,8 @@ function sandboxWorld(id, metadata)
             //route callmessage to the state to it can respond to manip the server side copy
             if (message.action == 'callMethod')
                 this.state.calledMethod(message.node, message.member, message.parameters);
+            if (message.action == 'simulationStateUpdate')
+                this.state.simulationStateUpdate(message.parameters);
             if (message.action == 'callMethod' && message.node == 'index-vwf' && message.member == 'PM')
             {
                 var textmessage = JSON.parse(message.parameters[0]);
@@ -682,7 +684,7 @@ function sandboxWorld(id, metadata)
             }
             var compressedMessage = messageCompress.pack(message);
             //distribute message to all clients on given instance
-            var concernedClients = this.simulationManager.getClientsForMessage(message.action, message.node, sendingclient)
+            var concernedClients = this.simulationManager.getClientsForMessage(message, sendingclient)
             for (var i in this.clients)
             {
                 var client = this.clients[i];

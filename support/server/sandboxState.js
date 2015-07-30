@@ -284,7 +284,7 @@ var sandboxState = function(id, metadata,world)
     this.satProperty = function(nodeid, prop, val)
     {
       
-
+        console.log(nodeid + prop + val)
         //We need to keep track internally of the properties
         //mostly just to check that the user has not messed with the ownership manually
         var node = this.findNode(nodeid);
@@ -465,6 +465,15 @@ var sandboxState = function(id, metadata,world)
                 //here, we need to hook back up the .parent property, so we can walk the graph for other operations.
                 this.reattachParents(this.nodes['index-vwf']);
             }
+        }
+       
+    }
+    this.simulationStateUpdate = function(updates)
+    {
+        for(var i in updates)
+        {
+            for(var j in updates[i])
+                this.satProperty(i,j,update[i][j])
         }
     }
 

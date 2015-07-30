@@ -53,7 +53,7 @@ var simClient = function(sandboxClient, simulationManager)
     }
     this.sendStartSimMessage = function(nodeID)
     {
-        console.log('sendStartSimMessage')
+       
         this.sandboxClient.emit('message', messageCompress.pack(JSON.stringify(
         {
             "action": "startSimulating",
@@ -151,8 +151,6 @@ var simulationManager = function(world)
         console.log("distribute");
         while (nodes.length)
         {
-            console.log(nodes.length)
-            console.log()
             for (var i in this.clients)
             {
                 var node = nodes.shift();
@@ -207,18 +205,28 @@ var simulationManager = function(world)
         if (!record[sendingClient.id])
             record[sendingClient.id] = 0;
         record[sendingClient.id] ++;
-        console.log(nodeid);
-        console.log(record)
+      
     }
-    this.getClientsForMessage = function(type, nodeid, sendingClient)
+    this.getClientsForMessage = function(message, sendingClient)
     {
+
+        var type = message.action;
+        var nodeid = message.node;
         // ancestors[0] should be index-vwf. 1 is the root. 
         //remember that we assign simulation by the root under scene
         var nodeid = this.world.state.ancestors(nodeid)[1] || nodeid;
         var clients = [];
         for (var i in this.clients)
         {
-            if (type == 'setProperty' || type == 'callMethod' || type == 'fireEvent')
+            //don't bother sending state updates back to the person who posted them
+            if(message.action == "simulationStateUpdate")
+            {
+                if(sendingClient != this.clients[i].sandboxClient)
+                {
+                    clients.push(this.client[i].sandboxClient) 
+                }
+            }
+            else if (type == 'setProperty' || type == 'callMethod' || type == 'fireEvent')
             {
                 if (this.clients[i].isSimulating(nodeid) || nodeid == 'index-vwf')
                     clients.push(this.clients[i].sandboxClient)
