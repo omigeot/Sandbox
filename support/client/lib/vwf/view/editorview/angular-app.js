@@ -111,7 +111,8 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 			app.root.fields.nodes[id].typeProp = val;
 		}
 
-		app.root.$apply();
+		if( app.root.fields.selectedNode && id===app.root.fields.selectedNode.id || prop === 'DisplayName' || prop === 'type' )
+			app.root.$apply();
 	}
 
 	app.createdNode = function(parentId, newId, newExtends, newImplements, newSource, newType)
