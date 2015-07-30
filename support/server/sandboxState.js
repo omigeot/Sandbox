@@ -284,7 +284,7 @@ var sandboxState = function(id, metadata,world)
     this.satProperty = function(nodeid, prop, val)
     {
       
-        console.log(nodeid + prop + val)
+        
         //We need to keep track internally of the properties
         //mostly just to check that the user has not messed with the ownership manually
         var node = this.findNode(nodeid);
@@ -473,7 +473,7 @@ var sandboxState = function(id, metadata,world)
         for(var i in updates)
         {
             for(var j in updates[i])
-                this.satProperty(i,j,update[i][j])
+                this.satProperty(i,j,updates[i][j])
         }
     }
 
