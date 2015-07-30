@@ -187,7 +187,8 @@ function handleReadyState(command, param){
 	if(param.isHTTP){
 		if(command == helper.command.RUN){
 			queueAllTests();
-			doRunCommand();
+			status = UPDATING;
+			doReload();
 		}
 		else if(command === helper.command.RUN_ONE){
 			addTestToQueue(param.query);
@@ -386,5 +387,5 @@ if (process.argv.indexOf('start') > -1){
 	async.series([gitPull, startSandbox, helper.findFiles, readFiles, queueAllTests, createRunner], listen);
 }
 else{
-	async.series([helper.findFiles, startSandbox, readFiles, createRunner], listen);
+	async.series([gitPull, helper.findFiles, startSandbox, readFiles, createRunner], listen);
 }
