@@ -1340,7 +1340,14 @@ this.tick = function() {
     if(this.getProperty(vwf.application(),'playMode') == 'play')
     {
     this.models.forEach( function( model ) {
-        model.ticking && model.ticking( this.now ); // TODO: maintain a list of tickable models and only call those
+
+        try{
+            model.ticking && model.ticking( this.now ); // TODO: maintain a list of tickable models and only call those
+        }catch(e)
+        {
+            console.error(e)
+        }
+
     }, this );
     
 
@@ -1353,7 +1360,12 @@ this.tick = function() {
     // Call ticked() on each view.
 
     this.views.forEach( function( view ) {
+        try{
         view.ticked && view.ticked( this.now ); // TODO: maintain a list of tickable views and only call those
+        }catch(e)
+        {
+            console.error(e);
+        }
     }, this );
     }
     this.tickCount ++;
