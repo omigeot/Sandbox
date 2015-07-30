@@ -191,7 +191,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 				if(ok)
 					staticLibs.addLibrary(val,val);
 			});
-		})
+		}
 
 		$scope.combinedLibs = convertAndCombine(assets, staticLibs);
 

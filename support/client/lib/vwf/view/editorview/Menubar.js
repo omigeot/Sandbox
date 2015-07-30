@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 
 define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], function(app, manageAssets)
 {
