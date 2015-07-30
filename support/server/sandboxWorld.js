@@ -665,6 +665,7 @@ function sandboxWorld(id, metadata)
             {
                 var displayname = this.state.getProperty(message.node, 'DisplayName');
                 this.state.deletedNode(message.node)
+                this.simulationManager.nodeDeleted(avatarID);
                 xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, displayname || message.node, null, this.id);
             }
             //We'll only accept a createChild if the user has ownership of the object
@@ -779,6 +780,7 @@ function sandboxWorld(id, metadata)
                     {
                         var avatarID = 'character-vwf-' + loginData.UID;
                         this.state.deletedNode(avatarID);
+                        this.simulationManager.nodeDeleted(avatarID);
                         this.messageClients(
                         {
                             "action": "deleteNode",
@@ -806,6 +808,7 @@ function sandboxWorld(id, metadata)
                         client: client.id
                     });
                     this.state.deletedNode(avatarID);
+                    this.simulationManager.nodeDeleted(avatarID);
                 }
                 this.messageClients(
                 {
