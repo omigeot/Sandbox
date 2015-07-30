@@ -1,4 +1,4 @@
-"use strict";
+"use strict"; 
 
 var helper = require('./helper.js'),
 	async = require("async"),
