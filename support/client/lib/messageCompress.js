@@ -30,7 +30,17 @@ function messageCompress()
             }
             if (typeof message == "string")
             {
-                return this.enc_mappings[message] || message;
+                if(this.enc_mappings[message])
+                return this.enc_mappings[message]
+                else
+                {
+                    if(message.length > 5 && message.length < 200 && message.indexOf('\n') == -1)
+                       {
+                             this.learnedMappings[message] = '';
+                             console.log('learning mapping for ' + message);
+                       }
+                    return message;
+                } 
             }
             if (typeof message == "boolean" || typeof message == "string" || typeof message == "number" || message === null || message === undefined)
                 return message;
@@ -63,7 +73,7 @@ function messageCompress()
                 return this.specialCaseDecode[key](message);
             if (typeof message == "string")
             {
-                return this.dnc_mappings[message] || message;
+                return this.dnc_mappings[message] || message
             }
             if (typeof message == "boolean" || typeof message == "string" || typeof message == "number" || message === null || message === undefined)
                 return message;
@@ -97,7 +107,14 @@ function messageCompress()
                 return message;
             if (!this.initialized)
                 this.initialize();
-            message = this.encode(message);
+
+            this.learnedMappings = {};
+            message = this.encode(message);    
+
+            this.postLearnedMappings(this.learnedMappings);
+            this.learnedMappings = {};
+
+            
             packed = JSON.stringify(message);
             //packed = packed.replace(/\"/g,String.fromCharCode(345));
             return packed;
@@ -111,11 +128,38 @@ function messageCompress()
                 this.initialize();
             //message = message.replace(new RegExp(String.fromCharCode(345),"g"),"\"");
             message = JSON.parse(message);
+        
             message = this.decode(message);
+           
             return message;
         },
         isServer : false,
-        setServer: function(world) {},
+        setServer: function(world) {
+            this.world = world;
+            this.isServer = true;
+        },
+        applyLearnedMappings:function(mapping)
+        {
+            for(var i in mapping)
+            {
+                this.addMapping(i,mapping[i]);
+            }
+        },
+        postLearnedMappings:function(mapping)
+        {
+            if(!this.isServer) return;
+            if(Object.keys(mapping).length == 0) return;
+            for(var i in mapping)
+            {
+                mapping[i] = this.addMapping(i);
+                console.log("mapping " + mapping[i] + " to " + i)
+            }
+            for(var i in this.world.clients)
+            {
+                this.world.clients[i].emit('compress',mapping);
+            }
+
+        },
         initialized: false,
         initialize: function()
         {
@@ -528,12 +572,13 @@ function messageCompress()
             this.specialCaseEncode[key] = encode;
             this.specialCaseDecode[key] = decode;
         },
-        addMapping: function(from)
+        addMapping: function(from,forcekey)
         {
-            var key = String.fromCharCode(this.tableSize + 128)
+            var key = forcekey || String.fromCharCode(this.tableSize + 128)
             this.dnc_mappings[key] = from
             this.enc_mappings[from] = key
             this.tableSize++;
+            return key;
         },
         compressToBase64: function(input)
         {

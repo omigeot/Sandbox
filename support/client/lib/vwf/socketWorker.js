@@ -100,6 +100,11 @@ onmessage = function(e)
 		host = message.host;
 		options = message.options;
 		socket = io(host, options);
+		socket.on('compress',function(e)
+		{
+			messageCompress.applyLearnedMappings(e)
+			log(e)
+		})
 		socket.on("message", function(e)
 		{
 			var message = e;

@@ -181,6 +181,7 @@ function sandboxWorld(id, metadata)
     this.simulationManager = new _simulationManager(this);
     this.status = STATUS.DEFAULT;
     this.messageCompress = messageCompress();
+    this.messageCompress.setServer(this);
     if (this.metadata.publishSettings && this.metadata.publishSettings.allowAnonymous)
         this.allowAnonymous = true;
     var log = null;
@@ -668,7 +669,7 @@ function sandboxWorld(id, metadata)
             {
                 var displayname = this.state.getProperty(message.node, 'DisplayName');
                 this.state.deletedNode(message.node)
-                this.simulationManager.nodeDeleted(avatarID);
+                this.simulationManager.nodeDeleted(message.node);
                 xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, displayname || message.node, null, this.id);
             }
             //We'll only accept a createChild if the user has ownership of the object

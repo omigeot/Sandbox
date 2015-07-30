@@ -191,7 +191,9 @@ var simulationManager = function(world)
     }
     this.nodeDeleted = function(nodeid)
     {
-        this.getClientForNode(nodeid).stopSimulatingNode(nodeid);
+        var client = this.getClientForNode(nodeid);
+        if(client)
+            client.stopSimulatingNode(nodeid);
         delete this.clientControlTable[nodeid];
     }
     this.updateClientControlTable = function(nodeid, sendingClient)
