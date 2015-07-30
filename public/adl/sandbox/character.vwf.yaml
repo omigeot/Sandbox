@@ -517,7 +517,7 @@ scripts:
 
           }
 
-          var jumpstart = 7;
+          var jumpstart = 18;
 
           if (this.cycleName == 'jump') {
 
