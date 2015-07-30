@@ -1,4 +1,4 @@
-"use strict"; 
+"use strict";
 
 var helper = require('./helper.js'),
 	async = require("async"),
@@ -317,7 +317,7 @@ function createRunner(cb){
 
 		//If necessary, we can check message to determine if this actually was an error.
 		//As of now, it doesn't really matter since the flow is more or less the same.
-		status = ERROR;
+		if(status != UPDATING) status = ERROR;
 		createRunner();
 	});
 
