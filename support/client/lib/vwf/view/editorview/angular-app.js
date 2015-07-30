@@ -107,6 +107,9 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 			// name has just been set, so update position in parent's children array
 			sortChildren( app.root.fields.nodes[id].parent );
 		}
+		else if( prop === 'type' ){
+			app.root.fields.nodes[id].typeProp = val;
+		}
 
 		app.root.$apply();
 	}

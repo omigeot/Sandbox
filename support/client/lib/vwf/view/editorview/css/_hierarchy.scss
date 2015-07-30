@@ -21,23 +21,42 @@
 
 	custom-select
 	{
-		width: 25px;
-		height: 25px;
+		position: relative;
+		margin: 2px;
 
-		@include display-flex();
-		@include flex-direction(column);
-
-		& > * {
-			@include flex-shrink(0);
+		.selectedOption {
+			border: solid grey 1px;
 		}
 
-		& > .selected, &.expanded > * {
-			display: block;
+		.menu
+		{
+			position: absolute;
+			top: 0px;
+			z-index: 1;
+			background-color: #313131;
+			border: solid grey 1px;
+
+			& > *
+			{
+				&:hover {
+					background-color: #82b8ff;
+				}
+				
+				&.selected {
+					background-color: #41547c;
+					order: 0;
+				}
+
+				&:not(.selected) {
+					order: 1;
+				}
+			}
 		}
 
-		&:not(.expanded) > :not(.selected) {
+		&:not(.expanded) .menu {
 			display: none;
 		}
+
 	}
 
 	input#makeNode

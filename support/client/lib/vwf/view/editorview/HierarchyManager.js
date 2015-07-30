@@ -32,16 +32,23 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 
 				$scope.isSearchResult = function(nodeId)
 				{
+					function inherits(prototype, className){
+						if(prototype === className)
+							return true;
+						else if(!prototype)
+							return false;
+						else
+							return inherits(vwf.prototype(prototype), className);
+					}
+
 					var node = $scope.fields.nodes[nodeId];
-					if( $scope.filter.text )
-						return node && node.name && node.name.toLowerCase().indexOf($scope.filter.text.toLowerCase()) > -1;
-					else
-						return true;
+					return (!$scope.filter.text || node && node.name && node.name.toLowerCase().indexOf($scope.filter.text.toLowerCase()) > -1)
+						&& (!$scope.filter.type || node && (inherits(node.prototype, $scope.filter.type) || $scope.filter.type === 'modifier' && node.typeProp === 'modifier'));
 				}
 
 				$scope.isSearchResultAncestor = function(nodeId)
 				{
-					if( $scope.filter.text )
+					if( $scope.filter.text || $scope.filter.type )
 						return $scope.fields.nodes[nodeId] && $scope.fields.nodes[nodeId].children.reduce(
 							function(oldResult, childId){
 								return oldResult || $scope.isSearchResult(childId) || $scope.isSearchResultAncestor(childId);
@@ -53,7 +60,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 				}
 
 				var cancel = null;
-				$scope.$watch('filter.text', function(newval)
+				$scope.$watch('filter.text || filter.type', function(newval)
 				{
 					if(cancel) $timeout.cancel(cancel);
 
@@ -63,7 +70,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 						var isResult = $scope.isSearchResult($scope.node.id);
 
 						elem.toggleClass('hidden', !isAncestor && !isResult);
-						if( $scope.filter.text && isAncestor )
+						if( newval && isAncestor )
 							elem.removeClass('collapsed');
 					}, 200);
 				});
@@ -511,8 +518,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 				var options = {};
 				var optionsInOrder = $('.menu', elem).children();
 
-				$scope.selected = options.attr('value');
-				$scope.expanded = false;
+				$scope.selected = optionsInOrder.attr('value');
 
 				for(var i=0; i<optionsInOrder.length; i++){
 					options[ $(optionsInOrder[i]).attr('value') ] = $(optionsInOrder[i]);
@@ -531,8 +537,9 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 
 				optionsInOrder.click(function(evt)
 				{
-					$scope.selected = $(evt.currentTarget).attr('value');
+					$scope.selected = $(this).attr('value');
 					elem.removeClass('expanded');
+					$scope.$apply();
 				});
 			}
 		};
