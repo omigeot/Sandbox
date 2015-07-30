@@ -686,7 +686,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             // return hits;
         }
         this.DeleteSelection = function() {
-            if (document.PlayerNumber == null) {
+            if (_UserManager.GetCurrentUserName() == null) {
                 _Notifier.notify('You must log in to participate');
                 return;
             }
@@ -1732,7 +1732,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             }
         }
         this.createChild = function(parent, name, proto, uri, callback) {
-            if (document.PlayerNumber == null) {
+            if (_UserManager.GetCurrentUserName() == null) {
                 _Notifier.notify('You must log in to participate');
                 return;
             }
@@ -1963,7 +1963,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             var proto = ModProto;
             proto.properties.type = 'behavior';
             proto.properties.DisplayName = self.GetUniqueName('behavior');
-            proto.properties.owner = document.PlayerNumber;
+            proto.properties.owner = _UserManager.GetCurrentUserName();
             var id = this.GetSelectedVWFID();
             var owner = vwf.getProperty(id, 'owner');
             if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(), id) == 0) {
@@ -3134,7 +3134,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                 extends: 'sandboxGroup.vwf',
                 properties: {
                     type: 'Group',
-                    owner: document.PlayerNumber,
+                    owner: _UserManager.GetCurrentUserName(),
                     transform: MATH.transposeMat4(parentmat)
                 },
                 children: {}
@@ -3643,31 +3643,37 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
 
         }
         this.focusSelected = function() {
-            var focusID = null;
-            if (_Editor.GetSelectedVWFNode())
-                focusID = _Editor.GetSelectedVWFNode().id;
-            if (!focusID)
-                focusID = _UserManager.GetAvatarForClientID(vwf.moniker()) && _UserManager.GetAvatarForClientID(vwf.moniker()).id;
-            if (focusID && _Editor.findviewnode(focusID)) {
+            helper( _Editor.GetSelectedVWFID() );
 
-                var t = _Editor.GetMoveGizmo().parent.matrixWorld.getPosition();
-                var gizpos = [t.x, t.y, t.z];
-                var matrix = _Editor.findviewnode(focusID).matrixWorld.elements;
-                matrix = MATH.transposeMat4(matrix);
-                var box = _Editor.findviewnode(focusID).GetBoundingBox(true);
-                box = box.transformBy(matrix);
+            function helper(focusID)
+            {
+                if( !focusID ){
+                    return;
+                }
+                else if(_Editor.findviewnode(focusID)) {
 
-                var dist = 1;
-                if (box)
-                    dist = Math.max(box.max[0] - box.min[0], box.max[1] - box.min[1], box.max[2] - box.min[2]);
-                if (dist == Infinity)
-                    dist = 1;
-                require("vwf/view/threejs/editorCameraController").getController('Orbit').orbitPoint(gizpos);
-                require("vwf/view/threejs/editorCameraController").getController('Orbit').zoom = dist;
-                require("vwf/view/threejs/editorCameraController").setCameraMode('Orbit');
-                require("vwf/view/threejs/editorCameraController").updateCamera();
-                box.release();
+                    var t = _Editor.GetMoveGizmo().parent.matrixWorld.getPosition();
+                    var gizpos = [t.x, t.y, t.z];
+                    var matrix = _Editor.findviewnode(focusID).matrixWorld.elements;
+                    matrix = MATH.transposeMat4(matrix);
+                    var box = _Editor.findviewnode(focusID).GetBoundingBox(true);
+                    box = box.transformBy(matrix);
 
+                    if (box && box.max.indexOf(-Infinity) == -1 && box.min.indexOf(Infinity) == -1)
+                        var dist = Math.max(box.max[0] - box.min[0], box.max[1] - box.min[1], box.max[2] - box.min[2]) + 2;
+                    else
+                        dist = 3;
+
+                    require("vwf/view/threejs/editorCameraController").getController('Orbit').orbitPoint(gizpos);
+                    require("vwf/view/threejs/editorCameraController").getController('Orbit').zoom = dist;
+                    require("vwf/view/threejs/editorCameraController").setCameraMode('Orbit');
+                    require("vwf/view/threejs/editorCameraController").updateCamera();
+                    box.release();
+
+                }
+                else {
+                    helper( vwf.parent(focusID) );
+                }
             }
         }
         this.initialize = function() {

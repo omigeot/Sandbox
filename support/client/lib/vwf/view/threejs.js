@@ -2126,6 +2126,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                             
                             sceneView.lastData = eData;
                             sceneView.kernel.dispatchEvent(pointerDownID, "pointerMove", eData.eventData, eData.eventNodeData);
+                           
                         
                     }
                 } else {
@@ -2327,7 +2328,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
     function getClientFocusNode(client) {
         var clients = vwf.getProperty(vwf.application(), 'clients');
-        if (clients[client] && clients[client].focusID)
+        if (clients && clients[client] && clients[client].focusID)
             return clients[client].focusID;
         else return vwf.application();
 

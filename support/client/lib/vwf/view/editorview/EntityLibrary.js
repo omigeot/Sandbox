@@ -10,7 +10,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			},
 			link: function(scope, elem, attrs)
 			{
-				elem.accordion({header: 'h3', heightStyle: 'content'});
+				elem.accordion({header: 'h3', heightStyle: 'content', collapsible: true});
 
 				scope.$watch('data', function(newval)
 				{
@@ -65,17 +65,20 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 	{
 		var libraries = [];
 
+		libraries.addLibrary = function(name, url)
+		{
+			var newLib = {name: name};
+			$http.get(url).success(function(lib){
+				newLib.content = lib;
+			});
+			libraries.push(newLib);
+		}
+
 		$http.get('./contentlibraries/libraries.json').success(function(libs)
 		{
 			for(var i=0; i<libs.length; i++)
 			{
-				libraries.push( {'name': libs[i].name} );
-
-				(function(url, obj){
-					$http.get(url).success(function(lib){
-						obj.content = lib;
-					});
-				})(libs[i].url, libraries[libraries.length-1]);
+				libraries.addLibrary(libs[i].name, libs[i].url);
 			}
 		});
 
@@ -181,6 +184,14 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 			return combinedLibs;
 		}
+
+		$scope.promptAddLibrary = function()
+		{
+			alertify.prompt('Enter the URL for an asset library',function(ok,val){
+				if(ok)
+					staticLibs.addLibrary(val,val);
+			});
+		})
 
 		$scope.combinedLibs = convertAndCombine(assets, staticLibs);
 

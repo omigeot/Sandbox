@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], function(app, manageAssets)
 {
@@ -299,44 +300,44 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 				_Editor.Duplicate();
 			},
 			MenuCreatePush: function(e) {
-				_Editor.CreateModifier('push', document.PlayerNumber, true);
+				_Editor.CreateModifier('push', _UserManager.GetCurrentUserName(), true);
 			},
 			MenuCreateExtrude: function(e) {
-				_Editor.CreateModifier('extrude', document.PlayerNumber, true);
+				_Editor.CreateModifier('extrude', _UserManager.GetCurrentUserName(), true);
 			},
 			 MenuCreatePathExtrude: function(e) {
-				_Editor.CreateModifier('pathextrude', document.PlayerNumber, true);
+				_Editor.CreateModifier('pathextrude', _UserManager.GetCurrentUserName(), true);
 			},
 			MenuCreateLathe: function(e) {
-				_Editor.CreateModifier('lathe', document.PlayerNumber, true);
+				_Editor.CreateModifier('lathe', _UserManager.GetCurrentUserName(), true);
 			},
 			MenuCreateTaper: function(e) {
-				_Editor.CreateModifier('taper', document.PlayerNumber);
+				_Editor.CreateModifier('taper', _UserManager.GetCurrentUserName());
 			},
 			MenuCreateBend: function(e) {
-				_Editor.CreateModifier('bend', document.PlayerNumber);
+				_Editor.CreateModifier('bend', _UserManager.GetCurrentUserName());
 			},
 			MenuCreateTwist: function(e) {
-				_Editor.CreateModifier('twist', document.PlayerNumber);
+				_Editor.CreateModifier('twist', _UserManager.GetCurrentUserName());
 			},
 	
 			MenuCreateUVMap: function(e) {
-				_Editor.CreateModifier('uvmap', document.PlayerNumber, true);
+				_Editor.CreateModifier('uvmap', _UserManager.GetCurrentUserName(), true);
 			},
 			MenuCreateCenterPivot: function(e) {
-				_Editor.CreateModifier('centerpivot', document.PlayerNumber, true);
+				_Editor.CreateModifier('centerpivot', _UserManager.GetCurrentUserName(), true);
 			},
 			MenuCreatePerlinNoise: function(e) {
-				_Editor.CreateModifier('perlinnoise', document.PlayerNumber);
+				_Editor.CreateModifier('perlinnoise', _UserManager.GetCurrentUserName());
 			},
 			MenuCreateSimplexNoise: function(e) {
-				_Editor.CreateModifier('simplexnoise', document.PlayerNumber);
+				_Editor.CreateModifier('simplexnoise', _UserManager.GetCurrentUserName());
 			},
 			MenuCreateOffset: function(e) {
-				_Editor.CreateModifier('offset', document.PlayerNumber);
+				_Editor.CreateModifier('offset', _UserManager.GetCurrentUserName());
 			},
 			MenuCreateStretch: function(e) {
-				_Editor.CreateModifier('stretch', document.PlayerNumber);
+				_Editor.CreateModifier('stretch', _UserManager.GetCurrentUserName());
 			},
 	
 			MenuCreateBehaviorRotator: function(e) {
@@ -411,7 +412,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			},
 			MenuHelpAbout: function(e) {
 				$('#NotifierAlertMessage').dialog('open');
-				$('#NotifierAlertMessage').html('VWF Sandbox version 0.99 <br/> VWF 0.6 <br/>Rob Chadwick, ADL <br/> robert.chadwick.ctr@adlnet.gov<br/> texture attribution: <br/>http://opengameart.org/content/45-high-res-metal-and-rust-texture-photos CC-BY-3.0<br/>http://opengameart.org/content/golgotha-textures  public domain<br/>http://opengameart.org/content/p0sss-texture-pack-1  CC-BY-3.0<br/>http://opengameart.org/content/117-stone-wall-tilable-textures-in-8-themes	GPL2<br/>http://opengameart.org/content/wall-grass-rock-stone-wood-and-dirt-480 public domain<br/>http://opengameart.org/content/29-grounds-and-walls-and-water-1024x1024  CC-By-SA<br/>http://opengameart.org/content/filth-texture-set  GPL2');
+				$('#NotifierAlertMessage').load('./about.html');
 				$('#NotifierAlertMessage').dialog('option', 'height', 'auto');
 				$('#NotifierAlertMessage').dialog('option', 'width', 'auto');
 			},
@@ -647,53 +648,53 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 	
 	
 			MenuCreateCameraPerspective: function(e) {
-				_Editor.CreateCamera(_Editor.GetInsertPoint(), document.PlayerNumber);
+				_Editor.CreateCamera(_Editor.GetInsertPoint(), _UserManager.GetCurrentUserName());
 			},
 			MenuCreateParticlesBasic: function(e) {
-				_Editor.createParticleSystem('basic', _Editor.GetInsertPoint(), document.PlayerNumber);
+				_Editor.createParticleSystem('basic', _Editor.GetInsertPoint(), _UserManager.GetCurrentUserName());
 			},
 			MenuCreateParticlesSpray: function(e) {
-				_Editor.createParticleSystem('spray', _Editor.GetInsertPoint(), document.PlayerNumber);
+				_Editor.createParticleSystem('spray', _Editor.GetInsertPoint(), _UserManager.GetCurrentUserName());
 			},
 			MenuCreateParticlesSuspended: function(e) {
-				_Editor.createParticleSystem('suspended', _Editor.GetInsertPoint(), document.PlayerNumber);
+				_Editor.createParticleSystem('suspended', _Editor.GetInsertPoint(), _UserManager.GetCurrentUserName());
 			},
 			MenuCreateParticlesAtmospheric: function(e) {
-				_Editor.createParticleSystem('atmospheric', _Editor.GetInsertPoint(), document.PlayerNumber);
+				_Editor.createParticleSystem('atmospheric', _Editor.GetInsertPoint(), _UserManager.GetCurrentUserName());
 			},
 			MenuCreateLightPoint: function(e) {
-				_Editor.createLight('point', _Editor.GetInsertPoint(), document.PlayerNumber);
+				_Editor.createLight('point', _Editor.GetInsertPoint(), _UserManager.GetCurrentUserName());
 			},
 			MenuCreateLightSpot: function(e) {
-				_Editor.createLight('spot', _Editor.GetInsertPoint(), document.PlayerNumber);
+				_Editor.createLight('spot', _Editor.GetInsertPoint(), _UserManager.GetCurrentUserName());
 			},
 			MenuCreateLightDirectional: function(e) {
-				_Editor.createLight('directional', _Editor.GetInsertPoint(), document.PlayerNumber);
+				_Editor.createLight('directional', _Editor.GetInsertPoint(), _UserManager.GetCurrentUserName());
 			},
 			MenuCreateBox: function(e) {
-				_Editor.CreatePrim('box', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+				_Editor.CreatePrim('box', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 			MenuCreateLine: function(e) {
-				_Editor.CreatePrim('line', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+				_Editor.CreatePrim('line', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 			MenuCreateCircle: function(e) {
-				_Editor.CreatePrim('circle', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+				_Editor.CreatePrim('circle', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 			MenuCreateStar: function(e) {
-				_Editor.CreatePrim('star', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+				_Editor.CreatePrim('star', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 			MenuCreateRectangle: function(e) {
-				_Editor.CreatePrim('rectangle', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+				_Editor.CreatePrim('rectangle', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 			MenuCreateLSection: function(e) {
-				_Editor.CreatePrim('lsection', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+				_Editor.CreatePrim('lsection', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 			MenuCreateTSection: function(e) {
-				_Editor.CreatePrim('tsection', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+				_Editor.CreatePrim('tsection', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 			MenuCreateTerrain: function(e) {
 				if (!window._dTerrain)
-					_Editor.CreatePrim('terrain', [0, 0, 0], [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+					_Editor.CreatePrim('terrain', [0, 0, 0], [1, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 				else {
 					alertify.alert('Only one terrain can be created at a time');
 				}
@@ -737,29 +738,29 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 	
 	
 			MenuCreateEmpty: function(e) {
-				_Editor.CreatePrim('node', _Editor.GetInsertPoint(), null, null, document.PlayerNumber, '');
+				_Editor.CreatePrim('node', _Editor.GetInsertPoint(), null, null, _UserManager.GetCurrentUserName(), '');
 			},
 			MenuCreateSphere: function(e) {
-				_Editor.CreatePrim('sphere', _Editor.GetInsertPoint(), [.5, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+				_Editor.CreatePrim('sphere', _Editor.GetInsertPoint(), [.5, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 	
 			MenuCreateText: function(e) {
-				_Editor.CreatePrim('text', _Editor.GetInsertPoint(), [.5, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+				_Editor.CreatePrim('text', _Editor.GetInsertPoint(), [.5, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 			MenuCreateTorus: function(e) {
-				_Editor.CreatePrim('torus', _Editor.GetInsertPoint(), [.5, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+				_Editor.CreatePrim('torus', _Editor.GetInsertPoint(), [.5, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 			MenuCreatePlane: function(e) {
-				_Editor.CreatePrim('plane', _Editor.GetInsertPoint(), [1, 1, 5], 'checker.jpg', document.PlayerNumber, '');
+				_Editor.CreatePrim('plane', _Editor.GetInsertPoint(), [1, 1, 5], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 			MenuCreateCylinder: function(e) {
-				_Editor.CreatePrim('cylinder', _Editor.GetInsertPoint(), [1, .5, .5], 'checker.jpg', document.PlayerNumber, '');
+				_Editor.CreatePrim('cylinder', _Editor.GetInsertPoint(), [1, .5, .5], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 			MenuCreateCone: function(e) {
-				_Editor.CreatePrim('cone', _Editor.GetInsertPoint(), [.500, 1, .5], 'checker.jpg', document.PlayerNumber, '');
+				_Editor.CreatePrim('cone', _Editor.GetInsertPoint(), [.500, 1, .5], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 			MenuCreatePyramid: function(e) {
-				_Editor.CreatePrim('pyramid', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', document.PlayerNumber, '');
+				_Editor.CreatePrim('pyramid', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 	
 			LocationGoToPosition: function(e) {

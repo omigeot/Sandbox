@@ -163,7 +163,7 @@ define(["vwf/view/editorview/mapbrowser", "vwf/view/editorview/colorpicker.js"],
             _MaterialEditor.BuildGUI();
         }
         this.updateObject = function(skipUndo) {
-            if (document.PlayerNumber == null) {
+            if (_UserManager.GetCurrentUserName() == null) {
                 _Notifier.notify('You must log in to participate');
                 return;
             }
@@ -728,7 +728,6 @@ define(["vwf/view/editorview/mapbrowser", "vwf/view/editorview/colorpicker.js"],
             
             function nodeShouldHaveMaterial(node)
             {
-                console.log(node);
                 if(!node)
                     return false;
                 else if( /^(prim2-vwf|asset-vwf|index-vwf)$/.test(node) )
