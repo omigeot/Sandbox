@@ -102,13 +102,13 @@ var timeout = function(world)
                     this.world.getStateTime = this.world.time;
                     //update 11/2/14
                     //if the last loadclient does not respond, pick a new client randomly
-                    loadClient.emit('message', messageCompress.pack(
+                    loadClient.emit('message', this.messageCompress.pack(
                     {
                         "action": "getState",
                         "respond": true,
                         "time": this.world.time
                     }));
-                    socket.emit('message', messageCompress.pack(
+                    socket.emit('message', this.messageCompress.pack(
                     {
                         "action": "status",
                         "parameters": ["Did not get state, resending request."],
@@ -127,13 +127,13 @@ var timeout = function(world)
                         if (loadClient != client && client.pending === true)
                         {
                             logger.warn('sending default state 2', 2);
-                            client.emit('message', messageCompress.pack(
+                            client.emit('message', this.messageCompress.pack(
                             {
                                 "action": "status",
                                 "parameters": ["State Not Received, Transmitting default"],
                                 "time": this.namespace.getStateTime
                             }));
-                            client.emit('message', messageCompress.pack(
+                            client.emit('message', this.messageCompress.pack(
                             {
                                 "action": "createNode",
                                 "parameters": [state],
@@ -180,6 +180,7 @@ function sandboxWorld(id, metadata)
     this.allowAnonymous = false;
     this.simulationManager = new _simulationManager(this);
     this.status = STATUS.DEFAULT;
+    this.messageCompress = messageCompress();
     if (this.metadata.publishSettings && this.metadata.publishSettings.allowAnonymous)
         this.allowAnonymous = true;
     var log = null;
@@ -324,7 +325,7 @@ function sandboxWorld(id, metadata)
                
             }
             //message to each user the join of the new client. Queue it up for the new guy, since he should not send it until after getstate
-            var packedMessage = messageCompress.pack(message);
+            var packedMessage = this.messageCompress.pack(message);
             
             for (var i in this.clients)
             {
@@ -397,7 +398,7 @@ function sandboxWorld(id, metadata)
     this.firstConnection = function(socket, cb)
     {
         logger.info('load from db', 2);
-        socket.emit('message', messageCompress.pack(
+        socket.emit('message', this.messageCompress.pack(
         {
             "action": "status",
             "parameters": ["Loading state from database"],
@@ -444,7 +445,7 @@ function sandboxWorld(id, metadata)
     {
         for (var i in this.clients)
         {
-            this.clients[i].emit('message', messageCompress.pack(
+            this.clients[i].emit('message', this.messageCompress.pack(
             {
                 "action": "status",
                 "parameters": ["Peer Connected"],
@@ -540,7 +541,7 @@ function sandboxWorld(id, metadata)
                 }
                 this.on('stateSent', distributeSim)
                     //loadClient.pending = true;
-                client.emit('message', messageCompress.pack(JSON.stringify(
+                client.emit('message', this.messageCompress.pack(JSON.stringify(
                 {
                     "action": "status",
                     "parameters": ["Requesting state from clients"],
@@ -560,7 +561,7 @@ function sandboxWorld(id, metadata)
         logger.info('load from client', 2);
         //  socket.pending = true;
         this.getStateTime = this.time;
-        loadClient.emit('message', messageCompress.pack(
+        loadClient.emit('message', this.messageCompress.pack(
         {
             "action": "status",
             "parameters": ["Server requested state. Sending..."],
@@ -568,7 +569,7 @@ function sandboxWorld(id, metadata)
         }));
         //here, we must reset all the physics worlds, right before who ever firstclient is responds to getState. 
         //important that nothing is between
-        loadClient.emit('message', messageCompress.pack(
+        loadClient.emit('message', this.messageCompress.pack(
         {
             "action": "getState",
             "respond": true,
@@ -587,7 +588,7 @@ function sandboxWorld(id, metadata)
             //need to add the client identifier to all outgoing messages
             try
             {
-                var message = messageCompress.unpack(msg);
+                var message = this.messageCompress.unpack(msg);
                 message.time = this.time;
             }
             catch (e)
@@ -625,9 +626,9 @@ function sandboxWorld(id, metadata)
                 }
                 //send the message to the sender and to the receiver
                 if (textmessage.receiver)
-                    this.clients[textmessage.receiver].emit('message', messageCompress.pack(message));
+                    this.clients[textmessage.receiver].emit('message', this.messageCompress.pack(message));
                 if (textmessage.sender)
-                    this.clients[textmessage.sender].emit('message', messageCompress.pack(message));
+                    this.clients[textmessage.sender].emit('message', this.messageCompress.pack(message));
                 return;
             }
             // only allow users to hang up their own RTC calls
@@ -647,7 +648,7 @@ function sandboxWorld(id, metadata)
                 {
                     var client = this.clients[params.target];
                     if (client)
-                        client.emit('message', messageCompress.pack(message));
+                        client.emit('message', this.messageCompress.pack(message));
                 }
                 return;
             }
@@ -682,7 +683,7 @@ function sandboxWorld(id, metadata)
                 var childID = this.state.createdChild(message.node, message.member, childComponent)
                 xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties.DisplayName, null, this.id);
             }
-            var compressedMessage = messageCompress.pack(message);
+            var compressedMessage = this.messageCompress.pack(message);
             //distribute message to all clients on given instance
             var concernedClients = this.simulationManager.getClientsForMessage(message, sendingclient)
             for (var i in this.clients)
