@@ -105,10 +105,10 @@ onmessage = function(e)
 			messageCompress.applyLearnedMappings(e)
 			log(e)
 		})
-		socket.on("message", function(e)
+		socket.on("m", function(e)
 		{
 			var message = e;
-			socketBytesReceived += 34 + getUTF8Length(message);
+			socketBytesReceived += 28 + getUTF8Length(message);
 			if (message.constructor == String)
 			{
 				var now = performance.now();
@@ -119,6 +119,18 @@ onmessage = function(e)
 			if(message)
 				onEvent("message", message);
 		})
+		socket.on("t", function(e)
+		{
+			socketBytesReceived += 16;
+			var tickmessage = {
+                    "action": "tick",
+                    "time": e,
+                    "parameters":[],
+                    "origin":"reflector"
+            };
+            onEvent("message", tickmessage);
+
+		});
 		socket.on("connect", function(e)
 		{
 			setInterval(socketMonitorInterval, 10000);
@@ -150,6 +162,6 @@ onmessage = function(e)
 			totalMessagesEncoded++
 		}
 		socketBytesSent += 34 + getUTF8Length(message.message);
-		socket.send(message.message)
+		socket.emit('m',message.message)
 	}
 }

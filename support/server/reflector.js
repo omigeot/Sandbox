@@ -7,7 +7,7 @@ var url = require("url");
 var mime = require('mime');
 var sessions = require('./sessions.js');
 var messageCompress = require('../client/lib/messageCompress')
-    .messageCompress;
+    .messageCompress();   //note! We're calling the construtor here, so this file has just one instance
 var connect = require('connect'),
     parseSignedCookie = connect.utils.parseSignedCookie,
     cookie = require('express/node_modules/cookie');
@@ -107,7 +107,7 @@ function ServeSinglePlayer(socket, namespace, instancedata)
         }
         DBstateToVWFDef(state, instancedata, function(scene)
         {
-            socket.emit('message',
+            socket.emit('m',
             {
                 "action": "createNode",
                 "parameters": [scene],
@@ -120,8 +120,8 @@ function ServeSinglePlayer(socket, namespace, instancedata)
                 node: "index-vwf",
                 "time": 0
             });
-            socket.emit('message', joinMessage);
-			socket.emit('message', messageCompress.pack(
+            socket.emit('m', joinMessage);
+			socket.emit('m', messageCompress.pack(
             {
                 "action": "startSimulating",
                 "parameters": ["index-vwf"],
@@ -142,8 +142,8 @@ function ServeSinglePlayer(socket, namespace, instancedata)
                         parameters: [avatar, null],
                         time: 0
                     };
-                    socket.emit('message', createAvatarMessage);
-                    socket.emit('message',
+                    socket.emit('m', createAvatarMessage);
+                    socket.emit('m',
                     {
                         "action": "goOffline",
                         "parameters": [scene],
@@ -154,7 +154,7 @@ function ServeSinglePlayer(socket, namespace, instancedata)
             }
             else
             {
-                socket.emit('message',
+                socket.emit('m',
                 {
                     "action": "goOffline",
                     "parameters": [scene],

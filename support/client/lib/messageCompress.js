@@ -116,7 +116,7 @@ function messageCompress()
 
             
             packed = JSON.stringify(message);
-            //packed = packed.replace(/\"/g,String.fromCharCode(345));
+            //packed = packed.replace(/\\\"/g,String.fromCharCode(1))
             return packed;
         },
         unpack: function(message)
@@ -126,7 +126,7 @@ function messageCompress()
                 return message;
             if (!this.initialized)
                 this.initialize();
-            //message = message.replace(new RegExp(String.fromCharCode(345),"g"),"\"");
+            //message = message.replace(new RegExp(String.fromCharCode(1),'g'),"\"")
             message = JSON.parse(message);
         
             message = this.decode(message);
@@ -164,7 +164,7 @@ function messageCompress()
         initialize: function()
         {
             var self = this;
-            /* this.addSpecialCase("transform", function(val)
+             this.addSpecialCase("transform", function(val)
                  {
                      var t = new Float32Array(16);
                      for (var i = 0; i < 16; i++)
@@ -188,6 +188,7 @@ function messageCompress()
 
                      return ret;
                  });
+             /*
              this.addSpecialCase("scripts", function(val)
                  {
                      var data = self.compress(JSON.stringify(val));

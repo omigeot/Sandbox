@@ -44,7 +44,7 @@ var simClient = function(sandboxClient, simulationManager)
     }
     this.sendStopSimMessage = function(nodeID)
     {
-        this.sandboxClient.emit('message', this.manager.world.messageCompress.pack(JSON.stringify(
+        this.sandboxClient.emit('m', this.manager.world.messageCompress.pack(JSON.stringify(
         {
             "action": "stopSimulating",
             "parameters": [nodeID],
@@ -54,7 +54,7 @@ var simClient = function(sandboxClient, simulationManager)
     this.sendStartSimMessage = function(nodeID)
     {
        
-        this.sandboxClient.emit('message', this.manager.world.messageCompress.pack(JSON.stringify(
+        this.sandboxClient.emit('m', this.manager.world.messageCompress.pack(JSON.stringify(
         {
             "action": "startSimulating",
             "parameters": [nodeID],

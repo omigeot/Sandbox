@@ -78,7 +78,7 @@ var sandboxClient = function(socket)
             logger.error(e);
         }
     });
-    socket.on('message', function(msg)
+    socket.on('m', function(msg)
     {
         if (self.world)
             self.world.message(msg, self)

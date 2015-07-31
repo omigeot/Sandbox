@@ -102,13 +102,13 @@ var timeout = function(world)
                     this.world.getStateTime = this.world.time;
                     //update 11/2/14
                     //if the last loadclient does not respond, pick a new client randomly
-                    loadClient.emit('message', this.messageCompress.pack(
+                    loadClient.emit('m', this.messageCompress.pack(
                     {
                         "action": "getState",
                         "respond": true,
                         "time": this.world.time
                     }));
-                    socket.emit('message', this.messageCompress.pack(
+                    socket.emit('m', this.messageCompress.pack(
                     {
                         "action": "status",
                         "parameters": ["Did not get state, resending request."],
@@ -127,13 +127,13 @@ var timeout = function(world)
                         if (loadClient != client && client.pending === true)
                         {
                             logger.warn('sending default state 2', 2);
-                            client.emit('message', this.messageCompress.pack(
+                            client.emit('m', this.messageCompress.pack(
                             {
                                 "action": "status",
                                 "parameters": ["State Not Received, Transmitting default"],
                                 "time": this.namespace.getStateTime
                             }));
-                            client.emit('message', this.messageCompress.pack(
+                            client.emit('m', this.messageCompress.pack(
                             {
                                 "action": "createNode",
                                 "parameters": [state],
@@ -142,7 +142,7 @@ var timeout = function(world)
                             client.pending = false;
                             for (var j = 0; j < client.pendingList.length; j++)
                             {
-                                client.emit('message', client.pendingList[j]);
+                                client.emit(client.pendingList[j].type, client.pendingList[j].message);
                             }
                             client.pendingList = [];
                         }
@@ -277,7 +277,7 @@ function sandboxWorld(id, metadata)
             logger.error(message);
         }
     }
-    this.messageClient = function(client, message, ignorePending, resolvePending)
+    this.messageClient = function(client, message, ignorePending, resolvePending,overrideType)
     {
         if (!client.pending || ignorePending)
         {
@@ -288,18 +288,18 @@ function sandboxWorld(id, metadata)
                 {
                     global.setTimeout(function()
                     {
-                        __client.emit('message', __message);
+                        __client.emit(overrideType||'m', __message);
                     }, global.latencySim)
                 })(client, message);
             }
             else
             {
-                client.emit('message', message);
+                client.emit(overrideType||'m', message);
             }
         }
         else
         {
-            client.pendingList.push(message)
+            client.pendingList.push({message:message,type:(overrideType || 'm')})
         }
         if (resolvePending)
         {
@@ -307,14 +307,14 @@ function sandboxWorld(id, metadata)
             {
                 for (var j = 0; j < client.pendingList.length; j++)
                 {
-                    client.emit('message', client.pendingList[j]);
+                    client.emit(client.pendingList[j].type, client.pendingList[j].message);
                 }
                 client.pendingList = [];
                 client.pending = false;
             }
         }
     }
-    this.messageClients = function(message, ignorePending, resolvePending)
+    this.messageClients = function(message, ignorePending, resolvePending,overrideType,noCompress)
     {
         try
         {
@@ -326,11 +326,11 @@ function sandboxWorld(id, metadata)
                
             }
             //message to each user the join of the new client. Queue it up for the new guy, since he should not send it until after getstate
-            var packedMessage = this.messageCompress.pack(message);
+            var packedMessage = (!noCompress) ? this.messageCompress.pack(message) : message;
             
             for (var i in this.clients)
             {
-                this.messageClient(this.clients[i], packedMessage, ignorePending, resolvePending);
+                this.messageClient(this.clients[i], packedMessage, ignorePending, resolvePending,overrideType);
             }
         }
         catch (e)
@@ -385,11 +385,9 @@ function sandboxWorld(id, metadata)
                 self.ticknum++;
                 var tickmessage = {
                     "action": "tick",
-                    "parameters": [],
                     "time": self.time,
-                    "origin": "reflector",
                 };
-                self.messageClients(tickmessage);
+                self.messageClients(self.time.toFixed(3),false,false,'t',true);
             }
             self.lasttime = now;
         }.bind(self);
@@ -399,7 +397,7 @@ function sandboxWorld(id, metadata)
     this.firstConnection = function(socket, cb)
     {
         logger.info('load from db', 2);
-        socket.emit('message', this.messageCompress.pack(
+        socket.emit('m', this.messageCompress.pack(
         {
             "action": "status",
             "parameters": ["Loading state from database"],
@@ -446,7 +444,7 @@ function sandboxWorld(id, metadata)
     {
         for (var i in this.clients)
         {
-            this.clients[i].emit('message', this.messageCompress.pack(
+            this.clients[i].emit('m', this.messageCompress.pack(
             {
                 "action": "status",
                 "parameters": ["Peer Connected"],
@@ -542,7 +540,7 @@ function sandboxWorld(id, metadata)
                 }
                 this.on('stateSent', distributeSim)
                     //loadClient.pending = true;
-                client.emit('message', this.messageCompress.pack(JSON.stringify(
+                client.emit('m', this.messageCompress.pack(JSON.stringify(
                 {
                     "action": "status",
                     "parameters": ["Requesting state from clients"],
@@ -562,7 +560,7 @@ function sandboxWorld(id, metadata)
         logger.info('load from client', 2);
         //  socket.pending = true;
         this.getStateTime = this.time;
-        loadClient.emit('message', this.messageCompress.pack(
+        loadClient.emit('m', this.messageCompress.pack(
         {
             "action": "status",
             "parameters": ["Server requested state. Sending..."],
@@ -570,7 +568,7 @@ function sandboxWorld(id, metadata)
         }));
         //here, we must reset all the physics worlds, right before who ever firstclient is responds to getState. 
         //important that nothing is between
-        loadClient.emit('message', this.messageCompress.pack(
+        loadClient.emit('m', this.messageCompress.pack(
         {
             "action": "getState",
             "respond": true,
@@ -627,9 +625,9 @@ function sandboxWorld(id, metadata)
                 }
                 //send the message to the sender and to the receiver
                 if (textmessage.receiver)
-                    this.clients[textmessage.receiver].emit('message', this.messageCompress.pack(message));
+                    this.clients[textmessage.receiver].emit('m', this.messageCompress.pack(message));
                 if (textmessage.sender)
-                    this.clients[textmessage.sender].emit('message', this.messageCompress.pack(message));
+                    this.clients[textmessage.sender].emit('m', this.messageCompress.pack(message));
                 return;
             }
             // only allow users to hang up their own RTC calls
@@ -649,7 +647,7 @@ function sandboxWorld(id, metadata)
                 {
                     var client = this.clients[params.target];
                     if (client)
-                        client.emit('message', this.messageCompress.pack(message));
+                        client.emit('m', this.messageCompress.pack(message));
                 }
                 return;
             }
