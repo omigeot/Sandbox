@@ -1,23 +1,52 @@
-define(['vwf/view/editorview/panelEditor'], function(baseclass) {
+define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/panelEditor'], function(app, baseClass){
+    var primEditor = {};
+    var isInitialized = false;
+
+    window._PrimitiveEditor = {
+        getSingleton: function(){
+            if(!isInitialized){
+                baseclass(PrimEditor,'PrimitiveEditor','Properties','properties',true,true,'#sidepanel .main')
+
+                PrimEditor.init()
+                initialize.call(PrimEditor);
+                PrimEditor.bind()
+                isInitialized = true;
+            }
+
+            return primEditor;
+        }
+    };
+
+    app.controller('PrimitiveController', ['$scope', function($scope){
+
+        window._PrimitiveEditor = $scope;
+    }]);
+
+
+    return window._PrimitiveEditor;
+});
+
+
+var old = function(baseclass) {
     var PrimEditor = {};
     var isInitialized = false;
     return {
         getSingleton: function() {
             if (!isInitialized) {
-                
-               
+
+
                 //var baseclass = require("vwf/view/editorview/panelEditor");
                 //var base = new baseclass('hierarchyManager','Hierarchy','hierarchy',false,true,'#sidepanel')
                 //base.init();
                 //$.extend(HierarchyManager,base);
                 baseclass(PrimEditor,'PrimitiveEditor','Properties','properties',true,true,'#sidepanel .main')
-                
+
                 PrimEditor.init()
                 initialize.call(PrimEditor);
                 PrimEditor.bind()
                 isInitialized = true;
 
-               
+
             }
             return PrimEditor;
         }
@@ -78,10 +107,10 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
             "</div>" +
             '</div>' +
             '</div>');
-        
-        
-        
-       
+
+
+
+
         $('.TransformEditorInput').spinner();
         $('#isStatic').change(function(e) {
             _PrimitiveEditor.setProperty('selection', 'isStatic', this.checked)
@@ -113,7 +142,7 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
             }
             _PrimitiveEditor.setProperty(_Editor.GetSelectedVWFNode().id, 'DisplayName', $(this).val());
         });
-        
+
         $("#accordion").accordion({
             fillSpace: true,
             heightStyle: "content",
@@ -122,7 +151,7 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
             }
         });
         $(".ui-accordion-content").css('height', 'auto');
-       
+
         this.setProperty = function(id, prop, val, skipUndo) {
             //prevent the handlers from firing setproperties when the GUI is first setup;
             if (this.inSetup) return;
@@ -175,7 +204,7 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
         }
         this.BuildGUI = function()
         {
-           
+
             var node = _Editor.getNode(this.selectedID);
             if(!node) return;
 
@@ -190,10 +219,10 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
             {
                 //accordion was not init yet
             }
-            
+
             $("#accordion").children('.modifiersection').remove();
             //update to ensure freshness
-           
+
             node.properties = vwf.getProperties(node.id);
             if (!node.properties) return;
 
@@ -204,7 +233,7 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
 
             this.addPropertyEditorDialog(node.id, 'DisplayName', $('#dispName'), 'text');
 
-            
+
 
             if ($('#dispName').val() == "") {
                 $('#dispName').val(node.name);
@@ -275,12 +304,12 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
             });
         }
         this.recursevlyAddPrototypes = function(node) {
-            
-            
+
+
             var oldID = node.id;
-            node = _Editor.getNode(vwf.prototype(node.id)); 
+            node = _Editor.getNode(vwf.prototype(node.id));
              if(!node){
-                return;  
+                return;
             }
             var currentID = node.id;
             //must be careful... we don't actually want to set the properties on the prototype
@@ -290,8 +319,8 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
             this.setupEditorData(node,currentID, false,vwf.getProperty(currentID, 'EditorData'));
             node.id = currentID; // careful not to recurse forever
             this.recursevlyAddPrototypes(node);
-                
-            
+
+
         }
         this.recursevlyAddModifiers = function(node) {
             for (var i in node.children) {
@@ -517,9 +546,9 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
             }
         }
         this.setupEditorData = function(node,panelid, wholeselection,editordata) {
-            
+
             if (wholeselection && _Editor.getSelectionCount() > 1) nodeid = 'selection';
-            
+
             var nodeid = node.id;
             editordatanames = [];
             for (var i in editordata) {
@@ -528,14 +557,14 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
             if (editordatanames.length == 0) return;
             editordatanames.sort();
             section = '<h3 class="modifiersection" ><a href="#"><div style="font-weight:bold;display:inline">' + (vwf.getProperty(node.id, 'type') || "Type") + ": </div>" + (node.properties.DisplayName || "None") + '</a></h3>' + '<div class="modifiersection" id="basicSettings' + panelid + '">' + '</div>';
-           
+
             $("#accordion").append(section);
 
             var addedWidget = false;
             for (var j = 0; j < editordatanames.length; j++) {
                 var i = editordatanames[j];
                 //if multiple editorData properties up the prototype chain have the same editor objects, skip
-                
+
                 if(this.currentWidgets[nodeid + i]) continue;
                 this.currentWidgets[nodeid + i] = true;
                 addedWidget = true;
@@ -544,7 +573,7 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
                     $('#basicSettings' + panelid).append('<div style="" class = "EditorDataSectionTitle">' + editordata[i].displayname + ': </div>');
                 }
                 if (editordata[i].type == 'label') {
- 
+
 
                     $('#basicSettings' + panelid).append('<div id="' + nodeid + editordata[i].property + 'value"></div>');
                     this.addPropertyEditorDialog(node.id, editordata[i].property, $('#' + nodeid + editordata[i].property + 'value'), 'label');
@@ -792,8 +821,8 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
                 if (editordata[i].type == 'nodeid') {
 
                     $('#basicSettings' + panelid).append('<div style="margin-top: 5px;margin-bottom: 5px;"><div >' + editordata[i].displayname + '</div><input type="text" style="background: black;display: inline;width: 50%;padding: 2px;border-radius: 5px;font-weight: bold;" id="' + nodeid + editordata[i].property + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/><div  style="float:right;width:45%;height:2em" id="' + nodeid + i + 'button" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/></div><div style="clear:both" />');
-                    
-                   
+
+
                     $('#' + nodeid + editordata[i].property).attr('disabled', 'disabled');
                     $('#' + nodeid + i + 'button').button({
                         label: 'Choose Node'
@@ -862,16 +891,16 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
                     $('#' + $('#' + nodeid + i + 'ColorPicker').data('colorpickerId')).attr('nodeid', nodeid);
                     this.addPropertyEditorDialog(node.id, editordata[i].property, $('#' + nodeid + i + 'ColorPicker'), 'color');
                 }
-                
+
             }
             if(!addedWidget)
                 {
-                    
+
                     $("#accordion").children().last().remove();
                     $("#accordion").children().last().remove();
                 }
             if(addedWidget)
-            {   
+            {
                 var randomname = GUID();
                 $('#basicSettings' + panelid).append('<div style="margin-top: 1em;" nodename="' + node.id + '" id="' + nodeid + randomname+ 'deletebutton"/>');
                 $('#' + nodeid +randomname+ 'deletebutton').button({
@@ -898,7 +927,7 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
             }
         }
         this.deleteButtonClicked = function() {
-            
+
             if (_UserManager.GetCurrentUserName() == null) {
                 _Notifier.notify('You must log in to participate');
                 return;
@@ -939,12 +968,12 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
             _PrimitiveEditor.setProperty(id, 'amount', amount);
         }
         this.positionChanged = function() {
-            
+
             var self = this;
             async.nextTick(function(){
-             self.setTransform();    
+             self.setTransform();
             })
-            
+
         }
         this.makeRotMat = function(x, y, z) {
             var xm = [
@@ -1012,20 +1041,20 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
             var self = this;
             async.nextTick(function()
             {
-                self.setProperty(_Editor.GetSelectedVWFNode().id, 'transform', val);    
+                self.setProperty(_Editor.GetSelectedVWFNode().id, 'transform', val);
             })
-            
+
         }
         this.rotationChanged = function() {
            var self = this;
             async.nextTick(function(){
-             self.setTransform();    
+             self.setTransform();
             })
         }
         this.scaleChanged = function() {
             var self = this;
             async.nextTick(function(){
-             self.setTransform();    
+             self.setTransform();
             })
         }
         this.initializedProperty = function (nodeID, propName, propVal)
@@ -1057,9 +1086,9 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
             {
             	_PrimitiveEditor.SelectionChanged(null, _Editor.GetSelectedVWFNode());
             }
-            
 
-            
+
+
             //if the editordata of a child behavior changes while selected, redraw
             //TODO:handle modifiers
             //TODO:redraw without animation
@@ -1082,7 +1111,7 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
         }
         this.SelectionTransformed = function(e, node) {
             try {
-                //dont update the spinners when the user is typing in them, but when they drag the gizmo do. 
+                //dont update the spinners when the user is typing in them, but when they drag the gizmo do.
                 if (node && (vwf.client() !== vwf.moniker()) || $("#index-vwf:focus").length ==1) {
 
                     var mat = vwf.getProperty(node.id, 'transform');
@@ -1094,15 +1123,15 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
                     $('#PositionY').val(Math.floor(pos[1] * 1000) / 1000);
                     $('#PositionZ').val(Math.floor(pos[2] * 1000) / 1000);
 
-                    //since there is ambiguity in the matrix, we need to keep these values aroud. otherwise , the typeins don't really do what you would think		
+                    //since there is ambiguity in the matrix, we need to keep these values aroud. otherwise , the typeins don't really do what you would think
                     $('#RotationX').val(Math.round(angles[0] * 57.2957795));
                     $('#RotationY').val(Math.round(angles[1] * 57.2957795));
                     $('#RotationZ').val(Math.round(angles[2] * 57.2957795));
 
                     //$('#RotationW').val(rot[3]);
-                    //well, this is embarassing. Old code from years ago, reflecting incorrect idea about how 
+                    //well, this is embarassing. Old code from years ago, reflecting incorrect idea about how
                     //transform matrix works
-              
+
                     $('#ScaleX').val((Math.floor(MATH.lengthVec3([mat[0],mat[1],mat[2]]) * 1000)) / 1000);
                     $('#ScaleY').val((Math.floor(MATH.lengthVec3([mat[4],mat[5],mat[6]]) * 1000)) / 1000);
                     $('#ScaleZ').val((Math.floor(MATH.lengthVec3([mat[8],mat[9],mat[10]]) * 1000)) / 1000);
@@ -1112,10 +1141,10 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
                 //console.log(e);
             }
         }
-        
+
         $(document).bind('modifierCreated', this.SelectionChanged.bind(this));
         $(document).bind('selectionTransformedLocal', this.SelectionTransformed.bind(this));
-       
+
         $('#PositionX').on( "spinchange",this.positionChanged.bind(this));
         $('#PositionY').on( "spinchange",this.positionChanged.bind(this));
         $('#PositionZ').on( "spinchange",this.positionChanged.bind(this));
@@ -1152,4 +1181,4 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
         $('#RotationW').hide();
         this.hide();
     }
-});
+};
