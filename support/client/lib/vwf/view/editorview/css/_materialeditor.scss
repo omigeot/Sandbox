@@ -1,0 +1,42 @@
+@import 'polyfill';
+
+#materialEditor
+{
+	slider
+	{
+		@include display-flex();
+		@include align-items(center);
+
+		.ui-slider
+		{
+			@include flex-grow(1);
+			margin: 0 10px 0 5px;
+			font-size: 11px;
+
+			background-color: #87b7d8 !important;
+			border-color: grey;
+
+			.ui-slider-handle
+			{
+				color: lightgrey !important;
+			}
+		}
+
+		input
+		{
+			@include flex-shrink(0);
+			width: 50px;
+			color: initial;
+			padding: initial;
+			font-size: 16px;
+		}
+	}
+
+	.ui-accordion .ui-accordion-content {
+		padding: 10px;
+	}
+
+	label {
+		display: block;
+	}
+}

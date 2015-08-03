@@ -1,0 +1,35 @@
+extends ./paneleditor
+
+block vars
+	- var settings = { name: 'materialEditor', controller: 'MaterialController', title: 'Material', icon: 'material' };
+
+block content
+
+	#materialaccordion(accordion)
+
+		h3: a(href="#") Material Base
+		#MaterialBasicSettings
+			label Material Type: 
+				select#materialtype
+					option phong
+					option mix
+					option video
+
+			label alpha:
+				br
+				slider(min=0, max=1, step=0.01, value='materialDef.alpha', disabled='!fields.selectedNode')
+			label specularLevel:
+				br
+				slider(min=0, max=10, step=0.1, value='materialDef.specularLevel', disabled='!fields.selectedNode')
+			label reflect:
+				br
+				slider(min=0, max=10, step=0.1, value='materialDef.reflect', disabled='!fields.selectedNode')
+			label shininess:
+				br
+				slider(min=0, max=10, step=0.1, value='materialDef.shininess', disabled='!fields.selectedNode')
+			label side:
+				br
+				slider(min=0, max=2, step=1, value='materialDef.side', disabled='!fields.selectedNode')
+
+			label diffuse color:
+				input(type='color', ng-model='convertColorFormat(materialDef.color)', ng-model-options='{"getterSetter": true, "debounce": 10}')

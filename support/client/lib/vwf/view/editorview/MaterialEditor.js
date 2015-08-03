@@ -1,13 +1,134 @@
-define(['vwf/view/editorview/panelEditor', "vwf/view/editorview/mapbrowser", "vwf/view/editorview/colorpicker.js"], function(baseclass) {
+'use strict';
+
+define(['vwf/view/editorview/angular-app'], function(app)
+{
+	app.controller('MaterialController', ['$scope', function($scope)
+	{
+		$scope.$watch('fields.selectedNode', function(newval){
+			$scope.materialDef = newval && newval.properties.materialDef || null;
+		});
+
+		$scope.$watch('materialDef', function(newval){
+			if(newval){
+				vwf_view.kernel.setProperty($scope.fields.selectedNode.id, 'materialDef', newval);
+			}
+		}, true);
+
+		$scope.convertColorFormat = function(obj)
+		{
+			return function(val)
+			{
+				if(obj && val){
+					val = parseInt(val.slice(1));
+					obj.r = (val & 0xff0000 >> 16) / 255;
+					obj.g = (val & 0x00ff00 >>  8) / 255;
+					obj.b = (val & 0x0000ff      ) / 255;
+					console.log(obj);
+				}
+				else if(obj){
+					var intRep =
+						(obj.r || 0) * 0xff << 16
+						|| (obj.g || 0) * 0xff << 8
+						|| (obj.b || 0) * 0xff;
+					var stringRep = '#'+('000000'+intRep.toString(16)).substr(-6);
+					console.log(stringRep);
+					return stringRep;
+				}
+				else {
+					return '#000000';
+				}
+			}
+		}
+	}]);
+
+	app.directive('slider', function()
+	{
+		return {
+			restrict: 'E',
+			template: '<div class="slider"></div>'+
+				'<input type="number" min="{{min}}" max="{{max}}" step="{{step}}" ng-model="value" ng-disabled="disabled"></input>',
+			scope: {
+				min: '=',
+				max: '=',
+				step: '=',
+				value: '=',
+				disabled: '='
+			},
+			link: function($scope, elem, attrs)
+			{
+				var slider = $('.slider', elem);
+				slider.slider({
+					min: $scope.min,
+					max: $scope.max,
+					step: $scope.step,
+					value: $scope.value
+				});
+
+				$scope.$on('$destroy', function(){
+					slider.slider('destroy');
+				});
+
+				slider.on('slide', function(evt, ui){
+					$scope.value = ui.value;
+					$scope.$apply();
+				});
+
+
+				$scope.$watch('value', function(newval){
+					slider.slider('option', 'value', newval);
+				});
+
+				$scope.$watch('disabled', function(newval){
+					if( newval )
+						slider.slider('disable');
+					else
+						slider.slider('enable');
+				});
+			}
+		};
+	});
+
+	app.directive('colorPicker', function()
+	{
+		return {
+			restrict: 'E',
+			scope: {
+				
+			},
+			link: function($scope, elem, attrs)
+			{
+				
+			}
+		};
+	});
+
+	app.directive('accordion', function()
+	{
+		return {
+			restrict: 'A',
+			scope: false,
+			link: function($scope, elem, attrs)
+			{
+				elem.accordion({
+					fillSpace: true,
+					heightStyle: "content"
+				});
+
+				$scope.$on('$destroy', function(){
+					elem.accordion('destroy');
+				});
+			}
+		};
+	});
+});
+
+var oldDefine = function(baseclass) {
     var MaterialEditor = {};
     var isInitialized = false;
     return {
         getSingleton: function() {
             if (!isInitialized) {
               
-				//var base = new baseclass('hierarchyManager','Hierarchy','hierarchy',false,true,'#sidepanel')
-				//base.init();
-				//$.extend(HierarchyManager,base);
 				baseclass(MaterialEditor,'MaterialEditor','Material','material',true,true,'#sidepanel .main')
 				
 				MaterialEditor.init()
@@ -22,16 +143,7 @@ define(['vwf/view/editorview/panelEditor', "vwf/view/editorview/mapbrowser", "vw
 
     function initialize() {
         window._MapBrowser = require("vwf/view/editorview/mapbrowser").getSingleton();
-        //$('#sidepanel').append("<div id='materialeditor'>" + "<div id='materialeditortitle' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' >Material</div>" + "</div>");
-        //$('#materialeditor').dialog({title:'Material Editor',autoOpen:false});
-        //$("#"+this.contentID).empty();
-        //$("#"+this.contentID).append("<div id='materialeditortitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Material</span></div>");
-
-       // $('#materialeditortitle').prepend('<div class="headericon material" />');
         $("#"+this.contentID).append('<div id="materialaccordion" style="height:100%;overflow:hidden">' + '	<h3>' + '		<a href="#">Material Base</a>' + '	</h3>' + '	<div id="MaterialBasicSettings">' + '	</div>' + '</div>');
-
-        //$('#materialeditor').css('border-bottom', '5px solid #444444')
-       // $('#materialeditor').css('border-left', '2px solid #444444')
 
 
         this.RootPropTypein = function() {
@@ -761,4 +873,5 @@ define(['vwf/view/editorview/panelEditor', "vwf/view/editorview/mapbrowser", "vw
       
         this.hide();
     }
-});
+}
+
