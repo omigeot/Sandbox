@@ -635,7 +635,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                     vwfDef.type = 'subDriver/threejs/asset/vnd.SAVE+json';
                     vwfDef.children = {};
                     vwfDef.properties = {}
-                    vwfDef.extends = "asset.vwf"
+                    vwfDef.extends = "./vwf/model/SAVE/semantic_entity.vwf"
                     vwfDef.properties.flora_ref =mapping.semantic_mapping.asset.flora_ref;
                     vwfDef.properties.sid = mapping.semantic_mapping.asset.sid;
                     vwfDef.properties.flora_uri =mapping.semantic_mapping.asset.uri;
@@ -659,7 +659,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                             newChild.source = s3dnode.groups[i].name;
                             newChild.type = "link_existing/threejs"
                             newChild.children = {};
-                            newChild.extends = "asset.vwf"
+                            newChild.extends = "./vwf/model/SAVE/semantic_entity.vwf"
                             newChild.properties = findMapping(s3dnode.groups[i].name) || {};
                             if(newChild.properties && newChild.properties.node)
                                 delete newChild.properties.node;
