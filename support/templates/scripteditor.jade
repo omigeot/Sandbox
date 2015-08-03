@@ -30,16 +30,17 @@ mixin scripteditor_body
 
 				.tabs-panel.horizontalLayout(ng-show='guiState.openTab !== "options"')
 					.list
-						label.listitem(ng-repeat='item in currentList | filter: (guiState.showHiddenProperties ? {} : {name:"!__"})'
-							ng-class='{"selected": currentList.selected===item.name, "dirty": dirty[item.id]}')
-							input(type='radio', name='selectedField', ng-model='currentList.selected', ng-value='item.name')
-							| {{dirty[item.id] ? '*' : ''}}{{item.name}}
+						.listContainer(style='width: 100%;')
+							label.listitem(ng-repeat='item in currentList | filter: (guiState.showHiddenProperties ? {} : {name:"!__"})'
+								ng-class='{"selected": currentList.selected===item.name, "dirty": dirty[item.id]}')
+								input(type='radio', name='selectedField', ng-model='currentList.selected', ng-value='item.name')
+								| {{dirty[item.id] ? '*' : ''}}{{item.name}}
 
-						label.listitem.suggestion(ng-repeat='item in currentSuggestions | filter: hasFieldFilter'
-							ng-class='{"selected": currentList.selected===item.name, "dirty": dirty[item.id]}'
-							title='Create the "{{item.name}}" {{guiState.openTab.slice(0,-1)}}')
-							input(type='radio', name='selectedField', ng-model='currentList.selected', ng-value='item.name')
-							| {{dirty[item.id] ? '*' : ''}}{{item.name}}
+							label.listitem.suggestion(ng-repeat='item in currentSuggestions | filter: hasFieldFilter'
+								ng-class='{"selected": currentList.selected===item.name, "dirty": dirty[item.id]}'
+								title='Create the "{{item.name}}" {{guiState.openTab.slice(0,-1)}}')
+								input(type='radio', name='selectedField', ng-model='currentList.selected', ng-value='item.name')
+								| {{dirty[item.id] ? '*' : ''}}{{item.name}}
 							
 					.textinner.verticalLayout
 						ace-code-editor.content(disabled='fields.selectedNode.id==="index-vwf" || !guiState.openTab || !currentList.selected'

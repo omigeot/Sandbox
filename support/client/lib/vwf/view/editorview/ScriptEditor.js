@@ -146,6 +146,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 				});
 
 				$(document).on('viewportresize', function(e){
+					console.log('Script editor resized');
 					editor.resize();
 				});
 
@@ -679,11 +680,19 @@ define(['vwf/view/editorview/angular-app'], function(app)
 		$scope.maximize = function(){
 			$('#vwf-root').hide();
 			$('#ScriptEditor').addClass('maximized');
+
+			var evt = new Event('viewportresize');
+			document.dispatchEvent(evt);
+
 			$scope.maximized = true;
 		}
 		$scope.unmaximize = function(){
 			$('#vwf-root').show();
 			$('#ScriptEditor').removeClass('maximized');
+
+			var evt = new Event('viewportresize');
+			document.dispatchEvent(evt);
+
 			$scope.maximized = false;
 		}
 
