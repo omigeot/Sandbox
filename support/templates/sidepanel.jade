@@ -3,7 +3,7 @@ mixin sidepanel_head
 
 mixin sidepanel_body
 
-	#sidepanel(ng-controller='SidePanelController')
+	#sidepanel.hidden(ng-controller='SidePanelController')
 		#sidetab(ng-click='isPanelOpen() ? hidePanel() : showPanel()') Editors
 
 		.main

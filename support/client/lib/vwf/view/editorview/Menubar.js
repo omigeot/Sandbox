@@ -289,7 +289,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 	
 	
 			MenuSelectName: function(e) {
-				_SelectionEditor.Show();
+				_SidePanel.showTab('hierarchyManager');
 			},
 	
 			MenuPaste: function(e) {
