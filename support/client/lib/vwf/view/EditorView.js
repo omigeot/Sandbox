@@ -43,9 +43,7 @@ define([
 	"vwf/view/editorview/DataManager", 
 	"vwf/view/editorview/UserManager", 
 	"vwf/view/editorview/help", 
-	//"vwf/view/editorview/SideTabs", 
 	"vwf/view/editorview/wireeditor", 
-	"vwf/view/editorview/selectionEditor", 
 	"vwf/view/editorview/UndoManager", 
 	"vwf/view/editorview/Publisher", 
 	"vwf/view/editorview/EntityLibrary", 
@@ -114,7 +112,6 @@ define([
                    
                     window._PermissionsManager = require("vwf/view/editorview/_PermissionsManager").getSingleton();
                     window._WireEditor = require("vwf/view/editorview/wireeditor").getSingleton();
-                    window._SelectionEditor = require("vwf/view/editorview/selectionEditor").getSingleton();
                     window._UndoManager = require("vwf/view/editorview/UndoManager").getSingleton();
                     require("vwf/view/editorview/EntityLibrary").initialize();
                     require("vwf/view/editorview/JSONPrompt").initialize();

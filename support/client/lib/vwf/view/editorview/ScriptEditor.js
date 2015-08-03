@@ -1,6 +1,6 @@
 'use strict';
 
-define(['vwf/view/editorview/angular-app'], function(app)
+define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager'], function(app)
 {
 	$(document.head).append('<script src="../vwf/view/editorview/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>');
 
@@ -146,6 +146,7 @@ define(['vwf/view/editorview/angular-app'], function(app)
 				});
 
 				$(document).on('viewportresize', function(e){
+					console.log('Script editor resized');
 					editor.resize();
 				});
 
@@ -657,6 +658,28 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			}
 		}
 
+
+		var defaultSize = 12;
+		$scope.fontSize = _SettingsManager.getKey('scriptEditorFontSize') || defaultSize;
+
+		$scope.$watch('fontSize', function(newval){
+			_SettingsManager.setKey('scriptEditorFontSize', newval);
+			$('#ScriptEditor ace-code-editor pre').css('font-size', newval);
+		});
+
+		$scope.defaultFont = function(){
+			$scope.fontSize = defaultSize;
+		}
+
+		$scope.increaseFont = function(){
+			$scope.fontSize++;
+		}
+
+		$scope.decreaseFont = function(){
+			$scope.fontSize--;
+		}
+
+
 		/*
 		 * Manage the visibility state of the script editor
 		 */
@@ -679,11 +702,19 @@ define(['vwf/view/editorview/angular-app'], function(app)
 		$scope.maximize = function(){
 			$('#vwf-root').hide();
 			$('#ScriptEditor').addClass('maximized');
+
+			var evt = new Event('viewportresize');
+			document.dispatchEvent(evt);
+
 			$scope.maximized = true;
 		}
 		$scope.unmaximize = function(){
 			$('#vwf-root').show();
 			$('#ScriptEditor').removeClass('maximized');
+
+			var evt = new Event('viewportresize');
+			document.dispatchEvent(evt);
+
 			$scope.maximized = false;
 		}
 

@@ -111,7 +111,7 @@ define({
         toolsLoaded = _EditorView.needTools();
 
 		var timeout;
-		window._resizeCanvas = function()
+		window._resizeCanvas = function(evt)
 		{
 			if(timeout) clearTimeout(timeout);
 			timeout = setTimeout(function()
@@ -125,7 +125,6 @@ define({
 				canvas.attr('height', h / resolutionScale);
 				if(window._dRenderer){
 					_dRenderer.setViewport(0, 0, w / resolutionScale, h / resolutionScale);
-	                //_dRenderer.setSize(w / resolutionScale, h / resolutionScale);
 				}
 	            _dView.getCamera().aspect = w/h;
 	            _dView.getCamera().updateProjectionMatrix()

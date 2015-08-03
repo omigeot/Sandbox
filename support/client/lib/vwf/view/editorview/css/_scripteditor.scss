@@ -88,11 +88,18 @@
 	{
 		width: 190px;
 		margin-right: 5px;
+		position: relative;
 
 		overflow-y: scroll;
 		overflow-x: hidden;
 
 		@include flex-shrink(0);
+
+		.listContainer
+		{
+			width: 100%;
+			position: absolute;
+		}
 
 		.listitem
 		{
@@ -141,6 +148,32 @@
 	.textinner
 	{
 		width: 100%;
+		position: relative;
+
+		.font-size-selector
+		{
+			position: absolute;
+			top: 6px;
+			right: 18px;
+
+			padding: 5px;
+			z-index: 2;
+			cursor: default;
+
+			font-size: 16px;
+
+			&:hover
+			{
+				color: whitesmoke;
+				background-color: #383838;
+				border-radius: 3px;
+			}
+
+			*:hover
+			{
+				color: #82b8ff;
+			}
+		}
 
 		.content
 		{
@@ -162,6 +195,7 @@
 			border: none;
 			border-radius: 0;
 			background-color: inherit;
+			font-size: 12px;
 
 			width: 100%;
 			height: 100%;

@@ -102,6 +102,10 @@ input[type=button]
 	}
 }
 
+[scroll-fixed] {
+	position: absolute;
+}
+
 #GlobalProgressBar {
 	vertical-align: middle;
 	display: inline-block;
