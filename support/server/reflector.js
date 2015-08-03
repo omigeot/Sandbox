@@ -76,6 +76,7 @@ function getNamespace(socket)
             .parse(referer)
             .pathname;
         var namespace = referer;
+        if(!namespace) return null;
         if (namespace[namespace.length - 1] != "/")
             namespace += "/";
         //account for customizable client url
@@ -187,7 +188,7 @@ function WebSocketConnection(socket, _namespace)
             socket.loginData.UID = socket.loginData.Username;
         var namespace = _namespace || getNamespace(socket);
         //let the data viewer tool connect, but wait for it to tell us what namespace to join 
-        if (namespace.indexOf('_adl_dataview_') == 0)
+        if (namespace && namespace.indexOf('_adl_dataview_') == 0)
         {
             socket.on('setNamespace', function(msg)
             {
@@ -202,6 +203,7 @@ function WebSocketConnection(socket, _namespace)
         {
             socket.emit('connectionTest', msg);
         })
+        if(namespace)
         DAL.getInstance(namespace, function(instancedata)
         {
             if (!instancedata)
@@ -216,9 +218,13 @@ function WebSocketConnection(socket, _namespace)
                             if (instancedata && instancedata.publishSettings && instancedata.publishSettings.singlePlayer)
                             {
                                 ServeSinglePlayer(socket, namespace, instancedata)
+                                return;
                             }
                             else
+                            {
                                 ClientConnected(socket, namespace, instancedata);
+                                return;
+                            }
                         }
                         else
                         {
