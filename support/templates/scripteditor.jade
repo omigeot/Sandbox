@@ -43,6 +43,11 @@ mixin scripteditor_body
 								| {{dirty[item.id] ? '*' : ''}}{{item.name}}
 							
 					.textinner.verticalLayout
+						.font-size-selector
+							.glyphicon.glyphicon-menu-down(title='Decrease font size', ng-click='decreaseFont()')
+							.glyphicon.glyphicon-text-size(title='Default font size', ng-click='defaultFont()')
+							.glyphicon.glyphicon-menu-up(title='Increase font size', ng-click='increaseFont()')
+
 						ace-code-editor.content(disabled='fields.selectedNode.id==="index-vwf" || !guiState.openTab || !currentList.selected'
 							ng-class='{"dirty": dirty[selectedField.id]}')
 						.buttonPanel.horizontalLayout

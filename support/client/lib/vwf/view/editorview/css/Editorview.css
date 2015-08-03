@@ -747,8 +747,26 @@
         margin-bottom: 28px; }
   /* line 148, _scripteditor.scss */
   #ScriptEditor .textinner {
-    width: 100%; }
-    /* line 152, _scripteditor.scss */
+    width: 100%;
+    position: relative; }
+    /* line 153, _scripteditor.scss */
+    #ScriptEditor .textinner .font-size-selector {
+      position: absolute;
+      top: 6px;
+      right: 18px;
+      padding: 5px;
+      z-index: 2;
+      cursor: default;
+      font-size: 16px; }
+      /* line 165, _scripteditor.scss */
+      #ScriptEditor .textinner .font-size-selector:hover {
+        color: whitesmoke;
+        background-color: #383838;
+        border-radius: 3px; }
+      /* line 172, _scripteditor.scss */
+      #ScriptEditor .textinner .font-size-selector *:hover {
+        color: #82b8ff; }
+    /* line 178, _scripteditor.scss */
     #ScriptEditor .textinner .content {
       position: relative;
       background: url(vwf/view/editorview/images/ui-bg_diagonals-thick_8_cccccc_40x40.png) 50% 50% repeat;
@@ -757,10 +775,10 @@
       -ms-flex: 1 1;
       -webkit-flex-grow: 1;
       flex-grow: 1; }
-      /* line 159, _scripteditor.scss */
+      /* line 185, _scripteditor.scss */
       #ScriptEditor .textinner .content.dirty {
         border-color: red; }
-    /* line 165, _scripteditor.scss */
+    /* line 191, _scripteditor.scss */
     #ScriptEditor .textinner pre {
       padding: 0;
       margin: 0;
@@ -771,7 +789,7 @@
       width: 100%;
       height: 100%;
       position: absolute; }
-    /* line 179, _scripteditor.scss */
+    /* line 205, _scripteditor.scss */
     #ScriptEditor .textinner .buttonPanel {
       -webkit-box-align: center;
       -moz-align-items: center;
@@ -782,14 +800,14 @@
       font-weight: bold;
       font-family: 'Open Sans', Verdana, Arial, sans-serif;
       color: #eee; }
-  /* line 190, _scripteditor.scss */
+  /* line 216, _scripteditor.scss */
   #ScriptEditor #options.tabs-panel {
     -webkit-box-align: flex-start;
     -moz-align-items: flex-start;
     -ms-flex-align: flex-start;
     -webkit-align-items: flex-start;
     align-items: flex-start; }
-  /* line 194, _scripteditor.scss */
+  /* line 220, _scripteditor.scss */
   #ScriptEditor label.toggleButton {
     font-size: 11px;
     font-weight: bold;
@@ -800,14 +818,14 @@
     background-color: #222222;
     margin: 5px;
     padding: 5.5px 11px; }
-    /* line 208, _scripteditor.scss */
+    /* line 234, _scripteditor.scss */
     #ScriptEditor label.toggleButton:hover {
       color: #82b8ff; }
-    /* line 212, _scripteditor.scss */
+    /* line 238, _scripteditor.scss */
     #ScriptEditor label.toggleButton.checked {
       background-color: #aeaeae;
       color: black; }
-    /* line 217, _scripteditor.scss */
+    /* line 243, _scripteditor.scss */
     #ScriptEditor label.toggleButton input {
       display: none; }
 
@@ -944,9 +962,6 @@
     opacity: 1;
     color: white; }
 /* line 74, _hierarchy.scss */
-#hierarchyManager [scroll-fixed] {
-  position: absolute; }
-/* line 78, _hierarchy.scss */
 #hierarchyManager #hierarchyDisplay {
   padding: 0 2px;
   border: 1px grey solid;
@@ -961,53 +976,53 @@
   white-space: nowrap;
   overflow-x: auto;
   overflow-y: auto; }
-  /* line 94, _hierarchy.scss */
+  /* line 90, _hierarchy.scss */
   #hierarchyManager #hierarchyDisplay .hidden, #hierarchyManager #hierarchyDisplay .collapsed ul {
     display: none; }
-  /* line 98, _hierarchy.scss */
+  /* line 94, _hierarchy.scss */
   #hierarchyManager #hierarchyDisplay span.name {
     cursor: pointer; }
-    /* line 102, _hierarchy.scss */
+    /* line 98, _hierarchy.scss */
     #hierarchyManager #hierarchyDisplay span.name:not(.nonselectable):hover {
       text-decoration: underline; }
-      /* line 104, _hierarchy.scss */
+      /* line 100, _hierarchy.scss */
       #hierarchyManager #hierarchyDisplay span.name:not(.nonselectable):hover:not(.selected) {
         color: #82b8ff; }
-    /* line 111, _hierarchy.scss */
+    /* line 107, _hierarchy.scss */
     #hierarchyManager #hierarchyDisplay span.name.nonselectable {
       cursor: default; }
-    /* line 115, _hierarchy.scss */
+    /* line 111, _hierarchy.scss */
     #hierarchyManager #hierarchyDisplay span.name.selected {
       background-color: #82b8ff;
       color: black; }
-  /* line 123, _hierarchy.scss */
+  /* line 119, _hierarchy.scss */
   #hierarchyManager #hierarchyDisplay .three span.name {
     font-style: italic;
     color: #fcff90; }
-    /* line 128, _hierarchy.scss */
+    /* line 124, _hierarchy.scss */
     #hierarchyManager #hierarchyDisplay .three span.name.selected {
       color: black;
       background-color: #fcff90; }
-  /* line 136, _hierarchy.scss */
+  /* line 132, _hierarchy.scss */
   #hierarchyManager #hierarchyDisplay > ul {
     border-left: none !important;
     padding-left: 5px !important; }
-  /* line 143, _hierarchy.scss */
+  /* line 139, _hierarchy.scss */
   #hierarchyManager #hierarchyDisplay ul {
     padding: 0;
     list-style: none;
     border-left: solid grey 1px;
     padding-left: 10px; }
-  /* line 153, _hierarchy.scss */
+  /* line 149, _hierarchy.scss */
   #hierarchyManager #hierarchyDisplay li {
     margin: 4px 0px 4px 12px;
     text-indent: -8px; }
-  /* line 159, _hierarchy.scss */
+  /* line 155, _hierarchy.scss */
   #hierarchyManager #hierarchyDisplay .hierarchyicon {
     font-size: 10px;
     margin-right: 5px;
     color: #82b8ff; }
-    /* line 165, _hierarchy.scss */
+    /* line 161, _hierarchy.scss */
     #hierarchyManager #hierarchyDisplay .hierarchyicon.glyphicon-ban-circle {
       color: #444; }
 
@@ -1102,6 +1117,10 @@ input[type=button] {
     color: grey; }
 
 /* line 105, Editorview.scss */
+[scroll-fixed] {
+  position: absolute; }
+
+/* line 109, Editorview.scss */
 #GlobalProgressBar {
   vertical-align: middle;
   display: inline-block;
@@ -1113,7 +1132,7 @@ input[type=button] {
   width: 200px;
   overflow: hidden; }
 
-/* line 117, Editorview.scss */
+/* line 121, Editorview.scss */
 #GlobalProgressBarInner {
   background: #82b8ff;
   display: block;
@@ -1137,7 +1156,7 @@ input[type=button] {
   max-width: 190px; }
 
 /* This button was generated using CSSButtonGenerator.com */
-/* line 141, Editorview.scss */
+/* line 145, Editorview.scss */
 #GlobalProgressBarBack {
   width: 200px;
   background: gray;
@@ -1150,7 +1169,7 @@ input[type=button] {
   font-weight: bold;
   height: 15px; }
 
-/* line 154, Editorview.scss */
+/* line 158, Editorview.scss */
 #FunctionTip {
   top: 804.1875px;
   left: 295px;
@@ -1165,7 +1184,7 @@ input[type=button] {
   color: white;
   margin: 0px; }
 
-/* line 169, Editorview.scss */
+/* line 173, Editorview.scss */
 .AutoCompleteOption {
   font-size: 1.5em;
   font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
@@ -1173,16 +1192,16 @@ input[type=button] {
   color: #FFF;
   border-bottom: 1px dashed #ededed; }
 
-/* line 177, Editorview.scss */
+/* line 181, Editorview.scss */
 .AutoCompleteOption:hover {
   color: #5ab4e6; }
 
-/* line 181, Editorview.scss */
+/* line 185, Editorview.scss */
 .AutoCompleteOptionFunction {
   font-style: italic;
   color: orange; }
 
-/* line 186, Editorview.scss */
+/* line 190, Editorview.scss */
 #AutoComplete {
   position: absolute;
   z-index: 10000000;
@@ -1194,20 +1213,20 @@ input[type=button] {
   overflow-x: hidden !important;
   margin: 0px; }
 
-/* line 198, Editorview.scss */
+/* line 202, Editorview.scss */
 input[type="text"]:focus, input[type="password"]:focus {
   box-shadow: 0px 0px 5px #82b8ff; }
 
-/* line 202, Editorview.scss */
+/* line 206, Editorview.scss */
 #alertify {
   font-size: 1.7em;
   top: 38%; }
 
-/* line 207, Editorview.scss */
+/* line 211, Editorview.scss */
 #alertify-logs {
   font-size: 2em; }
 
-/* line 211, Editorview.scss */
+/* line 215, Editorview.scss */
 .playerlabel {
   cursor: pointer;
   font-size: 1.3em;
@@ -1220,7 +1239,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   color: #eee;
   font-family: 'Open Sans'; }
 
-/* line 224, Editorview.scss */
+/* line 228, Editorview.scss */
 .loadchoice {
   background-color: #DDD;
   border-radius: 3px;
@@ -1228,17 +1247,17 @@ input[type="text"]:focus, input[type="password"]:focus {
   box-shadow: 3px 3px 7px grey;
   margin-bottom: 5px; }
 
-/* line 232, Editorview.scss */
+/* line 236, Editorview.scss */
 .SidePanelWindowTitle {
   padding: 3px 4px 3px 4px;
   font: 1.5em sans-serif; }
 
-/* line 237, Editorview.scss */
+/* line 241, Editorview.scss */
 .SidePanelWindowBottomBorder {
   border-bottom: 5px solid #444444;
   border-left: 2px solid #444444; }
 
-/* line 242, Editorview.scss */
+/* line 246, Editorview.scss */
 .loadchoice:hover {
   background-color: #DDF;
   border-radius: 3px;
@@ -1246,7 +1265,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   box-shadow: 3px 3px 7px grey;
   margin-bottom: 5px; }
 
-/* line 250, Editorview.scss */
+/* line 254, Editorview.scss */
 .BigTextureThumb {
   margin-left: auto;
   margin-right: auto;
@@ -1257,7 +1276,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   margin-bottom: 10px;
   cursor: pointer; }
 
-/* line 261, Editorview.scss */
+/* line 265, Editorview.scss */
 .BigTextureThumbSrc {
   margin-left: auto;
   margin-right: auto;
@@ -1267,7 +1286,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   cursor: pointer;
   word-break: break-all; }
 
-/* line 271, Editorview.scss */
+/* line 275, Editorview.scss */
 #ContextMenu {
   position: fixed;
   z-index: 10000000;
@@ -1284,7 +1303,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   border: 1px solid gray;
   cursor: default; }
 
-/* line 288, Editorview.scss */
+/* line 292, Editorview.scss */
 #ContextMenuName {
   border-bottom: 1px solid gray;
   height: 1em;
@@ -1295,26 +1314,26 @@ input[type="text"]:focus, input[type="password"]:focus {
   padding-left: 6px;
   color: lightblue; }
 
-/* line 299, Editorview.scss */
+/* line 303, Editorview.scss */
 .ContextMenuAction {
   background: #404040;
   padding-left: 5px;
   color: lightgreen; }
 
-/* line 305, Editorview.scss */
+/* line 309, Editorview.scss */
 .ContextMenuAction:hover {
   background: #82b8ff; }
 
-/* line 309, Editorview.scss */
+/* line 313, Editorview.scss */
 .ContextMenuItem {
   background: #404040;
   padding-left: 5px; }
 
-/* line 314, Editorview.scss */
+/* line 318, Editorview.scss */
 .ContextMenuItem:hover {
   background: #4040A0; }
 
-/* line 318, Editorview.scss */
+/* line 322, Editorview.scss */
 .textureChoice {
   width: 50px;
   cursor: pointer;
@@ -1329,14 +1348,14 @@ input[type="text"]:focus, input[type="password"]:focus {
   color: black;
   text-shadow: 1px 1px 3px white; }
 
-/* line 333, Editorview.scss */
+/* line 337, Editorview.scss */
 .editorCheck {
   margin: 0px 2px 0px 0px;
   text-align: center;
   vertical-align: middle;
   zoom: 1.5; }
 
-/* line 340, Editorview.scss */
+/* line 344, Editorview.scss */
 .editorSliderLabel {
   display: inline-block;
   margin-bottom: 3px;
@@ -1344,7 +1363,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   font-size: 1.2em;
   text-shadow: 1px 1px 3px #aaaaaa; }
 
-/* line 348, Editorview.scss */
+/* line 352, Editorview.scss */
 .nametagname {
   border-left: 2px ridge #6666ff;
   height: 100%;
@@ -1353,7 +1372,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   padding-right: 10px;
   cursor: pointer; }
 
-/* line 357, Editorview.scss */
+/* line 361, Editorview.scss */
 .nametag {
   /* pointer-events: none; */
   position: absolute;
@@ -1369,36 +1388,36 @@ input[type="text"]:focus, input[type="password"]:focus {
   opacity: .8;
   transition: background 1s, opacity 1s; }
 
-/* line 373, Editorview.scss */
+/* line 377, Editorview.scss */
 .nametag:hover {
   opacity: 1;
   background: #82b8ff;
   box-shadow: 3px 3px 3px rgba(52, 52, 52, 0.9), -3px -3px 3px #7777cc inset; }
 
-/* line 379, Editorview.scss */
+/* line 383, Editorview.scss */
 .glyph {
   position: absolute;
   left: 0px;
   right: 0px; }
 
-/* line 385, Editorview.scss */
+/* line 389, Editorview.scss */
 .textureChoice:hover {
   background: #4040A0;
   border: 1px inset blue;
   width: 48px;
   height: 48px; }
 
-/* line 392, Editorview.scss */
+/* line 396, Editorview.scss */
 .TransformEditorInput {
   width: 4em; }
 
-/* line 396, Editorview.scss */
+/* line 400, Editorview.scss */
 .usertable {
   width: 100%;
   margin-bottom: 5px;
   margin-left: 5px; }
 
-/* line 402, Editorview.scss */
+/* line 406, Editorview.scss */
 .headericon {
   vertical-align: middle;
   width: 25px;
@@ -1407,18 +1426,18 @@ input[type="text"]:focus, input[type="password"]:focus {
   zoom: 1.2;
   padding-right: 5px; }
 
-/* line 410, Editorview.scss */
+/* line 414, Editorview.scss */
 .usertable tr td {
   font: 8pt "Open Sans"; }
 
-/* line 414, Editorview.scss */
+/* line 418, Editorview.scss */
 .usertable tr {
   display: block;
   border-radius: 5px;
   width: 100%;
   padding-bottom: 1px; }
 
-/* line 421, Editorview.scss */
+/* line 425, Editorview.scss */
 .EditorDataSectionTitle {
   text-align: center;
   margin: 3em 0px 0px 0px;
@@ -1426,11 +1445,11 @@ input[type="text"]:focus, input[type="password"]:focus {
   font-size: 1.3em;
   text-shadow: 1px 1px 5px #888888; }
 
-/* line 429, Editorview.scss */
+/* line 433, Editorview.scss */
 .EditorDataSectionTitle:first-child {
   margin: 1em 0px 0px 0px; }
 
-/* line 435, Editorview.scss */
+/* line 439, Editorview.scss */
 .GLGEStat {
   z-index: 999999;
   background-color: black;
@@ -1439,11 +1458,11 @@ input[type="text"]:focus, input[type="password"]:focus {
   border-radius: 10px;
   opacity: .8; }
 
-/* line 444, Editorview.scss */
+/* line 448, Editorview.scss */
 .GLGEStat table tbody tr td {
   color: white; }
 
-/* line 448, Editorview.scss */
+/* line 452, Editorview.scss */
 .vectorinputfront {
   display: inline;
   padding: 0;
@@ -1456,7 +1475,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   height: 16px;
   margin: 1px 0px 1px -2px; }
 
-/* line 461, Editorview.scss */
+/* line 465, Editorview.scss */
 .vectorinput {
   display: inline;
   padding: 0;
@@ -1469,7 +1488,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   height: 16px;
   margin: 1px 0px 1px -2px; }
 
-/* line 474, Editorview.scss */
+/* line 478, Editorview.scss */
 .primeditorinputbox {
   display: inline;
   float: right;
@@ -1483,7 +1502,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   height: 16px; }
 
 @media only screen and (max-width: 800px) {
-  /* line 489, Editorview.scss */
+  /* line 493, Editorview.scss */
   .primeditorinputbox {
     display: block;
     float: none;
@@ -1495,7 +1514,7 @@ input[type="text"]:focus, input[type="password"]:focus {
  * Include this stylesheet in your site or copy and paste the styles below into your stylesheet - jScrollPane
  * may not operate correctly without them.
  */
-/* line 502, Editorview.scss */
+/* line 506, Editorview.scss */
 .jspContainer {
   overflow: hidden;
   position: relative;
@@ -1505,12 +1524,12 @@ input[type="text"]:focus, input[type="password"]:focus {
   background-size: 5%;
   margin-top: 3px; }
 
-/* line 512, Editorview.scss */
+/* line 516, Editorview.scss */
 .jspPane {
   position: absolute;
   left: 0px !important; }
 
-/* line 517, Editorview.scss */
+/* line 521, Editorview.scss */
 .jspVerticalBar {
   position: absolute;
   top: 0;
@@ -1519,7 +1538,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   height: 100%;
   background: #424242; }
 
-/* line 526, Editorview.scss */
+/* line 530, Editorview.scss */
 .jspHorizontalBar {
   position: absolute;
   bottom: 0;
@@ -1529,31 +1548,31 @@ input[type="text"]:focus, input[type="password"]:focus {
   background: red;
   display: none; }
 
-/* line 536, Editorview.scss */
+/* line 540, Editorview.scss */
 .jspVerticalBar * {
   margin: 0;
   padding: 0; }
 
-/* line 541, Editorview.scss */
+/* line 545, Editorview.scss */
 .jspHorizontalBar * {
   margin: 0;
   padding: 0;
   display: none; }
 
-/* line 547, Editorview.scss */
+/* line 551, Editorview.scss */
 .jspCap {
   display: none; }
 
-/* line 551, Editorview.scss */
+/* line 555, Editorview.scss */
 .jspHorizontalBar .jspCap {
   float: left; }
 
-/* line 555, Editorview.scss */
+/* line 559, Editorview.scss */
 .jspTrack {
   background: transparent;
   position: relative; }
 
-/* line 560, Editorview.scss */
+/* line 564, Editorview.scss */
 .jspDrag {
   box-shadow: 1px 1px 3px inset black;
   background: #3a8fff;
@@ -1565,50 +1584,50 @@ input[type="text"]:focus, input[type="password"]:focus {
   /* border-radius: 5px; */
   border-left: 1px solid black; }
 
-/* line 572, Editorview.scss */
+/* line 576, Editorview.scss */
 .jspHorizontalBar .jspTrack,
 .jspHorizontalBar .jspDrag {
   float: left;
   height: 100%; }
 
-/* line 578, Editorview.scss */
+/* line 582, Editorview.scss */
 .jspArrow {
   background: #50506d;
   text-indent: -20000px;
   display: block;
   cursor: pointer; }
 
-/* line 585, Editorview.scss */
+/* line 589, Editorview.scss */
 .jspArrow.jspDisabled {
   cursor: default;
   background: #80808d; }
 
-/* line 590, Editorview.scss */
+/* line 594, Editorview.scss */
 .jspVerticalBar .jspArrow {
   height: 16px; }
 
-/* line 594, Editorview.scss */
+/* line 598, Editorview.scss */
 .jspHorizontalBar .jspArrow {
   width: 16px;
   float: left;
   height: 100%; }
 
-/* line 600, Editorview.scss */
+/* line 604, Editorview.scss */
 .jspVerticalBar .jspArrow:focus {
   outline: none; }
 
-/* line 604, Editorview.scss */
+/* line 608, Editorview.scss */
 .jspCorner {
   background: #eeeef4;
   float: left;
   height: 100%; }
 
 /* Yuk! CSS Hack for IE6 3 pixel bug :( */
-/* line 611, Editorview.scss */
+/* line 615, Editorview.scss */
 * html .jspCorner {
   margin: 0 -3px 0 0; }
 
-/* line 615, Editorview.scss */
+/* line 619, Editorview.scss */
 .PrivateMessageWindow {
   background-image: -webkit-linear-gradient(top, white 0%, #d9eeef 100%);
   width: 99%;
@@ -1619,14 +1638,14 @@ input[type="text"]:focus, input[type="password"]:focus {
   position: absolute;
   overflow-y: auto; }
 
-/* line 626, Editorview.scss */
+/* line 630, Editorview.scss */
 .PrivateMessageTable {
   width: 100%;
   background-color: transparent;
   overflow-y: hidden;
   overflow-x: hidden; }
 
-/* line 633, Editorview.scss */
+/* line 637, Editorview.scss */
 .PrivateMessageWindowText {
   margin: 0px;
   padding: 0px;
@@ -1638,7 +1657,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   width: 98%;
   top: 0%; }
 
-/* line 645, Editorview.scss */
+/* line 649, Editorview.scss */
 .PrivateMessageWindow input {
   right: 1%;
   position: absolute;
@@ -1649,12 +1668,12 @@ input[type="text"]:focus, input[type="password"]:focus {
   box-shadow: 3px 2px 10px lightgrey inset;
   width: calc(98% - 1em); }
 
-/* line 656, Editorview.scss */
+/* line 660, Editorview.scss */
 .PrivateMessageWindow input:focus {
   border: 1px solid #82b8ff;
   box-shadow: 3px 2px 10px lightgrey inset; }
 
-/* line 661, Editorview.scss */
+/* line 665, Editorview.scss */
 .ChatFromOtherLabel {
   vertical-align: middle;
   color: #517890;
@@ -1667,7 +1686,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   font-style: italic;
   width: 100px; }
 
-/* line 674, Editorview.scss */
+/* line 678, Editorview.scss */
 .ChatFromOtherText {
   color: white;
   /* text-align: right; */
@@ -1686,7 +1705,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   vertical-align: middle;
   clear: both; }
 
-/* line 693, Editorview.scss */
+/* line 697, Editorview.scss */
 .ChatFromMeLabel {
   vertical-align: middle;
   color: #6ea1c0;
@@ -1699,7 +1718,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   font-style: italic;
   width: 100px; }
 
-/* line 706, Editorview.scss */
+/* line 710, Editorview.scss */
 .ChatFromMeText {
   color: white;
   /* text-align: right; */
@@ -1717,7 +1736,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   vertical-align: middle;
   clear: both; }
 
-/* line 724, Editorview.scss */
+/* line 728, Editorview.scss */
 .GlobalChatLabel {
   vertical-align: top;
   width: 25%;
@@ -1726,13 +1745,13 @@ input[type="text"]:focus, input[type="password"]:focus {
   color: darkred;
   display: table-cell; }
 
-/* line 733, Editorview.scss */
+/* line 737, Editorview.scss */
 .GlobalChatText {
   color: darkred;
   width: 75%;
   max-width: 75%; }
 
-/* line 739, Editorview.scss */
+/* line 743, Editorview.scss */
 #ChatInput {
   bottom: 0px;
   position: absolute;
@@ -1743,17 +1762,17 @@ input[type="text"]:focus, input[type="password"]:focus {
   width: 97%;
   box-sizing: border-box; }
 
-/* line 750, Editorview.scss */
+/* line 754, Editorview.scss */
 #ChatInput:focus {
   border: 1px solid #82b8ff;
   box-shadow: 3px 2px 10px lightgrey inset; }
 
-/* line 755, Editorview.scss */
+/* line 759, Editorview.scss */
 #ChatLog {
   width: 100%;
   background-color: transparent; }
 
-/* line 760, Editorview.scss */
+/* line 764, Editorview.scss */
 #ChatBodyInner {
   width: 99%;
   top: 0%;
@@ -1764,52 +1783,52 @@ input[type="text"]:focus, input[type="password"]:focus {
   bottom: 38px;
   border: none; }
 
-/* line 771, Editorview.scss */
+/* line 775, Editorview.scss */
 #ChatWindow {
   width: 100%;
   margin: 0px;
   padding: 0px; }
 
-/* line 777, Editorview.scss */
+/* line 781, Editorview.scss */
 .ChatFromOther {
   margin: 5px; }
 
-/* line 781, Editorview.scss */
+/* line 785, Editorview.scss */
 .ChatFromMe {
   width: 95%;
   border-radius: 10px;
   margin: 5px 5px 9px 5px;
   right: 1%; }
 
-/* line 788, Editorview.scss */
+/* line 792, Editorview.scss */
 .ChatFromMeText a {
   word-break: break-all; }
 
-/* line 792, Editorview.scss */
+/* line 796, Editorview.scss */
 .ChatFromOtherText a {
   word-break: break-all; }
 
-/* line 796, Editorview.scss */
+/* line 800, Editorview.scss */
 .targetpropchoice {
   padding-left: 1em;
   cursor: pointer;
   color: gray;
   border-bottom: 1px solid #eeeeee; }
 
-/* line 803, Editorview.scss */
+/* line 807, Editorview.scss */
 .sourcepropchoice {
   padding-left: 1em;
   cursor: pointer;
   border-bottom: 1px solid #eeeeee; }
 
-/* line 809, Editorview.scss */
+/* line 813, Editorview.scss */
 .wirepropselected {
   font-weight: bold;
   text-shadow: 1px 1px 1px #aaaaaa;
   color: blue;
   background: #DDF; }
 
-/* line 816, Editorview.scss */
+/* line 820, Editorview.scss */
 #WireEditorSelectedName {
   height: 1em;
   background: #EFEFEF;
@@ -1822,7 +1841,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   overflow: hidden;
   cursor: pointer; }
 
-/* line 829, Editorview.scss */
+/* line 833, Editorview.scss */
 #WireEditorSourceName {
   height: 1em;
   background: #EFEFEF;
@@ -1835,7 +1854,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   overflow: hidden;
   cursor: pointer; }
 
-/* line 842, Editorview.scss */
+/* line 846, Editorview.scss */
 #WireEditorSelectedProps {
   margin-left: 1em;
   overflow: auto;
@@ -1844,7 +1863,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   top: 5em;
   width: 94%; }
 
-/* line 851, Editorview.scss */
+/* line 855, Editorview.scss */
 #WireEditorSourceProps {
   margin-left: 1em;
   overflow: auto;
@@ -1853,13 +1872,13 @@ input[type="text"]:focus, input[type="password"]:focus {
   top: 5em;
   width: 94%; }
 
-/* line 860, Editorview.scss */
+/* line 864, Editorview.scss */
 #WireEditor {
   padding: 0px;
   margin: 0px;
   font-size: 1.2em; }
 
-/* line 866, Editorview.scss */
+/* line 870, Editorview.scss */
 .wireeditorleft {
   position: absolute;
   top: 0%;
@@ -1872,7 +1891,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   border-radius: 6px;
   box-shadow: 0px 0px 10px #cccccc inset; }
 
-/* line 879, Editorview.scss */
+/* line 883, Editorview.scss */
 .wireeditorright {
   position: absolute;
   width: 50%;
@@ -1884,14 +1903,14 @@ input[type="text"]:focus, input[type="password"]:focus {
   padding: 0em 0em 0em 0em;
   border-radius: 6px; }
 
-/* line 891, Editorview.scss */
+/* line 895, Editorview.scss */
 #wireeditorbuttons {
   position: absolute;
   top: 80%;
   width: 100%;
   text-align: center; }
 
-/* line 898, Editorview.scss */
+/* line 902, Editorview.scss */
 #wireeditorLink {
   height: 1em;
   background: #EFEFEF;
@@ -1909,11 +1928,11 @@ input[type="text"]:focus, input[type="password"]:focus {
   cursor: pointer;
   display: inline-block; }
 
-/* line 916, Editorview.scss */
+/* line 920, Editorview.scss */
 .wiredisabled {
   color: lightgray; }
 
-/* line 920, Editorview.scss */
+/* line 924, Editorview.scss */
 #wireeditordisable {
   position: absolute;
   top: 0%;
@@ -1923,12 +1942,12 @@ input[type="text"]:focus, input[type="password"]:focus {
   background: black;
   opacity: .05; }
 
-/* line 930, Editorview.scss */
+/* line 934, Editorview.scss */
 .wirepropwired {
   text-shadow: 1px 1px 1px gray;
   color: darkblue; }
 
-/* line 935, Editorview.scss */
+/* line 939, Editorview.scss */
 #SubExp2 {
   height: 1em;
   background: #EFEFEF;
@@ -1946,7 +1965,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   cursor: pointer;
   display: inline-block; }
 
-/* line 953, Editorview.scss */
+/* line 957, Editorview.scss */
 #SubExp1 {
   height: 1em;
   background: #EFEFEF;
@@ -1964,7 +1983,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   cursor: pointer;
   display: inline-block; }
 
-/* line 971, Editorview.scss */
+/* line 975, Editorview.scss */
 #preloadGUI {
   position: absolute;
   width: 30%;
@@ -1982,13 +2001,13 @@ input[type="text"]:focus, input[type="password"]:focus {
   font-family: 'Open Sans',sans-serif;
   font-size: 17px; }
 
-/* line 989, Editorview.scss */
+/* line 993, Editorview.scss */
 #preloadGUI .preloadCenter {
   height: 60%;
   -webkit-margin-after: 0;
   -webkit-margin-before: 0; }
 
-/* line 995, Editorview.scss */
+/* line 999, Editorview.scss */
 #preloadguiText {
   background: #F5F5F5;
   height: 40%;
@@ -2007,15 +2026,15 @@ input[type="text"]:focus, input[type="password"]:focus {
   color: #ccc;
   font-size: .7em; }
 
-/* line 1014, Editorview.scss */
+/* line 1018, Editorview.scss */
 #fullscreenlink {
   cursor: pointer; }
 
-/* line 1018, Editorview.scss */
+/* line 1022, Editorview.scss */
 #fullscreenlink:hover {
   color: blue; }
 
-/* line 1022, Editorview.scss */
+/* line 1026, Editorview.scss */
 #preloadprogress {
   vertical-align: middle;
   margin-top: auto;
@@ -2026,7 +2045,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   top: 16%;
   left: 2.5%; }
 
-/* line 1033, Editorview.scss */
+/* line 1037, Editorview.scss */
 .progress-label {
   position: absolute;
   font-weight: bold;
@@ -2037,7 +2056,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   height: 100%;
   margin: 0px; }
 
-/* line 1044, Editorview.scss */
+/* line 1048, Editorview.scss */
 #preloadGUIBack {
   position: absolute;
   width: 100%;
@@ -2051,52 +2070,52 @@ input[type="text"]:focus, input[type="password"]:focus {
   font-size: 1.5em;
   font-family: 'Open Sans',sans-serif; }
 
-/* line 1058, Editorview.scss */
+/* line 1062, Editorview.scss */
 .guinode {
   position: absolute; }
 
-/* line 1062, Editorview.scss */
+/* line 1066, Editorview.scss */
 .guipick:hover {
   outline: 3px solid lightblue !important; }
 
-/* line 1066, Editorview.scss */
+/* line 1070, Editorview.scss */
 .guiselected {
   outline: 3px solid blue !important; }
 
-/* line 1070, Editorview.scss */
+/* line 1074, Editorview.scss */
 .guiselected:hover {
   outline: 3px solid blue !important; }
 
 /* Let's get this party started */
-/* line 1074, Editorview.scss */
+/* line 1078, Editorview.scss */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px; }
 
 /* Handle */
-/* line 1080, Editorview.scss */
+/* line 1084, Editorview.scss */
 ::-webkit-scrollbar-thumb {
   -webkit-border-radius: 5px;
   border-radius: 5px;
   background: #5284c7; }
-  /* line 1086, Editorview.scss */
+  /* line 1090, Editorview.scss */
   ::-webkit-scrollbar-thumb:window-inactive {
     background: #82b8ff; }
 
-/* line 1091, Editorview.scss */
+/* line 1095, Editorview.scss */
 ::-webkit-scrollbar-corner {
   background-color: inherit; }
 
-/* line 1095, Editorview.scss */
+/* line 1099, Editorview.scss */
 .libraryAsset img:hover {
   /* box-shadow: 2px 2px 10px rgb(130, 184, 255), 9px 9px 10px black inset; */
   border: 3px solid #3a8fff; }
 
-/* line 1100, Editorview.scss */
+/* line 1104, Editorview.scss */
 .BigTextureThumb:hover, .BigTextureThumbSrc:hover {
   border: 3px solid #8cb9ff; }
 
-/* line 1104, Editorview.scss */
+/* line 1108, Editorview.scss */
 #loadingSplash {
   position: absolute;
   align-content: center;
@@ -2108,18 +2127,18 @@ input[type="text"]:focus, input[type="password"]:focus {
   box-shadow: 10px 10px 30px;
   border-radius: 15px; }
 
-/* line 1116, Editorview.scss */
+/* line 1120, Editorview.scss */
 #GuestLogin {
   position: absolute;
   left: 20px;
   top: 20px; }
 
-/* line 1122, Editorview.scss */
+/* line 1126, Editorview.scss */
 #JSONViewButtonBar {
   height: 2.5em;
   margin-left: -1em; }
 
-/* line 1127, Editorview.scss */
+/* line 1131, Editorview.scss */
 #JSONViewButtonBarOk, #JSONViewButtonBarCancel, #JSONViewButtonBarLoad, #JSONViewButtonBarSave {
   border: 1px solid #444444;
   background: #222222 url(images/ui-bg_glass_15_222222_1x400.png) 50% 50% repeat-x;
@@ -2131,7 +2150,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   cursor: pointer;
   display: inline; }
 
-/* line 1139, Editorview.scss */
+/* line 1143, Editorview.scss */
 #JSONViewButtonBarOk:hover, #JSONViewButtonBarCancel:hover, #JSONViewButtonBarLoad:hover, #JSONViewButtonBarSave:hover {
   border: 1px solid #26b3f7;
   background: #3a8fff url(images/ui-bg_glass_20_3a8fff_1x400.png) 50% 50% repeat-x;
@@ -2139,7 +2158,7 @@ input[type="text"]:focus, input[type="password"]:focus {
   color: #fff;
   display: inline; }
 
-/* line 1147, Editorview.scss */
+/* line 1151, Editorview.scss */
 #JSONLoadInput {
   position: absolute;
   opacity: 0;
@@ -2150,12 +2169,12 @@ input[type="text"]:focus, input[type="password"]:focus {
   padding: 0px;
   width: 5em; }
 
-/* line 1158, Editorview.scss */
+/* line 1162, Editorview.scss */
 .playerlabelID {
   font-size: .6em;
   color: gray; }
 
-/* line 1163, Editorview.scss */
+/* line 1167, Editorview.scss */
 .playerlabel .glyphicon {
   float: right;
   margin: 0px;
@@ -2164,34 +2183,34 @@ input[type="text"]:focus, input[type="password"]:focus {
   margin-left: 4px;
   font-size: 1.5em; }
 
-/* line 1172, Editorview.scss */
+/* line 1176, Editorview.scss */
 .playerlabel .glyphicon:hover {
   color: #84b9ff; }
 
-/* line 1176, Editorview.scss */
+/* line 1180, Editorview.scss */
 .playerlabelname {
   display: inline-block; }
 
-/* line 1180, Editorview.scss */
+/* line 1184, Editorview.scss */
 * {
   box-sizing: content-box; }
 
-/* line 1184, Editorview.scss */
+/* line 1188, Editorview.scss */
 * select {
   color: black; }
 
-/* line 1188, Editorview.scss */
+/* line 1192, Editorview.scss */
 div#Translation .ui-spinner, div#Rotation .ui-spinner, div#Scale .ui-spinner {
   border-radius: 0px; }
 
-/* line 1192, Editorview.scss */
+/* line 1196, Editorview.scss */
 div#otherprops input[type=text] {
   color: black;
   /* border-radius: 5px; */
   padding: 0px;
   margin: 2px; }
 
-/* line 1199, Editorview.scss */
+/* line 1203, Editorview.scss */
 .ui-selectmenu-button {
   float: right;
   margin-top: 2px;
@@ -2199,55 +2218,55 @@ div#otherprops input[type=text] {
   border-radius: 3px;
   width: 30px; }
 
-/* line 1207, Editorview.scss */
+/* line 1211, Editorview.scss */
 .ui-selectmenu-button span.ui-selectmenu-text {
   padding: 0px; }
 
-/* line 1211, Editorview.scss */
+/* line 1215, Editorview.scss */
 .ui-spinner {
   border-radius: 3px;
   margin-top: 2px; }
 
-/* line 1216, Editorview.scss */
+/* line 1220, Editorview.scss */
 .ui-spinner-input {
   margin: 0px 10px 0px 0px; }
 
-/* line 1220, Editorview.scss */
+/* line 1224, Editorview.scss */
 .ui-button-text {
   display: inline-block !important; }
 
-/* line 1224, Editorview.scss */
+/* line 1228, Editorview.scss */
 .ui-button-text-only img {
   width: 50px;
   height: 50px;
   display: inline-block; }
 
-/* line 1230, Editorview.scss */
+/* line 1234, Editorview.scss */
 .ui-dialog .ui-dialog-titlebar-close {
   margin: -12px 0 0; }
 
-/* line 1234, Editorview.scss */
+/* line 1238, Editorview.scss */
 #ModelSearchTerm {
   background: black; }
 
-/* line 1238, Editorview.scss */
+/* line 1242, Editorview.scss */
 #InventoryRename {
   color: black; }
 
-/* line 1242, Editorview.scss */
+/* line 1246, Editorview.scss */
 .jstree-default .jstree-wholerow-clicked {
   background: #274857; }
 
-/* line 1246, Editorview.scss */
+/* line 1250, Editorview.scss */
 .jstree-default .jstree-wholerow-hovered {
   background: #5b89b6;
   /* color: black !important; */ }
 
-/* line 1251, Editorview.scss */
+/* line 1255, Editorview.scss */
 #guioverlay_index-vwf {
   outline: none !important; }
 
-/* line 1255, Editorview.scss */
+/* line 1259, Editorview.scss */
 #entitylibrarytray {
   margin-left: 1em;
   font-size: 22.2px;
@@ -2255,19 +2274,19 @@ div#otherprops input[type=text] {
   margin-bottom: 6px;
   cursor: pointer; }
 
-/* line 1263, Editorview.scss */
+/* line 1267, Editorview.scss */
 #entitylibrarytray:hover {
   color: #84b9ff; }
 
-/* line 1267, Editorview.scss */
+/* line 1271, Editorview.scss */
 ul li a .glyphicon {
   margin-right: 1em; }
 
-/* line 1271, Editorview.scss */
+/* line 1275, Editorview.scss */
 .ui-slider {
   clear: both; }
 
-/* line 1275, Editorview.scss */
+/* line 1279, Editorview.scss */
 .editorPanelDisableOverlay {
   position: absolute;
   top: 0;
@@ -2279,32 +2298,32 @@ ul li a .glyphicon {
   cursor: not-allowed;
   display: none; }
 
-/* line 1287, Editorview.scss */
+/* line 1291, Editorview.scss */
 .editorPanelDisable {
   color: #5e5e5e !important;
   cursor: not-allowed;
   pointer-events: none;
   opacity: 0.85; }
 
-/* line 1294, Editorview.scss */
+/* line 1298, Editorview.scss */
 .sidetab-editor-title {
   background: #3a8fff 50% 50% repeat-x;
   cursor: pointer;
   border-radius: 2px; }
 
-/* line 1300, Editorview.scss */
+/* line 1304, Editorview.scss */
 .sidetab-editor-title:hover {
   text-decoration: underline; }
 
-/* line 1304, Editorview.scss */
+/* line 1308, Editorview.scss */
 .sidetab-editor-title-active {
   background: #3a8fff 50% 50% repeat-x; }
 
-/* line 1308, Editorview.scss */
+/* line 1312, Editorview.scss */
 .sidetab-editor-title-active:hover {
   text-decoration: underline; }
 
-/* line 1312, Editorview.scss */
+/* line 1316, Editorview.scss */
 .downarrowclass {
   display: none; }
 

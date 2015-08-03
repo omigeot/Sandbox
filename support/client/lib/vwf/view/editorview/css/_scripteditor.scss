@@ -148,6 +148,32 @@
 	.textinner
 	{
 		width: 100%;
+		position: relative;
+
+		.font-size-selector
+		{
+			position: absolute;
+			top: 6px;
+			right: 18px;
+
+			padding: 5px;
+			z-index: 2;
+			cursor: default;
+
+			font-size: 16px;
+
+			&:hover
+			{
+				color: whitesmoke;
+				background-color: #383838;
+				border-radius: 3px;
+			}
+
+			*:hover
+			{
+				color: #82b8ff;
+			}
+		}
 
 		.content
 		{
