@@ -1,4 +1,4 @@
-define(function() {
+define(['vwf/view/editorview/panelEditor'], function(baseclass) {
     var PrimEditor = {};
     var isInitialized = false;
     return {
@@ -6,11 +6,11 @@ define(function() {
             if (!isInitialized) {
                 
                
-                var baseclass = require("vwf/view/editorview/panelEditor");
+                //var baseclass = require("vwf/view/editorview/panelEditor");
                 //var base = new baseclass('hierarchyManager','Hierarchy','hierarchy',false,true,'#sidepanel')
                 //base.init();
                 //$.extend(HierarchyManager,base);
-                baseclass(PrimEditor,'PrimitiveEditor','Properties','properties',true,true,'#sidepanel')
+                baseclass(PrimEditor,'PrimitiveEditor','Properties','properties',true,true,'#sidepanel .main')
                 
                 PrimEditor.init()
                 initialize.call(PrimEditor);
