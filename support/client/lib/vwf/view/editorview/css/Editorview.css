@@ -1061,9 +1061,8 @@
     flex-shrink: 0;
     width: 50px;
     color: initial;
-    padding: initial;
-    font-size: 16px; }
-/* line 35, _materialeditor.scss */
+    padding: initial; }
+/* line 34, _materialeditor.scss */
 #materialEditor .colorPickerIcon {
   width: 25px;
   height: 25px;
@@ -1071,34 +1070,47 @@
   background-color: #aaaaaa;
   background-image: url(../images/select3.png);
   background-position: center; }
-/* line 46, _materialeditor.scss */
+/* line 45, _materialeditor.scss */
 #materialEditor .ui-accordion .ui-accordion-content {
   padding: 10px; }
-/* line 50, _materialeditor.scss */
+/* line 49, _materialeditor.scss */
+#materialEditor input {
+  color: black; }
+/* line 53, _materialeditor.scss */
 #materialEditor label {
   display: block;
   margin: 0; }
-  /* line 55, _materialeditor.scss */
-  #materialEditor label select {
-    font-size: 16px; }
-/* line 60, _materialeditor.scss */
-#materialEditor label.inline {
-  display: -webkit-box;
-  display: -moz-flex;
-  display: -ms-flexbox;
-  display: -webkit-flex;
-  display: flex;
-  -webkit-box-align: center;
-  -moz-align-items: center;
-  -ms-flex-align: center;
-  -webkit-align-items: center;
-  align-items: center;
-  -webkit-box-pack: justify;
-  -moz-justify-content: space-between;
-  -ms-flex-pack: justify;
-  -webkit-justify-content: space-between;
-  justify-content: space-between;
-  margin: 10px 0; }
+  /* line 58, _materialeditor.scss */
+  #materialEditor label.inline {
+    display: -webkit-box;
+    display: -moz-flex;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    -moz-align-items: center;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-box-pack: justify;
+    -moz-justify-content: space-between;
+    -ms-flex-pack: justify;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+    margin: 10px 0; }
+  /* line 67, _materialeditor.scss */
+  #materialEditor label input[type=checkbox] {
+    margin: 0; }
+/* line 72, _materialeditor.scss */
+#materialEditor #MaterialFlags {
+  -webkit-box-pack: center;
+  -moz-justify-content: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center; }
+  /* line 76, _materialeditor.scss */
+  #materialEditor #MaterialFlags label {
+    margin: 10px 0; }
 
 @-webkit-keyframes pulsing {
   0% {

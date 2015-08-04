@@ -28,7 +28,6 @@
 			width: 50px;
 			color: initial;
 			padding: initial;
-			font-size: 16px;
 		}
 	}
 
@@ -47,22 +46,36 @@
 		padding: 10px;
 	}
 
+	input {
+		color: black;
+	}
+
 	label
 	{
 		display: block;
 		margin: 0;
 
-		select {
-			font-size: 16px;
+		&.inline
+		{
+			@include display-flex();
+			@include align-items(center);
+			@include justify-content(space-between);
+
+			margin: 10px 0;
+		}
+
+		input[type=checkbox] {
+			margin: 0;
 		}
 	}
 
-	label.inline
+	#MaterialFlags
 	{
-		@include display-flex();
-		@include align-items(center);
-		@include justify-content(space-between);
+		@include justify-content(center);
 
-		margin: 10px 0;
+		label
+		{
+			margin: 10px 0;
+		}
 	}
 }

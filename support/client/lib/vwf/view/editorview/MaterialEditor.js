@@ -5,19 +5,77 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 	app.controller('MaterialController', ['$scope', function($scope)
 	{
 		$scope.ambientLinked = true;
+		$scope.materialDef = null;
+		$scope.materialArray = null;
+		$scope.activeMaterial = 0;
 
-		$scope.$watch('fields.selectedNode', function(newval){
-			$scope.materialDef = newval && newval.properties.materialDef || null;
+		$scope.$watch('fields.selectedNode', function(newval)
+		{
+			if( newval && newval.properties.materialDef )
+			{
+				if( angular.isArray(newval.properties.materialDef) ){
+					$scope.materialArray = newval.properties.materialDef;
+					$scope.activeMaterial = 0;
+					$scope.materialDef = $scope.materialArray[0];
+				}
+				else {
+					$scope.materialArray = null;
+					$scope.activeMaterial = 0;
+					$scope.materialDef = newval.properties.materialDef;
+				}
 
-			if( $scope.materialDef ){
-				var diffuse = $scope.materialDef.color, ambient = $scope.materialDef.ambient;
-				$scope.ambientLinked = diffuse.r === ambient.r && diffuse.g === ambient.g && diffuse.b === ambient.b;
+				setMaterialDefaults();
 			}
-			else
+			else {
+				$scope.materialArray = null;
+				$scope.activeMaterial = 0;
+				$scope.materialDef = null;
 				$scope.ambientLinked = true;
+			}
 		});
 
-		$scope.$watch('materialDef', function(newval){
+		$scope.$watch('activeMaterial', function(newval){
+			if( $scope.materialArray && newval >= 0 && newval < $scope.materialArray.length )
+			{
+				$scope.materialDef = $scope.materialArray[newval];
+				setMaterialDefaults();
+			}
+		});
+
+		function setMaterialDefaults()
+		{
+			if( $scope.materialDef )
+			{
+				var diffuse = $scope.materialDef.color, ambient = $scope.materialDef.ambient;
+				$scope.ambientLinked = diffuse.r === ambient.r && diffuse.g === ambient.g && diffuse.b === ambient.b;
+
+				// set defaults
+
+				if( $scope.materialDef.type === undefined )
+					$scope.materialDef.type = 'phong';
+				if( $scope.materialDef.side === undefined )
+					$scope.materialDef.side = 0;
+				if( $scope.materialDef.blendMode === undefined )
+					$scope.materialDef.blendMode = 1;
+
+				if( $scope.materialDef.fog === undefined )
+					$scope.materialDef.fog = true;
+				if( $scope.materialDef.shading === undefined )
+					$scope.materialDef.shading = true;
+				if( $scope.materialDef.metal === undefined )
+					$scope.materialDef.metal = false;
+				if( $scope.materialDef.wireframe === undefined )
+					$scope.materialDef.wireframe = false;
+				if( $scope.materialDef.depthtest === undefined )
+					$scope.materialDef.depthtest = true;
+				if( $scope.materialDef.depthwrite === undefined )
+					$scope.materialDef.depthwrite = true;
+				if( $scope.materialDef.vertexColors === undefined )
+					$scope.materialDef.vertexColors = false;
+			}
+		}
+
+		$scope.$watch('materialArray || materialDef', function(newval){
 			if(newval){
 				vwf_view.kernel.setProperty($scope.fields.selectedNode.id, 'materialDef', newval);
 			}
@@ -71,8 +129,10 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 				});
 
 				$scope.$watch('disabled', function(newval){
-					if( newval )
+					if( newval ){
 						slider.slider('disable');
+						slider.slider('option', 'value', $scope.min);
+					}
 					else
 						slider.slider('enable');
 				});
