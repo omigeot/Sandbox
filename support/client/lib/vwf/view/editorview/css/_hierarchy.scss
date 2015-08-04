@@ -1,6 +1,8 @@
 
 #hierarchyManager
 {
+	max-height: 400px;
+
 	.content
 	{
 		@include display-flex();

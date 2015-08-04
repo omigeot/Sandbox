@@ -1,6 +1,6 @@
 'use strict';
 
-define(['vwf/view/editorview/angular-app'], function(app)
+define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 {
 	app.controller('MaterialController', ['$scope', function($scope)
 	{
@@ -14,31 +14,6 @@ define(['vwf/view/editorview/angular-app'], function(app)
 			}
 		}, true);
 
-		$scope.convertColorFormat = function(obj)
-		{
-			return function(val)
-			{
-				if(obj && val){
-					val = parseInt(val.slice(1));
-					obj.r = (val & 0xff0000 >> 16) / 255;
-					obj.g = (val & 0x00ff00 >>  8) / 255;
-					obj.b = (val & 0x0000ff      ) / 255;
-					console.log(obj);
-				}
-				else if(obj){
-					var intRep =
-						(obj.r || 0) * 0xff << 16
-						|| (obj.g || 0) * 0xff << 8
-						|| (obj.b || 0) * 0xff;
-					var stringRep = '#'+('000000'+intRep.toString(16)).substr(-6);
-					console.log(stringRep);
-					return stringRep;
-				}
-				else {
-					return '#000000';
-				}
-			}
-		}
 	}]);
 
 	app.directive('slider', function()
@@ -88,34 +63,84 @@ define(['vwf/view/editorview/angular-app'], function(app)
 		};
 	});
 
-	app.directive('colorPicker', function()
+	app.directive('colorPicker', ['$timeout', function($timeout)
 	{
 		return {
 			restrict: 'E',
+			template: '<div class="colorPickerIcon"></div>',
 			scope: {
-				
+				colorObj: '=',
+				altColorObj: '='
 			},
 			link: function($scope, elem, attrs)
 			{
-				
-			}
-		};
-	});
+				$scope.$watch('colorObj.r + colorObj.b + colorObj.g', function(newval)
+				{
+					$('.colorPickerIcon', elem).css('background-color', '#'+color());
 
-	app.directive('accordion', function()
-	{
-		return {
-			restrict: 'A',
-			scope: false,
-			link: function($scope, elem, attrs)
-			{
-				elem.accordion({
-					fillSpace: true,
-					heightStyle: "content"
+					if(newval && $scope.altColorObj){
+						$scope.altColorObj.r = $scope.colorObj.r;
+						$scope.altColorObj.g = $scope.colorObj.g;
+						$scope.altColorObj.b = $scope.colorObj.b;
+					}
 				});
 
-				$scope.$on('$destroy', function(){
-					elem.accordion('destroy');
+				function color(hexval)
+				{
+					if(hexval && $scope.colorObj)
+					{
+						var parsed = parseInt(hexval, 16);
+						$scope.colorObj.r = ((parsed & 0xff0000) >> 16)/255;
+						$scope.colorObj.g = ((parsed & 0x00ff00) >>  8)/255;
+						$scope.colorObj.b = ((parsed & 0x0000ff)      )/255;
+
+						if(handle) $timeout.cancel(handle);
+						var handle = $timeout($scope.$apply.bind($scope), 300);
+						return hexval;
+					}
+					else if($scope.colorObj)
+					{
+						var parsed = (Math.floor($scope.colorObj.r * 255) << 16)
+							| (Math.floor($scope.colorObj.g * 255) << 8)
+							| Math.floor($scope.colorObj.b * 255);
+
+						return ('000000'+parsed.toString(16)).slice(-6);
+					}
+					else
+						return 'aaaaaa';
+				}
+
+				elem.ColorPicker({
+					onShow: function(e){
+						$(e).fadeIn();
+					},
+					onHide: function(e){
+						$(e).fadeOut();
+						return false;
+					},
+					onBeforeShow: function(){
+						elem.ColorPickerSetColor(color());
+					},
+					onChange: function(hsb, hex, rgb, el){
+						color(hex);
+					}
+				});
+			}
+		};
+	}]);
+
+	app.directive('convertToNumber', function()
+	{
+		return {
+			require: 'ngModel',
+			restrict: 'A',
+			link: function($scope, elem, attrs, ngModel)
+			{
+				ngModel.$parsers.push(function(val){
+					return parseInt(val, 10);
+				});
+				ngModel.$formatters.push(function(val){
+					return '' + val;
 				});
 			}
 		};
