@@ -35,10 +35,14 @@ block content
 					option(value=1, label='Front') Front
 					option(value=2, label='None') None
 
-				//slider(min=0, max=2, step=1, value='materialDef.side', disabled='!fields.selectedNode')
-
 			label.inline Diffuse color:
-				color-picker(color-obj='materialDef.color', alt-color-obj='materialDef.ambient')
+				color-picker(color-obj='materialDef.color', disabled='!fields.selectedNode')
+
+			label.inline Ambient color:
+				.verticalLayout(style='align-items: flex-end;')
+					label Linked
+						input(type='checkbox', ng-model='ambientLinked', style='margin-top: 0')
+					color-picker(color-obj='materialDef.ambient', disabled='!fields.selectedNode', ng-hide='ambientLinked')
 
 			label.inline Emissive color:
 				color-picker(color-obj='materialDef.emit')

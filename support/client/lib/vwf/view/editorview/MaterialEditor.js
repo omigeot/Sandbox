@@ -4,8 +4,17 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 {
 	app.controller('MaterialController', ['$scope', function($scope)
 	{
+		$scope.ambientLinked = true;
+
 		$scope.$watch('fields.selectedNode', function(newval){
 			$scope.materialDef = newval && newval.properties.materialDef || null;
+
+			if( $scope.materialDef ){
+				var diffuse = $scope.materialDef.color, ambient = $scope.materialDef.ambient;
+				$scope.ambientLinked = diffuse.r === ambient.r && diffuse.g === ambient.g && diffuse.b === ambient.b;
+			}
+			else
+				$scope.ambientLinked = true;
 		});
 
 		$scope.$watch('materialDef', function(newval){
@@ -13,6 +22,14 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 				vwf_view.kernel.setProperty($scope.fields.selectedNode.id, 'materialDef', newval);
 			}
 		}, true);
+
+		$scope.$watch('ambientLinked && materialDef.color.r + materialDef.color.g + materialDef.color.b', function(newval){
+			if(newval){
+				$scope.materialDef.ambient.r = $scope.materialDef.color.r;
+				$scope.materialDef.ambient.b = $scope.materialDef.color.b;
+				$scope.materialDef.ambient.g = $scope.materialDef.color.g;
+			}
+		});
 
 	}]);
 
@@ -70,19 +87,12 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 			template: '<div class="colorPickerIcon"></div>',
 			scope: {
 				colorObj: '=',
-				altColorObj: '='
+				disabled: '='
 			},
 			link: function($scope, elem, attrs)
 			{
-				$scope.$watch('colorObj.r + colorObj.b + colorObj.g', function(newval)
-				{
+				$scope.$watch('colorObj.r + colorObj.b + colorObj.g', function(newval){
 					$('.colorPickerIcon', elem).css('background-color', '#'+color());
-
-					if(newval && $scope.altColorObj){
-						$scope.altColorObj.r = $scope.colorObj.r;
-						$scope.altColorObj.g = $scope.colorObj.g;
-						$scope.altColorObj.b = $scope.colorObj.b;
-					}
 				});
 
 				function color(hexval)
@@ -123,6 +133,22 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 					},
 					onChange: function(hsb, hex, rgb, el){
 						color(hex);
+					}
+				});
+
+				$scope.$watch('disabled', function(newval){
+					if(newval){
+						elem.css('pointer-events', 'none');
+					}
+					else {
+						elem.css('pointer-events', '');
+					}
+				});
+
+				elem.bind('$destroy', function(){
+					if( elem.data('colorpickerId') ){
+						$('#'+elem.data('colorpickerId')).remove();
+						elem.removeData('colorpickerId');
 					}
 				});
 			}

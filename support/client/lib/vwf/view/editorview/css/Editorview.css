@@ -1078,7 +1078,10 @@
 #materialEditor label {
   display: block;
   margin: 0; }
-/* line 56, _materialeditor.scss */
+  /* line 55, _materialeditor.scss */
+  #materialEditor label select {
+    font-size: 16px; }
+/* line 60, _materialeditor.scss */
 #materialEditor label.inline {
   display: -webkit-box;
   display: -moz-flex;
