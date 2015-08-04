@@ -1,15 +1,17 @@
-define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/panelEditor'], function(app, baseClass){
+'use strict';
+
+define(['./angular-app', './panelEditor', './EntityLibrary'], function(app, baseClass){
     var primEditor = {};
     var isInitialized = false;
 
     window._PrimitiveEditor = {
         getSingleton: function(){
             if(!isInitialized){
-                baseclass(PrimEditor,'PrimitiveEditor','Properties','properties',true,true,'#sidepanel .main')
+                baseClass(primEditor,'PrimitiveEditor','Properties','properties',true,true,'#sidepanel .main')
 
-                PrimEditor.init()
-                initialize.call(PrimEditor);
-                PrimEditor.bind()
+                primEditor.init()
+                //initialize.call(primEditor);
+                primEditor.bind()
                 isInitialized = true;
             }
 
@@ -24,10 +26,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/panelEditor'], f
 
 
     return window._PrimitiveEditor;
-});
+}
+// oldPrimEditor
+);
 
 
-var old = function(baseclass) {
+function oldPrimEditor(angular, baseclass) {
     var PrimEditor = {};
     var isInitialized = false;
     return {
@@ -1181,4 +1185,4 @@ var old = function(baseclass) {
         $('#RotationW').hide();
         this.hide();
     }
-};
+}

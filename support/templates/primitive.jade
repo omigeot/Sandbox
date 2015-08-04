@@ -1,0 +1,32 @@
+extends ./paneleditor
+
+block vars
+	- var settings = { name: 'primitiveEditor', controller: 'PrimitiveController', title: 'Properties', icon: 'properties', requiresSelection: true };
+
+block content
+	#accordion(vws-accordion='fields.selectedNode')
+		h3 
+			a(href="#") Flags
+		div
+			#otherprops(ng-repeat='n in [1,2]')  
+				| {{n}}
+				input#dispName(type="text") 
+				label Name
+		h3
+			a(href="#") Transforms
+		div
+			.EditorLabel Translation
+			#Translation
+					input.TransformEditorInput#PositionX
+					input.TransformEditorInput#PositionY
+					input.TransformEditorInput#PositionZ
+				.EditorLabel Rotation
+				#Rotation
+					input.TransformEditorInput#RotationX
+					input.TransformEditorInput#RotationY
+					input.TransformEditorInput#RotationZ
+				.EditorLabel Scale
+				#Scale
+					input.TransformEditorInput#ScaleX(min=".0001", step=".05")
+					input.TransformEditorInput#ScaleY(min=".0001", step=".05")
+					input.TransformEditorInput#ScaleZ(min=".0001", step=".05")

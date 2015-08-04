@@ -3,13 +3,13 @@ mixin sidepanel_head
 
 mixin sidepanel_body
 
-	#sidepanel.hidden(ng-controller='SidePanelController')
+	#sidepanel(ng-controller='SidePanelController')
 		#sidetab(ng-click='isPanelOpen() ? hidePanel() : showPanel()') Editors
 
 		.main
 			include ./hierarchy
 			// hierarchy
-			// properties
+			include ./primitive
 			// material
 			// physics
 			// players
