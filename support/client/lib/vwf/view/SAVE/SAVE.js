@@ -14,6 +14,10 @@
 var SAVE_GROUP_DEF = "./vwf/model/SAVE/semantic_entity.vwf";
 var SAVE_BACKEND_URL_QUERY = "http://localhost:3001/exercises/071-100-0032/step01/m4_flora_clear/query";
 var SAVE_BACKEND_URL_OBJECT = "http://localhost:3001/exercises/071-100-0032/step01/m4_flora_clear/object";
+var SAVE_BACKEND_URL_ACTIVITY = "http://localhost:3001/exercises/071-100-0032/step01/m4_flora_clear/action";
+var __CAT = {
+    baseServerAddress: "http://localhost:3001/exercises/071-100-0032/step01/m4_flora_clear"
+};
 define(["module", "vwf/view"], function(module, view)
 {
 
@@ -25,20 +29,150 @@ define(["module", "vwf/view"], function(module, view)
         // == Module Definition ====================================================================
 
         // -- initialize ---------------------------------------------------------------------------
+        instance: function(data)
+        {
+            this.createS3D(GUID(), data.ID,data.name);
+        },
+        loadToolTray: function()
+        {
 
+            var self = this;
+            var url = __CAT.baseServerAddress + '/inventory';
+            $.ajax(
+            {
+                url: url,
+                type: 'get',
+                cache: false
+            })
+                .done(function(data)
+                {
+                    self.setToolTray(data.tooltray);
+                    self.buildToolTrayGUI();
+                })
+                .fail(function(jqXHR, textStatus, errorThrown)
+                {
+                    console.info('using inventoryServerAddress:' + url);
+                    console.warn('error:' + textStatus);
+                });
+        },
+        toolTray: null,
+        setToolTray: function(t)
+        {
+            this.toolTray = t;
+        },
+        buildToolTrayGUI: function()
+        {
+            _EntityLibrary.removeLibrary("Semantic 3D")
+            var lib = {};
+            for (var i in this.toolTray)
+            {
+                lib[this.toolTray[i].name] = {};
+                lib[this.toolTray[i].name].name = this.toolTray[i].name;
+                lib[this.toolTray[i].name].ID = this.toolTray[i].ID;
+                lib[this.toolTray[i].name].type = "semantic3D";
+            }
+            _EntityLibrary.addLibrary("Semantic 3D", lib);
+        },
         initialize: function()
         {
             window._dSAVE = this;
             this.nodes = {};
+            var self = this;
+            $(document).on('setstatecomplete', function()
+            {
+              
+                self.mouseDown = false;
+                self.lastMouse = {x:0,y:0}
+                $('#index-vwf').mousedown(function(e)
+                {
+                    if (e.which !== 3) return;
+                    self.mouseDown = true;
+                })
+                $('#index-vwf').mousemove(function(e)
+                {
+                    
+                    if(Math.pow(e.clientX-self.lastMouse.x,2) + Math.pow(e.clientY-self.lastMouse.y,2)  > 7)
+                    {
+                        self.lastMouse.x = e.clientX;
+                        self.lastMouse.y = e.clientY;    
+                        self.mouseDown = false;
+                    }
+                    
+                })
+                $('#index-vwf').mouseup(function(e)
+                {
+                    if (e.which !== 3) return;
+                    if (!self.mouseDown) return;
+                    self.mouseDown = false;
+                    if (vwf.getProperty(vwf.application(), 'playMode') !== "play") return;
+                    var ray = _Editor.GetWorldPickRay(e);
+                    var campos = _Editor.getCameraPosition();
+                    var hit = _SceneManager.CPUPick(campos, ray);
+
+                    //walk up until we have the VWFID of the picked object
+                    if (hit && hit.object)
+                    {
+                        while (hit.object && !hit.object.vwfID)
+                            hit.object = hit.object.parent;
+                    }
+                    var vwfID = null;
+
+                    if (hit.object)
+                    {
+                        vwfID = hit.object.vwfID;
+                        _RenderManager.flashHilight(hit.object);
+                    }
+                    var child_name = vwf.getProperty(vwfID, "DisplayName");
+                    var childKBID = vwf.getProperty(vwfID, "KbId");
+                    if (vwfID)
+                    {
+                        
+                        var rootnode = self.getRootSemanticID(vwfID);
+                        var actions = vwf.getProperty(rootnode.id, "actionNames");
+                        console.log(actions);
+
+                        $('#ContextMenu').show();
+                        $('#ContextMenu').css('left',e.clientX);
+                        $('#ContextMenu').css('top',e.clientY);
+                        $('#ContextMenu').css('z-index', '1000');
+
+                        $('#ContextMenuActions').empty();
+
+                        for (var i in actions)
+                        {
+                            (function(){
+                                
+                                $('#ContextMenuActions').append('<div id="Action' + i + '" class="ContextMenuAction">' + actions[i] + '</div>');
+                                $('#Action' + i).attr('EventName', actions[i]);
+                                $('#Action' + i).click(function()
+                                {
+                                    $('#ContextMenu').hide();
+                                    $('#ContextMenu').css('z-index', '-1');
+                                    $(".ddsmoothmenu").find('li').trigger('mouseleave');
+                                    $('#index-vwf').focus();
+                                    vwf_view.kernel.callMethod(vwfID, 'action',[$(this).attr('EventName'),childKBID,child_name]);
+                                });
+                            })()
+                        }
+                    }
+                });
+
+            })
+
+
         },
         //public facing function to  trigger load of an S3D file. Normally this probably would live in the _Editor
         // or in the _EntityLibrary
-        createS3D: function(name, url)
+        createS3D: function(name, ID,DisplayName)
         {
+            
             //Get the VWF node definition
-            var postData = {object:{}};
+            var postData = {
+                object:
+                {}
+            };
             postData.object.auto = false;
-            postData.object.ID = name;
+            postData.object.ID = ID;
             postData.object.type = "create";
             postData.object = JSON.stringify(postData.object)
             $.post(SAVE_BACKEND_URL_OBJECT, postData, function(data)
@@ -48,9 +182,9 @@ define(["module", "vwf/view"], function(module, view)
                 var mapping = null;
                 var rootKbId = data[0].KbId;
 
-                _assetLoader.s3dToVWF(name, rootKbId, asset, s3d, mapping, function(def)
+                _assetLoader.s3dToVWF(name, ID, rootKbId, asset, s3d, mapping, function(def)
                 {
-                    def.properties.DisplayName = name;
+                    def.properties.DisplayName = DisplayName;
                     //hook up all the children with their KBID
                     function walkDef(node, parent, cb)
                     {
@@ -125,7 +259,17 @@ define(["module", "vwf/view"], function(module, view)
                     //hookup the KB_IDS
                     walkDef(def, null, function()
                     {
-                        _Editor.createChild(vwf.application(), name, def);
+
+
+                        var behavior = ("./vwf/view/SAVE/test/" + DisplayName.replace(/ /g, "_") + "_dae.eui");
+                        $.get(behavior, function(code)
+                        {
+                            
+                            $.extend(true, def, code);
+                            _Editor.createChild(vwf.application(), name, def);
+                        })
+
+
                     })
 
                 });
@@ -162,26 +306,39 @@ define(["module", "vwf/view"], function(module, view)
         {
             if (!this.nodes[nodeID]) return;
             this.nodes[nodeID].properties[propname] = val;
-
         },
         initializedNode: function(nodeID)
         {
-            //if the node already has a KBID, because it is replicated (we are a late joining client), then there is no need to associate with 
-            //the ontology, because it already exists. Otherwise we are the first client to see this node, so we need to 
-            //inform the backend
-
-            //note this does note really handle cloning well, because the clone will be represented in the 
-            //back end by the same entities. We would need some function to ask the backend if it knows of an object
-            //by ID. This would need to be synchronous
-            if (!this.nodes[nodeID]) return;
-
-            if (this.nodes[nodeID].properties["flora_ref"] && !this.nodes[nodeID].properties["kb_ID"])
+            if (nodeID == vwf.application())
             {
-                var kbid = GUID(); //inform backend of creation here, get ID
-                vwf_view.kernel.setProperty(nodeID, 'kb_ID', kbid);
+                this.loadToolTray();
             }
-        }
+        },
+        getRootSemanticID: function(nodeID)
+        {
+            var node = _Editor.getNode(nodeID);
+            while (node && node.id != vwf.application() && !node.properties.actionNames)
+            {
+                node = _Editor.getNode(vwf.parent(node.id))
+            }
+            return node;
+        },
+        calledMethod: function(nodeID, methodName, params)
+        {
+            //get the top level semantic node
+            var node = this.getRootSemanticID(nodeID);
+            var actions = vwf.getProperty(node.id, "actionNames");
 
+            //is there any way we can do this from here? rather than have the behaviors of the object do the post?
+            //is the called method a semantic action?
+            if (methodName == 'action')
+            {
+                 var json = { action: params[0], arguments: [ params[1] ], names: [ params[2] ] };
+                 $.post(SAVE_BACKEND_URL_ACTIVITY,json);
+            }
+
+        }
     });
 
 });
+

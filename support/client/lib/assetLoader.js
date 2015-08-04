@@ -619,7 +619,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                 return G2JS.g2js(s3dXML);
             }
             //turn and S3D file into a VWF node def            
-            this.s3dToVWF = function(name, rootKbId, asset, s3d, mapping,  cb2)
+            this.s3dToVWF = function(name, url, rootKbId, asset, s3d, mapping,  cb2)
             {
                 var vwfDef = {};
                 //Get the s3d
@@ -630,7 +630,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                     //mapping = G2JS.s2js(s3dXML);
 
                     //Setup root node
-                    vwfDef.source = name;
+                    vwfDef.source = url;
                     vwfDef.type = 'subDriver/threejs/asset/vnd.SAVE+json';
                     vwfDef.children = {};
                     vwfDef.properties = {}
@@ -702,6 +702,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                 //get and parse the SAVE data
                 function getSAVEJSON(cb)
                 {
+                    debugger;
                      var postData = {object:{}};
                      postData.object.auto = false;
                      postData.object.ID = url;

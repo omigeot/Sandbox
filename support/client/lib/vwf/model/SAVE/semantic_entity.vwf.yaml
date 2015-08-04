@@ -1,1 +1,5 @@
 extends:  asset.vwf
+properties: 
+  actionNames:  
+methods:
+  action: 

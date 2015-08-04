@@ -105,10 +105,7 @@ define(function() {
 
                                 $("#asset" + ToSafeID(i1) + ToSafeID(k)).on('click',function(evt)
                                 {
-
-                                    
                                     EntityLibrary.create(j1);
-
                                 });
 
                                 $("#asset" + ToSafeID(i1) + ToSafeID(k)).on('dragstart', function(evt) {
@@ -146,12 +143,23 @@ define(function() {
         this.addLibrary = function(name,url)
         {
                 var self = this;
-                $.getJSON(url, function(lib) {
-                        self.libraries[name] = {};
-                        self.libraries[name].url = url;
-                        self.libraries[name].library = lib;
-                        self.buildGUI();
-                })
+                if(url.constructor == String)
+                {
+                    $.getJSON(url, function(lib) {
+                            self.libraries[name] = {};
+                            self.libraries[name].url = url;
+                            self.libraries[name].library = lib;
+                            self.buildGUI();
+                    })
+                }   
+                else
+                {
+                    //assume directly provided lib
+                    self.libraries[name] = {};
+                    self.libraries[name].url = null;
+                    self.libraries[name].library = url;
+                    self.buildGUI();
+                }
         }
         this.removeLibrary = function(name)
         {
@@ -296,31 +304,45 @@ define(function() {
         this.isOpen = function() {
             return isOpen;
         }
+        this.refresh = function(done)
+        {
+            
+            var self = this;
+            async.eachSeries(Object.keys(this.libraries),function(i,cb){
+                var lib = self.libraries[i]
+                $.get(lib.url,function(newlib)
+                {
+                    if(newlib)
+                        lib.library = newlib;
+                    cb();    
+                })
+            },done)    
+        }
         this.show = function() {
 
-            this.setup();
+            this.refresh(function(){
+                $('#EntityLibrary').animate({
+                    'left': 0
+                });
+                var w = $(window).width() - 250 - ($(window).width() - getLeft('sidepanel',$(window).width()));
+                $('#ScriptEditor').animate({
+                    'left': $('#EntityLibrary').width(),
+                    width: w
+                }, {
+                    step: _ScriptEditor.resize
+                });
+                $('#index-vwf').animate({
+                    'left': $('#EntityLibrary').width(),
+                    width: w
+                }, {
+                    step: sizeWindowTimer
+                });
 
-            $('#EntityLibrary').animate({
-                'left': 0
+                $('#EntityLibraryAccordion').css('height', $('#index-vwf').css('height') - $('#entitylibrarytitle').height());
+                $('#EntityLibrary').css('height', $('#index-vwf').css('height'));
+                $('#EntityLibraryAccordion').css('overflow', 'auto');
+                isOpen = true;
             });
-            var w = $(window).width() - 250 - ($(window).width() - getLeft('sidepanel',$(window).width()));
-            $('#ScriptEditor').animate({
-                'left': $('#EntityLibrary').width(),
-                width: w
-            }, {
-                step: _ScriptEditor.resize
-            });
-            $('#index-vwf').animate({
-                'left': $('#EntityLibrary').width(),
-                width: w
-            }, {
-                step: sizeWindowTimer
-            });
-
-            $('#EntityLibraryAccordion').css('height', $('#index-vwf').css('height') - $('#entitylibrarytitle').height());
-            $('#EntityLibrary').css('height', $('#index-vwf').css('height'));
-            $('#EntityLibraryAccordion').css('overflow', 'auto');
-            isOpen = true;
         }
         this.hide = function() {
 
@@ -469,6 +491,10 @@ define(function() {
                         _Editor.createChild(vwf.application(), GUID(), proto.children[i]);
                     _UndoManager.stopCompoundEvent();
                 })
+            }
+            else if (data.type == "semantic3D")
+            {
+                _dSAVE.instance(data);
             }
         }
         this.createPreviewMaterial = function() {
