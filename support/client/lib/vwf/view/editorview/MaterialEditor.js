@@ -75,10 +75,14 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 			}
 		}
 
-		$scope.$watch('materialArray || materialDef', function(newval){
-			if(newval){
+		var oldval = null;
+		$scope.$watch('materialArray || materialDef', function(newval)
+		{
+			if(newval && newval === oldval){
 				vwf_view.kernel.setProperty($scope.fields.selectedNode.id, 'materialDef', newval);
 			}
+
+			oldval = newval;
 		}, true);
 
 		$scope.$watch('ambientLinked && materialDef.color.r + materialDef.color.g + materialDef.color.b', function(newval){

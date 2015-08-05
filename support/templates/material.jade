@@ -87,7 +87,7 @@ block content
 					input(type='checkbox', ng-model='materialDef.vertexColors', ng-disabled='!materialDef')
 					|  Vertex Colors
 
-		h3(ng-repeat-start='layer in materialDef.layers')
+		h3(ng-repeat-start='layer in materialDef.layers track by $index')
 			a(href='#') Texture Layer {{$index}}
 
 		.textureLayer(ng-repeat-end)
