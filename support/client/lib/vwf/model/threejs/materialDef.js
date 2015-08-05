@@ -8,8 +8,8 @@
                 this.initialized = true;
                 if(this.tempmaterialdef)
                 {
-                    this.materialDef = this.tempdef;
-                    delete this.tempdef;
+                    this.materialDef = this.tempmaterialdef;
+                    delete this.tempmaterialdef;
                 }
                 this.settingProperty('materialDef', this.materialDef);
                 if (this.dirtyStack)
