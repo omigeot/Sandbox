@@ -760,7 +760,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
             if (camID === 'top')
                 cam = this.topCamera;
             if (this.cameraID) {
-                clearCameraModeIcons();
+                
                 cam = null;
                 if (this.state.nodes[this.cameraID])
                     if (this.state.nodes[this.cameraID].getRoot && this.state.nodes[this.cameraID].getRoot()) {
