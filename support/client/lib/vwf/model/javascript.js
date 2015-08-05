@@ -216,7 +216,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
             Object.defineProperty(node.properties, "create", {
                 value: function(name, value, get, set) { // "this" is node.properties
-                    return jsDriverSelf.kernel.createProperty(this.node.id, name, value, get, set);
+                    return vwf_view.kernel.createProperty(this.node.id, name, value, get, set);
                 }
             });
 
@@ -236,7 +236,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
             Object.defineProperty(node.methods, "create", {
                 value: function(name, parameters, body) { // "this" is node.methods  // TODO: also accept create( name, body )
-                    return jsDriverSelf.kernel.createMethod(this.node.id, name, parameters, body);
+                    return vwf_view.kernel.createMethod(this.node.id, name, parameters, body);
                 }
             });
 
@@ -254,7 +254,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
             Object.defineProperty(node.events, "create", {
                 value: function(name, parameters) { // "this" is node.events
-                    return jsDriverSelf.kernel.createEvent(this.node.id, name, parameters);
+                    return vwf_view.kernel.createEvent(this.node.id, name, parameters);
                 }
             });
 
@@ -262,47 +262,6 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             // event handlers.
 
             // Add: node.events.*eventName* = node.events.add( *handler* [, *phases* ] [, *context* ] )
-
-            Object.defineProperty(node.events, "add", {
-                value: function(handler, phases, context) {
-                    if (arguments.length != 2 || typeof phases == "string" || phases instanceof String || phases instanceof Array) {
-                        return {
-                            add: true,
-                            handler: handler,
-                            phases: phases,
-                            context: context
-                        };
-                    } else { // interpret add( handler, context ) as add( handler, undefined, context )
-                        return {
-                            add: true,
-                            handler: handler,
-                            context: phases
-                        };
-                    }
-                }
-            });
-
-            // Remove: node.events.*eventName* = node.events.remove( *handler* )
-
-            Object.defineProperty(node.events, "remove", {
-                value: function(handler) {
-                    return {
-                        remove: true,
-                        handler: handler
-                    };
-                }
-            });
-
-            // Flush: node.events.*eventName* = node.events.flush( *context* )
-
-            Object.defineProperty(node.events, "flush", {
-                value: function(context) {
-                    return {
-                        flush: true,
-                        context: context
-                    };
-                }
-            });
 
             node.private.listeners = {}; // not delegated to the prototype as with getters, setters, and bodies; findListeners() filters recursion
 
@@ -314,13 +273,13 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
             Object.defineProperty(node.children, "create", {
                 value: function(name, component, callback /* ( child ) */ ) { // "this" is node.children
-                    return jsDriverSelf.kernel.createChild(this.node.id, name, component /* , callback */ ); // TODO: support callback and map callback's childID parameter to the child node
+                    return vwf_view.kernel.createChild(this.node.id, name, component /* , callback */ ); // TODO: support callback and map callback's childID parameter to the child node
                 }
             });
 
             Object.defineProperty(node.children, "delete", {
                 value: function(child) {
-                    return jsDriverSelf.kernel.deleteNode(child.id);
+                    return vwf_view.kernel.deleteNode(child.id);
                 }
             });
 
