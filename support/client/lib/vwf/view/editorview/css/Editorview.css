@@ -1101,16 +1101,50 @@
   /* line 67, _materialeditor.scss */
   #materialEditor label input[type=checkbox] {
     margin: 0; }
-/* line 72, _materialeditor.scss */
+/* line 74, _materialeditor.scss */
+#materialEditor #MaterialBasicSettings label#materialIndex {
+  display: -webkit-box;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-pack: center;
+  -moz-justify-content: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -moz-align-items: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  font-size: 15px; }
+  /* line 81, _materialeditor.scss */
+  #materialEditor #MaterialBasicSettings label#materialIndex input {
+    padding: 0;
+    margin: 0 5px;
+    width: 30px; }
+/* line 89, _materialeditor.scss */
 #materialEditor #MaterialFlags {
   -webkit-box-pack: center;
   -moz-justify-content: center;
   -ms-flex-pack: center;
   -webkit-justify-content: center;
   justify-content: center; }
-  /* line 76, _materialeditor.scss */
+  /* line 93, _materialeditor.scss */
   #materialEditor #MaterialFlags label {
     margin: 10px 0; }
+/* line 101, _materialeditor.scss */
+#materialEditor .textureLayer .texPreview {
+  -webkit-box-align: center;
+  -moz-align-items: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  margin-bottom: 10px; }
+  /* line 106, _materialeditor.scss */
+  #materialEditor .textureLayer .texPreview img {
+    margin: 5px; }
 
 @-webkit-keyframes pulsing {
   0% {

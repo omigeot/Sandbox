@@ -9,22 +9,28 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 		$scope.materialArray = null;
 		$scope.activeMaterial = 0;
 
+		var oldMaterialDef = null;
+
 		$scope.$watch('fields.selectedNode', function(newval)
 		{
-			if( newval && newval.properties.materialDef )
+			var mat = newval && (newval.properties.materialDef || vwf_view.kernel.getProperty(newval.id));
+			if( newval && mat )
 			{
-				if( angular.isArray(newval.properties.materialDef) ){
-					$scope.materialArray = newval.properties.materialDef;
+				// try to get a materialDef from driver
+				if( angular.isArray(mat) ){
+					$scope.materialArray = mat.map(function(val){ return materialWithDefaults(val); });
 					$scope.activeMaterial = 0;
-					$scope.materialDef = $scope.materialArray[0];
+					$scope.materialDef = mat[0];
 				}
 				else {
 					$scope.materialArray = null;
 					$scope.activeMaterial = 0;
-					$scope.materialDef = newval.properties.materialDef;
+					$scope.materialDef = materialWithDefaults(mat);
 				}
 
-				setMaterialDefaults();
+				var diffuse = $scope.materialDef.color, ambient = $scope.materialDef.ambient;
+				$scope.ambientLinked = diffuse.r === ambient.r && diffuse.g === ambient.g && diffuse.b === ambient.b;
+				//setMaterialDefaults();
 			}
 			else {
 				$scope.materialArray = null;
@@ -38,51 +44,45 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 			if( $scope.materialArray && newval >= 0 && newval < $scope.materialArray.length )
 			{
 				$scope.materialDef = $scope.materialArray[newval];
-				setMaterialDefaults();
 			}
 		});
 
-		function setMaterialDefaults()
+		function materialWithDefaults(mat)
 		{
-			if( $scope.materialDef )
-			{
-				var diffuse = $scope.materialDef.color, ambient = $scope.materialDef.ambient;
-				$scope.ambientLinked = diffuse.r === ambient.r && diffuse.g === ambient.g && diffuse.b === ambient.b;
+			// set defaults
+			if( mat.type === undefined )
+				mat.type = 'phong';
+			if( mat.side === undefined )
+				mat.side = 0;
+			if( mat.blendMode === undefined )
+				mat.blendMode = 1;
 
-				// set defaults
+			if( mat.fog === undefined )
+				mat.fog = true;
+			if( mat.shading === undefined )
+				mat.shading = true;
+			if( mat.metal === undefined )
+				mat.metal = false;
+			if( mat.wireframe === undefined )
+				mat.wireframe = false;
+			if( mat.depthtest === undefined )
+				mat.depthtest = true;
+			if( mat.depthwrite === undefined )
+				mat.depthwrite = true;
+			if( mat.vertexColors === undefined )
+				mat.vertexColors = false;
 
-				if( $scope.materialDef.type === undefined )
-					$scope.materialDef.type = 'phong';
-				if( $scope.materialDef.side === undefined )
-					$scope.materialDef.side = 0;
-				if( $scope.materialDef.blendMode === undefined )
-					$scope.materialDef.blendMode = 1;
-
-				if( $scope.materialDef.fog === undefined )
-					$scope.materialDef.fog = true;
-				if( $scope.materialDef.shading === undefined )
-					$scope.materialDef.shading = true;
-				if( $scope.materialDef.metal === undefined )
-					$scope.materialDef.metal = false;
-				if( $scope.materialDef.wireframe === undefined )
-					$scope.materialDef.wireframe = false;
-				if( $scope.materialDef.depthtest === undefined )
-					$scope.materialDef.depthtest = true;
-				if( $scope.materialDef.depthwrite === undefined )
-					$scope.materialDef.depthwrite = true;
-				if( $scope.materialDef.vertexColors === undefined )
-					$scope.materialDef.vertexColors = false;
-			}
+			return mat;
 		}
 
-		var oldval = null;
 		$scope.$watch('materialArray || materialDef', function(newval)
 		{
-			if(newval && newval === oldval){
+			if(newval && newval === oldMaterialDef){
+				console.log('Writing materialDef');
 				vwf_view.kernel.setProperty($scope.fields.selectedNode.id, 'materialDef', newval);
 			}
 
-			oldval = newval;
+			oldMaterialDef = newval;
 		}, true);
 
 		$scope.$watch('ambientLinked && materialDef.color.r + materialDef.color.g + materialDef.color.b', function(newval){
@@ -93,6 +93,7 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 			}
 		});
 
+		window._MaterialEditor = $scope;
 	}]);
 
 	app.directive('slider', function()

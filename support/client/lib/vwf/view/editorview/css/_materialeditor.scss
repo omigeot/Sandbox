@@ -69,6 +69,23 @@
 		}
 	}
 
+	#MaterialBasicSettings
+	{
+		label#materialIndex
+		{
+			@include display-flex();
+			@include justify-content(center);
+			@include align-items(center);
+			font-size: 15px;
+
+			input {
+				padding: 0;
+				margin: 0 5px;
+				width: 30px;
+			}
+		}
+	}
+
 	#MaterialFlags
 	{
 		@include justify-content(center);
@@ -76,6 +93,19 @@
 		label
 		{
 			margin: 10px 0;
+		}
+	}
+
+	.textureLayer
+	{
+		.texPreview
+		{
+			@include align-items(center);
+			margin-bottom: 10px;
+
+			img {
+				margin: 5px;
+			}
 		}
 	}
 }
