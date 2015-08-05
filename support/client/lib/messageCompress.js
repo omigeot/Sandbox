@@ -140,11 +140,14 @@ function messageCompress()
         },
         applyLearnedMappings:function(mapping)
         {
+             if (!this.initialized)
+                this.initialize();
             for(var i in mapping)
             {
                 this.addMapping(i,mapping[i]);
             }
         },
+        learnedMappingsTotal:{},
         postLearnedMappings:function(mapping)
         {
             if(!this.isServer) return;
@@ -152,6 +155,12 @@ function messageCompress()
             for(var i in mapping)
             {
                 mapping[i] = this.addMapping(i);
+                if(this.learnedMappingsTotal[i])
+                {
+                    console.log('*** compression table duplicate ***')
+                    console.log(i)
+                }
+                this.learnedMappingsTotal[i] = mapping[i];
                 console.log("mapping " + mapping[i] + " to " + i)
             }
             for(var i in this.world.clients)
@@ -160,11 +169,16 @@ function messageCompress()
             }
 
         },
+        sendFullLearnedTable:function(client)
+        {
+            console.log(this.learnedMappingsTotal);
+            client.emit('compress',this.learnedMappingsTotal);
+        },
         initialized: false,
         initialize: function()
         {
             var self = this;
-             this.addSpecialCase("transform", function(val)
+          /*   this.addSpecialCase("transform", function(val)
                  {
                      var t = new Float32Array(16);
                      for (var i = 0; i < 16; i++)
@@ -188,7 +202,7 @@ function messageCompress()
 
                      return ret;
                  });
-             /*
+             
              this.addSpecialCase("scripts", function(val)
                  {
                      var data = self.compress(JSON.stringify(val));

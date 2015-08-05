@@ -458,6 +458,7 @@ function sandboxWorld(id, metadata)
         this.messagePeerConnected();
         //add the new client to the instance data
         this.addClient(client);
+        this.messageCompress.sendFullLearnedTable(client);
         //count anonymous users, try to align with the value used for hte displayname of the avatar
         if (client.loginData.UID == "Anonymous")
         {

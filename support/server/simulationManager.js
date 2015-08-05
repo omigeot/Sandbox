@@ -225,7 +225,7 @@ var simulationManager = function(world)
             {
                 if(sendingClient != this.clients[i].sandboxClient)
                 {
-                    clients.push(this.client[i].sandboxClient) 
+                    clients.push(this.clients[i].sandboxClient) 
                 }
             }
             else if (type == 'setProperty' || type == 'callMethod' || type == 'fireEvent')
