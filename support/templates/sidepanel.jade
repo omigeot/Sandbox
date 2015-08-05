@@ -1,0 +1,19 @@
+mixin sidepanel_head
+	block
+
+mixin sidepanel_body
+
+	#sidepanel.hidden(ng-controller='SidePanelController')
+		#sidetab(ng-click='isPanelOpen() ? hidePanel() : showPanel()') Editors
+
+		.main
+			include ./hierarchy
+			// hierarchy
+			// properties
+			// material
+			// physics
+			// players
+
+			// paintertool
+			// splinetool
+			// terraintool

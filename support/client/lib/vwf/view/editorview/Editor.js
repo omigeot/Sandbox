@@ -82,7 +82,7 @@ var lightgreenBoundingBoxMaterial = new THREE.LineBasicMaterial();
     lightgreenBoundingBoxMaterial.color.g = .7;
     lightgreenBoundingBoxMaterial.color.b = .7;
 
-define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(Log, ProgressBar) {
+define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/editorview/angular-app"], function(Log, ProgressBar, angularapp) {
     var originalGizmoPos;
     var Editor = {};
     var isInitialized = false;
@@ -151,44 +151,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
         var needTools = _EditorView.needTools();
 
         if (needTools) {
-            $(document.body).append('<div id="statusbar" class="statusbar" />');
-            $('#statusbar').css('top', (document.height - 25) + 'px');
-
-            $('#statusbar').append('<div id="TimeControl" style="height: 59px;display: inline-block;margin-top: -42px;background: #444;border-radius: 5px;border: 1px solid #555;"><div class="timeControl" id="playButton"></div><div id="pauseButton" class="timeControl"></div><div id="stopButton" class="timeControl"></div></div>');
-            $('#statusbar').append('<div id="statusbarinner"></div>');
-            $('#statusbarinner').append('<div id="SceneSaved" class="statusbarElement" />');
-            $('#SceneSaved').text('Not Saved');
-            $('#statusbarinner').append('<div id="StatusSelectedName" style="color:rgb(175, 209, 253);" class="statusbarElement" />');
-            $('#StatusSelectedName').text('No Selection');
-            $('#statusbarinner').append('<div id="StatusMouseOverName" style="color:rgb(175, 209, 253);" class="statusbarElement" />');
-            $('#StatusMouseOverName').text('No Selection');
-            $('#statusbarinner').append('<div id="StatusSelectedID" class="statusbarElement" style="display:none" />');
-            $('#StatusSelectedID').text('No Selection');
-            $('#statusbarinner').append('<div id="StatusPickMode" class="statusbarElement" />');
-            $('#StatusPickMode').text('Pick: None');
-            $('#statusbarinner').append('<div id="StatusSnaps" class="statusbarElement" />');
-            $('#StatusSnaps').text('Snaps: 15deg, .5m, .1%');
-            $('#statusbarinner').append('<div id="StatusAxis" class="statusbarElement" />');
-            $('#StatusAxis').text('Axis: -1');
-            $('#statusbarinner').append('<div id="StatusCoords" class="statusbarElement" />');
-            $('#StatusCoords').text('World Coords');
-            $('#statusbarinner').append('<div id="StatusTransform" class="statusbarElement" />');
-            $('#StatusTransform').text('Move');
-            $('#statusbarinner').append('<div id="StatusGizmoLocation" class="statusbarElement" />');
-            $('#StatusGizmoLocation').text('[0,0,0]');
-            $('#statusbarinner').append('<div id="StatusCameraLocation" class="statusbarElement" />');
-            $('#StatusCameraLocation').text('[0,0,0]');
-
-            var instanceData = _DataManager.getInstanceData()
-            if (instanceData) {
-                $('#statusbarinner').append('<div id="StatusWorldTitle" style="color:rgb(175, 209, 253);" class="statusbarElement" />');
-                $('#StatusWorldTitle').text(instanceData.title);
-                
-            }
-            $('#statusbarinner').append('<div style="" class="statusbarElement" >Logged in as:');
-            $('#statusbarinner').append('<div id="StatusUserName" style="border: none;color:rgb(175, 209, 253);" class="statusbarElement" />');
-
-
+            $('#statusbar').css('display', 'block');
 
             $('#playButton').click(function() {
                 _Publisher.playWorld();
@@ -3291,12 +3254,12 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             SelectMode = e;
             $('#StatusPickMode').text('Pick: ' + e);
             if (e == 'Pick') {
-                $('#MenuSelectPickicon').addClass('iconselected')
+                //$('#MenuSelectPickicon').addClass('iconselected')
                 $('#glyphOverlay').show();
 
             } else {
 
-                $('#MenuSelectPickicon').removeClass('iconselected')
+                //$('#MenuSelectPickicon').removeClass('iconselected')
                 $('#glyphOverlay').hide();
 
             }
@@ -3317,12 +3280,16 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar"], function(
             CoordSystem = e;
             if (e == WorldCoords) {
                 $('#StatusCoords').text('World Coords');
-                $('#MenuWorldicon').addClass('iconselected')
-                $('#MenuLocalicon').removeClass('iconselected');
+				setTimeout(function(){
+					angularapp.root.fields.coordSpaceSelected = 'world';
+					angularapp.root.$apply();
+				}, 0);
             } else {
                 $('#StatusCoords').text('Local Coords');
-                $('#MenuWorldicon').removeClass('iconselected');
-                $('#MenuLocalicon').addClass('iconselected')
+				setTimeout(function(){
+					angularapp.root.fields.coordSpaceSelected = 'local';
+					angularapp.root.$apply();
+				}, 0);
             }
         }.bind(this);
         this.GetMoveGizmo = function(e) {

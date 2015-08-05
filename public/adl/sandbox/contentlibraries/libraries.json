@@ -1,48 +1,26 @@
-{
-	"My Entities": {
-		"url": "./vwfdatamanager.svc/library/my-entities"
+[
+	{
+		"name": "Demo Entities",
+		"url": "./contentlibraries/entities.json"
 	},
-	"My Models": {
-		"url": "./vwfdatamanager.svc/library/my-models"
+	{
+		"name": "Materials",
+		"url": "./contentlibraries/materials.json"
 	},
-	"My Materials": {
-		"url": "./vwfdatamanager.svc/library/my-materials"
+	{
+		"name": "Environments",
+		"url": "./contentlibraries/environments.json"
 	},
-	"My Behaviors": {
-		"url": "./vwfdatamanager.svc/library/my-behaviors"
+	{
+		"name": "Behaviors",
+		"url": "./contentlibraries/behaviors.json"
 	},
-	"My Textures": {
-		"url": "./vwfdatamanager.svc/library/my-textures"
+	{
+		"name": "Primitives",
+		"url": "./contentlibraries/primitives.json"
 	},
-    "Demo Entities": {
-        "url": "./contentlibraries/entities.json"
-    },
-    "Materials": {
-        "url": "./contentlibraries/materials.json"
-    },
-    "Environments": {
-        "url": "./contentlibraries/environments.json"
-    },
-    "Behaviors": {
-        "url": "./contentlibraries/behaviors.json"
-    },
-    "Primitives": {
-        "url": "./contentlibraries/primitives.json"
-    },
-    "Cameras": {
+	{
+		"name": "Cameras",
         "url": "./contentlibraries/cameras.json"
-    },
-    "Scripts": {
-        "url": "./contentlibraries/marsgame/scripts.json"
-    },
-    "Rovers": {
-        "url": "./contentlibraries/marsgame/rovers.json"
-    },
-    "Terrain": {
-        "url": "./contentlibraries/marsgame/terrain.json"
-    },
-    "Objects": {
-        "url": "./contentlibraries/marsgame/objects.json"
-    }
-
 }
+]

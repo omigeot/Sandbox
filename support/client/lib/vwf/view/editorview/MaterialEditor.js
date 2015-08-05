@@ -1,15 +1,14 @@
-define(["vwf/view/editorview/mapbrowser", "vwf/view/editorview/colorpicker.js"], function() {
+define(['vwf/view/editorview/panelEditor', "vwf/view/editorview/mapbrowser", "vwf/view/editorview/colorpicker.js"], function(baseclass) {
     var MaterialEditor = {};
     var isInitialized = false;
     return {
         getSingleton: function() {
             if (!isInitialized) {
               
-				var baseclass = require("vwf/view/editorview/panelEditor");
 				//var base = new baseclass('hierarchyManager','Hierarchy','hierarchy',false,true,'#sidepanel')
 				//base.init();
 				//$.extend(HierarchyManager,base);
-				baseclass(MaterialEditor,'MaterialEditor','Material','material',true,true,'#sidepanel')
+				baseclass(MaterialEditor,'MaterialEditor','Material','material',true,true,'#sidepanel .main')
 				
 				MaterialEditor.init()
 				initialize.call(MaterialEditor);

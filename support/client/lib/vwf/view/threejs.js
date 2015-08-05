@@ -161,10 +161,12 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
             $('#glyphOverlay').append(newdiv);
             $(newdiv).disableSelection();
             $(newdiv).mousedown(function(e) {
+				console.log('glyph mousedown');
                 $('#index-vwf').focus();
                 if (_Editor.GetSelectMode() == "None" || e.which != 1) $('#index-vwf').trigger(e)
             });
             $(newdiv).mouseup(function(e) {
+				console.log('glyph mouseup');
                 $('#index-vwf').focus();
                 $('#index-vwf').trigger(e)
             });
@@ -172,6 +174,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                 $('#index-vwf').trigger(e)
             });
             $(newdiv).click(function(e) {
+				console.log('glyph click');
                 $('#index-vwf').focus();
                 if (_Editor.GetSelectMode() != "None") _Editor.SelectObjectPublic(id)
             });
@@ -231,8 +234,8 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
                 screen[1] = wh - screen[1];
 
-                div.style.top = (screen[1]) + 'px';
-                div.style.left = (screen[0] - 20 / 2) + 'px';
+                div.style.top = (screen[1] - 10) + 'px';
+                div.style.left = (screen[0] - 10) + 'px';
 
 
                 if ((screen[0] < 0 || screen[0] > ww || screen[1] < 0 || screen[1] > wh)) {
@@ -642,7 +645,8 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                 var domWin = window;
 
 
-                this.canvasQuery = jQuery(this.rootSelector["application-root"]).append("<canvas id='" + 'index-vwf' + "' width='" + this.width + "' height='" + this.height + "' class='vwf-scene'/>").children(":last");
+                //this.canvasQuery = jQuery(this.rootSelector["application-root"]).append("<canvas id='" + 'index-vwf' + "' width='" + this.width + "' height='" + this.height + "' class='vwf-scene'/>").children(":last");
+				this.canvasQuery = jQuery('canvas#index-vwf');
                 this.canvasQuery.css('display', 'none');
                 initScene.call(this, this.state.scenes[childID]);
                 require("vwf/view/threejs/editorCameraController").initialize(this.editorCamera);
@@ -1776,7 +1780,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
                     if (contextCreated) {
                         sceneNode.renderer.autoUpdateScene = false;
-                        sceneNode.renderer.setSize($('#index-vwf').width(), $('#index-vwf').height());
+                        sceneNode.renderer.setViewport(0, 0, $('#index-vwf').width(), $('#index-vwf').height());
 
                         sceneNode.renderer.shadowMapType = THREE.PCFSoftShadowMap;
                         sceneNode.renderer.shadowMapEnabled = true;
@@ -2335,11 +2339,11 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
     function mouseXPos(e) {
 
-        return e.clientX - e.currentTarget.offsetLeft + (window.scrollX || 0);
+        return e.clientX - e.currentTarget.getClientRects()[0].left + (window.scrollX || 0);
     }
 
     function mouseYPos(e) {
-        return e.clientY - e.currentTarget.offsetTop + (window.scrollY || 0);
+        return e.clientY - e.currentTarget.getClientRects()[0].top + (window.scrollY || 0);
     }
 
 
