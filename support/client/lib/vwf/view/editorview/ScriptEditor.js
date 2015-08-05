@@ -348,6 +348,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 		});
 
 		$scope.$watch('guiState.inheritPrototype', function(newval){
+			propertiesDirty = true;
 			$scope.rebuildLists();
 		});
 
