@@ -66,6 +66,7 @@ var simulationManager = function(world)
 {
     this.world = world;
     this.clients = {};
+    this.observers = {};
     this.clientControlTable = {}; //learn which clients need to simulate locally most
     //once a second look for client that most needs to simulate a node, and change owners
     this.postLearnedMappings = function()
@@ -101,6 +102,11 @@ var simulationManager = function(world)
     this.addClient = function(sandboxClient)
     {
         var newClient = new simClient(sandboxClient, this);
+        if(sandboxClient.isAnonymous() && !this.world.state.metadata.publishSettings.allowAnonymous)
+        {
+            this.observers[sandboxClient.id] = newClient;
+            return;
+        }
         //must add to list to get proper average load, then remove so we don't keep distributing
         //nodes from new client to new client
         this.clients[sandboxClient.id] = newClient;
@@ -136,6 +142,11 @@ var simulationManager = function(world)
     }
     this.removeClient = function(sandboxClient)
     {
+        if(this.observers[sandboxClient.id])
+        {
+            delete this.observers[sandboxClient.id];
+            return;
+        }
         var oldNodes = this.clients[sandboxClient.id].nodesSimulating;
         delete this.clients[sandboxClient.id];
         //redistribute the nodes the client had been simulating
@@ -237,6 +248,22 @@ var simulationManager = function(world)
             else
             {
                 clients.push(this.clients[i].sandboxClient);
+            }
+        }
+        for (var i in this.observers)
+        {
+            //don't bother sending state updates back to the person who posted them
+            if(message.action == "simulationStateUpdate")
+            {
+                clients.push(this.observers[i].sandboxClient) 
+            }
+            else if (type == 'setProperty' || type == 'callMethod' || type == 'fireEvent')
+            {
+              
+            }
+            else
+            {
+                clients.push(this.observers[i].sandboxClient);
             }
         }
         return clients;

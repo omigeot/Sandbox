@@ -52,7 +52,10 @@ var sandboxClient = function(socket)
             console.log('Avatar saved');
         })
     }
-
+    this.isAnonymous = function()
+    {
+        return this.loginData.anonymous;
+    }
     var self = this;
     socket.on('authenticate', function(msg)
     {
