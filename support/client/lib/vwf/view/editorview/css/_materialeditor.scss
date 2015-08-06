@@ -4,8 +4,19 @@
 {
 	slider
 	{
-		@include display-flex();
-		@include align-items(center);
+		.mantissa {
+			@include display-flex();
+			@include align-items(center);
+		}
+
+		.exponent {
+			@extend .mantissa;
+			@include justify-content(flex-end);
+
+			input {
+				margin-left: 5px;
+			}
+		}
 
 		.ui-slider
 		{

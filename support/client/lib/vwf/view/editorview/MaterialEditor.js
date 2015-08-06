@@ -100,12 +100,23 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 	{
 		return {
 			restrict: 'E',
-			template: '<div class="slider"></div>'+
-				'<input type="number" min="{{min}}" max="{{max}}" step="{{step}}" ng-model="value" ng-disabled="disabled"></input>',
+			template: [
+				'<div class="mantissa">',
+					'<div class="slider"></div>',
+					'<input type="number" min="{{min}}" max="{{max}}" step="{{step}}" ng-model="mantissa" ng-disabled="disabled"></input>',
+				'</div>',
+				'<div class="exponent" ng-show="useExponent">',
+					'Exponent: ',
+					'<input type="number" min="0" step="1" ng-model="exponent" ng-disabled="disabled"></input>',
+				'</div>',
+			].join(''),
 			scope: {
 				min: '=',
 				max: '=',
 				step: '=',
+
+				useExponent: '=',
+
 				value: '=',
 				disabled: '='
 			},
@@ -123,14 +134,35 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 					slider.slider('destroy');
 				});
 
+				slider.on('slidestart', function(evt,ui){
+					$scope.freezeExponent = true;
+					$scope.$apply();
+				});
+
 				slider.on('slide', function(evt, ui){
-					$scope.value = ui.value;
+					$scope.mantissa = ui.value;
+					$scope.$apply();
+				});
+
+				slider.on('slidestop', function(evt,ui){
+					$scope.freezeExponent = false;
 					$scope.$apply();
 				});
 
 
-				$scope.$watch('value', function(newval){
-					slider.slider('option', 'value', newval);
+				$scope.$watch('freezeExponent || value', function(newval)
+				{
+					if( !$scope.freezeExponent ){
+						$scope.exponent = $scope.useExponent ? Math.max(Math.floor(Math.log10(Math.abs($scope.value))), 0) : 0;
+						console.log($scope.exponent);
+					}
+
+					$scope.mantissa = $scope.value / Math.pow(10,$scope.exponent);
+				});
+
+				$scope.$watch('mantissa + exponent', function(newval){
+					$scope.value = $scope.mantissa * Math.pow(10, $scope.exponent);
+					slider.slider('option', 'value', $scope.mantissa);
 				});
 
 				$scope.$watch('disabled', function(newval){

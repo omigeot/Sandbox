@@ -32,7 +32,7 @@ block content
 					slider(min=0, max=1, step=0.01, value='materialDef.reflect', disabled='!materialDef')
 				label Shininess:
 					br
-					slider(min=0, max=10, step=0.1, value='materialDef.shininess', disabled='!materialDef')
+					slider(min=0, max=10, step=0.1, use-exponent='true', value='materialDef.shininess', disabled='!materialDef')
 
 				label.inline Culling:
 					select(ng-model='materialDef.side', convert-to-number, ng-disabled='!materialDef')
@@ -102,16 +102,16 @@ block content
 				slider(min=0, max=1, step=0.01, value='layer.alpha')
 			label Scale (x axis):
 				br
-				slider(min=-1, max=1, step=0.02, value='layer.scalex')
+				slider(min=-10, max=10, step=0.2, use-exponent='true', value='layer.scalex')
 			label Scale (y axis):
 				br
-				slider(min=-1, max=1, step=0.02, value='layer.scaley')
+				slider(min=-10, max=10, step=0.2, use-exponent='true', value='layer.scaley')
 			label Offset (x axis):
 				br
-				slider(min=-1, max=1, step=0.02, value='layer.offsetx')
+				slider(min=-10, max=10, step=0.2, use-exponent='true', value='layer.offsetx')
 			label Offset (y axis):
 				br
-				slider(min=-1, max=1, step=0.02, value='layer.offsety')
+				slider(min=-10, max=10, step=0.2, use-exponent='true', value='layer.offsety')
 
 			label.inline Texture Type:
 				select(ng-model='layer.mapTo', convert-to-number)
