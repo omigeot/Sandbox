@@ -264,7 +264,7 @@ define(["module", "vwf/view"], function(module, view)
                         var behavior = ("./vwf/view/SAVE/test/" + DisplayName.replace(/ /g, "_") + "_dae.eui");
                         $.get(behavior, function(code)
                         {
-                            
+                            debugger;
                             $.extend(true, def, code);
                             _Editor.createChild(vwf.application(), name, def);
                         })

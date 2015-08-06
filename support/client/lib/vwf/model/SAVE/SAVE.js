@@ -21,7 +21,36 @@ define(["module", "vwf/model"], function(module, model)
         {
             this.nodes = {};
         },
-        callingMethod: function(nodeID, method, args) {
+        callingMethod: function(nodeID, methodName, args) {
+            
+     
+         
+            //is there any way we can do this from here? rather than have the behaviors of the object do the post?
+            //is the called method a semantic action?
+            if (methodName == 'action')
+            {
+                var parent = vwf.parent(nodeID);
+                var behaviors = vwf.getProperty(parent,"behaviors");
+                if(!behaviors) return;
+                for(var i in behaviors[0])
+                {
+                    if(i == args[0])
+                    {
+                            var behavior = behaviors[0][i];
+                            for(var j in behavior)
+                            {
+                                    var trans = vwf.getProperty(behavior[0].target,'transform')
+                                    trans[12] = behavior[0].position[0];
+                                    trans[13] = behavior[0].position[1];
+                                    trans[14] = behavior[0].position[2];
+                                    var trans = vwf.setProperty(behavior[0].target,'transform',trans);
+                            }
+                    }    
+
+                }
+            }
+
+        
 
         },
         creatingNode: function(nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback /* ( ready ) */ )
