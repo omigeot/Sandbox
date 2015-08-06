@@ -100,8 +100,10 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 	{
 		var apply = false;
 
-		if( id === 'index-vwf' && prop === 'playMode' )
+		if( id === 'index-vwf' && prop === 'playMode' ){
 			playing = val === 'play';
+			if( !playing ) apply = true;
+		}
 
 		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
 			app.root.fields.selectedNode.properties[prop] = val;
