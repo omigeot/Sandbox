@@ -95,10 +95,18 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		}
 	}
 
+	var playing = false;
 	app.initializedProperty = app.createdProperty = app.satProperty = function(id, prop, val)
 	{
-		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id )
+		var apply = false;
+
+		if( id === 'index-vwf' && prop === 'playMode' )
+			playing = val === 'play';
+
+		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
 			app.root.fields.selectedNode.properties[prop] = val;
+			apply = true;
+		}
 
 		if(prop === 'DisplayName')
 		{
@@ -106,13 +114,16 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 
 			// name has just been set, so update position in parent's children array
 			sortChildren( app.root.fields.nodes[id].parent );
+
+			apply = true;
 		}
 		else if( prop === 'type' ){
 			app.root.fields.nodes[id].typeProp = val;
+			apply = true;
 		}
 
-		if( app.root.fields.selectedNode && id===app.root.fields.selectedNode.id || prop === 'DisplayName' || prop === 'type' )
-			app.root.$apply();
+		// do as INFREQUENTLY as possible, pretty expensive
+		if(apply && !playing) app.root.$apply();
 	}
 
 	app.createdNode = function(parentId, newId, newExtends, newImplements, newSource, newType)
