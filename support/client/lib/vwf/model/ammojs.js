@@ -453,7 +453,7 @@ phyObject.prototype.addForceOffset = function(vec, pos) {
     if (pos.length !== 3) return;
     if (this.initialized === true) {
         var f = new Ammo.btVector3(vec[0], vec[1], vec[2]);
-        var g = new Ammo.btVector3(vec[0], vec[1], vec[2]);
+        var g = new Ammo.btVector3(pos[0], pos[1], pos[2]);
         this.body.applyForce(f, g);
         Ammo.destroy(f);
         Ammo.destroy(g);
