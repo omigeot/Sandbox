@@ -5,7 +5,7 @@ block vars
 
 block content
 
-	#materialaccordion(vws-accordion='materialDef')
+	#materialaccordion(vws-accordion='materialDef.layers.length')
 
 		h3: a(href="#") Material Base
 		#MaterialBasicSettings
@@ -61,6 +61,9 @@ block content
 						option(value=1, label='Normal') Normal
 						option(value=2, label='Additive') Additive
 						option(value=3, label='Subtractive') Subtractive
+
+				.horizontalLayout.centered
+					input(type='button', value='Add Texture Layer', ng-click='addTexture()', ng-disabled='!materialDef')
 
 		h3: a(href='#') Material Flags
 		#MaterialFlags.horizontalLayout
@@ -130,3 +133,6 @@ block content
 					option(value=2, label='Cube Refraction') Cube Refraction
 					option(value=3, label='Spherical Reflection') Spherical Reflection
 					option(value=4, label='Spherical Refraction') Spherical Refraction
+
+			.horizontalLayout.centered
+				input(type='button', value='Remove Texture Layer', ng-click='removeTexture($index)')

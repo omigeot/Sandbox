@@ -1,8 +1,14 @@
 'use strict';
 
+if( !Math.log10 ){
+	Math.log10 = function(x){
+		return Math.log(x)/Math.log(10);
+	}
+}
+
 define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 {
-	app.controller('MaterialController', ['$scope', function($scope)
+	app.controller('MaterialController', ['$scope','$timeout', function($scope, $timeout)
 	{
 		$scope.ambientLinked = true;
 		$scope.materialDef = null;
@@ -14,7 +20,7 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 		$scope.$watch('fields.selectedNode', function(newval)
 		{
 			var mat = newval && (newval.properties.materialDef || vwf_view.kernel.getProperty(newval.id));
-			if( newval && mat )
+			if( mat )
 			{
 				// try to get a materialDef from driver
 				if( angular.isArray(mat) ){
@@ -30,13 +36,13 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 
 				var diffuse = $scope.materialDef.color, ambient = $scope.materialDef.ambient;
 				$scope.ambientLinked = diffuse.r === ambient.r && diffuse.g === ambient.g && diffuse.b === ambient.b;
-				//setMaterialDefaults();
 			}
 			else {
 				$scope.materialArray = null;
 				$scope.activeMaterial = 0;
 				$scope.materialDef = null;
 				$scope.ambientLinked = true;
+				//_SidePanel.hideTab('materialEditor');
 			}
 		});
 
@@ -93,6 +99,32 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 			}
 		});
 
+		$scope.addTexture = function()
+		{
+			if($scope.materialDef && $scope.materialDef.layers)
+			{
+				$scope.materialDef.layers.push({
+					src: 'white.png',
+					mapTo: 1,
+					mapInput: 0,
+					alpha: 1,
+					scalex: 1,
+					scaley: 1,
+					offsetx: 0,
+					offsety: 0
+				});
+				$timeout(function(){
+					$('#materialaccordion').accordion('option','active',2+$scope.materialDef.layers.length-1);
+				});
+			}
+		}
+
+		$scope.removeTexture = function(index){
+			if( $scope.materialDef && $scope.materialDef.layers && index ){
+				$scope.materialDef.layers.splice(index,1);
+			}
+		}
+
 		window._MaterialEditor = $scope;
 	}]);
 
@@ -131,7 +163,8 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 				});
 
 				$scope.$on('$destroy', function(){
-					slider.slider('destroy');
+					if(slider.slider('instance'))
+						slider.slider('destroy');
 				});
 
 				slider.on('slidestart', function(evt,ui){
@@ -152,17 +185,21 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 
 				$scope.$watch('freezeExponent || value', function(newval)
 				{
-					if( !$scope.freezeExponent ){
-						$scope.exponent = $scope.useExponent ? Math.max(Math.floor(Math.log10(Math.abs($scope.value))), 0) : 0;
-						console.log($scope.exponent);
-					}
+					if($scope.value !== undefined)
+					{
+						if( !$scope.freezeExponent ){
+							$scope.exponent = $scope.useExponent ? Math.max(Math.floor(Math.log10(Math.abs($scope.value))), 0) : 0;
+						}
 
-					$scope.mantissa = $scope.value / Math.pow(10,$scope.exponent);
+						$scope.mantissa = $scope.value / Math.pow(10,$scope.exponent);
+					}
 				});
 
 				$scope.$watch('mantissa + exponent', function(newval){
-					$scope.value = $scope.mantissa * Math.pow(10, $scope.exponent);
-					slider.slider('option', 'value', $scope.mantissa);
+					if( $scope.disabled ){
+						$scope.value = $scope.mantissa * Math.pow(10, $scope.exponent);
+						slider.slider('option', 'value', $scope.mantissa);
+					}
 				});
 
 				$scope.$watch('disabled', function(newval){

@@ -57,8 +57,16 @@
 		padding: 10px;
 	}
 
-	input {
+	input:not([type=button]) {
 		color: black;
+	}
+
+	.horizontalLayout.centered {
+		@include justify-content(center);
+
+		input[type=button] {
+			width: 80%;
+		}
 	}
 
 	label
@@ -112,10 +120,11 @@
 		.texPreview
 		{
 			@include align-items(center);
-			margin-bottom: 10px;
 
 			img {
 				margin: 5px;
+				height: 128px;
+				border: solid grey 1px;
 			}
 		}
 	}

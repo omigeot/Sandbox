@@ -146,7 +146,6 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 				});
 
 				$(document).on('viewportresize', function(e){
-					console.log('Script editor resized');
 					editor.resize();
 				});
 
