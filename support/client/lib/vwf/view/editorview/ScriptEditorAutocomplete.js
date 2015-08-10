@@ -257,9 +257,11 @@ define(['./angular-app'], function(app)
                     }
                     else
                     {
-                        return !e.match(/[^a-zA-Z0-9]/)
+                        return !e.match(/[^a-zA-Z0-9_]/)
                     }
                 }));
+                if(locals.indexOf(line))
+                	locals.splice(locals.indexOf(line),1);
                 for (var i = 0; i < locals.length; i++)
                 {
                     locals[i] = [locals[i], String]
