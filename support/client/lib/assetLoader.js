@@ -689,10 +689,16 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                     cb2(vwfDef);
                 //});
         }
+        this.getBaseServerAddress = function()
+        {
+            return vwf.getProperty(vwf.application(),'baseServerAddress') || "http://localhost:3001/exercises/071-100-0032/step01/m4_flora_clear";
+        }
         //load the SAVE JSON, get the asset file, modify the scenegraph as required, return to engine
         this.loadSAVE = function(url, cb2)
         {
-            var SAVE_BACKEND_URL_OBJECT = "http://localhost:3001/exercises/071-100-0032/step01/m4_flora_clear/object";
+            var SAVE_BACKEND_URL_OBJECT = _assetLoader.getBaseServerAddress() + "/object";
+
+
             var JSON_Groups = null;
             var JSON_S3D = null;
             var COLLADA = null;
@@ -702,7 +708,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                 //get and parse the SAVE data
                 function getSAVEJSON(cb)
                 {
-                    debugger;
+                   
                      var postData = {object:{}};
                      postData.object.auto = false;
                      postData.object.ID = url;
