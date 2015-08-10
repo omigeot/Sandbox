@@ -215,23 +215,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 					{
 						e.preventDefault();
 
-						var cur = editor.getCursorPosition();
-						var session = editor.getSession();
-						var line = session.getLine(cur.row);
-
-						line = /[^\s;(),!]*$/.exec(line)[0];
-
-						var triggerkeyloc = Math.max(line.lastIndexOf('.'), line.lastIndexOf('['));
-						var triggerkey = line[triggerkeyloc];
-						var filter = line.substr(triggerkeyloc + 1);
-						line = line.substring(0, triggerkeyloc);
-						line = line || 'window';
-						triggerkey = triggerkey || '.';
+						
 						//Don't show for lines that have ( or ) (other than the one that triggered the autocomplete) because function calls
 						//might have side effects
-						if (line.indexOf('(') == -1 && line.indexOf('=') == -1) {
-							autocomplete.beginAutoComplete(editor, triggerkey, line, filter);
-						}
+						
+						autocomplete.autoComplete(editor, true);
+						
 					}
 
 				});
@@ -348,6 +337,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 		});
 
 		$scope.$watch('guiState.inheritPrototype', function(newval){
+			propertiesDirty = true;
 			$scope.rebuildLists();
 		});
 
