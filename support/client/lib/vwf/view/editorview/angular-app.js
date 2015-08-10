@@ -7,6 +7,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		app.root = $rootScope;
 		$rootScope.fields = {
 			selectedNode: null,
+			selectedNodeIds: [],
 			worldIsReady: false,
 			nodes: {},
 			cameras: []
