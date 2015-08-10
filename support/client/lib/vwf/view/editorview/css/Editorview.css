@@ -1165,7 +1165,8 @@
   #materialEditor .textureLayer .texPreview img {
     margin: 5px;
     height: 128px;
-    border: solid grey 1px; }
+    border: solid grey 1px;
+    cursor: pointer; }
 
 @-webkit-keyframes pulsing {
   0% {

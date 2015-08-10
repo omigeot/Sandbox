@@ -97,7 +97,7 @@ block content
 		.textureLayer(ng-repeat-end)
 
 			.texPreview.verticalLayout
-				img(ng-src='{{layer.src}}')
+				img(ng-src='{{layer.src}}', ng-click='browseForTexture($index)')
 				span {{layer.src}}
 
 			label Alpha:

@@ -6,8 +6,10 @@ if( !Math.log10 ){
 	}
 }
 
-define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
+define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], function(app, mapbrowser)
 {
+	window._MapBrowser = mapbrowser.getSingleton();
+
 	app.controller('MaterialController', ['$scope','$timeout', function($scope, $timeout)
 	{
 		$scope.ambientLinked = true;
@@ -122,6 +124,23 @@ define(['./angular-app', './colorpicker', './EntityLibrary'], function(app)
 		$scope.removeTexture = function(index){
 			if( $scope.materialDef && $scope.materialDef.layers && index ){
 				$scope.materialDef.layers.splice(index,1);
+			}
+		}
+
+		$scope.browseForTexture = function(index)
+		{
+			if( window._MapBrowser ){
+				window._MapBrowser.setTexturePickedCallback(function(url){
+					$scope.materialDef.layers[index].src = url;
+					$scope.$apply();
+
+					window._MapBrowser.hide();
+				});
+
+				window._MapBrowser.show();
+			}
+			else {
+				console.log('Texture browser is unavailable');
 			}
 		}
 
