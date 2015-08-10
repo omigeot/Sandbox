@@ -19,6 +19,7 @@ block content
 					option phong
 					option mix
 					option video
+					//option camera
 
 			div(ng-show='materialDef.type === "phong" || materialDef.type === "mix" || !materialDef')
 				label Alpha:
@@ -64,6 +65,18 @@ block content
 
 				.horizontalLayout.centered
 					input(type='button', value='Add Texture Layer', ng-click='addTexture()', ng-disabled='!materialDef')
+
+			div(ng-show='materialDef.type === "video"')
+				label Video source URL:
+					.verticalLayout
+						input(type='text', ng-model='videoTextureSource', ng-style='materialDef.videosrc !== videoTextureSource ? {"border-color": "red"} : {}')
+						input(type='button', value='Apply', ng-click='materialDef.videosrc = videoTextureSource')
+
+			div(ng-show='materialDef.type === "camera"')
+				label.inline Realtime camera ID:
+					select(ng-model='materialDef.RTTCameraID', ng-options='cam for cam in fields.cameras')
+						option(value="") None
+					
 
 		h3: a(href='#') Material Flags
 		#MaterialFlags.horizontalLayout

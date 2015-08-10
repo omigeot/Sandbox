@@ -18,6 +18,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		$scope.activeMaterial = 0;
 
 		var oldMaterialDef = null;
+		$scope.videoTextureSource = '';
 
 		$scope.$watch('fields.selectedNode', function(newval)
 		{
@@ -28,7 +29,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				if( angular.isArray(mat) ){
 					$scope.materialArray = mat.map(function(val){ return materialWithDefaults(val); });
 					$scope.activeMaterial = 0;
-					$scope.materialDef = mat[0];
+					$scope.materialDef = materialWithDefaults(mat[0]);
 				}
 				else {
 					$scope.materialArray = null;
@@ -89,6 +90,9 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				console.log('Writing materialDef');
 				vwf_view.kernel.setProperty($scope.fields.selectedNode.id, 'materialDef', newval);
 			}
+
+			if( $scope.materialDef )
+				$scope.videoTextureSource = $scope.materialDef.videosrc;
 
 			oldMaterialDef = newval;
 		}, true);
@@ -206,17 +210,30 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				{
 					if($scope.value !== undefined)
 					{
-						if( !$scope.freezeExponent ){
-							$scope.exponent = $scope.useExponent ? Math.max(Math.floor(Math.log10(Math.abs($scope.value))), 0) : 0;
-						}
+						if( $scope.useExponent )
+						{
+							if( !$scope.freezeExponent ){
+								$scope.exponent = $scope.useExponent ? Math.max(Math.floor(Math.log10(Math.abs($scope.value))), 0) : 0;
+							}
 
-						$scope.mantissa = $scope.value / Math.pow(10,$scope.exponent);
+							$scope.mantissa = $scope.value / Math.pow(10,$scope.exponent);
+						}
+						else
+							$scope.mantissa = $scope.value;
+					}
+					else {
+						$scope.mantissa = 0;
+						$scope.exponent = 0;
 					}
 				});
 
 				$scope.$watch('mantissa + exponent', function(newval){
-					if( $scope.disabled ){
-						$scope.value = $scope.mantissa * Math.pow(10, $scope.exponent);
+					if( !$scope.disabled ){
+						if( $scope.useExponent )
+							$scope.value = $scope.mantissa * Math.pow(10, $scope.exponent);
+						else
+							$scope.value = $scope.mantissa;
+
 						slider.slider('option', 'value', $scope.mantissa);
 					}
 				});

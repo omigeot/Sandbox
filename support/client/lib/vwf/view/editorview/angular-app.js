@@ -8,7 +8,8 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		$rootScope.fields = {
 			selectedNode: null,
 			worldIsReady: false,
-			nodes: {}
+			nodes: {},
+			cameras: []
 		};
 
 		$(document).on('selectionChanged', function(e,node)
@@ -132,6 +133,9 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 			sortChildren( parentId );
 		}
 
+		if(newExtends === 'SandboxCamera-vwf')
+			app.root.fields.cameras.push(newId);
+
 		app.root.$apply();
 	}
 
@@ -157,6 +161,11 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		}
 
 		delete app.root.fields.nodes[nodeId];
+
+		if( app.root.fields.cameras.indexOf(nodeId) > -1 )
+			app.root.fields.cameras.splice( app.root.fields.cameras.indexOf(nodeId), 1 );
+
+		app.root.$apply();
 	}
 
 	return app;
