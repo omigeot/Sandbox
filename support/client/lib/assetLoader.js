@@ -716,7 +716,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                      postData.object = JSON.stringify(postData.object);
                     $.post(SAVE_BACKEND_URL_OBJECT, postData, function(data)
                     {
-                        JSON_Groups = JSON.parse(data[0].grouping);
+                        JSON_Groups = data[0].grouping;
                         assetURL = data[0].assetURL;    
                         cb();
                     });

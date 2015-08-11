@@ -2036,3 +2036,29 @@ text-decoration: underline;
 .downarrowclass {
 display:none;
 }
+
+.SAVEMenu
+{
+position: fixed;
+    z-index: 100;
+    background-color: white;
+    width: 200px;
+    font-size: 18px;
+    text-align: center;
+
+}
+.tooltrayItem
+{
+
+cursor:pointer;
+}
+.tooltrayItem:hover
+{
+
+text-decoration: underline;
+}
+
+.tooltraytitle
+{
+	background-color: lightblue;
+}

@@ -30,87 +30,47 @@ methods:
   addAnimation:
 scripts:
 - |
-  function keyframe(goal,time)
-  {
-     return {
-      
-      rel_goal:goal,
-      time:time
-     }
-  }
   this.action = function(action,childID,childName)
   {
      if(action[0] == "Point")
      {
-        this.addAnimation(this.id,'rotation',[keyframe([0,0,-90],1)]);
+        this.addAnimation(this.id,'rotation',[0,0,-90],1);
      }
      if(action[0] == "Push" && childName == 'Magazine_Catch_Button')
      {
-        this.addAnimation(this.Scene.findNode("Magazine_g Group").id,'position',[keyframe([0,0,-.15],1)]);
-        this.addAnimation(this.Scene.findNode("Magazine_Catch_Button").id,'position',[keyframe([0,.02,0],1)]);
-     }
-     if(action[0] == "Push" && childName == 'Charging_Handle')
-     {
-        this.addAnimation(this.Scene.findNode("Charging_Handle").id,'position',[keyframe([.02,0,0],1),keyframe([-.02,0,0],1)]);
-     }
-     if(action[0] == "Release" && childName == 'Charging_Handle')
-     {
-        this.addAnimation(this.Scene.findNode("Charging_Handle").id,'position',[keyframe([-.02,0,0],1)]);
-     }
-     if(action[0] == "PushAndHold" && childName == 'Charging_Handle')
-     {
-        this.addAnimation(this.Scene.findNode("Charging_Handle").id,'position',[keyframe([.02,0,0],1)]);
-     }
-     if(action[0] == "Pull" && childName == 'Trigger')
-     {
-        this.addAnimation(this.Scene.findNode("Trigger").id,'position',[keyframe([-.01,0,0],.5),keyframe([.01,0,0],.5)]);
+        this.addAnimation(this.Scene.findNode("Magazine_g Group").id,'position',[0,0,-.15],1);
+        this.addAnimation(this.Scene.findNode("Magazine_Catch_Button").id,'position',[0,.02,0],1);
      }
   }
-  this.addAnimation = function(nodeID,type,keyframes)
+  this.addAnimation = function(nodeID,type,rel_goal,time)
   {
      var node = this.Scene.findNodeByID(nodeID);
      var animation = {nodeID:nodeID,type:type,keys:[]}
      this.animations[nodeID] = animation;
-    
-     for(var i in keyframes)
+     if(type == 'position')
      {
-         var rel_goal = keyframes[i].rel_goal;
-         var time = keyframes[i].time;
-         var lasttime = 0;
-         
-         if(i > 0)
+         var current = node.transformAPI.getPosition();
+         for(var i = 0; i <= time*20; i++)
          {
-            lasttime = keyframes[i-1].time*20;
+            var pos = [current[0] + (rel_goal[0]/(time*20) * i) ,
+            current[1] + (rel_goal[1]/(time*20)* i) ,
+            current[2] + (rel_goal[2]/(time*20)* i) ]
+            
+            animation.keys.push(pos);
          }
-         if(type == 'position')
+     }
+      if(type == 'rotation')
+     {
+         var current = node.transformAPI.getRotation();
+         for(var i = 0; i <= time*20; i++)
          {
-             var current = node.transformAPI.getPosition();
-              if(i > 0)
-                current = Vec3.add(keyframes[i-1].rel_goal,current,[]);
-             for(var i = 0; i <= time*20; i++)
-             {
-                var pos = [current[0] + (rel_goal[0]/(time*20) * i) ,
-                current[1] + (rel_goal[1]/(time*20)* i) ,
-                current[2] + (rel_goal[2]/(time*20)* i) ]
-                
-                animation.keys.push(pos);
-             }
+            var pos = [current[0] + (rel_goal[0]/(time*20) * i) ,
+            current[1] + (rel_goal[1]/(time*20)* i) ,
+            current[2] + (rel_goal[2]/(time*20)* i) ]
+            
+            animation.keys.push(pos);
          }
-         if(type == 'rotation')
-         {
-             var current = node.transformAPI.getRotation();
-             if(i > 0)
-                current = Vec3.add(keyframes[i-1].rel_goal,current,[]);
-             for(var i = 0; i <= time*20; i++)
-             {
-                var pos = [current[0] + (rel_goal[0]/(time*20) * i) ,
-                current[1] + (rel_goal[1]/(time*20)* i) ,
-                current[2] + (rel_goal[2]/(time*20)* i) ]
-                
-                animation.keys.push(pos);
-             }
-         }
-      }
+     }
   }
   this.tick = function()
   {
