@@ -25,6 +25,8 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		$scope.refresh = function()
 		{
 			var mat = $scope.fields.selectedNode && ($scope.fields.selectedNode.properties.materialDef || vwf_view.kernel.getProperty($scope.fields.selectedNode.id));
+			mat = angular.copy(mat);
+
 			if( mat )
 			{
 				// try to get a materialDef from driver
