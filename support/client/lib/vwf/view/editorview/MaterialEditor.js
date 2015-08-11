@@ -113,15 +113,21 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 					}
 				}
 
-				if( !$scope.suppressUndo )
+				if( !$scope.suppressUndo ){
+					console.log('registering undo');
 					_UndoManager.pushEvent(undoEvent);
+				}
 			}
 		}
 
 		$scope.$watch('materialArray || materialDef', function(newval)
 		{
 			if(newval && newval === oldMaterialDef){
+				console.log('material changed, applying');
 				applyDef(newval);
+			}
+			else if(newval){
+				console.log('whole material swap');
 			}
 
 			if( $scope.materialDef )
