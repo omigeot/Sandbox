@@ -1,6 +1,7 @@
 define(['vwf/view/editorview/lib/angular'], function(angular)
 {
 	var app = angular.module('SandboxEditor', []);
+	var playing = false;
 
 	app.run(['$timeout', '$rootScope', function($timeout, $rootScope)
 	{
@@ -38,7 +39,10 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 	app.initialize = function(){
 		angular.bootstrap( document.body, ['SandboxEditor'] );
 	}
-
+	app.apply = debounce(function(){
+		if(!playing) app.root.$apply();
+	},200);
+	
 	function sortChildren(nodeId)
 	{
 		var parent = app.root.fields.nodes[nodeId];
@@ -67,7 +71,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				parameters: params,
 				body: body
 			};
-			app.root.$apply();
+			this.apply()
 		}
 	}
 
@@ -75,7 +79,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 	{
 		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
 			delete app.root.fields.selectedNode.methods[name];
-			app.root.$apply();
+			this.apply()
 		}
 	}
 
@@ -86,22 +90,30 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				parameters: params,
 				body: body
 			};
-			app.root.$apply();
+			this.apply()
 		}
 	}
 
 	app.deletedEvent = function(id, name){
 		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
 			delete app.root.fields.selectedNode.events[name];
-			app.root.$apply();
+			this.apply()
 		}
 	}
 
+	
 	app.initializedProperty = app.createdProperty = app.satProperty = function(id, prop, val)
 	{
-		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id )
-		{
+		var apply = false;
+
+		if( id === 'index-vwf' && prop === 'playMode' ){
+			playing = val === 'play';
+			if( !playing ) apply = true;
+		}
+
+		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
 			app.root.fields.selectedNode.properties[prop] = val;
+			apply = true;
 			if(prop === 'materialDef')
 				_MaterialEditor.refresh();
 		}
@@ -112,13 +124,16 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 
 			// name has just been set, so update position in parent's children array
 			sortChildren( app.root.fields.nodes[id].parent );
+
+			apply = true;
 		}
 		else if( prop === 'type' ){
 			app.root.fields.nodes[id].typeProp = val;
+			apply = true;
 		}
 
-		if( app.root.fields.selectedNode && id===app.root.fields.selectedNode.id || prop === 'DisplayName' || prop === 'type' )
-			app.root.$apply();
+		// do as INFREQUENTLY as possible, pretty expensive
+		if(apply) this.apply()
 	}
 
 	app.createdNode = function(parentId, newId, newExtends, newImplements, newSource, newType)
@@ -141,7 +156,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		if(newExtends === 'SandboxCamera-vwf')
 			app.root.fields.cameras.push(newId);
 
-		app.root.$apply();
+		this.apply()
 	}
 
 	/*app.initializedNode = function(nodeId)
@@ -149,7 +164,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		if(app.root.fields.nodes[nodeId]){
 			console.log('Initialized', nodeId);
 			app.root.fields.nodes[nodeId].childrenBound = true;
-			app.root.$apply();
+			this.apply()
 		}
 	}*/
 
@@ -170,7 +185,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		if( app.root.fields.cameras.indexOf(nodeId) > -1 )
 			app.root.fields.cameras.splice( app.root.fields.cameras.indexOf(nodeId), 1 );
 
-		app.root.$apply();
+		this.apply();
 	}
 
 	return app;

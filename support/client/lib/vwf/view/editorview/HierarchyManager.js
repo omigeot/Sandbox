@@ -321,7 +321,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 		$scope.getThreeDescendants = function(node)
 		{
 			var threenode = _Editor.findviewnode(node.id);
-			node.threeId = threenode.uuid;
+			node.threeId = threenode && threenode.uuid || null;
 
 			if( node.prototype === 'asset-vwf' && threenode )
 			{
