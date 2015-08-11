@@ -11,7 +11,9 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 			selectedNodeIds: [],
 			worldIsReady: false,
 			nodes: {},
-			cameras: []
+			cameras: [],
+
+			materialUpdateFromModel: false
 		};
 
 		$(document).on('selectionChanged', function(e,node)
@@ -111,11 +113,16 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 			if( !playing ) apply = true;
 		}
 
-		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
+		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id )
+		{
 			app.root.fields.selectedNode.properties[prop] = val;
 			apply = true;
-			if(prop === 'materialDef')
+
+			// only refresh material editor for material updates not originating there
+			if(prop === 'materialDef' && !app.root.fields.materialUpdateFromModel)
 				_MaterialEditor.refresh();
+			else if(prop === 'materialDef')
+				app.root.fields.materialUpdateFromModel = false;
 		}
 
 		if(prop === 'DisplayName')

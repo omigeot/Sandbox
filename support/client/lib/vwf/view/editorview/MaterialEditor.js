@@ -107,6 +107,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 						_Notifier.notify('You do not have permission to edit this material');
 					}
 					else {
+						$scope.fields.materialUpdateFromModel = true;
 						undoEvent.push( new _UndoManager.SetPropertyEvent(id, 'materialDef', def) );
 						vwf_view.kernel.setProperty(id, 'materialDef', def);
 					}
