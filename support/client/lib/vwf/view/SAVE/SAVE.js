@@ -21,7 +21,7 @@ define(["module", "vwf/view"], function(module, view)
 		// -- initialize ---------------------------------------------------------------------------
 		instance: function(data)
 		{
-			this.createS3D(GUID(), data.ID, data.name,transform);
+			this.createS3D(GUID(), data.ID, data.name);
 		},
 		loadToolTray: function()
 		{
