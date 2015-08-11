@@ -866,6 +866,11 @@
     #hierarchyManager #hierarchyDisplay .hierarchyicon.glyphicon-ban-circle {
       color: #444; }
 
+#primitiveEditor label {
+  font-size: 12px; }
+#primitiveEditor input {
+  color: black; }
+
 @-webkit-keyframes pulsing {
   0% {
     background-color: #20559b; }

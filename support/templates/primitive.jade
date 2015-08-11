@@ -4,29 +4,50 @@ block vars
 	- var settings = { name: 'primitiveEditor', controller: 'PrimitiveController', title: 'Properties', icon: 'properties', requiresSelection: true };
 
 block content
-	#accordion(vws-accordion='fields.selectedNode')
+	#primitive-accordion(vws-accordion='fields.selectedNode', ng-class="fields.selectedNode?'':'editorPanelDisable'")
 		h3 
 			a(href="#") Flags
-		div
-			#otherprops(ng-repeat='n in [1,2]')  
-				| {{n}}
-				input#dispName(type="text") 
-				label Name
+		#otherprops.accordian-flags		
+			input#dispName(type="text", ng-model="DisplayName" ng-model-options="{updateOn: 'blur'}")
+			label Name
+			input#dispOwner(type="text", disabled="disabled", ng-model="owner") 
+			label Owners
+			
+			div(ng-repeat="flag in ::flags")
+				input(type="checkbox" name="{{flag}}")
+				label(for="{{flag}}") {{flag}}
+
 		h3
 			a(href="#") Transforms
-		div
+		.accordian-transforms
 			.EditorLabel Translation
 			#Translation
-					input.TransformEditorInput#PositionX
-					input.TransformEditorInput#PositionY
-					input.TransformEditorInput#PositionZ
-				.EditorLabel Rotation
-				#Rotation
-					input.TransformEditorInput#RotationX
-					input.TransformEditorInput#RotationY
-					input.TransformEditorInput#RotationZ
-				.EditorLabel Scale
-				#Scale
-					input.TransformEditorInput#ScaleX(min=".0001", step=".05")
-					input.TransformEditorInput#ScaleY(min=".0001", step=".05")
-					input.TransformEditorInput#ScaleZ(min=".0001", step=".05")
+				input.TransformEditorInput#PositionX
+				input.TransformEditorInput#PositionY
+				input.TransformEditorInput#PositionZ
+			.EditorLabel Rotation
+			#Rotation
+				input.TransformEditorInput#RotationX
+				input.TransformEditorInput#RotationY
+				input.TransformEditorInput#RotationZ
+			.EditorLabel Scale
+			#Scale
+				input.TransformEditorInput#ScaleX(min=".0001", step=".05")
+				input.TransformEditorInput#ScaleY(min=".0001", step=".05")
+				input.TransformEditorInput#ScaleZ(min=".0001", step=".05")
+		h3(ng-repeat-start="data in allEditorData") 
+			a(href="#") {{node.properties.type}}: {{node.properties.DisplayName}}
+		.accordion-properties
+			div(ng-repeat="(key, value) in data")
+				vwf-editor-property(vwf-prop="value", vwf-type="{{value.type}}")
+		div(ng-repeat-end="")
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			

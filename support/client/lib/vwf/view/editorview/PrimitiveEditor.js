@@ -20,10 +20,75 @@ define(['./angular-app', './panelEditor', './EntityLibrary'], function(app, base
     };
 
     app.controller('PrimitiveController', ['$scope', function($scope){
-
         window._PrimitiveEditor = $scope;
+
+        var flags = ["Visible","Static (does not move)", "Dynamic (moves frequently)", "Cast Shadows",
+                     "Receive Shadows", "Passable (collides with avatars)", "Selectable (visible to pick)",
+                     "Inherit Parent Scale"];
+
+        //Find all bound ng-model properties in the DOM, then add watches
+        var watchProps = $('#primitive-accordion')
+            .find('[ng-model]')
+            .map(function(i, e){
+                var key = $(e).attr('ng-model');
+
+                //$scope[key] = '';
+                console.log(key);
+                return key;
+             });
+
+        $scope.flags = flags;
+        $scope.allEditorData = [];
+        $scope.node = null;
+
+        //vwf.getProperty(node.id, 'EditorData')
+
+        //These are changes happening from the client
+        /*$scope.$watchGroup(watchProps, function(newVal, oldVal){
+            for (var i = 0; i < newVal.length; i++) {
+                if(newVal[i] !== oldVal[i]){
+
+                }
+            }
+        });*/
+
+        $scope.$watch('fields.selectedNode', function(node){
+            console.log("node", node);
+            $scope.node = node;
+            $scope.allEditorData.length = 0;
+
+            if(node){
+                buildEditorData(node);
+            }
+        });
+
+        function buildEditorData(node, id, editorData){
+            id = id || node.id;
+            editorData = editorData || vwf.getProperty(node.id, 'EditorData');
+
+            console.log("editorData: ", editorData);
+
+            $scope.allEditorData.push(editorData);
+        }
     }]);
 
+    app.directive('vwfEditorProperty', function(){
+		function linkFn(scope, elem, attr){
+
+            //Set proper property template (slider, )
+            var pre = '../vwf/view/editorView/templates/';
+            scope.template = pre + (attr.vwfType || "empty") + ".html";
+		}
+
+		return {
+			restrict: 'E',
+			link: linkFn,
+            replace: true,
+            scope: { vwfProp: "="},
+            template: "<div ng-include='template'></div>"
+			//templateUrl: '../vwf/view/editorView/editorViewProperty.html'
+		};
+	});
 
     return window._PrimitiveEditor;
 }
@@ -70,51 +135,6 @@ function oldPrimEditor(angular, baseclass) {
 	        return hasPrototype(id, 'http-vwf-example-com-behavior-vwf');
 	    }
 
-
-        $('#' + this.contentID).append(
-            '<div id="accordion" style="height:100%;overflow:hidden">' +
-            '<h3><a href="#">Flags</a></h3>' +
-            '<div>' +
-            "<div id='otherprops'>" +
-            "<input class='' style='width:50%;text-align: center;vertical-align: middle;' type='text' id='dispName'>Name</input><br/>" +
-            "<input disabled='disabled' class='' style='width:50%;text-align: center;vertical-align: middle;' type='text' id='dispOwner'>Owners</input><br/>" +
-
-            "<input class='editorCheck' type='checkbox' id='isVisible'>Visible</input><br/>" +
-            "<input class='editorCheck' type='checkbox' id='isStatic'>Static (does not move)</input><br/>" +
-            "<input class='editorCheck' type='checkbox' id='isDynamic'>Dynamic (moves frequently)</input><br/>" +
-            "<input class='editorCheck' type='checkbox' id='castShadows'>Cast Shadows</input><br/>" +
-            "<input class='editorCheck'type='checkbox' id='receiveShadows'>Receive Shadows</input><br/>" +
-            "<input class='editorCheck' type='checkbox' id='passable'>Passable (collides with avatars)</input><br/>" +
-            "<input class='editorCheck' type='checkbox' id='isSelectable'>Selectable (visible to pick)</input><br/>" +
-            "<input class='editorCheck' type='checkbox' id='inheritScale'>Inherit Parent Scale</input><br/>" +
-            "</div>" +
-            '</div>' +
-            '<h3><a href="#">Transforms</a></h3>' +
-            '<div>' +
-            "<div class='EditorLabel'>Translation</div>" +
-            "<div id='Translation'>" +
-            "<input   class='TransformEditorInput' id='PositionX'/>" +
-            "<input   class='TransformEditorInput' id='PositionY'/>" +
-            "<input   class='TransformEditorInput' id='PositionZ'/>" +
-            "</div>" + "<div class='EditorLabel'>Rotation</div>" +
-            "<div id='Rotation'>" +
-            "<input  class='TransformEditorInput' id='RotationX'/>" +
-            "<input  class='TransformEditorInput' id='RotationY'/>" +
-            "<input  class='TransformEditorInput' id='RotationZ'/>" +
-            "<input  class='TransformEditorInput' id='RotationW'/>" +
-            "</div>" +
-            "<div class='EditorLabel'>Scale</div>" +
-            "<div id='Scale'>" +
-            "<input  min='.0001' step='.05'  class='TransformEditorInput' id='ScaleX'/>" +
-            "<input  min='.0001' step='.05' class='TransformEditorInput' id='ScaleY'/>" +
-            "<input  min='.0001' step='.05' class='TransformEditorInput' id='ScaleZ'/>" +
-            "</div>" +
-            '</div>' +
-            '</div>');
-
-
-
-
         $('.TransformEditorInput').spinner();
         $('#isStatic').change(function(e) {
             _PrimitiveEditor.setProperty('selection', 'isStatic', this.checked)
@@ -146,15 +166,6 @@ function oldPrimEditor(angular, baseclass) {
             }
             _PrimitiveEditor.setProperty(_Editor.GetSelectedVWFNode().id, 'DisplayName', $(this).val());
         });
-
-        $("#accordion").accordion({
-            fillSpace: true,
-            heightStyle: "content",
-            change: function() {
-                if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
-            }
-        });
-        $(".ui-accordion-content").css('height', 'auto');
 
         this.setProperty = function(id, prop, val, skipUndo) {
             //prevent the handlers from firing setproperties when the GUI is first setup;
@@ -208,85 +219,8 @@ function oldPrimEditor(angular, baseclass) {
         }
         this.BuildGUI = function()
         {
-
-            var node = _Editor.getNode(this.selectedID);
-            if(!node) return;
-
-            this.currentWidgets = {};
-            this.inSetup = true;
-            this.clearPropertyEditorDialogs();
-            var lastTab = 0;
-            try{
-                lastTab = $("#accordion").accordion('option', 'active');
-                $("#accordion").accordion('destroy');
-            }catch(e)
-            {
-                //accordion was not init yet
-            }
-
-            $("#accordion").children('.modifiersection').remove();
-            //update to ensure freshness
-
-            node.properties = vwf.getProperties(node.id);
-            if (!node.properties) return;
-
-
-
-            $('#ui-dialog-title-ObjectProperties').text(vwf.getProperty(node.id, 'DisplayName') + " Properties");
-            $('#dispName').val(vwf.getProperty(node.id, 'DisplayName') || node.id);
-
             this.addPropertyEditorDialog(node.id, 'DisplayName', $('#dispName'), 'text');
 
-
-
-            if ($('#dispName').val() == "") {
-                $('#dispName').val(node.name);
-            }
-            $('#dispOwner').val(vwf.getProperty(node.id, 'owner'));
-
-            if (vwf.getProperty(node.id, 'isStatic')) {
-                $('#isStatic').prop('checked', 'checked');
-            } else {
-                $('#isStatic').prop('checked', '');
-            }
-
-            if (vwf.getProperty(node.id, 'visible')) {
-                $('#isVisible').prop('checked', 'checked');
-            } else {
-                $('#isVisible').prop('checked', '');
-            }
-
-            if (vwf.getProperty(node.id, 'inheritScale')) {
-                $('#inheritScale').prop('checked', 'checked');
-            } else {
-                $('#inheritScale').prop('checked', '');
-            }
-
-            if (vwf.getProperty(node.id, 'isDynamic')) {
-                $('#isDynamic').prop('checked', 'checked');
-            } else {
-                $('#isDynamic').prop('checked', '');
-            }
-            if (vwf.getProperty(node.id, 'castShadows')) {
-                $('#castShadows').prop('checked', 'checked');
-            } else {
-                $('#castShadows').prop('checked', '');
-            }
-            if (vwf.getProperty(node.id, 'isSelectable')) {
-                $('#isSelectable').prop('checked', 'checked');
-            } else {
-                $('#isSelectable').prop('checked', '');
-            }
-            if (vwf.getProperty(node.id, 'passable')) {
-                $('#passable').prop('checked', 'checked');
-            } else {
-                $('#passable').prop('checked', '');
-            }
-            if (vwf.getProperty(node.id, 'receiveShadows')) {
-                $('#receiveShadows').prop('checked', 'checked');
-            } else {
-                $('#receiveShadows').prop('checked', '');
-            }
             $('#BaseSectionTitle').text(node.properties.type || "Type" + ": " + node.id);
             this.SelectionTransformed(null, node);
             this.setupAnimationGUI(node, true);
@@ -1145,44 +1079,5 @@ function oldPrimEditor(angular, baseclass) {
                 //console.log(e);
             }
         }
-
-        $(document).bind('modifierCreated', this.SelectionChanged.bind(this));
-        $(document).bind('selectionTransformedLocal', this.SelectionTransformed.bind(this));
-
-        $('#PositionX').on( "spinchange",this.positionChanged.bind(this));
-        $('#PositionY').on( "spinchange",this.positionChanged.bind(this));
-        $('#PositionZ').on( "spinchange",this.positionChanged.bind(this));
-        $('#RotationX').on( "spinchange",this.rotationChanged.bind(this));
-        $('#RotationY').on( "spinchange",this.rotationChanged.bind(this));
-        $('#RotationZ').on( "spinchange",this.rotationChanged.bind(this));
-        $('#RotationW').on( "spinchange",this.rotationChanged.bind(this));
-        $('#ScaleX').on( "spinchange",this.scaleChanged.bind(this));
-        $('#ScaleY').on( "spinchange",this.scaleChanged.bind(this));
-        $('#ScaleZ').on( "spinchange",this.scaleChanged.bind(this));
-
-        $('#PositionX').on( "spin",this.positionChanged.bind(this));
-        $('#PositionY').on( "spin",this.positionChanged.bind(this));
-        $('#PositionZ').on( "spin",this.positionChanged.bind(this));
-        $('#RotationX').on( "spin",this.rotationChanged.bind(this));
-        $('#RotationY').on( "spin",this.rotationChanged.bind(this));
-        $('#RotationZ').on( "spin",this.rotationChanged.bind(this));
-        $('#RotationW').on( "spin",this.rotationChanged.bind(this));
-        $('#ScaleX').on( "spin",this.scaleChanged.bind(this));
-        $('#ScaleY').on( "spin",this.scaleChanged.bind(this));
-        $('#ScaleZ').on( "spin",this.scaleChanged.bind(this));
-
-        $('#PositionX').on( "keyup",this.positionChanged.bind(this));
-        $('#PositionY').on( "keyup",this.positionChanged.bind(this));
-        $('#PositionZ').on( "keyup",this.positionChanged.bind(this));
-        $('#RotationX').on( "keyup",this.rotationChanged.bind(this));
-        $('#RotationY').on( "keyup",this.rotationChanged.bind(this));
-        $('#RotationZ').on( "keyup",this.rotationChanged.bind(this));
-        $('#RotationW').on( "keyup",this.rotationChanged.bind(this));
-        $('#ScaleX').on( "keyup",this.scaleChanged.bind(this));
-        $('#ScaleY').on( "keyup",this.scaleChanged.bind(this));
-        $('#ScaleZ').on( "keyup",this.scaleChanged.bind(this));
-
-        $('#RotationW').hide();
-        this.hide();
     }
 }
