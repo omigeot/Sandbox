@@ -21,9 +21,10 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		$scope.videoTextureSource = '';
 		$scope.suppressUndo = false;
 
-		$scope.$watch('fields.selectedNode', function(newval)
+
+		$scope.refresh = function()
 		{
-			var mat = newval && (newval.properties.materialDef || vwf_view.kernel.getProperty(newval.id));
+			var mat = $scope.fields.selectedNode && ($scope.fields.selectedNode.properties.materialDef || vwf_view.kernel.getProperty($scope.fields.selectedNode.id));
 			if( mat )
 			{
 				// try to get a materialDef from driver
@@ -48,7 +49,9 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				$scope.ambientLinked = true;
 				//_SidePanel.hideTab('materialEditor');
 			}
-		});
+		}
+
+		$scope.$watch('fields.selectedNode', $scope.refresh);
 
 		$scope.$watch('activeMaterial', function(newval){
 			if( $scope.materialArray && newval >= 0 && newval < $scope.materialArray.length )
@@ -162,7 +165,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		}
 
 		$scope.removeTexture = function(index){
-			if( $scope.materialDef && $scope.materialDef.layers && index ){
+			if( $scope.materialDef && $scope.materialDef.layers ){
 				$scope.materialDef.layers.splice(index,1);
 			}
 		}

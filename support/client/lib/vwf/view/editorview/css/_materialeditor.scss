@@ -69,19 +69,20 @@
 		}
 	}
 
+	.inline
+	{
+		@include display-flex();
+		@include align-items(center);
+		@include justify-content(space-between);
+
+		margin: 10px 0;
+		cursor: default;
+	}
+
 	label
 	{
 		display: block;
 		margin: 0;
-
-		&.inline
-		{
-			@include display-flex();
-			@include align-items(center);
-			@include justify-content(space-between);
-
-			margin: 10px 0;
-		}
 
 		input[type=checkbox] {
 			margin: 0;

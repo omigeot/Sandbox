@@ -100,7 +100,11 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 	app.initializedProperty = app.createdProperty = app.satProperty = function(id, prop, val)
 	{
 		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id )
+		{
 			app.root.fields.selectedNode.properties[prop] = val;
+			if(prop === 'materialDef')
+				_MaterialEditor.refresh();
+		}
 
 		if(prop === 'DisplayName')
 		{

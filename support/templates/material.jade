@@ -44,7 +44,7 @@ block content
 				label.inline Diffuse color:
 					color-picker(color-obj='materialDef.color', disabled='!materialDef', sliding='suppressUndo')
 
-				label.inline Ambient color:
+				.inline Ambient color:
 					.verticalLayout(style='align-items: flex-end;')
 						label Linked
 							input(type='checkbox', ng-model='ambientLinked', ng-disabled='!materialDef')
@@ -67,7 +67,7 @@ block content
 					input(type='button', value='Add Texture Layer', ng-click='addTexture()', ng-disabled='!materialDef')
 
 			div(ng-show='materialDef.type === "video"')
-				label Video source URL:
+				div Video source URL:
 					.verticalLayout
 						input(type='text', ng-model='videoTextureSource', ng-style='materialDef.videosrc !== videoTextureSource ? {"border-color": "red"} : {}')
 						input(type='button', value='Apply', ng-click='materialDef.videosrc = videoTextureSource')

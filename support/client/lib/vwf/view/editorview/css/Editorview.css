@@ -1097,31 +1097,32 @@
   #materialEditor .horizontalLayout.centered input[type=button] {
     width: 80%; }
 /* line 72, _materialeditor.scss */
+#materialEditor .inline {
+  display: -webkit-box;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-align: center;
+  -moz-align-items: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-box-pack: justify;
+  -moz-justify-content: space-between;
+  -ms-flex-pack: justify;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+  margin: 10px 0;
+  cursor: default; }
+/* line 82, _materialeditor.scss */
 #materialEditor label {
   display: block;
   margin: 0; }
-  /* line 77, _materialeditor.scss */
-  #materialEditor label.inline {
-    display: -webkit-box;
-    display: -moz-flex;
-    display: -ms-flexbox;
-    display: -webkit-flex;
-    display: flex;
-    -webkit-box-align: center;
-    -moz-align-items: center;
-    -ms-flex-align: center;
-    -webkit-align-items: center;
-    align-items: center;
-    -webkit-box-pack: justify;
-    -moz-justify-content: space-between;
-    -ms-flex-pack: justify;
-    -webkit-justify-content: space-between;
-    justify-content: space-between;
-    margin: 10px 0; }
-  /* line 86, _materialeditor.scss */
+  /* line 87, _materialeditor.scss */
   #materialEditor label input[type=checkbox] {
     margin: 0; }
-/* line 93, _materialeditor.scss */
+/* line 94, _materialeditor.scss */
 #materialEditor #MaterialBasicSettings label#materialIndex {
   display: -webkit-box;
   display: -moz-flex;
@@ -1139,29 +1140,29 @@
   -webkit-align-items: center;
   align-items: center;
   font-size: 15px; }
-  /* line 100, _materialeditor.scss */
+  /* line 101, _materialeditor.scss */
   #materialEditor #MaterialBasicSettings label#materialIndex input {
     padding: 0;
     margin: 0 5px;
     width: 30px; }
-/* line 108, _materialeditor.scss */
+/* line 109, _materialeditor.scss */
 #materialEditor #MaterialFlags {
   -webkit-box-pack: center;
   -moz-justify-content: center;
   -ms-flex-pack: center;
   -webkit-justify-content: center;
   justify-content: center; }
-  /* line 112, _materialeditor.scss */
+  /* line 113, _materialeditor.scss */
   #materialEditor #MaterialFlags label {
     margin: 10px 0; }
-/* line 120, _materialeditor.scss */
+/* line 121, _materialeditor.scss */
 #materialEditor .textureLayer .texPreview {
   -webkit-box-align: center;
   -moz-align-items: center;
   -ms-flex-align: center;
   -webkit-align-items: center;
   align-items: center; }
-  /* line 124, _materialeditor.scss */
+  /* line 125, _materialeditor.scss */
   #materialEditor .textureLayer .texPreview img {
     margin: 5px;
     height: 128px;
