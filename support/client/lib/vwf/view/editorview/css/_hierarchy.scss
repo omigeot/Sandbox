@@ -1,6 +1,8 @@
 
 #hierarchyManager
 {
+	max-height: 400px;
+
 	.content
 	{
 		@include display-flex();
@@ -79,6 +81,7 @@
 		position: relative;
 
 		@include flex-grow(1);
+		max-height: 320px;
 
 		font-size: 1.5em;
 		//font-family: Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;

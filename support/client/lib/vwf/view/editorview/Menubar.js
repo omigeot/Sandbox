@@ -608,7 +608,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 	
 			MenuCameraFly: function(e) {
 				_dView.setCameraDefault();
-				clearCameraModeIcons();
+				
 				$('#MenuCameraNavigateicon').addClass('iconselected');
 				require("vwf/view/threejs/editorCameraController").setCameraMode('Fly');
 	
@@ -616,12 +616,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 	
 			MenuCameraNone: function(e) {
 				_dView.setCameraDefault();
-				clearCameraModeIcons();
+				
 				require("vwf/view/threejs/editorCameraController").setCameraMode('None');
 			},
 			MenuCameraFree: function(e) {
 				_dView.setCameraDefault();
-				clearCameraModeIcons();
+				
 				$('#MenuCameraFreeicon').addClass('iconselected');
 				require("vwf/view/threejs/editorCameraController").setCameraMode('Orbit');
 				require("vwf/view/threejs/editorCameraController").setCameraMode('Free');
@@ -636,7 +636,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 	
 				if (_UserManager.GetCurrentUserName()) {
 					_dView.setCameraDefault();
-					clearCameraModeIcons();
+					
 					$('#MenuCamera3RDPersonicon').addClass('iconselected');
 					require("vwf/view/threejs/editorCameraController").getController('Orbit').followObject(vwf.models[0].model.nodes[_UserManager.GetCurrentUserID()]);
 					require("vwf/view/threejs/editorCameraController").setCameraMode('3RDPerson');
