@@ -36,12 +36,15 @@ block content
 				input.TransformEditorInput#ScaleY(min=".0001", step=".05")
 				input.TransformEditorInput#ScaleZ(min=".0001", step=".05")
 		h3(ng-repeat-start="data in allEditorData") 
-			a(href="#") {{node.properties.type}}: {{node.properties.DisplayName}}
-		.accordion-properties
+			a(href="#") {{getProperty(node, 'type')}}: {{getProperty(node, 'DisplayName')}}
+		.accordion-properties(ng-repeat-end)
 			div(ng-repeat="(key, value) in data")
-				vwf-editor-property(vwf-prop="value", vwf-type="{{value.type}}")
-		div(ng-repeat-end="")
-			
+				vwf-editor-property(vwf-prop="value", vwf-key="{{key}}", vwf-node="$parent.node")
+	#vwf-template-slider(ng-non-bindable, style='display: none;') 
+		.editorSliderLabel {{displayname}}
+		slider(min="min", max="max", step="step || .5", use-exponent='false', value='vwfNode.properties[vwfKey]', sliding='suppressUndo')
+	#vwf-template-color(ng-non-bindable, style='display: none;')
+		| nope.
 			
 			
 			

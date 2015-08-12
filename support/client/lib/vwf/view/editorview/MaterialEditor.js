@@ -257,23 +257,19 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 
 				$scope.$watch('freezeExponent || value', function(newval)
 				{
-					if($scope.value !== undefined)
-					{
-						if( $scope.useExponent )
-						{
-							if( !$scope.freezeExponent ){
-								$scope.exponent = $scope.useExponent ? Math.max(Math.floor(Math.log10(Math.abs($scope.value))), 0) : 0;
-							}
+					if($scope.value === undefined)
+						$scope.value = $scope.min;
 
-							$scope.mantissa = $scope.value / Math.pow(10,$scope.exponent);
+					if( $scope.useExponent )
+					{
+						if( !$scope.freezeExponent ){
+							$scope.exponent = $scope.useExponent ? Math.max(Math.floor(Math.log10(Math.abs($scope.value))), 0) : 0;
 						}
-						else
-							$scope.mantissa = $scope.value;
+
+						$scope.mantissa = $scope.value / Math.pow(10,$scope.exponent);
 					}
-					else {
-						$scope.mantissa = 0;
-						$scope.exponent = 0;
-					}
+					else
+						$scope.mantissa = $scope.value;
 				});
 
 				$scope.$watch('mantissa + exponent', function(newval){
@@ -404,4 +400,3 @@ var oldDefine = function(baseclass) {
 
     }
 }
-

@@ -1,6 +1,6 @@
 'use strict';
 
-define(['./angular-app', './panelEditor', './EntityLibrary'], function(app, baseClass){
+define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor'], function(app, baseClass){
     var primEditor = {};
     var isInitialized = false;
 
@@ -62,6 +62,10 @@ define(['./angular-app', './panelEditor', './EntityLibrary'], function(app, base
             }
         });
 
+        $scope.getProperty = function(node, prop){
+            return node ? vwf.getProperty(node.id, prop) : null;
+        }
+
         function buildEditorData(node, id, editorData){
             id = id || node.id;
             editorData = editorData || vwf.getProperty(node.id, 'EditorData');
@@ -72,23 +76,63 @@ define(['./angular-app', './panelEditor', './EntityLibrary'], function(app, base
         }
     }]);
 
-    app.directive('vwfEditorProperty', function(){
+    app.directive('vwfEditorProperty', ['$compile', function($compile){
 		function linkFn(scope, elem, attr){
+            if(scope.vwfProp){
+                for(var key in scope.vwfProp){
+                    if(key != "vwfKey" && key != "vwfNode")
+                        scope[key] = scope.vwfProp[key];
+                }
 
-            //Set proper property template (slider, )
-            var pre = '../vwf/view/editorView/templates/';
-            scope.template = pre + (attr.vwfType || "empty") + ".html";
+                scope.$watch('vwfNode.properties[vwfKey]', function(newVal){
+                    console.log(scope.vwfProp, newVal);
+                    //if(newVal) setProperty(scope.vwfNode, scope.vwfProp.property, newVal)
+                });
+
+                //Get template that corresponds with current type of property
+                var template = $("#vwf-template-" + scope.type).html();
+                $compile(template)(scope, function(e){
+                    elem.html(e);
+                });
+            }
 		}
 
 		return {
 			restrict: 'E',
 			link: linkFn,
             replace: true,
-            scope: { vwfProp: "="},
-            template: "<div ng-include='template'></div>"
-			//templateUrl: '../vwf/view/editorView/editorViewProperty.html'
+            scope: { vwfProp: "=", vwfKey: "@", vwfNode: "=" },
 		};
-	});
+	}]);
+
+    function setProperty(node, prop, val) {
+        if (_UserManager.GetCurrentUserName() == null) {
+            _Notifier.notify('You must log in to participate');
+            return;
+        }
+        else if (node && node.id) {
+            if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(), node.id) == 0) {
+                _Notifier.notify('You do not have permission to edit this object');
+                return;
+            }
+            vwf_view.kernel.setProperty(node.id, prop, val)
+        }
+        else {
+            var undoEvent = new _UndoManager.CompoundEvent();
+
+            for (var k = 0; k < _Editor.getSelectionCount(); k++) {
+                if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(), _Editor.GetSelectedVWFNode(k).id) == 0) {
+                    _Notifier.notify('You do not have permission to edit this object');
+                    continue;
+                }
+
+                undoEvent.push(new _UndoManager.SetPropertyEvent(_Editor.GetSelectedVWFNode(k).id, prop, val));
+                vwf_view.kernel.setProperty(_Editor.GetSelectedVWFNode(k).id, prop, val)
+            }
+            if (!skipUndo)
+                _UndoManager.pushEvent(undoEvent);
+        }
+    }
 
     return window._PrimitiveEditor;
 }
