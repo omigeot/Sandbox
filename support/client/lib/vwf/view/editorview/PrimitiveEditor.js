@@ -281,7 +281,7 @@ function oldPrimEditor(angular, baseclass) {
             this.SelectionTransformed(null, node);
             this.setupAnimationGUI(node, true);
             this.setupEditorData(node,node.id, true,vwf.getProperty(node.id, 'EditorData'));
-            this.recursevlyAddPrototypes(node);
+            this.recursevlyAddPrototypes(vwf.prototype(node.id),node.id);
             this.recursevlyAddModifiers(node);
             this.addBehaviors(node);
             $("#accordion").accordion({
@@ -297,24 +297,23 @@ function oldPrimEditor(angular, baseclass) {
                 'active': lastTab
             });
         }
-        this.recursevlyAddPrototypes = function(node) {
+
+        this.recursevlyAddPrototypes = function(nodeid,selectionID) {
 
 
-            var oldID = node.id;
-            node = _Editor.getNode(vwf.prototype(node.id));
-             if(!node){
+            if(!nodeid) return;
+            node = _Editor.getNode(nodeid);
+            if(!node){
                 return;
             }
-            var currentID = node.id;
+
             //must be careful... we don't actually want to set the properties on the prototype
             //we want to set them on the current node
-            node.id = oldID;
-
-            this.setupEditorData(node,currentID, false,vwf.getProperty(currentID, 'EditorData'));
-            node.id = currentID; // careful not to recurse forever
-            this.recursevlyAddPrototypes(node);
-
-
+            var protoID = vwf.prototype(nodeid);
+            var currentID = node.id;
+            node.id = selectionID;
+            this.setupEditorData(node,currentID, false,vwf.getProperty(nodeid, 'EditorData'));
+            this.recursevlyAddPrototypes(protoID,selectionID);
         }
         this.recursevlyAddModifiers = function(node) {
             for (var i in node.children) {
@@ -550,7 +549,8 @@ function oldPrimEditor(angular, baseclass) {
             }
             if (editordatanames.length == 0) return;
             editordatanames.sort();
-            section = '<h3 class="modifiersection" ><a href="#"><div style="font-weight:bold;display:inline">' + (vwf.getProperty(node.id, 'type') || "Type") + ": </div>" + (node.properties.DisplayName || "None") + '</a></h3>' + '<div class="modifiersection" id="basicSettings' + panelid + '">' + '</div>';
+
+            section = '<h3 class="modifiersection" ><a href="#"><div style="font-weight:bold;display:inline">' + (vwf.getProperty(node.id, 'type') || "Type") + ": </div>" + (node.properties.DisplayName || panelid) + '</a></h3>' + '<div class="modifiersection" id="basicSettings' + panelid + '">' + '</div>';
 
             $("#accordion").append(section);
 
