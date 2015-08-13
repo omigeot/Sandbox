@@ -40,9 +40,11 @@ block content
 		.accordion-properties(ng-repeat-end)
 			div(ng-repeat="(key, value) in data")
 				vwf-editor-property(vwf-prop="value", vwf-key="{{key}}", vwf-node="$parent.node")
+	
 	#vwf-template-slider(ng-non-bindable, style='display: none;') 
 		.editorSliderLabel {{displayname}}
 		slider(min="min", max="max", step="step || .5", use-exponent='false', value='vwfNode.properties[vwfKey]', sliding='suppressUndo')
+	
 	#vwf-template-color(ng-non-bindable, style='display: none;')
 		| nope.
 			

@@ -58,7 +58,8 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             $scope.allEditorData.length = 0;
 
             if(node){
-                buildEditorData(node);
+                recursevlyAddPrototypes(node);
+                //buildEditorData(node.id);
             }
         });
 
@@ -66,13 +67,24 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             return node ? vwf.getProperty(node.id, prop) : null;
         }
 
-        function buildEditorData(node, id, editorData){
-            id = id || node.id;
-            editorData = editorData || vwf.getProperty(node.id, 'EditorData');
+        function buildEditorData(id, editorData){
+            editorData = editorData || vwf.getProperty(id, 'EditorData');
 
-            console.log("editorData: ", editorData);
+            console.log("editorData 2: ", editorData);
 
-            $scope.allEditorData.push(editorData);
+            if(editorData && $scope.allEditorData.indexOf(editorData) === -1)
+                $scope.allEditorData.push(editorData);
+        }
+
+        function recursevlyAddPrototypes(node){
+            if(node){
+                var protoId = vwf.prototype(node.id);
+                console.log("PROTO:", node);
+                console.log("editorData 1:", vwf.getProperty(protoId, 'EditorData'));
+
+                buildEditorData(node.id);
+                if(protoId) recursevlyAddPrototypes(_Editor.getNode(protoId));
+            }
         }
     }]);
 
