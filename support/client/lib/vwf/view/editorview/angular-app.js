@@ -117,12 +117,6 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		{
 			app.root.fields.selectedNode.properties[prop] = val;
 			apply = true;
-
-			// only refresh material editor for material updates not originating there
-			if(prop === 'materialDef' && !app.root.fields.materialUpdateFromModel)
-				_MaterialEditor.refresh();
-			else if(prop === 'materialDef')
-				app.root.fields.materialUpdateFromModel = false;
 		}
 
 		if(prop === 'DisplayName')

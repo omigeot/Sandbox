@@ -20,15 +20,17 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		var oldMaterialDef = null;
 		$scope.videoTextureSource = '';
 		$scope.suppressUndo = false;
-
+		var lastUndo = null;
 
 		$scope.refresh = function()
 		{
 			var mat = $scope.fields.selectedNode && ($scope.fields.selectedNode.properties.materialDef || vwf_view.kernel.getProperty($scope.fields.selectedNode.id));
-			mat = angular.copy(mat);
+			//console.log($scope.materialDef === mat);
+			//mat = angular.copy(mat);
 
-			if( mat )
+			if( mat && !$scope.suppressUndo && !angular.equals($scope.materialArray||$scope.materialDef, mat))
 			{
+				lastUndo = angular.copy(mat);
 				// try to get a materialDef from driver
 				if( angular.isArray(mat) ){
 					$scope.materialArray = mat.map(function(val){ return materialWithDefaults(val); });
@@ -44,16 +46,17 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				var diffuse = $scope.materialDef.color, ambient = $scope.materialDef.ambient;
 				$scope.ambientLinked = diffuse.r === ambient.r && diffuse.g === ambient.g && diffuse.b === ambient.b;
 			}
-			else {
+			else if( !mat ){
 				$scope.materialArray = null;
 				$scope.activeMaterial = 0;
 				$scope.materialDef = null;
 				$scope.ambientLinked = true;
+				lastUndo = null;
 				//_SidePanel.hideTab('materialEditor');
 			}
 		}
 
-		$scope.$watch('fields.selectedNode', $scope.refresh);
+		$scope.$watch('fields.selectedNode.properties.materialDef', $scope.refresh);
 
 		$scope.$watch('activeMaterial', function(newval){
 			if( $scope.materialArray && newval >= 0 && newval < $scope.materialArray.length )
@@ -109,8 +112,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 						_Notifier.notify('You do not have permission to edit this material');
 					}
 					else {
-						$scope.fields.materialUpdateFromModel = true;
-						undoEvent.push( new _UndoManager.SetPropertyEvent(id, 'materialDef', def) );
+						undoEvent.push( new _UndoManager.SetPropertyEvent(id, 'materialDef', def, lastUndo) );
 						vwf_view.kernel.setProperty(id, 'materialDef', def);
 					}
 				}
@@ -118,6 +120,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				if( !$scope.suppressUndo ){
 					console.log('registering undo');
 					_UndoManager.pushEvent(undoEvent);
+					lastUndo = angular.copy(def);
 				}
 			}
 		}
