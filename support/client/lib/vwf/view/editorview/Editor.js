@@ -716,7 +716,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
 
                 }
                 if (_PrimitiveEditor.isOpen()) _PrimitiveEditor.hide();
-                if (_MaterialEditor.isOpen()) _MaterialEditor.hide();
+                if (_SidePanel.isTabOpen('materialEditor')) _SidePanel.hideTab('materialEditor');
                 if (_ScriptEditor.isOpen()) _ScriptEditor.hide();
             }
             _UndoManager.stopCompoundEvent();

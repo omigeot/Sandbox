@@ -2,13 +2,18 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 {
 	var app = angular.module('SandboxEditor', []);
 	var playing = false;
+
 	app.run(['$timeout', '$rootScope', function($timeout, $rootScope)
 	{
 		app.root = $rootScope;
 		$rootScope.fields = {
 			selectedNode: null,
+			selectedNodeIds: [],
 			worldIsReady: false,
-			nodes: {}
+			nodes: {},
+			cameras: [],
+
+			materialUpdateFromModel: false
 		};
 
 		$(document).on('selectionChanged', function(e,node)
@@ -36,10 +41,8 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 	app.initialize = function(){
 		angular.bootstrap( document.body, ['SandboxEditor'] );
 	}
-	app.apply = debounce(function()
-	{
-		if(!playing)
-		app.root.$apply();
+	app.apply = debounce(function(){
+		if(!playing) app.root.$apply();
 	},200);
 	
 	function sortChildren(nodeId)
@@ -110,7 +113,8 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 			if( !playing ) apply = true;
 		}
 
-		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id ){
+		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id )
+		{
 			app.root.fields.selectedNode.properties[prop] = val;
 			apply = true;
 		}
@@ -130,7 +134,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		}
 
 		// do as INFREQUENTLY as possible, pretty expensive
-		if(apply && !playing) this.apply()
+		if(apply) this.apply()
 	}
 
 	app.createdNode = function(parentId, newId, newExtends, newImplements, newSource, newType)
@@ -149,6 +153,9 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 			app.root.fields.nodes[parentId].children.push(newId);
 			sortChildren( parentId );
 		}
+
+		if(newExtends === 'SandboxCamera-vwf')
+			app.root.fields.cameras.push(newId);
 
 		this.apply()
 	}
@@ -175,6 +182,11 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		}
 
 		delete app.root.fields.nodes[nodeId];
+
+		if( app.root.fields.cameras.indexOf(nodeId) > -1 )
+			app.root.fields.cameras.splice( app.root.fields.cameras.indexOf(nodeId), 1 );
+
+		this.apply();
 	}
 
 	return app;
