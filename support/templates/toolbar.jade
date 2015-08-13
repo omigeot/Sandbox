@@ -9,8 +9,8 @@ mixin toolbar_body
 		.icon.logout(title='Leave World', ng-click='triggerMenu("MenuLogOut",$event)')
 		.separator
 
-		.icon.undo(title='Undo (ctrl-z)')
-		.icon.redo(title='Redo (ctrl-y)')
+		.icon.undo(title='Undo (ctrl-z)', ng-click='triggerMenu("MenuUndo",$event)')
+		.icon.redo(title='Redo (ctrl-y)', ng-click='triggerMenu("MenuRedo",$event)')
 		.separator
 
 		.icon.move(toolbar-select='xfSelected = "move"', title='Move Tool', ng-click='triggerMenu("MenuMove",$event)'

@@ -36,7 +36,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		 */
 
 		// check for upstream materialDef changes when this value updates
-		$scope.$watch('fields.selectedNode.properties.materialDef', $scope.refresh);
+		$scope.$watch('fields.selectedNode.properties.materialDef', refresh);
 
 		// repoint materialDef when it's an array and the active material changes
 		$scope.$watch('activeMaterial', function(newval){
@@ -142,7 +142,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		}
 
 		// determine if $scope.materialDef requires resyncing with the vwf
-		$scope.refresh = function()
+		function refresh()
 		{
 			// try to get a materialDef from property, or failing that, from the driver
 			var mat = $scope.fields.selectedNode && ($scope.fields.selectedNode.properties.materialDef || vwf_view.kernel.getProperty($scope.fields.selectedNode.id));
@@ -176,6 +176,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				//_SidePanel.hideTab('materialEditor');
 			}
 		}
+		$scope.refresh = refresh;
 
 		// push a new default texture layer to materialDef.layers, and open the accordion tab
 		$scope.addTexture = function()
