@@ -36,18 +36,30 @@ block content
 				input.TransformEditorInput#ScaleY(min=".0001", step=".05")
 				input.TransformEditorInput#ScaleZ(min=".0001", step=".05")
 		h3(ng-repeat-start="data in allEditorData") 
-			a(href="#") {{getProperty(node, 'type')}}: {{getProperty(node, 'DisplayName')}}
+			a(href="#") {{data.type}}: {{data.name}}
 		.accordion-properties(ng-repeat-end)
-			div(ng-repeat="(key, value) in data")
-				vwf-editor-property(vwf-prop="value", vwf-key="{{key}}", vwf-node="$parent.node")
+			div(ng-repeat="(key, value) in data.editorProps")
+				vwf-editor-property(vwf-prop="value", vwf-key="{{key}}", vwf-node="node")
 	
 	#vwf-template-slider(ng-non-bindable, style='display: none;') 
 		.editorSliderLabel {{displayname}}
-		slider(min="min", max="max", step="step || .5", use-exponent='false', value='vwfNode.properties[vwfKey]', sliding='suppressUndo')
+		slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfKey]', sliding='suppressUndo')
 	
 	#vwf-template-color(ng-non-bindable, style='display: none;')
-		| nope.
-			
+		.editorSliderLabel {{displayname}}
+		color-picker(color-arr='vwfNode.properties[vwfKey]', color-obj='{r:0,g:0,b:0}', sliding='suppressUndo')
+		
+	#vwf-template-check(ng-non-bindable, style='display: none;')
+		| checkbox
+		
+	#vwf-template-button(ng-non-bindable, style='display: none;')
+		| button
+		
+	#vwf-template-rangeslider(ng-non-bindable, style='display: none;')
+		| rangeslider?		
+		
+	#vwf-template-choice(ng-non-bindable, style='display: none;')
+		| choice?	
 			
 			
 			

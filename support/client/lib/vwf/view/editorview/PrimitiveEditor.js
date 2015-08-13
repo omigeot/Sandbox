@@ -67,22 +67,44 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             return node ? vwf.getProperty(node.id, prop) : null;
         }
 
-        function buildEditorData(id, editorData){
-            editorData = editorData || vwf.getProperty(id, 'EditorData');
+        function buildEditorData(node, editorData){
+            if(editorData){
+                console.log("editorData 2: ", editorData);
+                var props = node.properties;
+                var obj = {
+                    name: props.DisplayName || node.id,
+                    type: props.type || vwf.getProperty(node.id, 'type'),
+                    editorProps: editorData
+                };
 
-            console.log("editorData 2: ", editorData);
+                $scope.allEditorData.push(obj);
+                setInheritedProperties($scope.node, node, editorData);
+            }
+        }
 
-            if(editorData && $scope.allEditorData.indexOf(editorData) === -1)
-                $scope.allEditorData.push(editorData);
+        /**
+            Iterate over properties in editorData. If it exists in the
+            src node (base object), but not the dest node (derived object),
+            then set the property on the derived object.
+        */
+        function setInheritedProperties(dest, src, editorData){
+            for(var key in editorData){
+                if(!(key in dest.properties) && key in src.properties){
+                    vwf.setProperty(dest.id, key, src.properties[key]);
+                }
+                else if(editorData[key].type === "color"){
+                    //dest.properties[key] = [0, 0, 0];
+                    vwf.setProperty(dest.id, key, [0, 0, 0]);
+                }
+            }
         }
 
         function recursevlyAddPrototypes(node){
             if(node){
                 var protoId = vwf.prototype(node.id);
                 console.log("PROTO:", node);
-                console.log("editorData 1:", vwf.getProperty(protoId, 'EditorData'));
 
-                buildEditorData(node.id);
+                buildEditorData(node, node.properties.EditorData);
                 if(protoId) recursevlyAddPrototypes(_Editor.getNode(protoId));
             }
         }
@@ -98,8 +120,8 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
                 scope.$watch('vwfNode.properties[vwfKey]', function(newVal){
                     console.log(scope.vwfProp, newVal);
-                    //if(newVal) setProperty(scope.vwfNode, scope.vwfProp.property, newVal)
-                });
+                    if(newVal) setProperty(scope.vwfNode, scope.vwfProp.property, newVal);
+                }, true);
 
                 //Get template that corresponds with current type of property
                 var template = $("#vwf-template-" + scope.type).html();

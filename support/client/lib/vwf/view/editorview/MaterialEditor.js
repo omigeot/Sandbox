@@ -260,6 +260,9 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			},
 			link: function($scope, elem, attrs)
 			{
+				$scope.mantissa = $scope.value || $scope.min;
+				$scope.exponent = 0;
+
 				// initialize the jquery ui slider
 				var slider = $('.slider', elem);
 				slider.slider({
@@ -296,19 +299,18 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				// break value into a mantissa and exponent if appropriate, such that value = mantissa * pow(10,exponent)
 				$scope.$watch('freezeExponent || value', function(newval)
 				{
-					if($scope.value === undefined)
-						$scope.value = $scope.min;
+					if($scope.value !== undefined){
+						if( $scope.useExponent )
+						{
+							if( !$scope.freezeExponent ){
+								$scope.exponent = $scope.useExponent ? Math.max(Math.floor(Math.log10(Math.abs($scope.value))), 0) : 0;
+							}
 
-					if( $scope.useExponent )
-					{
-						if( !$scope.freezeExponent ){
-							$scope.exponent = $scope.useExponent ? Math.max(Math.floor(Math.log10(Math.abs($scope.value))), 0) : 0;
+							$scope.mantissa = $scope.value / Math.pow(10,$scope.exponent);
 						}
-
-						$scope.mantissa = $scope.value / Math.pow(10,$scope.exponent);
+						else
+							$scope.mantissa = $scope.value;
 					}
-					else
-						$scope.mantissa = $scope.value;
 				});
 
 				// compute new output value when mantissa or exponent are updated
@@ -347,15 +349,34 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			restrict: 'E',
 			template: '<div class="colorPickerIcon"></div>',
 			scope: {
+				colorArr: '=',
 				colorObj: '=',
 				disabled: '=',
 				sliding: '='
 			},
 			link: function($scope, elem, attrs)
 			{
+				$scope.colorObj = $scope.colorObj || {r:0, g:0, b:0};
+
+				$scope.$watch('colorArr[0] + colorArr[1] + colorArr[2]', function(newVal){
+					 console.log(newval, $scope.colorArr);
+					 if(newVal){
+					 	$scope.colorObj.r = $scope.colorArr[0];
+					 	$scope.colorObj.g = $scope.colorArr[1];
+					 	$scope.colorObj.b = $scope.colorArr[2];
+					 }
+				});
+
 				// set color of icon when upstream color changes
 				$scope.$watch('colorObj.r + colorObj.b + colorObj.g', function(newval){
 					$('.colorPickerIcon', elem).css('background-color', '#'+color());
+
+					console.log(newval, $scope.colorArr);
+					if($scope.colorArr){
+					 	$scope.colorArr[0] = $scope.colorObj.r;
+					 	$scope.colorArr[1] = $scope.colorObj.g;
+					 	$scope.colorArr[2] = $scope.colorObj.b;
+					}
 				});
 
 
