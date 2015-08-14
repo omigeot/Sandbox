@@ -441,7 +441,7 @@ function CreateProfile(URL, data, response)
 			return;
 		}
 		//dont check the pass - it's a big hash, so complexity rules are meaningless
-		data.Password = Hash(URL.query.P);
+		data.Password = Hash(URL.query.P || data.Password);
 		if (validateUsername(data.Username) !== true)
 		{
 			respond(response, 500, 'Bad Username');
