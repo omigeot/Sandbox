@@ -416,11 +416,13 @@ phyObject.prototype.addForce = function(vec, offset) {
 //this is a global space force that is applied at every tick. Sort of a motor. Could be 
 //used to do custom per object gravity.
 phyObject.prototype.setConstantForce = function(vec) {
+    if(this.constantForce) Ammo.destroy(this.constantForce);
     if (vec) this.constantForce = new Ammo.btVector3(vec[0], vec[1], vec[2]);
     else this.constantForce = null;
 }
 //a constant torque applied at every tick
 phyObject.prototype.setConstantTorque = function(vec) {
+    if(this.constantTorque) Ammo.destroy(this.constantTorque);
     if (vec) this.constantTorque = new Ammo.btVector3(vec[0], vec[1], vec[2]);
     else this.constantTorque = null;
 }
@@ -429,7 +431,7 @@ phyObject.prototype.addTorque = function(vec) {
     if (this.initialized === true) {
         var f = new Ammo.btVector3(vec[0], vec[1], vec[2]);
         this.body.applyTorque(f);
-        //Ammo.destroy(f);
+        Ammo.destroy(f);
     }
 }
 phyObject.prototype.addForceImpulse = function(vec) {
@@ -877,6 +879,7 @@ phyObject.prototype.setTransform = function(matrix) {
         startTransform.setRotation(q);
         Ammo.destroy(q);
         this.body.setCenterOfMassTransform(startTransform);
+        Ammo.destroy(startTransform)
         if (this.collision) {
             //update the localscaling
         }
@@ -1222,7 +1225,14 @@ phyAsset.prototype.setCollisionOffset = function(vec) {
         this.markRootBodyCollisionDirty();
     }
 }
-define(["module", "vwf/model", "vwf/configuration"], function(module, model, configuration) {
+
+require.config({shim:{
+    "vwf/model/ammo.js/ammo":{
+        deps:["vwf/model/ammo.js/memoryprofiler"]
+    }
+}})
+
+define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], function(module, model, configuration) {
     return model.load(module, {
         // == Module Definition ====================================================================
         // -- initialize ---------------------------------------------------------------------------

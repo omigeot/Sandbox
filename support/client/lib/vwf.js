@@ -304,7 +304,7 @@
                 { library: "vwf/configuration", active: true },
                 { library: "vwf/kernel/model", active: true },
                 { library: "vwf/model/javascript", active: true },
-                { library: "vwf/model/ammojs", linkedLibraries: ["vwf/model/ammo.js/ammo"], active: false },
+                { library: "vwf/model/ammojs",  active: false },
          
                 { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three.js.r68", "vwf/model/threejs/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
           
@@ -320,8 +320,8 @@
                 { library: "vwf/utility", active: true },
           
                 
-              
-                { library: "vwf/model/ammo.js/ammo", active: true },
+                
+                
                 { library: "vwf/view/webrtc/adapter", active: false },
             
 

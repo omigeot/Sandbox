@@ -2472,3 +2472,11 @@ ul li a .glyphicon {
   display: none; }
 
 /*# sourceMappingURL=Editorview.css.map */
+#memoryprofilerroot
+{
+      position: Absolute;
+    z-index: 1000;
+    top: 100px;
+    background-color: beige;
+    width: 800px;
+}
