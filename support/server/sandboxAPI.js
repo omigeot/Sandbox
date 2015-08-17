@@ -4,7 +4,9 @@ var libpath = require('path'),
 	url = require("url"),
 	mime = require('mime'),
 	sio = require('socket.io'),
-	YAML = require('js-yaml');
+	YAML = require('js-yaml'),
+	sass = require('node-sass');
+
 require('./hash.js');
 var _3DR_proxy = require('./3dr_proxy.js');
 var safePathRE = RegExp('/\//' + (libpath.sep == '/' ? '\/' : '\\') + '/g');
@@ -1781,6 +1783,24 @@ function serve(request, response)
 						else {
 							response.send(global.configuration.remoteAssetServerURL);
 						}
+					}
+					break;
+				case "geteditorcss":
+					{
+						sass.render({
+							file: libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/Editorview.scss'),
+							includePaths: [libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/')],
+							sourceComments: true
+						}, function(err,result){
+							if(err){
+								console.error('Error compiling sass:', err);
+								response.sendStatus(500);
+							}
+							else {
+								response.set('Content-Type', 'text/css');
+								response.send(result.css);
+							}
+						});
 					}
 					break;
 				default:
