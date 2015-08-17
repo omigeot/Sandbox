@@ -89,12 +89,14 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
         */
         function setInheritedProperties(dest, src, editorData){
             for(var key in editorData){
-                if(!(key in dest.properties) && key in src.properties){
-                    vwf.setProperty(dest.id, key, src.properties[key]);
-                }
-                else if(editorData[key].type === "color"){
-                    //dest.properties[key] = [0, 0, 0];
-                    vwf.setProperty(dest.id, key, [0, 0, 0]);
+                if(!(key in dest.properties)){
+                    if(key in src.properties){
+                        vwf.setProperty(dest.id, key, src.properties[key]);
+                    }
+                    else if(editorData[key].type === "color"){
+                        //dest.properties[key] = [0, 0, 0];
+                        vwf.setProperty(dest.id, key, [0, 0, 0]);
+                    }
                 }
             }
         }
@@ -113,14 +115,15 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
     app.directive('vwfEditorProperty', ['$compile', function($compile){
 		function linkFn(scope, elem, attr){
             if(scope.vwfProp){
+                var exclude = ["vwfKey", "vwfNode", "vwfProp"];
                 for(var key in scope.vwfProp){
-                    if(key != "vwfKey" && key != "vwfNode")
+                    if(exclude.indexOf(key) === -1)
                         scope[key] = scope.vwfProp[key];
                 }
 
-                scope.$watch('vwfNode.properties[vwfKey]', function(newVal){
-                    console.log(scope.vwfProp, newVal);
-                    if(newVal) setProperty(scope.vwfNode, scope.vwfProp.property, newVal);
+                scope.$watch('vwfNode.properties[vwfProp.property]', function(newVal){
+                    //console.log(scope.vwfProp, newVal);
+                    if(newVal && newVal != undefined) setProperty(scope.vwfNode, scope.vwfProp.property, newVal);
                 }, true);
 
                 //Get template that corresponds with current type of property

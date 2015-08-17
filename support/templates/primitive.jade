@@ -43,23 +43,23 @@ block content
 	
 	#vwf-template-slider(ng-non-bindable, style='display: none;') 
 		.editorSliderLabel {{displayname}}
-		slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfKey]', sliding='suppressUndo')
+		slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property]', sliding='suppressUndo')
 	
 	#vwf-template-color(ng-non-bindable, style='display: none;')
 		.editorSliderLabel {{displayname}}
-		color-picker(color-arr='vwfNode.properties[vwfKey]', color-obj='{r:0,g:0,b:0}', sliding='suppressUndo')
+		color-picker(color-arr='vwfNode.properties[vwfProp.property]', color-obj='{r:0,g:0,b:0}', sliding='suppressUndo')
 		
 	#vwf-template-check(ng-non-bindable, style='display: none;')
-		| checkbox
+		span checkbox
 		
 	#vwf-template-button(ng-non-bindable, style='display: none;')
-		| button
+		span button
 		
 	#vwf-template-rangeslider(ng-non-bindable, style='display: none;')
-		| rangeslider?		
+		span rangeslider?		
 		
 	#vwf-template-choice(ng-non-bindable, style='display: none;')
-		| choice?	
+		span choice	
 			
 			
 			

@@ -359,7 +359,6 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				$scope.colorObj = $scope.colorObj || {r:0, g:0, b:0};
 
 				$scope.$watch('colorArr[0] + colorArr[1] + colorArr[2]', function(newVal){
-					 console.log(newval, $scope.colorArr);
 					 if(newVal){
 					 	$scope.colorObj.r = $scope.colorArr[0];
 					 	$scope.colorObj.g = $scope.colorArr[1];
@@ -368,10 +367,9 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				});
 
 				// set color of icon when upstream color changes
-				$scope.$watch('colorObj.r + colorObj.b + colorObj.g', function(newval){
+				$scope.$watch('colorObj.r + colorObj.b + colorObj.g', function(newVal){
 					$('.colorPickerIcon', elem).css('background-color', '#'+color());
 
-					console.log(newval, $scope.colorArr);
 					if($scope.colorArr){
 					 	$scope.colorArr[0] = $scope.colorObj.r;
 					 	$scope.colorArr[1] = $scope.colorObj.g;
