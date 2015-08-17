@@ -37,7 +37,7 @@ if (false) {
         "centerinclient.js",
         "vwf/model/ammo.js/ammo",
         "vwf/model/ammojs",
-        "./vwf/view/editorview/lib/ace/src-min-noconflict/ace.js",
+        "./vwf/view/editorview/lib/ace/ace.js",
         "boot"
     ]);
 }
