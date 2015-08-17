@@ -430,9 +430,9 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
             if (hit === 1) {
 
 
-                if (_Editor.GetMoveGizmo().parent.matrix) {
+                if (_Editor.GetMoveGizmo().getGizmoHead().matrix) {
                     this.gizmoLastTickTransform = this.gizmoThisTickTransform;
-                    this.gizmoThisTickTransform = _Editor.GetMoveGizmo().parent.matrix.clone();
+                    this.gizmoThisTickTransform = _Editor.GetMoveGizmo().getGizmoHead().matrix.clone();
                 }
 
                 var keys = Object.keys(this.nodes);
