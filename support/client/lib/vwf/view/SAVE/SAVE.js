@@ -49,6 +49,26 @@ define(["module", "vwf/view"], function(module, view)
 		{
 			this.toolTray = t;
 		},
+		buildEUIOptions: function()
+		{
+			if (!window._EntityLibrary)
+			{
+				$(document.body).append("<div class='SAVEMenu' style='right:1px' id='EUIOptionsMenu'></div");
+				$("#EUIOptionsMenu").append("<div class='tooltraytitle' >Options</div");
+				$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIReset'>Reset</div");
+				$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIMessages'>Messages</div");
+				$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIAssessment'>Assessment</div");
+				var self = this;
+				$('#EUIReset').click(function()
+				{
+					self.reset();
+				})
+				$('#EUIAssessment').click(function()
+				{
+					self.assessment();
+				})
+			}
+		},
 		buildToolTrayGUI: function()
 		{
 			if (window._EntityLibrary)
@@ -63,29 +83,62 @@ define(["module", "vwf/view"], function(module, view)
 					lib[this.toolTray[i].name].type = "semantic3D";
 				}
 				_EntityLibrary.addLibrary("Semantic 3D", lib);
-			}else
+			}
+			else
 			{
-
+				this.buildEUIOptions();
 				$(document.body).append("<div class='SAVEMenu' id='EUIToolTray'></div");
 				$("#EUIToolTray").append("<div class='tooltraytitle' >Tools</div");
-				for(var i in this.toolTray)
+				for (var i in this.toolTray)
 				{
 					var id = GUID();
 					var self = this;
-					$("#EUIToolTray").append("<div class='tooltrayItem' id='"+id+"'></div");
-					$("#"+id).text(this.toolTray[i].name);
-					(function(){
+					$("#EUIToolTray").append("<div class='tooltrayItem' id='" + id + "'></div");
+					$("#" + id).text(this.toolTray[i].name);
+					(function()
+					{
 						var item = self.toolTray[i];
-							$("#"+id).click(function()
-							{
-								self.createS3D(GUID(),item.ID,item.name,vwf.getProperty('http-vwf-example-com-node3-vwf-N63f37e3e','transform'));
-
-							})
+						$("#" + id).click(function()
+						{
+							var newname = GUID();
+							self.rezzedNames.push(newname)
+							self.createS3D(newname, item.ID, item.name, vwf.getProperty('http-vwf-example-com-node3-vwf-N63f37e3e', 'transform'));
+						})
 					})()
 				}
-
 			}
-
+		},
+		assessment:function()
+		{
+			$(document.body).append("<div class='SAVEMenu' id='SAVEAssessment'></div");
+			$("#SAVEAssessment").load(this.getBaseServerAddress() + "/assessment")
+		},
+		reset: function()
+		{
+			var self = this;
+			jQuery.ajax(
+				{
+					url: this.getBaseServerAddress() + "/query",
+					type: 'post',
+					cache: false,
+					data:
+					{
+						query: JSON.stringify(
+						{
+							type: "Reset",
+						})
+					},
+				})
+				.done(function(data)
+				{
+					for (var i in self.rezzedIDs)
+					{
+						vwf_view.kernel.deleteNode(self.rezzedIDs[i])
+					}
+					self.rezzedIDs = [];
+					self.rezzedNames = [];
+				})
+				.fail(function() {})
 		},
 		getBaseServerAddress: function()
 		{
@@ -167,6 +220,8 @@ define(["module", "vwf/view"], function(module, view)
 			})
 		},
 		actionStack: [],
+		rezzedIDs: [],
+		rezzedNames: [],
 		contextMenuClick: function(rootnodeID, vwfID, prev_actions, childKBID, child_name, e)
 		{
 			var actions = vwf.callMethod(rootnodeID, "getContext", [prev_actions, child_name])
@@ -206,7 +261,7 @@ define(["module", "vwf/view"], function(module, view)
 		},
 		//public facing function to  trigger load of an S3D file. Normally this probably would live in the _Editor
 		// or in the _EntityLibrary
-		createS3D: function(name, ID, DisplayName,transform)
+		createS3D: function(name, ID, DisplayName, transform)
 		{
 			//Get the VWF node definition
 			var postData = {
@@ -334,6 +389,8 @@ define(["module", "vwf/view"], function(module, view)
 			if (parent)
 				parent.children[childID] = newNode;
 			this.nodes[childID] = newNode;
+			if (this.rezzedNames.indexOf(childName) !== -1)
+				this.rezzedIDs.push(childID);
 		},
 		createdProperty: function(nodeID, propname, val)
 		{
