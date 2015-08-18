@@ -4,7 +4,7 @@ var transformTool = function()
     var Rotate = 1;
     var Scale = 2;
     var Multi = 3;
-
+    var TESTING = true;
     this.movegizbody = null;
     this.mode = null;
 
@@ -591,17 +591,52 @@ var transformTool = function()
         }
 
     }
-    this.applyOffset = function(offset)
+    this.applyMove = function(wtmat, offset, mouseDownOffset,ID)
+    {
+        var worldTranslation = [wtmat.elements[12], wtmat.elements[13], wtmat.elements[14]]
+
+        var thisOff = MATH.subVec3(offset, mouseDownOffset);
+        thisOff = MATH.subVec3(thisOff, worldTranslation)
+        thisOff = this.maskOffset(this.axisToPlane(this.axisSelected), thisOff);
+
+        var snapped;
+        if (!TESTING)
+            snapped = _Editor.snapPosition([worldTranslation[0] + thisOff[0], worldTranslation[1] + thisOff[1], worldTranslation[2] + thisOff[2]])
+        else
+            snapped = [worldTranslation[0] + thisOff[0], worldTranslation[1] + thisOff[1], worldTranslation[2] + thisOff[2]];
+
+
+        var finalpos = new THREE.Vector3(snapped[0], snapped[1], snapped[2]);
+
+        if (finalpos.length() < .0001) return false;
+
+        wtmat.setPosition(finalpos);
+        return true;
+    }
+    this.applyRotate = function(wtmat, offset, mouseDownOffset,ID)
+    {
+        var worldTranslation = [wtmat.elements[12], wtmat.elements[13], wtmat.elements[14]]
+        var thisOff = MATH.subVec3(offset, mouseDownOffset);
+        thisOff = MATH.subVec3(thisOff, worldTranslation)
+        thisOff = this.maskOffset(this.axisToPlane(this.axisSelected), thisOff);
+        console.log(MATH.lengthVec3(thisOff));
+
+        var rot = new THREE.Matrix4();
+        rot.makeRotationAxis(new THREE.Vector3(0,0,1),MATH.lengthVec3(thisOff));
+        var mouseDownTransform = new THREE.Matrix4();
+        mouseDownTransform.elements.set(this.mouseDownTransforms[ID])
+        wtmat.multiply(mouseDownTransform,rot);
+        return true;
+    }
+    this.applyTransform = function(offset)
     {
         for (var i = 0; i < _Editor.getSelectionCount(); i++)
         {
-
-            var worldOff = this.mouseDownOffsets[_Editor.GetSelectedVWFID(i)];
-            var t = vwf.getProperty(_Editor.GetSelectedVWFID(i), 'transform')
-            var pt = vwf.getProperty(vwf.parent(_Editor.GetSelectedVWFID()), 'transform');
-            var wt = vwf.getProperty(_Editor.GetSelectedVWFID(i), 'worldTransform')
-
-            var worldTranslation = [wt[12], wt[13], wt[14]]
+            var ID = _Editor.GetSelectedVWFID(i)
+            var mouseDownOffset = this.mouseDownOffsets[ID];
+            var t = vwf.getProperty(ID, 'transform')
+            var pt = vwf.getProperty(vwf.parent(ID), 'transform');
+            var wt = vwf.getProperty(ID, 'worldTransform')
 
 
             var tmat = new THREE.Matrix4();
@@ -616,25 +651,26 @@ var transformTool = function()
             var wtmat = new THREE.Matrix4();
             wtmat.elements.set(wt);
 
-            var thisOff = MATH.subVec3(offset, worldOff);
-            thisOff = MATH.subVec3(thisOff, worldTranslation)
-            thisOff = this.maskOffset(this.axisToPlane(this.axisSelected), thisOff);
-            var snapped = _Editor.snapPosition([worldTranslation[0] + thisOff[0], worldTranslation[1] + thisOff[1], worldTranslation[2] + thisOff[2]])
-            var finalpos = new THREE.Vector3(snapped[0], snapped[1], snapped[2]);
-            if (finalpos.length() < .0001) continue;
+            var changed = false;
 
-            wtmat.setPosition(finalpos);
+            if (this.axisToTransformType(this.axisSelected) == 'move')
+                changed = this.applyMove(wtmat, offset, mouseDownOffset,ID);
+            if (this.axisToTransformType(this.axisSelected) == 'rotate')
+                changed = this.applyRotate(wtmat, offset, mouseDownOffset,ID);
+            if (this.axisToTransformType(this.axisSelected) == 'scale')
+                changed = this.applyScale(wtmat, offset, mouseDownOffset,ID);
 
-            var newLocalmat = new THREE.Matrix4();
-            newLocalmat.multiply(ptmatInv, wtmat);
-
-            var newt = newLocalmat.elements;
-
-
-            var ok = _Editor.setProperty(_Editor.GetSelectedVWFID(i), 'transform', newt);
-
+            if (changed)
+            {
+                var newLocalmat = new THREE.Matrix4();
+                newLocalmat.multiply(ptmatInv, wtmat);
+                var newt = newLocalmat.elements;
+                if (TESTING)
+                    vwf.setProperty(_Editor.GetSelectedVWFID(i), 'transform', newt);
+                else
+                    var ok = _Editor.setProperty(_Editor.GetSelectedVWFID(i), 'transform', newt);
+            }
         }
-
     }
     this.maskOffset = function(axis, offset)
     {
@@ -705,7 +741,7 @@ var transformTool = function()
         var intersections = this.intersectPlanes(worldRay, _Editor.getCameraPosition());
         intersections = this.subIntersects(intersections, this.mouseDownIntersects);
         var offset = intersections[this.bestPlane(this.axisToPlane(this.axisSelected), _Editor.getCameraPosition())]
-        this.applyOffset(offset);
+        this.applyTransform(offset);
     }
     this.axisToPlane = function(axis)
     {
@@ -721,6 +757,33 @@ var transformTool = function()
             return 'zx'
         if (this.axisSelected == 14)
             return 'yz'
+        if (this.axisSelected == 16)
+            return 'x'
+        if (this.axisSelected == 17)
+            return 'y'
+        if (this.axisSelected == 18)
+            return 'z'
+    }
+    this.axisToTransformType = function(axis)
+    {
+        if (this.axisSelected == 0)
+            return 'move'
+        if (this.axisSelected == 1)
+            return 'move'
+        if (this.axisSelected == 2)
+            return 'move'
+        if (this.axisSelected == 12)
+            return 'move'
+        if (this.axisSelected == 13)
+            return 'move'
+        if (this.axisSelected == 14)
+            return 'move'
+        if (this.axisSelected == 16)
+            return 'rotate'
+        if (this.axisSelected == 17)
+            return 'rotate'
+        if (this.axisSelected == 18)
+            return 'rotate'
     }
     this.getAxis = function()
     {
