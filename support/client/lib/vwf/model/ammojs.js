@@ -465,11 +465,7 @@ phyObject.prototype.setLinearFactor = function(vec) {
     if (vec.length !== 3) return;
     this.linearFactor = vec;
     if (this.initialized === true) {
-		var old = this.body.getLinearFactor();
-        var f = new Ammo.btVector3(vec[0], vec[1], vec[2]);
-        this.body.setLinearFactor(f);
-		Ammo.destroy(old);
-        //Ammo.destroy(f);
+		this.body.getLinearFactor().setValue(vec[0], vec[1], vec[2]);
     }
 }
 phyObject.prototype.getLinearFactor = function(vec) {
@@ -482,11 +478,7 @@ phyObject.prototype.setAngularFactor = function(vec) {
     if (vec.length !== 3) return;
     this.angularFactor = vec;
     if (this.initialized === true) {
-		var old = this.body.getAngularFactor();
-        var f = new Ammo.btVector3(vec[0], vec[1], vec[2]);
-        this.body.setAngularFactor(f);
-		Ammo.destroy(old);
-        //Ammo.destroy(f);
+		this.body.getAngularFactor().setValue(vec[0], vec[1], vec[2]);
     }
 }
 phyObject.prototype.setMass = function(mass) {
@@ -592,10 +584,10 @@ phyObject.prototype.initialize = function() {
         var rest = this.restitution;
         this.body.setRestitution(rest);
 
-        this.setLinearVelocity(this.linearVelocity);
-        this.setAngularVelocity(this.angularVelocity);
-        this.setAngularFactor(this.angularFactor);
-        this.setLinearFactor(this.linearFactor);
+        this.body.getLinearVelocity().setValue(this.linearVelocity[0], this.linearVelocity[1], this.linearVelocity[2]);
+        this.body.getAngularVelocity().setValue(this.angularVelocity[0], this.angularVelocity[1], this.angularVelocity[2]);
+        this.body.getAngularFactor().setValue(this.angularFactor[0], this.angularFactor[1], this.angularFactor[2])
+        this.body.getLinearFactor().setValue(this.linearFactor[0], this.linearFactor[1], this.linearFactor[2]);
 
         this.body.forceActivationState(this.activationState);
         this.body.setDeactivationTime(this.deactivationTime);
@@ -644,17 +636,13 @@ phyObject.prototype.getLinearVelocity = function() {
 phyObject.prototype.setLinearVelocity = function(vel) {
     this.linearVelocity = vel;
     if (this.initialized === true) {
-        var f = new Ammo.btVector3(vel[0], vel[1], vel[2]);
-        this.body.setLinearVelocity(f);
-        //Ammo.destroy(f);
+		this.body.getLinearVelocity().setValue(vel[0], vel[1], vel[2]);
     }
 }
 phyObject.prototype.setAngularVelocity = function(vel) {
     this.angularVelocity = vel;
     if (this.initialized === true) {
-        var f = new Ammo.btVector3(vel[0], vel[1], vel[2]);
-        this.body.setAngularVelocity(f);
-        // Ammo.destroy(f);
+		this.body.getAngularVelocity().setValue(vel[0], vel[1], vel[2]);
     }
 }
 //note - we don't store up forces when the body is not initialized, so AddTorque called before init does nothing
@@ -669,11 +657,11 @@ phyObject.prototype.getForce = function() {
 //only has meaning within a tick cycle. This is only for replication. Use either addForce, addForceLocal
 //or setConstantForce
 phyObject.prototype.setForce = function(force) {
-    if (this.initialized === true) {
+    /*if (this.initialized === true) {
         var f = new btVector3(force[0], force[1], force[2]);
         this.body.setTotalForce(f);
         //Ammo.destroy(f);
-    }
+    }*/
 }
 phyObject.prototype.getTorque = function() {
     if (this.initialized === true) {
@@ -685,11 +673,11 @@ phyObject.prototype.getTorque = function() {
 //only has meaning within a tick cycle. This is only for replication. Use either addTorque 
 //or setConstantTorque
 phyObject.prototype.setTorque = function(torque) {
-    if (this.initialized === true) {
+    /*if (this.initialized === true) {
         var f = new btVector3(torque[0], torque[1], torque[2]);
         this.body.setTotalTorque(f);
         //Ammo.destroy(f);
-    }
+    }*/
 }
 phyObject.prototype.getAngularVelocity = function() {
     //waiting for an ammo build that includes body.getAngularVelocity

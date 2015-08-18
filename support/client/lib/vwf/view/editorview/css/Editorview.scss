@@ -107,6 +107,15 @@ input[type=button]
 	position: absolute;
 }
 
+#memoryprofilerroot
+{
+      position: Absolute;
+    z-index: 1000;
+    top: 100px;
+    background-color: beige;
+    width: 800px;
+}
+
 #GlobalProgressBar {
 	vertical-align: middle;
 	display: inline-block;
