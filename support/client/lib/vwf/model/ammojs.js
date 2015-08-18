@@ -465,20 +465,20 @@ phyObject.prototype.setLinearFactor = function(vec) {
     if (vec.length !== 3) return;
     this.linearFactor = vec;
     if (this.initialized === true) {
-		this.body.getLinearFactor().setValue(vec[0], vec[1], vec[2]);
+		//this.body.getLinearFactor().setValue(vec[0], vec[1], vec[2]);
     }
 }
 phyObject.prototype.getLinearFactor = function(vec) {
     return this.linearFactor;
 }
 phyObject.prototype.getAngularFactor = function(vec) {
-    return this.linearFactor;
+    return this.angularFactor;
 }
 phyObject.prototype.setAngularFactor = function(vec) {
     if (vec.length !== 3) return;
     this.angularFactor = vec;
     if (this.initialized === true) {
-		this.body.getAngularFactor().setValue(vec[0], vec[1], vec[2]);
+		//this.body.getAngularFactor().setValue(vec[0], vec[1], vec[2]);
     }
 }
 phyObject.prototype.setMass = function(mass) {
@@ -586,8 +586,8 @@ phyObject.prototype.initialize = function() {
 
         this.body.getLinearVelocity().setValue(this.linearVelocity[0], this.linearVelocity[1], this.linearVelocity[2]);
         this.body.getAngularVelocity().setValue(this.angularVelocity[0], this.angularVelocity[1], this.angularVelocity[2]);
-        this.body.getAngularFactor().setValue(this.angularFactor[0], this.angularFactor[1], this.angularFactor[2])
-        this.body.getLinearFactor().setValue(this.linearFactor[0], this.linearFactor[1], this.linearFactor[2]);
+        //this.body.getAngularFactor().setValue(this.angularFactor[0], this.angularFactor[1], this.angularFactor[2])
+        //this.body.getLinearFactor().setValue(this.linearFactor[0], this.linearFactor[1], this.linearFactor[2]);
 
         this.body.forceActivationState(this.activationState);
         this.body.setDeactivationTime(this.deactivationTime);
