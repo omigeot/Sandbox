@@ -657,11 +657,9 @@ phyObject.prototype.getForce = function() {
 //only has meaning within a tick cycle. This is only for replication. Use either addForce, addForceLocal
 //or setConstantForce
 phyObject.prototype.setForce = function(force) {
-    /*if (this.initialized === true) {
-        var f = new btVector3(force[0], force[1], force[2]);
-        this.body.setTotalForce(f);
-        //Ammo.destroy(f);
-    }*/
+    if (this.initialized === true) {
+        this.body.getTotalForce().setValue(force[0], force[1], force[2]);
+    }
 }
 phyObject.prototype.getTorque = function() {
     if (this.initialized === true) {
@@ -673,11 +671,9 @@ phyObject.prototype.getTorque = function() {
 //only has meaning within a tick cycle. This is only for replication. Use either addTorque 
 //or setConstantTorque
 phyObject.prototype.setTorque = function(torque) {
-    /*if (this.initialized === true) {
-        var f = new btVector3(torque[0], torque[1], torque[2]);
-        this.body.setTotalTorque(f);
-        //Ammo.destroy(f);
-    }*/
+    if (this.initialized === true) {
+        this.body.getTotalTorque().setValue(torque[0], torque[1], torque[2]);
+    }
 }
 phyObject.prototype.getAngularVelocity = function() {
     //waiting for an ammo build that includes body.getAngularVelocity
