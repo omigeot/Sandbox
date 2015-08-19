@@ -58,7 +58,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             $scope.allEditorData.length = 0;
 
             if(node){
-                recursevlyAddPrototypes(node);
+                recursevlyAddPrototypes(node, {});
                 //buildEditorData(node.id);
             }
         });
@@ -67,18 +67,30 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             return node ? vwf.getProperty(node.id, prop) : null;
         }
 
-        function buildEditorData(node, editorData){
+        function buildEditorData(node, editorData, existingProps){
             if(editorData){
-                console.log("editorData 2: ", editorData);
+
+                var outEditorData = {};
+                var numAdds = 0;
+                for (var key in editorData) {
+                    if(!(key in existingProps)){
+                        numAdds++;
+                        outEditorData[key] = editorData[key];
+                        existingProps[key] = true;
+                    }
+                }
+
+                if(numAdds == 0) return;
+
                 var props = node.properties;
                 var obj = {
                     name: props.DisplayName || node.id,
                     type: props.type || vwf.getProperty(node.id, 'type'),
-                    editorProps: editorData
+                    editorProps: outEditorData
                 };
 
                 $scope.allEditorData.push(obj);
-                setInheritedProperties($scope.node, node, editorData);
+                setInheritedProperties($scope.node, outEditorData);
             }
         }
 
@@ -87,27 +99,33 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             src node (base object), but not the dest node (derived object),
             then set the property on the derived object.
         */
-        function setInheritedProperties(dest, src, editorData){
+        function setInheritedProperties(dest, editorData){
             for(var key in editorData){
                 if(!(key in dest.properties)){
-                    if(key in src.properties){
-                        vwf.setProperty(dest.id, key, src.properties[key]);
+                    //vwfProp is necessary because the keys in EditorData are not always equal
+                    //to their respective "property" values. The VWF uses "property" internally.
+                    var vwfProp = editorData[key].property;
+                    var value = vwf.getProperty(dest.id, vwfProp);
+
+                    if(value !== undefined){
+                        dest.properties[key] = value;
+                        vwf.setProperty(dest.id, vwfProp, value);
                     }
                     else if(editorData[key].type === "color"){
-                        //dest.properties[key] = [0, 0, 0];
-                        vwf.setProperty(dest.id, key, [0, 0, 0]);
+                        var arr = [0, 0, 0];
+                        dest.properties[key] = arr;
+                        vwf.setProperty(dest.id, vwfProp, arr);
                     }
                 }
             }
         }
 
-        function recursevlyAddPrototypes(node){
+        function recursevlyAddPrototypes(node, existingProps){
             if(node){
                 var protoId = vwf.prototype(node.id);
-                console.log("PROTO:", node);
 
-                buildEditorData(node, node.properties.EditorData);
-                if(protoId) recursevlyAddPrototypes(_Editor.getNode(protoId));
+                buildEditorData(node, vwf.getProperty(node.id, "EditorData"), existingProps);
+                if(protoId) recursevlyAddPrototypes(_Editor.getNode(protoId), existingProps);
             }
         }
     }]);
@@ -121,9 +139,9 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                         scope[key] = scope.vwfProp[key];
                 }
 
-                scope.$watch('vwfNode.properties[vwfProp.property]', function(newVal){
+                scope.$watch('vwfNode.properties[vwfProp.property]', function(newVal, oldVal){
                     //console.log(scope.vwfProp, newVal);
-                    if(newVal && newVal != undefined) setProperty(scope.vwfNode, scope.vwfProp.property, newVal);
+                    if(newVal !== oldVal) setProperty(scope.vwfNode, scope.vwfProp.property, newVal);
                 }, true);
 
                 //Get template that corresponds with current type of property
