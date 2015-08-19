@@ -405,13 +405,16 @@ phyObject.prototype.addForce = function(vec, offset) {
     if (vec.length !== 3) return;
     if (this.initialized === true) {
         var f = new Ammo.btVector3(vec[0], vec[1], vec[2]);
-        if (!offset) this.body.applyForce(f);
-        else {
-            var o = new Ammo.btVector3(offset[0], offset[1], offset[2]);
-            this.body.applyForce(f, o);
-        }
-        Ammo.destroy(f);
-    }
+		if(offset){
+			var o = new Ammo.btVector3(offset[0], offset[1], offset[2]);
+			this.body.applyForce(f, o);
+			Ammo.destroy(o);
+		}
+		else {
+			this.body.applyCentralForce(f);
+		}
+		Ammo.destroy(f);
+	}
 }
 //this is a global space force that is applied at every tick. Sort of a motor. Could be 
 //used to do custom per object gravity.
@@ -450,7 +453,7 @@ phyObject.prototype.addTorqueImpulse = function(vec) {
         Ammo.destroy(f);
     }
 }
-phyObject.prototype.addForceOffset = function(vec, pos) {
+/*phyObject.prototype.addForceOffset = function(vec, pos) {
     if (vec.length !== 3) return;
     if (pos.length !== 3) return;
     if (this.initialized === true) {
@@ -460,7 +463,7 @@ phyObject.prototype.addForceOffset = function(vec, pos) {
         Ammo.destroy(f);
         Ammo.destroy(g);
     }
-}
+}*/
 phyObject.prototype.setLinearFactor = function(vec) {
     if (vec.length !== 3) return;
     this.linearFactor = vec;
