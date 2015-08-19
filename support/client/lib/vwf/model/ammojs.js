@@ -1212,9 +1212,7 @@ phyAsset.prototype.setCollisionOffset = function(vec) {
 }
 
 require.config({shim:{
-    "vwf/model/ammo.js/ammo":{
-        deps:["vwf/model/ammo.js/memoryprofiler"]
-    }
+    "vwf/model/ammo.js/ammo":{}
 }})
 
 define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], function(module, model, configuration) {
