@@ -1790,10 +1790,15 @@ function serve(request, response)
 						sass.render({
 							file: libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/Editorview.scss'),
 							includePaths: [libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/')],
-							sourceComments: true
+							sourceComments: true,
+							functions: {
+								'getImgPath()': function(){
+									return new sass.types.String('../vwf/view/editorview');
+								}
+							}
 						}, function(err,result){
 							if(err){
-								console.error('Error compiling sass:', err);
+								logger.error('Error compiling sass:', err);
 								response.sendStatus(500);
 							}
 							else {

@@ -323,10 +323,15 @@ function startVWF() {
 						sass.render({
 							file: libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/Editorview.scss'),
 							includePaths: [libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/')],
-							outputStyle: 'compressed'
+							outputStyle: 'compressed',
+							functions: {
+								'getImgPath()': function(){
+									return new sass.types.String('vwf/view/editorview');
+								}
+							}
 						}, function(err,result){
 							if(err){
-								console.error('Error compiling sass:', err);
+								logger.error('Error compiling sass:', err);
 	                        	FileCache.insertFile([path, path2], contents, fs.statSync(buildname), "utf8", cb);
 							}
 							else {

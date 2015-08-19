@@ -22,4 +22,4 @@ config.json
 *.orig
 .sass-cache
 configserver.json
-assets/database.sqlite
+/support/client/lib/vwfbuild.js
