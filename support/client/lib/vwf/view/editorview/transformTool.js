@@ -455,6 +455,7 @@ var transformTool = function()
                 this.mouseDownOffsets[ID] = MATH.subVec3(this.getPosition(), translation)
                 this.mouseDownTransforms[ID] = vwf.getProperty(ID, 'transform');
                 this.mouseDownWorldTransforms[ID] = vwf.getProperty(ID, 'worldTransform');
+                this.mouseDownWorldTransforms[vwf.parent(ID)] = vwf.getProperty(vwf.parent(ID), 'worldTransform');
             }
             var worldRay = _Editor.GetWorldPickRay(e);
             this.mouseDownOrigin = this.getPosition();
@@ -652,8 +653,8 @@ var transformTool = function()
             var ID = _Editor.GetSelectedVWFID(i)
             var mouseDownOffset = this.mouseDownOffsets[ID];
             var t = vwf.getProperty(ID, 'transform')
-            var pt = vwf.getProperty(vwf.parent(ID), 'worldTransform');
-            var wt = vwf.getProperty(ID, 'worldTransform')
+            var pt = this.mouseDownWorldTransforms[vwf.parent(ID)];
+            var wt = this.mouseDownWorldTransforms[ID]
             var tmat = new THREE.Matrix4();
             tmat.elements.set(t);
             var ptmat = new THREE.Matrix4();

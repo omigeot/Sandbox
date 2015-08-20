@@ -1749,13 +1749,22 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
         this.getTransformCallback = this.getTransform;
         this.getTranslationCallback = this.getTranslation;
 
-        this.updateGizmoOrientation = function(updateBasisVectors) {
+        this.updateGizmoOrientation = function() {
+            
+            //prefer the override value
+
+            var localView = _dView.viewTransformOverrides[this.GetSelectedVWFID()];
+            var localParentView = _dView.viewTransformOverrides[vwf.parent(this.GetSelectedVWFID())];
+
+            localView = localView && localView.override
+            localParentView = localParentView && localParentView.override
+
             if(CoordSystem == LocalCoords)
-                this.MoveGizmo.updateOrientation(this.getTransformCallback(this.GetSelectedVWFID()));
+                this.MoveGizmo.updateOrientation(localView || this.getTransformCallback(this.GetSelectedVWFID()));
             if(CoordSystem == WorldCoords)
                 this.MoveGizmo.updateOrientation(this.getTransformCallback(vwf.application()));
             if(CoordSystem == ParentCoords)
-                this.MoveGizmo.updateOrientation(this.getTransformCallback(vwf.parent(this.GetSelectedVWFID())));
+                this.MoveGizmo.updateOrientation(localParentView || this.getTransformCallback(vwf.parent(this.GetSelectedVWFID())));
         }.bind(this);
         this.triggerSelectionChanged = function(VWFNode) {
 
@@ -1768,7 +1777,13 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
         this.updateGizmoLocation = function() {
             var transforms = [];
             for(var i in SelectedVWFNodes)
-               transforms.push(vwf.getProperty(SelectedVWFNodes[i].id,'worldTransform'));    
+            {
+               var node = findviewnode(SelectedVWFNodes[i].id);
+               if(node)
+               {
+                transforms.push(node.matrixWorld.elements);    
+               }
+            }
             MoveGizmo.updateLocation(transforms);
         }
         this.updateBounds = function() {
@@ -2835,10 +2850,16 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                 }
             }
         }
+        this.updateGizmo = function()
+        {
+            this.updateGizmoSize();
+            this.updateGizmoOrientation();
+            this.updateGizmoLocation();
+        }
         this.initialize = function() {
             this.BuildMoveGizmo();
             this.SelectObject(null);
-            _dView.bind('prerender', this.updateGizmoSize.bind(this));
+            _dView.bind('prerender', this.updateGizmo.bind(this));
             document.oncontextmenu = function() {
                 return false;
             };
