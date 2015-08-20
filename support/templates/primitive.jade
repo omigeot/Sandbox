@@ -58,7 +58,16 @@ block content
 		
 	#vwf-template-rangeslider(ng-non-bindable, style='display: none;')
 		span rangeslider?		
-		
+	
+	#vwf-template-vector(ng-non-bindable, style='display: none;')
+		.editorSliderLabel {{displayname}}
+		div(ng-repeat='component in vwfNode.properties[vwfProp.property] track by $index')
+			input(type='number', ng-model='vwfNode.properties[vwfProp.property][$index]', ng-model-options='{updateOn: "click blur"}')
+	
+	#vwf-template-text(ng-non-bindable, style='display: none;')
+		.editorSliderLabel {{displayname}}
+		input(ng-model='vwfNode.properties[vwfProp.property]', type='text', placeholder='{{displayname}}')
+				
 	#vwf-template-choice(ng-non-bindable, style='display: none;')
 		.editorSliderLabel {{displayname}}
 		select(ng-model='vwfNode.properties[vwfProp.property]')

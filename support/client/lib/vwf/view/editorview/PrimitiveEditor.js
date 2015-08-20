@@ -54,10 +54,11 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
         $scope.$watch('fields.selectedNode', function(node){
             console.log("node", node);
-            $scope.node = node;
-            $scope.allEditorData.length = 0;
 
             if(node){
+                $scope.node = node;
+                $scope.allEditorData.length = 0;
+
                 recursevlyAddPrototypes(node, {});
                 //buildEditorData(node.id);
             }
@@ -101,6 +102,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
         */
         function setInheritedProperties(dest, editorData){
             for(var key in editorData){
+
                 if(!(key in dest.properties)){
                     //vwfProp is necessary because the keys in EditorData are not always equal
                     //to their respective "property" values. The VWF uses "property" internally.
@@ -111,7 +113,8 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                         dest.properties[key] = value;
                         vwf.setProperty(dest.id, vwfProp, value);
                     }
-                    else if(editorData[key].type === "color"){
+                    else if(editorData[key].type === "color" || editorData[key].type === "vector"){
+
                         var arr = [0, 0, 0];
                         dest.properties[key] = arr;
                         vwf.setProperty(dest.id, vwfProp, arr);
@@ -140,7 +143,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 }
 
                 scope.$watch('vwfNode.properties[vwfProp.property]', function(newVal, oldVal){
-                    //console.log(scope.vwfProp, newVal);
+                    console.log(scope.vwfProp, newVal, typeof newVal);
                     if(newVal !== oldVal) setProperty(scope.vwfNode, scope.vwfProp.property, newVal);
                 }, true);
 
