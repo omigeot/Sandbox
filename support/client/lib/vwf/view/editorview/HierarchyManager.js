@@ -147,7 +147,11 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 			type: 'any'
 		};
 
-		$scope.$watch('fields.selectedNode', function(newval){
+		$scope.$watch('fields.selectedNode', function(newval)
+		{
+			if( !_SidePanel.isTabOpen('hierarchyManager') )
+				$('#hierarchyDisplay tree-node[node-id="'+newval.id+'"]').parents('tree-node:not(.collapsed)').addClass('collapsed');
+
 			if( newval )
 			{
 				$scope.selectedThreeNode = null;
