@@ -12,7 +12,7 @@
 // the License.
 var SAVE_GROUP_DEF = "./vwf/model/SAVE/semantic_entity.vwf";
 var SAVE_GROUP_DEF_Extends = "-vwf-model-SAVE-semantic_entity-vwf";
-define(["module", "vwf/view"], function(module, view)
+define(["module", "vwf/view", "vwf/view/SAVE/api"], function(module, view, SAVEAPI)
 {
 	// vwf/view/test.js is a dummy driver used for tests.
 	return view.load(module,
@@ -26,28 +26,23 @@ define(["module", "vwf/view"], function(module, view)
 		loadToolTray: function()
 		{
 			var self = this;
-			var url = this.getBaseServerAddress() + '/inventory';
-			$.ajax(
-				{
-					url: url,
-					type: 'get',
-					cache: false
-				})
-				.done(function(data)
-				{
-					self.setToolTray(data.tooltray);
-					self.buildToolTrayGUI();
-				})
-				.fail(function(jqXHR, textStatus, errorThrown)
-				{
-					console.info('using inventoryServerAddress:' + url);
-					console.warn('error:' + textStatus);
-				});
+			SAVEAPI.inventory(function(data)
+			{
+				debugger;
+				self.setToolTray(data.tooltray);
+				self.setMode(data.instructorMode ? "instructorMode" : "studentMode");
+				self.buildToolTrayGUI();
+			})
 		},
 		toolTray: null,
+		mode:null,
 		setToolTray: function(t)
 		{
 			this.toolTray = t;
+		},
+		setMode: function(m)
+		{
+			this.mode = m;
 		},
 		buildEUIOptions: function()
 		{
@@ -57,7 +52,10 @@ define(["module", "vwf/view"], function(module, view)
 				$("#EUIOptionsMenu").append("<div class='tooltraytitle' >Options</div");
 				$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIReset'>Reset</div");
 				$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIMessages'>Messages</div");
-				$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIAssessment'>Assessment</div");
+				if(this.mode == "studentMode")
+					$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIAssessment'>Assessment</div");
+				if(this.mode == "instructorMode")
+					$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIGenerate'>Generate Solution</div");
 				var self = this;
 				$('#EUIReset').click(function()
 				{
@@ -66,6 +64,10 @@ define(["module", "vwf/view"], function(module, view)
 				$('#EUIAssessment').click(function()
 				{
 					self.assessment();
+				})
+				$('#EUIGenerate').click(function()
+				{
+					self.generateSolution();
 				})
 			}
 		},
@@ -108,43 +110,56 @@ define(["module", "vwf/view"], function(module, view)
 				}
 			}
 		},
-		assessment:function()
+		generateSolution:function()
 		{
-			$(document.body).append("<div class='SAVEMenu' id='SAVEAssessment'></div");
-			$("#SAVEAssessment").load(this.getBaseServerAddress() + "/assessment")
+			SAVEAPI.generateSolution(function(){
+				window.location.reload();
+			})
+		},
+		assessment: function()
+		{
+			$(document.body).append("<iframe class='SAVEMenu' id='SAVEAssessment'></iframe");
+			$("#SAVEAssessment").attr('src', this.getBaseServerAddress() + "/assessment");
+			$("#SAVEAssessment").attr('style',"width: 40%;height: 60%;left: 10%;top: 10%;");
 		},
 		reset: function()
 		{
 			var self = this;
-			jQuery.ajax(
+			SAVEAPI.reset(function()
+			{
+				for (var i in self.rezzedIDs)
 				{
-					url: this.getBaseServerAddress() + "/query",
-					type: 'post',
-					cache: false,
-					data:
-					{
-						query: JSON.stringify(
-						{
-							type: "Reset",
-						})
-					},
-				})
-				.done(function(data)
-				{
-					for (var i in self.rezzedIDs)
-					{
-						vwf_view.kernel.deleteNode(self.rezzedIDs[i])
-					}
-					self.rezzedIDs = [];
-					self.rezzedNames = [];
-				})
-				.fail(function() {})
+					vwf_view.kernel.deleteNode(self.rezzedIDs[i])
+				}
+				self.rezzedIDs = [];
+				self.rezzedNames = [];
+				self.issueAutoLoads();
+			})
 		},
 		getBaseServerAddress: function()
 		{
-			return vwf.getProperty(vwf.application(), "baseServerAddress") || "http://localhost:3001/exercises/071-100-0032/step01/m4_flora_clear"
+			return vwf.getProperty(vwf.application(), "baseServerAddress");
 		},
-		setupEUI: function() {},
+		setupEUI: function()
+		{
+			this.loadToolTray();
+			this.issueAutoLoads();
+		},
+		autoLoadedNodes: [],
+		issueAutoLoads: function()
+		{
+			for (var i = 0; i < this.autoLoadedNodes.length; i++)
+			{
+				var node = this.nodes[this.autoLoadedNodes[i]]
+				var ID = node.properties.DisplayName;
+				SAVEAPI.create(ID, true, function(data)
+				{
+					var _KbId = data[0].KbIds;
+					vwf_view.kernel.setProperty(node.id, "KbId", _KbId)
+					console.log("got " + _KbId);
+				}, function() {})
+			}
+		},
 		initialize: function()
 		{
 			window._dSAVE = this;
@@ -159,6 +174,7 @@ define(["module", "vwf/view"], function(module, view)
 					x: 0,
 					y: 0
 				}
+				self.issueAutoLoads();
 				$('#index-vwf').mousedown(function(e)
 				{
 					if (e.which !== 3) return;
@@ -264,16 +280,8 @@ define(["module", "vwf/view"], function(module, view)
 		createS3D: function(name, ID, DisplayName, transform)
 		{
 			//Get the VWF node definition
-			var postData = {
-				object:
-				{}
-			};
-			postData.object.auto = false;
-			postData.object.ID = ID;
-			postData.object.type = "create";
-			postData.object = JSON.stringify(postData.object)
 			var self = this;
-			$.post(this.getBaseServerAddress() + "/object", postData, function(data)
+			SAVEAPI.create(ID, false, function(data)
 			{
 				var s3d = data[0].grouping;
 				var asset = data[0].assetURL;
@@ -283,7 +291,7 @@ define(["module", "vwf/view"], function(module, view)
 				{
 					def.properties.DisplayName = DisplayName;
 					//hook up all the children with their KBID
-					function walkDef(node, parent, cb)
+					/*function walkDef(node, parent, cb)
 						{
 							//Only Groups get KBIDs
 							if (node.extends == SAVE_GROUP_DEF)
@@ -292,36 +300,19 @@ define(["module", "vwf/view"], function(module, view)
 									//Get ID for self
 									function getMyID(cb2)
 									{
-										var query = [node.properties.DisplayName + "_KbId"];
-										console.log("getting KBID for " + node.properties.DisplayName)
-										jQuery.ajax(
-											{
-												url: self.getBaseServerAddress() + "/query",
-												type: 'post',
-												cache: false,
-												data:
-												{
-													type: "KbId",
-													query: JSON.stringify(
-													{
-														type: 'KbId',
-														parent: parent ? parent.properties.KbId : null,
-														query: query
-													})
-												},
-											})
-											.done(function(data)
-											{
-												var _KbId = data.KbIds[0];
-												node.properties["KbId"] = _KbId;
-												console.log("got " + _KbId);
-												cb2(); //goTo walkChildren
-											})
-											.fail(function()
-											{
-												node.properties["KbId"] = GUID();
-												cb2(); //goTo walkChildren
-											})
+										var ID = node.properties.DisplayName;
+										var parentID = parent ? parent.properties.KbId : null
+										SAVEAPI.KbId(ID, parentID, function(data)
+										{
+											var _KbId = data.KbIds[0];
+											node.properties["KbId"] = _KbId;
+											console.log("got " + _KbId);
+											cb2(); //goTo walkChildren
+										}, function()
+										{
+											node.properties["KbId"] = GUID();
+											cb2(); //goTo walkChildren
+										})
 									},
 									//Async walk of children
 									function walkChildren(cb2)
@@ -347,19 +338,19 @@ define(["module", "vwf/view"], function(module, view)
 							{
 								cb(null, node); //this node does not need IDs
 							}
-						}
-						//hookup the KB_IDS
-						// walkDef(def, null, function()
-						//moving this to observer for autoloads
+						}*/
+					//hookup the KB_IDS
+					// walkDef(def, null, function()
+					//moving this to observer for autoloads
+					{
+						var behavior = ("./vwf/view/SAVE/test/" + DisplayName.replace(/ /g, "_") + "_dae.eui");
+						$.get(behavior, function(code)
 						{
-							var behavior = ("./vwf/view/SAVE/test/" + DisplayName.replace(/ /g, "_") + "_dae.eui");
-							$.get(behavior, function(code)
-							{
-								$.extend(true, def, code);
-								def.properties.transform = transform
-								vwf_view.kernel.createChild(vwf.application(), name, def);
-							})
-						}
+							$.extend(true, def, code);
+							def.properties.transform = transform
+							vwf_view.kernel.createChild(vwf.application(), name, def);
+						})
+					}
 				});
 			});
 		},
@@ -404,15 +395,13 @@ define(["module", "vwf/view"], function(module, view)
 		{
 			if (!this.nodes[nodeID]) return;
 			this.nodes[nodeID].properties[propname] = val;
+			if (nodeID == vwf.application() && propname == "baseServerAddress")
+				SAVEAPI.setBaseServerAddress(val);
 		},
 		initializedNode: function(nodeID, childID)
 		{
-			if (childID == vwf.application())
-			{
-				this.loadToolTray();
-			}
 			var node = this.nodes[childID]
-			if (node)
+			if (node && !node.properties.SAVE_AUTO_LOAD)
 			{
 				if (node.extends == SAVE_GROUP_DEF_Extends && !node.properties.KbId)
 				{
@@ -421,30 +410,20 @@ define(["module", "vwf/view"], function(module, view)
 					console.log("getting KBID for " + node.properties.DisplayName)
 						//this really is not a great place to do this...
 						//but it's all good because it's synchronous. 
-					jQuery.ajax(
-						{
-							url: self.getBaseServerAddress() + "/query",
-							type: 'post',
-							cache: false,
-							async: false,
-							data:
-							{
-								type: "KbId",
-								query: JSON.stringify(
-								{
-									type: 'KbId',
-									parent: parent && parent.properties ? parent.properties.KbId : null,
-									query: query
-								})
-							},
-						})
-						.done(function(data)
-						{
-							var _KbId = data.KbIds[0];
-							vwf_view.kernel.setProperty(node.id, "KbId", _KbId)
-							console.log("got " + _KbId);
-						})
+					var ID = node.properties.DisplayName;
+					var parent = this.nodes[vwf.parent(nodeID)];
+					var parentID = parent ? parent.properties.KbId : null
+					SAVEAPI.KbId(ID, parentID, function(data)
+					{
+						var _KbId = data.KbIds[0];
+						vwf_view.kernel.setProperty(node.id, "KbId", _KbId)
+						console.log("got " + _KbId);
+					}, function() {})
 				}
+			}
+			else if (node && node.properties.SAVE_AUTO_LOAD)
+			{
+				this.autoLoadedNodes.push(childID);
 			}
 		},
 		getRootSemanticID: function(nodeID)
@@ -467,12 +446,10 @@ define(["module", "vwf/view"], function(module, view)
 				//get the top level semantic node
 				var node = this.getRootSemanticID(nodeID);
 				var actions = vwf.getProperty(node.id, "actionNames");
-				var json = {
-					action: params[0],
-					arguments: [params[1]],
-					names: [params[2]]
-				};
-				$.post(this.getBaseServerAddress() + "/action", json);
+				var action = params[0];
+				var arguments = [params[1]];
+				var names = [params[2]];
+				SAVEAPI.action(action, arguments, names);
 			}
 		}
 	});
