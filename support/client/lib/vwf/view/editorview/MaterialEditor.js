@@ -252,25 +252,38 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				min: '=',
 				max: '=',
 				step: '=',
+				range: '=?',
 
 				useExponent: '=',  // determine if the final value should be represented in exponential notation
 				value: '=',        // two-way binding for the final value of the widget
+				upperValue: '=?',
 				disabled: '=',     // determines if the widget should accept input
 				sliding: '='       // true iff the user is dragging the slider
 			},
 			link: function($scope, elem, attrs)
 			{
+				var rangeMode = $scope.range === true;
+
 				$scope.mantissa = $scope.value || $scope.min;
 				$scope.exponent = 0;
 
-				// initialize the jquery ui slider
-				var slider = $('.slider', elem);
-				slider.slider({
+				var opts = {
 					min: $scope.min,
 					max: $scope.max,
 					step: $scope.step,
-					value: $scope.value
-				});
+					range: rangeMode
+				};
+
+				if(rangeMode){
+					opts.values = [$scope.value || $scope.min, $scope.upperValue || $scope.max];
+				}
+				else{
+					opts.value = $scope.value;
+				}
+
+				// initialize the jquery ui slider
+				var slider = $('.slider', elem);
+				slider.slider(opts);
 
 				// clean up
 				$scope.$on('$destroy', function(){
@@ -280,7 +293,11 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 
 				// update the value when sliding
 				slider.on('slide', function(evt, ui){
-					$scope.mantissa = ui.value;
+					if(rangeMode){
+						$scope.value = ui.values[0];
+						$scope.upperValue = ui.values[1];
+					}
+					else $scope.mantissa = ui.value;
 					$scope.$apply();
 				});
 
@@ -296,34 +313,41 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 					$scope.$apply();
 				});
 
-				// break value into a mantissa and exponent if appropriate, such that value = mantissa * pow(10,exponent)
-				$scope.$watch('freezeExponent || value', function(newval)
-				{
-					if($scope.value !== undefined){
-						if( $scope.useExponent )
-						{
-							if( !$scope.freezeExponent ){
-								$scope.exponent = $scope.useExponent ? Math.max(Math.floor(Math.log10(Math.abs($scope.value))), 0) : 0;
+				if(rangeMode){
+					$scope.$watch('upperValue + value', function(newval){
+						slider.slider('option', 'values', [$scope.value || $scope.min, $scope.upperValue || $scope.max]);
+					});
+				}
+				else{
+					// break value into a mantissa and exponent if appropriate, such that value = mantissa * pow(10,exponent)
+					$scope.$watch('freezeExponent || value', function(newval)
+					{
+						if($scope.value !== undefined){
+							if( $scope.useExponent )
+							{
+								if( !$scope.freezeExponent ){
+									$scope.exponent = $scope.useExponent ? Math.max(Math.floor(Math.log10(Math.abs($scope.value))), 0) : 0;
+								}
+
+								$scope.mantissa = $scope.value / Math.pow(10,$scope.exponent);
 							}
-
-							$scope.mantissa = $scope.value / Math.pow(10,$scope.exponent);
+							else
+								$scope.mantissa = $scope.value;
 						}
-						else
-							$scope.mantissa = $scope.value;
-					}
-				});
+					});
 
-				// compute new output value when mantissa or exponent are updated
-				$scope.$watch('mantissa + exponent', function(newval){
-					if( !$scope.disabled ){
-						if( $scope.useExponent )
-							$scope.value = $scope.mantissa * Math.pow(10, $scope.exponent);
-						else
-							$scope.value = $scope.mantissa;
+					// compute new output value when mantissa or exponent are updated
+					$scope.$watch('mantissa + exponent', function(newval){
+						if( !$scope.disabled ){
+							if( $scope.useExponent )
+								$scope.value = $scope.mantissa * Math.pow(10, $scope.exponent);
+							else
+								$scope.value = $scope.mantissa;
 
-						slider.slider('option', 'value', $scope.mantissa);
-					}
-				});
+							slider.slider('option', 'value', $scope.mantissa);
+						}
+					});
+				}
 
 				// disable everything when true
 				$scope.$watch('disabled', function(newval){

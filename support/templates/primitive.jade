@@ -57,8 +57,9 @@ block content
 		span button
 		
 	#vwf-template-rangeslider(ng-non-bindable, style='display: none;')
-		span rangeslider?		
-	
+		.editorSliderLabel {{displayname}}
+		slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property[0]]', upperValue='vwfNode.properties[vwfProp.property[1]]', range="true", sliding='suppressUndo')
+		
 	#vwf-template-vector(ng-non-bindable, style='display: none;')
 		.editorSliderLabel {{displayname}}
 		div(ng-repeat='component in vwfNode.properties[vwfProp.property] track by $index')

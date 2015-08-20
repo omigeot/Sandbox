@@ -41,17 +41,6 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
         $scope.allEditorData = [];
         $scope.node = null;
 
-        //vwf.getProperty(node.id, 'EditorData')
-
-        //These are changes happening from the client
-        /*$scope.$watchGroup(watchProps, function(newVal, oldVal){
-            for (var i = 0; i < newVal.length; i++) {
-                if(newVal[i] !== oldVal[i]){
-
-                }
-            }
-        });*/
-
         $scope.$watch('fields.selectedNode', function(node){
             console.log("node", node);
 
@@ -78,10 +67,17 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                         numAdds++;
                         outEditorData[key] = editorData[key];
                         existingProps[key] = true;
+
+                        //If propArr is an array, remove any duplicate elements
+                        var props = outEditorData[key].property;
+                        if(Array.isArray(props))
+                            outEditorData[key].property = getUniqueElems(props);
                     }
                 }
 
                 if(numAdds == 0) return;
+
+                //Remove duplicates in outEditorData[i].property if it's an array
 
                 var props = node.properties;
                 var obj = {
@@ -102,24 +98,36 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
         */
         function setInheritedProperties(dest, editorData){
             for(var key in editorData){
+                //vwfProp is necessary because the keys in EditorData are not always equal
+                //to their respective "property" values. The VWF uses "property" internally.
+                var vwfProp = editorData[key].property;
 
-                if(!(key in dest.properties)){
-                    //vwfProp is necessary because the keys in EditorData are not always equal
-                    //to their respective "property" values. The VWF uses "property" internally.
-                    var vwfProp = editorData[key].property;
-                    var value = vwf.getProperty(dest.id, vwfProp);
-
-                    if(value !== undefined){
-                        dest.properties[key] = value;
-                        vwf.setProperty(dest.id, vwfProp, value);
-                    }
-                    else if(editorData[key].type === "color" || editorData[key].type === "vector"){
-
-                        var arr = [0, 0, 0];
-                        dest.properties[key] = arr;
-                        vwf.setProperty(dest.id, vwfProp, arr);
+                //As it turns out, it's possible for vwfProp to be an array. The plot thickens.
+                if(Array.isArray(vwfProp)){
+                    for (var i = 0; i < vwfProp.length; i++) {
+                        if(!(vwfProp in dest.properties)){
+                            setDefaultValue(dest, vwfProp[i], editorData[key].type);
+                        }
                     }
                 }
+                else if(!(vwfProp in dest.properties)){
+                    setDefaultValue(dest, vwfProp, editorData[key].type);
+                }
+            }
+        }
+
+        function setDefaultValue(dest, key, type){
+            var value = vwf.getProperty(dest.id, key);
+
+            if(value !== undefined){
+                dest.properties[key] = value;
+                vwf.setProperty(dest.id, key, value);
+            }
+            else if(type === "color" || type === "vector"){
+
+                var arr = [0, 0, 0];
+                dest.properties[key] = arr;
+                vwf.setProperty(dest.id, key, arr);
             }
         }
 
@@ -142,10 +150,28 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                         scope[key] = scope.vwfProp[key];
                 }
 
-                scope.$watch('vwfNode.properties[vwfProp.property]', function(newVal, oldVal){
-                    console.log(scope.vwfProp, newVal, typeof newVal);
-                    if(newVal !== oldVal) setProperty(scope.vwfNode, scope.vwfProp.property, newVal);
-                }, true);
+                //Some Editor properties can actually be an array of properties!!
+                if(Array.isArray(scope.property)){
+                    scope.property = getUniqueElems(scope.property);
+                    var uniques = scope.property.slice();
+                    uniques.map(function(elem, i){
+                        uniques[i] = 'vwfNode.properties.' + elem;
+                    });
+
+                    scope.$watchGroup(uniques, function(newVal, oldVal){
+                        console.log("Watch group change: ", newVal, oldVal);
+                        for (var i = 0; i < newVal.length; i++) {
+                            if(newVal[i] !== oldVal[i])
+                                setProperty(scope.vwfNode, scope.property[i], newVal[i]);
+                        }
+                    });
+                }
+                else{
+                    scope.$watch('vwfNode.properties[property]', function(newVal, oldVal){
+                        console.log(scope.vwfProp, newVal, typeof newVal);
+                        if(newVal !== oldVal) setProperty(scope.vwfNode, scope.property, newVal);
+                    }, true);
+                }
 
                 //Get template that corresponds with current type of property
                 var template = $("#vwf-template-" + scope.type).html();
@@ -190,6 +216,15 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             if (!skipUndo)
                 _UndoManager.pushEvent(undoEvent);
         }
+    }
+
+    function getUniqueElems(arr){
+        var uniques = [];
+        for (var i = 0; i < arr.length; i++) {
+            if(uniques.indexOf(arr[i]) === -1)
+                uniques.push(arr[i]);
+        }
+        return uniques;
     }
 
     return window._PrimitiveEditor;
