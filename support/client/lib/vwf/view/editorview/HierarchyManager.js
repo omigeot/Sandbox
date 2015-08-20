@@ -149,7 +149,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 
 		$scope.$watch('fields.selectedNode', function(newval){
 			if( newval )
+			{
 				$scope.selectedThreeNode = null;
+
+				// open ancestor nodes
+				$('#hierarchyDisplay tree-node[node-id="'+newval.id+'"]').parents('tree-node.collapsed').removeClass('collapsed');
+			}
 		});
 
 		$scope.$watch('selectedThreeNode', function(newval){
