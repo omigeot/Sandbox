@@ -7,11 +7,9 @@ var transformTool = function()
     var TESTING = false;
     this.movegizbody = null;
     this.mode = null;
-
     this.coordSystem = new THREE.Matrix4();
     this.mouseDownOffsets = {};
     this.coordSystemInv = new THREE.Matrix4();
-
     this.transformOffsets = true;
     this.init = function()
     {
@@ -21,7 +19,6 @@ var transformTool = function()
         var red = [1, 0, 0, 1];
         var green = [0, 1, .0, 1];
         var blue = [0, 0, 1, 1];
-
         //temp mesh for all geometry to test
         var cubeX = new THREE.Mesh(new THREE.BoxGeometry(10.00, .40, .40), new THREE.MeshLambertMaterial(
         {
@@ -44,7 +41,6 @@ var transformTool = function()
             ambient: 0x0000FF
         }));
         cubeZ.position.set(.15, .15, 5.00);
-
         this.allChildren = [];
         this.allChildren.push(cubeX);
         this.allChildren.push(cubeY);
@@ -52,24 +48,19 @@ var transformTool = function()
         cubeX.geometry.setPickGeometry(new THREE.BoxGeometry(10.00, 1.80, 1.80));
         cubeY.geometry.setPickGeometry(new THREE.BoxGeometry(1.80, 10.00, 1.80));
         cubeZ.geometry.setPickGeometry(new THREE.BoxGeometry(1.80, 1.80, 10.00));
-
-
         var arrowX = new THREE.Mesh(new THREE.CylinderGeometry(0, 1, 2, 10, 0), cubeX.material);
         cubeX.add(arrowX, true);
         arrowX.rotation.z = -90 * 0.0174532925;
         arrowX.position.x = 5
-
         var arrowY = new THREE.Mesh(new THREE.CylinderGeometry(0, 1, 2, 10, 0), cubeY.material);
         cubeY.add(arrowY, true);
         //arrowX.rotation.z = -90 * 0.0174532925;
         arrowY.position.y = 5
-
         var arrowZ = new THREE.Mesh(new THREE.CylinderGeometry(0, 1, 2, 10, 0), cubeZ.material);
         cubeZ.add(arrowZ, true);
         arrowZ.rotation.y = -90 * 0.0174532925;
         arrowZ.rotation.z = -90 * 0.0174532925
         arrowZ.position.z = 5
-
         var rotx = new THREE.Mesh(new THREE.TorusGeometry(7, .50, 4, 20), new THREE.MeshLambertMaterial(
         {
             color: 0xFF0000,
@@ -94,8 +85,6 @@ var transformTool = function()
         rotx.rotation.y = Math.PI / 2;
         this.allChildren.push(rotz);
         rotz.rotation.z = 90;
-
-
         this.allChildren.push(this.BuildBox([.5, .5, .5], [11.25, 0, 0], red)); //scale x       
         this.allChildren.push(this.BuildBox([.5, .5, .5], [0, 11.25, 0], green)); //scale y
         this.allChildren.push(this.BuildBox([.5, .5, .5], [0, 0, 11.25], blue)); //scale z
@@ -108,29 +97,21 @@ var transformTool = function()
         //MoveGizmo.allChildren[MoveGizmo.allChildren.length -1].geometry.setPickGeometry(new THREE.BoxGeometry( 8, .30, 8 ));
         this.allChildren.push(this.BuildBox([.1, 6, 6], [-.2, 3.2, 3], [0, 75, 75, 1], .5)); //moveyz
         //MoveGizmo.allChildren[MoveGizmo.allChildren.length -1].geometry.setPickGeometry(new THREE.BoxGeometry( .30, 8, 8 ));
-
-
         this.allChildren.push(this.BuildRing(14, .2, [0, 0, 1], 30, [.5, .5, .5, 1], 90, 450)); //rotate z
-
         var xRotation = this.BuildRing(7, 0.5, [1, 0, 0], 37, red, 0, 370);
         xRotation.add(this.BuildBox([.5, .5, 13], [0, 0, 0], red), true);
         xRotation.children[0].material = xRotation.material;
         this.allChildren.push(xRotation); //rotate x
-
-
         var yRotation = this.BuildRing(7, 0.5, [0, 1, 0], 37, green, 0, 370);
         yRotation.add(this.BuildBox([.5, .5, 13], [0, 0, 0], green), true);
         yRotation.children[0].material = yRotation.material;
         this.allChildren.push(yRotation); //rotate y
-
-
         var zRotation = this.BuildRing(7, 0.5, [0, 0, 1], 37, blue, 0, 370);
         zRotation.add(this.BuildBox([.5, .5, 13], [0, 0, 0], blue), true);
         zRotation.children[0].material = zRotation.material;
         this.allChildren.push(zRotation); //rotate z
         //MoveGizmo.allChildren.push(this.BuildBox([5, 5, 5], [0, 0, 0], [1, 1, 1, 1])); //scale uniform
         this.allChildren.push(this.BuildScaleUniform()); //scale uniform
-
         this.allChildren.push(this.BuildBox([0.30, 5, 5], [5, 0, 0], red)); //scale uniform
         this.allChildren.push(this.BuildBox([5, .30, 5], [0, 5, 0], green)); //scale uniform
         this.allChildren.push(this.BuildBox([5, 5, .30], [0, 0, 5], blue)); //scale uniform
@@ -171,7 +152,6 @@ var transformTool = function()
         //since the picking system will use the scenemanager, must add.
         //but use special add because there is no point in constantly re organizing the
         //graph based on the gizmo
-
         this.matrixAutoUpdate = false;
         for (var i = 0; i < this.allChildren.length; i++)
         {
@@ -209,10 +189,7 @@ var transformTool = function()
     }
     this.SetGizmoMode = function(type)
     {
-
         this.GizmoMode = type;
-
-
         if (type == Move)
         {
             $('#StatusTransform').text('Move');
@@ -333,7 +310,6 @@ var transformTool = function()
         mesh.material.ambient.g = 0;
         mesh.material.shading = true;
         //mesh.matrix.setPosition(new THREE.Vector3(offset[0],offset[1],offset[2]));
-
         mesh.matrixAutoUpdate = false;
         mesh.updateMatrixWorld(true);
         return mesh;
@@ -361,7 +337,6 @@ var transformTool = function()
     }
     this.updateOrientation = function(transform)
     {
-
         this.coordSystem.elements.set(transform);
         this.coordSystem.orthogonalize();
         this.coordSystem.setPosition(new THREE.Vector3(0, 0, 0));
@@ -369,16 +344,13 @@ var transformTool = function()
         this.getGizmoHead().matrix.elements[0] = this.coordSystem.elements[0];
         this.getGizmoHead().matrix.elements[1] = this.coordSystem.elements[1];
         this.getGizmoHead().matrix.elements[2] = this.coordSystem.elements[2];
-
         this.getGizmoHead().matrix.elements[4] = this.coordSystem.elements[4];
         this.getGizmoHead().matrix.elements[5] = this.coordSystem.elements[5];
         this.getGizmoHead().matrix.elements[6] = this.coordSystem.elements[6];
-
         this.getGizmoHead().matrix.elements[8] = this.coordSystem.elements[8];
         this.getGizmoHead().matrix.elements[9] = this.coordSystem.elements[9];
         this.getGizmoHead().matrix.elements[10] = this.coordSystem.elements[10];
         this.getGizmoHead().updateMatrixWorld(true);
-
     }
     this.updateLocation = function(transforms)
     {
@@ -418,25 +390,23 @@ var transformTool = function()
         var windowYadj = 1200.0 / $(window).height();
         var winadj = Math.max(windowXadj, windowYadj);
         this.getGizmoBody().matrix.scale(new THREE.Vector3(dist * winadj * fovadj, dist * winadj * fovadj, dist * winadj * fovadj));
-
         tempcammatinverse.getInverse(this.getGizmoHead().matrixWorld);
         tcamposGizSpace = MATH.mulMat4Vec3(MATH.transposeMat4(tempcammatinverse.elements, transposeTemp), campos, tcamposGizSpace);
         //document.title = tcamposGizSpace[0];
         this.getGizmoBody().matrix.scale(new THREE.Vector3(tcamposGizSpace[0] > 0 ? 1 : -1, tcamposGizSpace[1] > 0 ? 1 : -1, tcamposGizSpace[2] > 0 ? 1 : -1));
-
         this.getGizmoBody().updateMatrixWorld(true);
-
     }
     this.mouseLeave = function(e)
     {
-
         if (this.axisSelected !== -1)
         {
             this.axisSelected = -1;
             this.hilightAxis(-1)
-
         }
-
+        for (var i = 0; i < _Editor.getSelectionCount(); i++)
+        {
+            _dView.setViewTransformOverride(_Editor.GetSelectedVWFID(i), null);
+        }
     }
     this.mouseUp = function(e)
     {
@@ -456,6 +426,10 @@ var transformTool = function()
             _UndoManager.pushEvent(this.masterUndoRecord);
             this.masterUndoRecord = null;
         }
+        for (var i = 0; i < _Editor.getSelectionCount(); i++)
+        {
+            _dView.setViewTransformOverride(_Editor.GetSelectedVWFID(i), null);
+        }
     }
     this.mouseDown = function(e)
     {
@@ -472,7 +446,7 @@ var transformTool = function()
             this.mouseDownCoordSystem = this.coordSystem.clone();
             this.mouseDownTransforms = {};
             this.mouseDownWorldTransforms = {};
-            this.mouseDownGizScale = MATH.lengthVec3([this.getGizmoBody().matrix.elements[0],this.getGizmoBody().matrix.elements[1],this.getGizmoBody().matrix.elements[2]])
+            this.mouseDownGizScale = MATH.lengthVec3([this.getGizmoBody().matrix.elements[0], this.getGizmoBody().matrix.elements[1], this.getGizmoBody().matrix.elements[2]])
             for (var i = 0; i < _Editor.getSelectionCount(); i++)
             {
                 var ID = _Editor.GetSelectedVWFID(i);
@@ -484,13 +458,11 @@ var transformTool = function()
             }
             var worldRay = _Editor.GetWorldPickRay(e);
             this.mouseDownOrigin = this.getPosition();
-
             this.mouseDownIntersects = this.intersectPlanes(worldRay, _Editor.getCameraPosition());
             this.mouseDownIntersects.xy = MATH.subVec3(this.mouseDownIntersects.xy, this.getPosition())
             this.mouseDownIntersects.yz = MATH.subVec3(this.mouseDownIntersects.yz, this.getPosition())
             this.mouseDownIntersects.zx = MATH.subVec3(this.mouseDownIntersects.zx, this.getPosition())
         }
-
         this.axisSelected = axis;
         this.hilightAxis(axis);
     }
@@ -501,8 +473,6 @@ var transformTool = function()
         {
             if (vwf.views[0].lastPick && vwf.views[0].lastPick.object && vwf.views[0].lastPick.object == this.getGizmoBody().children[i]) axis = i;
         }
-
-
         for (var i = 0; i < this.getGizmoBody().children.length; i++)
         {
             if (i != document.AxisSelected)
@@ -519,11 +489,8 @@ var transformTool = function()
                 this.getGizmoBody().children[axis].material.color.setRGB(1, 1, 1);
                 this.getGizmoBody().children[axis].material.emissive.setRGB(1, 1, 1);
             }
-
     }
-    this.setPlane = function(plane) {
-
-    }
+    this.setPlane = function(plane) {}
     this.getPosition = function()
     {
         return [this.getGizmoHead().matrixWorld.elements[12], this.getGizmoHead().matrixWorld.elements[13], this.getGizmoHead().matrixWorld.elements[14]]
@@ -534,27 +501,23 @@ var transformTool = function()
         var z = [coordSystem.elements[8], coordSystem.elements[9], coordSystem.elements[10]]
         var y = [coordSystem.elements[4], coordSystem.elements[5], coordSystem.elements[6]]
         var x = [coordSystem.elements[0], coordSystem.elements[1], coordSystem.elements[2]]
-
         var cam = _Editor.findcamera().matrixWorld.elements;
-        var e = [cam[8],cam[9],cam[10]];    
-
+        var e = [cam[8], cam[9], cam[10]];
         return {
             xy: z,
             yz: x,
             zx: y,
-            e:e
+            e: e
         }
     }
-
     this.intersectPlanes = function(worldRay, campos)
     {
-
         var planeNormals = this.getPlaneNormals();
         var origin = this.getPosition();
         var xy = _Editor.intersectLinePlane(worldRay, campos, this.mouseDownOrigin, planeNormals.xy);
         var zx = _Editor.intersectLinePlane(worldRay, campos, this.mouseDownOrigin, planeNormals.zx);
         var yz = _Editor.intersectLinePlane(worldRay, campos, this.mouseDownOrigin, planeNormals.yz);
-        var e = _Editor.intersectLinePlane(worldRay, campos, MATH.addVec3(campos,planeNormals.e), planeNormals.e);
+        var e = _Editor.intersectLinePlane(worldRay, campos, MATH.addVec3(campos, planeNormals.e), planeNormals.e);
         return {
             xy: MATH.addVec3(MATH.scaleVec3(worldRay, xy), campos),
             yz: MATH.addVec3(MATH.scaleVec3(worldRay, yz), campos),
@@ -577,151 +540,112 @@ var transformTool = function()
         if (axis == 'zx') return 'zx';
         if (axis == 'yz') return 'yz';
         if (axis == 'e') return 'e';
-
-
         var tempMatrix = new THREE.Matrix4();
         var eye = new THREE.Vector3(eyepos[0], eyepos[1], eyepos[2])
         eye.applyMatrix4(tempMatrix.getInverse(tempMatrix.extractRotation(this.coordSystem)));
-
         if (axis == "x")
         {
-
             if (Math.abs(eye.y) > Math.abs(eye.z)) return 'zx'
             else return 'xy'
         }
-
         if (axis == "y")
         {
-
             if (Math.abs(eye.x) > Math.abs(eye.z)) return 'yz'
             else return 'xy'
         }
-
         if (axis == "z")
         {
-
             if (Math.abs(eye.x) > Math.abs(eye.y)) return 'yz'
             else return 'zx'
-
         }
-
     }
-    this.applyMove = function(wtmat, offset, mouseDownOffset,ID)
+    this.applyMove = function(wtmat, offset, mouseDownOffset, ID)
     {
         var worldTranslation = [wtmat.elements[12], wtmat.elements[13], wtmat.elements[14]]
-
         var thisOff = MATH.subVec3(offset, mouseDownOffset);
         thisOff = MATH.subVec3(thisOff, worldTranslation)
         thisOff = this.maskOffset(this.axisToPlane(this.axisSelected), thisOff);
-
         var snapped;
         if (!TESTING)
             snapped = _Editor.snapPosition([worldTranslation[0] + thisOff[0], worldTranslation[1] + thisOff[1], worldTranslation[2] + thisOff[2]])
         else
             snapped = [worldTranslation[0] + thisOff[0], worldTranslation[1] + thisOff[1], worldTranslation[2] + thisOff[2]];
-
-
         var finalpos = new THREE.Vector3(snapped[0], snapped[1], snapped[2]);
-
         if (finalpos.length() < .0001) return false;
-
         wtmat.setPosition(finalpos);
         return true;
     }
-    this.applyScale = function(wtmat, offset, mouseDownOffset,ID,deltas)
+    this.applyScale = function(wtmat, offset, mouseDownOffset, ID, deltas)
     {
         var worldTranslation = [wtmat.elements[12], wtmat.elements[13], wtmat.elements[14]]
         var thisOff = MATH.subVec3(offset, mouseDownOffset);
         thisOff = MATH.subVec3(thisOff, this.getPosition())
-
-        var amt = 1 - (deltas.e[2]*5);
+        var amt = 1 - (deltas.e[2] * 5);
         var scale = new THREE.Matrix4();
-        scale.makeScale(amt,amt,amt);
-
-
+        scale.makeScale(amt, amt, amt);
         var mouseDownTransform = new THREE.Matrix4();
         mouseDownTransform.elements.set(this.mouseDownWorldTransforms[ID])
         var x = mouseDownTransform.elements[12];
         var y = mouseDownTransform.elements[13];
         var z = mouseDownTransform.elements[14];
-
-        mouseDownTransform.elements[12] = 0 ;
+        mouseDownTransform.elements[12] = 0;
         mouseDownTransform.elements[13] = 0;
         mouseDownTransform.elements[14] = 0;
-        wtmat.multiplyMatrices(scale,mouseDownTransform);
-        
-       
-
-        var worldOffset = MATH.subVec3([x,y,z],this.mouseDownOrigin);
-        var tmd = new THREE.Vector3(worldOffset[0],worldOffset[1],worldOffset[2]);
-       
-        if(this.transformOffsets)
+        wtmat.multiplyMatrices(scale, mouseDownTransform);
+        var worldOffset = MATH.subVec3([x, y, z], this.mouseDownOrigin);
+        var tmd = new THREE.Vector3(worldOffset[0], worldOffset[1], worldOffset[2]);
+        if (this.transformOffsets)
             tmd.applyMatrix4(scale);
-        
         wtmat.elements[12] = this.mouseDownOrigin[0] + tmd.x;
         wtmat.elements[13] = this.mouseDownOrigin[1] + tmd.y;
         wtmat.elements[14] = this.mouseDownOrigin[2] + tmd.z;
-
         return true;
     }
-    this.applyRotate = function(wtmat, offset, mouseDownOffset,ID,deltas)
+    this.applyRotate = function(wtmat, offset, mouseDownOffset, ID, deltas)
     {
         var worldTranslation = [wtmat.elements[12], wtmat.elements[13], wtmat.elements[14]]
         var thisOff = MATH.subVec3(offset, mouseDownOffset);
         thisOff = MATH.subVec3(thisOff, this.getPosition())
-
         var rot = new THREE.Matrix4();
         var axis;
         var mat = this.coordSystem.elements;
-        if(this.axisToPlane(this.axisSelected) == 'xy')
-            axis = (new THREE.Vector3(0,0,1)).applyMatrix4(this.mouseDownCoordSystem);
-        if(this.axisToPlane(this.axisSelected) == 'yz')
-            axis = (new THREE.Vector3(1,0,0)).applyMatrix4(this.mouseDownCoordSystem);
-        if(this.axisToPlane(this.axisSelected) == 'zx')
-            axis = (new THREE.Vector3(0,1,0)).applyMatrix4(this.mouseDownCoordSystem);
-
+        if (this.axisToPlane(this.axisSelected) == 'xy')
+            axis = (new THREE.Vector3(0, 0, 1)).applyMatrix4(this.mouseDownCoordSystem);
+        if (this.axisToPlane(this.axisSelected) == 'yz')
+            axis = (new THREE.Vector3(1, 0, 0)).applyMatrix4(this.mouseDownCoordSystem);
+        if (this.axisToPlane(this.axisSelected) == 'zx')
+            axis = (new THREE.Vector3(0, 1, 0)).applyMatrix4(this.mouseDownCoordSystem);
         var plane = [this.bestPlane(this.axisToPlane(this.axisSelected), _Editor.getCameraPosition())];
         var intersect = this.mouseDownIntersects[plane];
-    
         var c1 = MATH.toUnitVec3(intersect);
-        var c2 = [axis.x,axis.y,axis.z]
-     
-        
-
-        var c3 = MATH.crossVec3(c1,c2);
-        var tanMat = [c1[0],  c1[1],  c1[2],  0,
-                      c2[0],  c2[1],  c2[2],  0, 
-                      c3[0],  c3[1],  c3[2],  0, 
-                      0,  0,  0,  1 ];
-        var tan = MATH.mulMat4Vec3(tanMat,MATH.subVec3(offset, this.mouseDownOrigin));
-        
-        rot.makeRotationAxis(axis,-tan[2]/(this.mouseDownGizScale*10));
+        var c2 = [axis.x, axis.y, axis.z]
+        var c3 = MATH.crossVec3(c1, c2);
+        var tanMat = [c1[0], c1[1], c1[2], 0,
+            c2[0], c2[1], c2[2], 0,
+            c3[0], c3[1], c3[2], 0,
+            0, 0, 0, 1
+        ];
+        var tan = MATH.mulMat4Vec3(tanMat, MATH.subVec3(offset, this.mouseDownOrigin));
+        rot.makeRotationAxis(axis, -tan[2] / (this.mouseDownGizScale * 10));
         var mouseDownTransform = new THREE.Matrix4();
         mouseDownTransform.elements.set(this.mouseDownWorldTransforms[ID])
         var x = mouseDownTransform.elements[12];
         var y = mouseDownTransform.elements[13];
         var z = mouseDownTransform.elements[14];
-
-        mouseDownTransform.elements[12] = 0 ;
+        mouseDownTransform.elements[12] = 0;
         mouseDownTransform.elements[13] = 0;
         mouseDownTransform.elements[14] = 0;
-        wtmat.multiplyMatrices(rot,mouseDownTransform);
-        
-       
-
-        var worldOffset = MATH.subVec3([x,y,z],this.mouseDownOrigin);
-        var tmd = new THREE.Vector3(worldOffset[0],worldOffset[1],worldOffset[2]);
-       
-        if(this.transformOffsets)
+        wtmat.multiplyMatrices(rot, mouseDownTransform);
+        var worldOffset = MATH.subVec3([x, y, z], this.mouseDownOrigin);
+        var tmd = new THREE.Vector3(worldOffset[0], worldOffset[1], worldOffset[2]);
+        if (this.transformOffsets)
             tmd.applyMatrix4(rot);
-        
         wtmat.elements[12] = this.mouseDownOrigin[0] + tmd.x;
         wtmat.elements[13] = this.mouseDownOrigin[1] + tmd.y;
         wtmat.elements[14] = this.mouseDownOrigin[2] + tmd.z;
-
         return true;
     }
-    this.applyTransform = function(offset,deltas)
+    this.applyTransform = function(offset, deltas)
     {
         for (var i = 0; i < _Editor.getSelectionCount(); i++)
         {
@@ -730,29 +654,21 @@ var transformTool = function()
             var t = vwf.getProperty(ID, 'transform')
             var pt = vwf.getProperty(vwf.parent(ID), 'worldTransform');
             var wt = vwf.getProperty(ID, 'worldTransform')
-
-
             var tmat = new THREE.Matrix4();
             tmat.elements.set(t);
-
             var ptmat = new THREE.Matrix4();
             ptmat.elements.set(pt);
-
             var ptmatInv = new THREE.Matrix4();
             ptmatInv.getInverse(ptmat);
-
             var wtmat = new THREE.Matrix4();
             wtmat.elements.set(wt);
-
             var changed = false;
-
             if (this.axisToTransformType(this.axisSelected) == 'move')
-                changed = this.applyMove(wtmat, offset, mouseDownOffset,ID);
+                changed = this.applyMove(wtmat, offset, mouseDownOffset, ID);
             if (this.axisToTransformType(this.axisSelected) == 'rotate')
-                changed = this.applyRotate(wtmat, offset, mouseDownOffset,ID,deltas);
+                changed = this.applyRotate(wtmat, offset, mouseDownOffset, ID, deltas);
             if (this.axisToTransformType(this.axisSelected) == 'scale')
-                changed = this.applyScale(wtmat, offset, mouseDownOffset,ID,deltas);
-
+                changed = this.applyScale(wtmat, offset, mouseDownOffset, ID, deltas);
             if (changed)
             {
                 var newLocalmat = new THREE.Matrix4();
@@ -762,6 +678,7 @@ var transformTool = function()
                     vwf.setProperty(_Editor.GetSelectedVWFID(i), 'transform', newt);
                 else
                     var ok = _Editor.setProperty(_Editor.GetSelectedVWFID(i), 'transform', newt);
+                _dView.setViewTransformOverride(_Editor.GetSelectedVWFID(i), newt);
             }
         }
     }
@@ -773,69 +690,54 @@ var transformTool = function()
         tv.x = offset[0];
         tv.y = offset[1];
         tv.z = offset[2];
-
         tv.applyMatrix4(coordSystemInv);
-
         offset = [tv.x, tv.y, tv.z];
         if (axis == 'xy')
         {
             offset[2] = 0;
-
         }
         if (axis == 'yz')
         {
             offset[0] = 0;
-
         }
         if (axis == 'zx')
         {
             offset[1] = 0;
-
         }
         if (axis == 'x')
         {
             offset[1] = 0;
             offset[2] = 0;
-
         }
         if (axis == 'y')
         {
             offset[0] = 0;
             offset[2] = 0;
-
         }
         if (axis == 'z')
         {
             offset[0] = 0;
             offset[1] = 0;
-
         }
-
         tv.x = offset[0];
         tv.y = offset[1];
         tv.z = offset[2];
-
         tv.applyMatrix4(this.coordSystem);
-
         offset = [tv.x, tv.y, tv.z];
         return offset;
-
     }
     this.mouseMoved = function(e)
     {
-
         if (this.axisSelected == -1)
         {
             this.mouseOverAxis();
             return;
         }
-
         var worldRay = _Editor.GetWorldPickRay(e);
         var intersections = this.intersectPlanes(worldRay, _Editor.getCameraPosition());
-       
         var deltas = this.subIntersects(intersections, this.mouseDownIntersects);
         var offset = deltas[this.bestPlane(this.axisToPlane(this.axisSelected), _Editor.getCameraPosition())]
-        this.applyTransform(offset,deltas);
+        this.applyTransform(offset, deltas);
     }
     this.axisToPlane = function(axis)
     {
@@ -859,7 +761,6 @@ var transformTool = function()
             return 'xy'
         if (this.axisSelected == 19)
             return 'e'
-
         if (this.axisSelected == 5)
             return 'xy'
         if (this.axisSelected == 4)
@@ -894,7 +795,7 @@ var transformTool = function()
         if (this.axisSelected == 4)
             return 'rotate'
         if (this.axisSelected == 5)
-            return 'rotate'    
+            return 'rotate'
     }
     this.getAxis = function()
     {
@@ -908,9 +809,7 @@ var transformTool = function()
     {
         this.transformOffsets = o;
     }
-
 }
-
 define([], function()
 {
     return transformTool;

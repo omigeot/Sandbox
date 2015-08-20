@@ -413,7 +413,47 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
             return nqm;
         },
+        viewTransformOverrides:{},
+        setViewTransformOverride : function(nodeID,transform)
+        {
+            if(transform)
+            {
+                this.viewTransformOverrides[nodeID] = {
+                    override:transform,
+                    original:null,
+                };
+            }else
+            {
+                delete this.viewTransformOverrides[nodeID];
+            }
 
+        },
+        applyViewTransformOverrides: function()
+        {
+            for( var i in this.viewTransformOverrides)
+            {
+                var node = findviewnode(i);
+                if(node)
+                {
+                    var original = (new THREE.Matrix4()).copy(node.matrix);
+                    this.viewTransformOverrides[i].original = original;
+                    node.matrix.elements.set(this.viewTransformOverrides[i].override)    
+                    node.updateMatrixWorld(true);
+                }
+            }
+        },
+        restoreViewTransformOverrides: function()
+        {
+            for( var i in this.viewTransformOverrides)
+            {
+                var node = findviewnode(i);
+                if(node)
+                {
+                    node.matrix.copy(this.viewTransformOverrides[i].original)
+                    node.updateMatrixWorld(true);
+                }
+            }
+        },
         setInterpolatedTransforms: function(deltaTime) {
 
 
@@ -1295,6 +1335,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
             if (self.interpolateTransforms)
                 self.setInterpolatedTransforms(timepassed);
 
+            self.applyViewTransformOverrides(timepassed);
 
             cam.matrixWorldInverse.getInverse(cam.matrixWorld);
 
@@ -1560,6 +1601,8 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
             if (self.interpolateTransforms)
                 self.restoreTransforms();
+
+            self.restoreViewTransformOverrides(timepassed);
 
             sceneNode.lastTime = now;
             self.inFrame = false;
