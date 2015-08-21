@@ -330,7 +330,7 @@
                 { library: "/socket.io/socket.io.js", active: true },
                 { library: "vwf/view/EditorView", active: true },
                 { library: "vwf/view/WebRTC", active: true },
-                { library: "vwf/view/audio", active: true },
+                { library: "vwf/model/audio", active: true },
                 { library: "messageCompress", active: true },
                 { library: "vwf/view/xapi", active: true }
 
@@ -345,7 +345,8 @@
                     { library: "vwf/model/cesium", active: false },
                     { library: "vwf/model/object", active: true },
                     { library: "vwf/model/wires", active: true },
-                    { library: "vwf/model/jqueryui", active: true }
+                    { library: "vwf/model/jqueryui", active: true },
+                    { library: "vwf/model/audio", active: true },
                 ],
                 view: [
                     { library: "vwf/view/glge", parameters: {"application-root":"#vwf-root"}, active: false },
@@ -358,7 +359,6 @@
                     { library: "vwf/view/webrtc", active: false},
                     { library: "vwf/view/EditorView", active: true },
                     { library: "vwf/view/WebRTC", active: true },
-                    { library: "vwf/view/audio", active: true },
                     { library: "vwf/view/xapi", active: true },
                     { library: "vwf/view/jqueryui", active: true },
 
@@ -481,6 +481,7 @@
                         "vwf/model/wires",
                         "vwf/model/threejs",
                         "vwf/model/jqueryui",
+                        "vwf/model/audio",
                         "vwf/model/object",
                     ];
 
@@ -493,7 +494,7 @@
                             "vwf/view/document",
                             "vwf/view/EditorView",
                             "vwf/view/WebRTC",
-                            "vwf/view/audio",
+                            
                             "vwf/view/xapi",
                             "vwf/view/jqueryui",
                         ];
