@@ -1477,6 +1477,7 @@ function LogError(URL, error, response)
 function serve(request, response)
 {
 	var URL = url.parse(request.url, true);
+	URL.pathname = decodeURIComponent(URL.pathname)
 	var serviceRoute = "vwfdatamanager.svc/";
 	var pathAfterRoute = URL.pathname.substr(URL.pathname.toLowerCase()
 		.lastIndexOf(serviceRoute) + serviceRoute.length);
