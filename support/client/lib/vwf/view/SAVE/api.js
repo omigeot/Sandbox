@@ -48,9 +48,9 @@ define([], function()
 		action: function(action, arguments, names, done)
 		{
 			var json = {
-				action: params[0],
-				arguments: [params[1]],
-				names: [params[2]]
+				action: action,
+				arguments: arguments,
+				names: names
 			};
 			$.post(this.getBaseServerAddress() + "/action", json, function()
 			{
