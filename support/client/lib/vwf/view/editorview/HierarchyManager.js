@@ -149,12 +149,13 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 
 		$scope.$watch('fields.selectedNode', function(newval)
 		{
-			if( !_SidePanel.isTabOpen('hierarchyManager') )
-				$('#hierarchyDisplay tree-node[node-id="'+newval.id+'"]').parents('tree-node:not(.collapsed)').addClass('collapsed');
 
 			if( newval )
 			{
 				$scope.selectedThreeNode = null;
+
+				if( !_SidePanel.isTabOpen('hierarchyManager') )
+					$('#hierarchyDisplay tree-node[node-id="'+newval.id+'"]').parents('tree-node:not(.collapsed)').addClass('collapsed');
 
 				// open ancestor nodes
 				$('#hierarchyDisplay tree-node[node-id="'+newval.id+'"]').parents('tree-node.collapsed').removeClass('collapsed');
