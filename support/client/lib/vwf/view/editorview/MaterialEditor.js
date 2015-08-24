@@ -362,6 +362,29 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		};
 	});
 
+	/*
+	 * Reusable angular wrapper around the image (map) picker
+	 */
+
+	 app.directive('vwfImagePicker', function(){
+		function linkFn(scope, elem, attr){
+			elem.button({label: scope.label});
+			scope.showPicker = function() {
+				_MapBrowser.setTexturePickedCallback(function(e) {
+					_MapBrowser.setTexturePickedCallback(null);
+					scope.value = e;
+				}.bind(elem.get(0)));
+				_MapBrowser.show();
+			}
+		}
+		return {
+			template: '<div ng-click="showPicker()" class="vwf-image-picker"><img ng-src="value"/></div>',
+			restrict: 'E',
+			link: linkFn,
+			replace: true,
+			scope: { value: '=', label: '=' }
+		};
+	 });
 
 	/*
 	 * Reusable angular wrapper around the color picker

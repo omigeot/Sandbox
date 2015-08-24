@@ -42,38 +42,48 @@ block content
 				vwf-editor-property(vwf-prop="value", vwf-key="{{key}}", vwf-node="node")
 	
 	#vwf-template-slider(ng-non-bindable, style='display: none;') 
-		.editorSliderLabel {{displayname}}
+		.editorSliderLabel {{displayname}} 
 		slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property]', sliding='suppressUndo')
 	
 	#vwf-template-color(ng-non-bindable, style='display: none;')
-		.editorSliderLabel {{displayname}}
+		.editorSliderLabel {{displayname}} 
 		color-picker(color-arr='vwfNode.properties[vwfProp.property]', color-obj='{r:0,g:0,b:0}', sliding='suppressUndo')
 		
 	#vwf-template-check(ng-non-bindable, style='display: none;')
-		.editorSliderLabel {{displayname}}
+		.editorSliderLabel {{displayname}} 
 		input(type='checkbox', ng-model='vwfNode.properties[vwfProp.property]')
 		
 	#vwf-template-button(ng-non-bindable, style='display: none;')
 		span button
 		
 	#vwf-template-rangeslider(ng-non-bindable, style='display: none;')
-		.editorSliderLabel {{displayname}}
+		.editorSliderLabel {{displayname}} 
 		slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property[0]]', upper-value='vwfNode.properties[vwfProp.property[1]]', range="true", sliding='suppressUndo')
 		
 	#vwf-template-vector(ng-non-bindable, style='display: none;')
-		.editorSliderLabel {{displayname}}
+		.editorSliderLabel {{displayname}} 
 		div(ng-repeat='component in vwfNode.properties[vwfProp.property] track by $index')
 			input(type='number', ng-model='vwfNode.properties[vwfProp.property][$index]', ng-model-options='{updateOn: "click blur"}')
 	
+	#vwf-template-rangevector(ng-non-bindable, style='display: none;')
+		.editorSliderLabel {{displayname}} 
+		span min:
+		input(type='number', ng-repeat='min in vwfNode.properties[vwfProp.property[0]] track by $index', ng-model='min', )
+		span max:
+		input(type='number', ng-repeat='max in vwfNode.properties[vwfProp.property[1]] track by $index', ng-model='max')
+	
 	#vwf-template-text(ng-non-bindable, style='display: none;')
-		.editorSliderLabel {{displayname}}
+		.editorSliderLabel {{displayname}} 
 		input(ng-model='vwfNode.properties[vwfProp.property]', type='text', placeholder='{{displayname}}')
 				
 	#vwf-template-choice(ng-non-bindable, style='display: none;')
 		.editorSliderLabel {{displayname}}
 		select(ng-model='vwfNode.properties[vwfProp.property]')
 			option(ng-repeat='value in vwfProp.values' value='{{value}}') {{labels[$index]}}
-			
+
+	#vwf-template-map(ng-non-bindable, style='display: none;')
+		.editorSliderLabel {{displayname}}	
+		vwf-image-picker(label='displayname', value='vwfNode.properties[vwfProp.property]')
 			
 			
 			
