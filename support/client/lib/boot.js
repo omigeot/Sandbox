@@ -53,7 +53,7 @@ define([
     "vwf/view/googleEarth",
     "vwf/utility",
     "vwf/view/WebRTC",
-    "vwf/view/audio",
+    "vwf/model/audio",
     "messageCompress",
     "vwf/view/xapi",
     "assetLoader",

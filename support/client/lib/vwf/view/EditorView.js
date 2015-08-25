@@ -97,14 +97,9 @@ define([
 
                     //initialize the primitive editor
 
-                    //window.HierarchyManager = require("vwf/view/editorview/HeirarchyManager").getSingleton();;
                     window._PrimitiveEditor = require("vwf/view/editorview/PrimitiveEditor").getSingleton();
                     
-                    window._MaterialEditor = require("vwf/view/editorview/MaterialEditor").getSingleton();
                     window._PhysicsEditor = require("vwf/view/editorview/PhysicsEditor").getSingleton();
-                    //initialize the Material editor
-                    
-                    //window._MaterialEditor.hide();
                     window._Notifier = require("vwf/view/editorview/Notifier").getSingleton();
 					require('vwf/view/editorview/ScriptEditor').initialize();
                     window._ModelLibrary = require("vwf/view/editorview/_3DRIntegration").getSingleton();
@@ -120,11 +115,9 @@ define([
                     this.addManager(_UndoManager);
                     this.addManager(_ModelLibrary);
                     this.addManager(_Notifier);
-                    this.addManager(_MaterialEditor);
                     this.addManager(_PrimitiveEditor);
                     this.addManager(_PermissionsManager);
                     this.addManager(_WireEditor);
-                    //this.addManager(HierarchyManager);
                     this.addManager(_Publisher);
                     this.addManager(_PhysicsEditor);
                     
