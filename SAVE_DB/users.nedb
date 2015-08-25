@@ -1,6 +1,34 @@
-{"$$indexCreated":{"fieldName":"_key","unique":true}}
-{"val":[],"_key":"UserIndex","_id":"U9QFADBsusGJlWBY"}
 {"val":[],"_key":"StateIndex","_id":"8vroWZ95QJWNLS7Q"}
-{"val":[],"_key":"f68a276c-80a8-4bfd-a36a-42f728e6d244","_id":"RsnvFy9jP0Kytuzy"}
 {"val":{"inventoryKey":"f68a276c-80a8-4bfd-a36a-42f728e6d244"},"_key":"___Global___","_id":"NCh0rysWUmS5LNGa"}
+{"val":[],"_key":"f68a276c-80a8-4bfd-a36a-42f728e6d244","_id":"RsnvFy9jP0Kytuzy"}
 {"val":["___Global___"],"_key":"UserIndex","_id":"U9QFADBsusGJlWBY"}
+{"$$indexCreated":{"fieldName":"_key","unique":true,"sparse":false}}
+{"val":[],"_key":"94dd8720-5931-49d7-bfca-9aeeed99575a","_id":"lFZ3cXD6Jvb7GiOj"}
+{"val":{"Username":"Rob","Email":"r@vt.edu","Password":"3e5517937d2e4c0231f4fa7b5627bb6051f9607ddffac4f88d8bd4b87b6218b8","Avatar":"usmale.dae","Salt":"d4201f07-795e-e2ed-7139-7aec788ec2d5","inventoryKey":"94dd8720-5931-49d7-bfca-9aeeed99575a"},"_key":"Rob","_id":"UXqLcTHrP3zE3vzL"}
+{"val":["___Global___","Rob"],"_key":"UserIndex","_id":"U9QFADBsusGJlWBY"}
+{"val":{"objects":0,"owner":"Rob","title":"EUI Demo","description":"A demo of the SAVE EUI\n\nRemember to start the back end server!","lastUpdate":"2015-08-25T20:18:56.397Z","created":"2015-08-25T20:18:56.399Z"},"_key":"_adl_sandbox_Wqw3qThupLM8xsf0_","_id":"SniRmw0YqjZsyfrF"}
+{"val":["_adl_sandbox_Wqw3qThupLM8xsf0_"],"_key":"StateIndex","_id":"8vroWZ95QJWNLS7Q"}
+{"$$deleted":true,"_id":"SniRmw0YqjZsyfrF"}
+{"val":{"objects":1,"owner":"Rob","title":"EUI Demo","description":"A demo of the SAVE EUI\n\nRemember to start the back end server!","lastUpdate":"2015-08-25T20:19:47.016Z","created":"2015-08-25T20:18:56.399Z","publishSettings":{"allowAnonymous":false,"SinglePlayer":false,"camera":null,"createAvatar":true,"allowTools":true,"persistence":true},"updates":null},"_key":"_adl_sandbox_Wqw3qThupLM8xsf0_","_id":"rl7W44g5nBve22sz"}
+{"$$deleted":true,"_id":"rl7W44g5nBve22sz"}
+{"val":{"objects":1,"owner":"Rob","title":"EUI Demo","description":"A demo of the SAVE EUI\n\nRemember to start the back end server!","lastUpdate":"2015-08-25T20:19:47.016Z","created":"2015-08-25T20:18:56.399Z","publishSettings":{"singlePlayer":false,"camera":"","allowAnonymous":false,"createAvatar":false,"allowTools":true,"persistence":false},"updates":null},"_key":"_adl_sandbox_Wqw3qThupLM8xsf0_","_id":"JPgyGQwCEdc8Cg0z"}
+{"$$deleted":true,"_id":"JPgyGQwCEdc8Cg0z"}
+{"val":{"objects":1,"owner":"Rob","title":"EUI Demo","description":"A demo of the SAVE EUI\n\nRemember to start the back end server!","lastUpdate":"2015-08-25T20:19:47.016Z","created":"2015-08-25T20:18:56.399Z","publishSettings":{"singlePlayer":false,"camera":"","allowAnonymous":false,"createAvatar":false,"allowTools":true,"persistence":false,"SinglePlayer":false},"updates":null},"_key":"_adl_sandbox_Wqw3qThupLM8xsf0_","_id":"XQrsLfRwxCDOkGuP"}
+{"$$deleted":true,"_id":"XQrsLfRwxCDOkGuP"}
+{"val":{"objects":1,"owner":"Rob","title":"EUI Demo","description":"A demo of the SAVE EUI\n\nRemember to start the back end server!","lastUpdate":"2015-08-25T20:19:47.016Z","created":"2015-08-25T20:18:56.399Z","publishSettings":{"singlePlayer":false,"camera":"","allowAnonymous":false,"createAvatar":false,"allowTools":true,"persistence":true},"updates":null},"_key":"_adl_sandbox_Wqw3qThupLM8xsf0_","_id":"3DeUpwyJQ2OIkytW"}
+{"$$deleted":true,"_id":"3DeUpwyJQ2OIkytW"}
+{"val":{"objects":1,"owner":"Rob","title":"EUI Demo","description":"A demo of the SAVE EUI\n\nRemember to start the back end server!","lastUpdate":"2015-08-25T20:19:47.016Z","created":"2015-08-25T20:18:56.399Z","publishSettings":{"singlePlayer":false,"camera":"","allowAnonymous":false,"createAvatar":false,"allowTools":true,"persistence":true,"SinglePlayer":false},"updates":null},"_key":"_adl_sandbox_Wqw3qThupLM8xsf0_","_id":"NKMdXWyKBeyk75nb"}
+{"$$deleted":true,"_id":"NKMdXWyKBeyk75nb"}
+{"val":{"objects":4,"owner":"Rob","title":"EUI Demo","description":"A demo of the SAVE EUI\n\nRemember to start the back end server!","lastUpdate":"2015-08-25T20:22:15.932Z","created":"2015-08-25T20:18:56.399Z","publishSettings":{"singlePlayer":false,"camera":"","allowAnonymous":false,"createAvatar":false,"allowTools":true,"persistence":true,"SinglePlayer":false},"updates":1},"_key":"_adl_sandbox_Wqw3qThupLM8xsf0_","_id":"FydovegNJhTVfCAD"}
+{"$$deleted":true,"_id":"FydovegNJhTVfCAD"}
+{"val":{"objects":4,"owner":"Rob","title":"EUI Demo","description":"A demo of the SAVE EUI\n\nRemember to start the back end server!","lastUpdate":"2015-08-25T20:22:15.932Z","created":"2015-08-25T20:18:56.399Z","publishSettings":{"singlePlayer":false,"camera":"","allowAnonymous":false,"createAvatar":false,"allowTools":true,"persistence":true,"SinglePlayer":false},"updates":1,"userSetThumbnail":true},"_key":"_adl_sandbox_Wqw3qThupLM8xsf0_","_id":"Kh9Cwcl6TQtCdqc7"}
+{"$$deleted":true,"_id":"Kh9Cwcl6TQtCdqc7"}
+{"val":{"objects":4,"owner":"Rob","title":"EUI Demo","description":"A demo of the SAVE EUI\n\nRemember to start the back end server!","lastUpdate":"2015-08-25T20:22:26.148Z","created":"2015-08-25T20:18:56.399Z","publishSettings":{"singlePlayer":false,"camera":"","allowAnonymous":false,"createAvatar":false,"allowTools":true,"persistence":true,"SinglePlayer":false},"updates":2,"userSetThumbnail":true},"_key":"_adl_sandbox_Wqw3qThupLM8xsf0_","_id":"lM8JtMm88ZRjJYhx"}
+{"$$deleted":true,"_id":"lM8JtMm88ZRjJYhx"}
+{"val":{"objects":4,"owner":"Rob","title":"EUI Demo","description":"A demo of the SAVE EUI\n\nRemember to start the back end server!","lastUpdate":"2015-08-25T20:22:26.148Z","created":"2015-08-25T20:18:56.399Z","publishSettings":{"singlePlayer":true,"camera":"SandboxCamera-vwf-N57b13f43","allowAnonymous":true,"createAvatar":false,"allowTools":true,"persistence":false},"updates":2,"userSetThumbnail":true},"_key":"_adl_sandbox_Wqw3qThupLM8xsf0_","_id":"CY5LthXFima4rOFH"}
+{"$$deleted":true,"_id":"CY5LthXFima4rOFH"}
+{"val":{"objects":4,"owner":"Rob","title":"EUI Demo","description":"A demo of the SAVE EUI\n\nRemember to start the back end server!","lastUpdate":"2015-08-25T20:22:26.148Z","created":"2015-08-25T20:18:56.399Z","publishSettings":{"singlePlayer":true,"camera":"SandboxCamera-vwf-N57b13f43","allowAnonymous":true,"createAvatar":false,"allowTools":true,"persistence":false,"SinglePlayer":false},"updates":2,"userSetThumbnail":true},"_key":"_adl_sandbox_Wqw3qThupLM8xsf0_","_id":"zCVCcfjcEUmWJgOu"}
+{"$$deleted":true,"_id":"zCVCcfjcEUmWJgOu"}
+{"val":{"objects":4,"owner":"Rob","title":"EUI Demo","description":"A demo of the SAVE EUI\n\nRemember to start the back end server!","lastUpdate":"2015-08-25T20:22:26.148Z","created":"2015-08-25T20:18:56.399Z","publishSettings":{"singlePlayer":true,"camera":"SandboxCamera-vwf-N57b13f43","allowAnonymous":true,"createAvatar":false,"allowTools":false,"persistence":false},"updates":2,"userSetThumbnail":true},"_key":"_adl_sandbox_Wqw3qThupLM8xsf0_","_id":"23xutQdiBL1hIRep"}
+{"$$deleted":true,"_id":"23xutQdiBL1hIRep"}
+{"val":{"objects":4,"owner":"Rob","title":"EUI Demo","description":"A demo of the SAVE EUI\n\nRemember to start the back end server!","lastUpdate":"2015-08-25T20:22:26.148Z","created":"2015-08-25T20:18:56.399Z","publishSettings":{"singlePlayer":true,"camera":"SandboxCamera-vwf-N57b13f43","allowAnonymous":true,"createAvatar":false,"allowTools":false,"persistence":false,"SinglePlayer":false},"updates":2,"userSetThumbnail":true},"_key":"_adl_sandbox_Wqw3qThupLM8xsf0_","_id":"4Da9kqwb36A5ck5j"}
