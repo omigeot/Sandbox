@@ -1903,12 +1903,12 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             if(!node.properties) node.properties = {};
             return node;
         }
-        this.SelectObjectPublic = function(VWFNodeid) {
+        this.SelectObjectPublic = function(VWFNodeid, pickmod) {
             if (SelectMode == 'TempPick') {
                 if (this.TempPickCallback) this.TempPickCallback(_Editor.getNode(VWFNodeid));
             } else {
 
-                this.SelectObject(VWFNodeid, this.PickMod);
+                this.SelectObject(VWFNodeid, pickmod !== undefined ? pickmod : this.PickMod);
             }
         }
         this.SelectObject = function(VWFNode, selectmod, skipUndo) //the skip undo flag is necessary so that the undomanager can trigger new selections without messing up the undostack

@@ -179,12 +179,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 				// new selection = 0, add = 2, subtract = 3
 				if( !evt.ctrlKey )
 				{
-					_Editor.SelectObject(node.id, 0);
+					_Editor.SelectObjectPublic(node.id, 0);
 				}
 				else if( $scope.fields.selectedNodeIds.indexOf(node.id) === -1 )
-					_Editor.SelectObject(node.id, 2);
+					_Editor.SelectObjectPublic(node.id, 2);
 				else
-					_Editor.SelectObject(node.id, 3);
+					_Editor.SelectObjectPublic(node.id, 3);
 			}
 
 			// three.js nodes

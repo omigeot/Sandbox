@@ -182,6 +182,8 @@ define({
             $('#index-vwf').focus();
             if(libraryEnabled)
                 $('#EntityLibrary').show();
+			$('#ScriptEditor').show();
+
             /*$('#index-vwf').css('height', $(window).height() + 'px');
             $('#index-vwf').css('width', $(window).width() + 'px');
             $('#index-vwf').css('top', $('#smoothmenu1').height() + $('#toolbar').height() + 'px');
