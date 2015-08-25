@@ -1,0 +1,22 @@
+{
+    "port": 3000,
+    "datapath": "./SAVE_DB/",
+    "admin": "admin",
+    "logLevel": 1,
+    "build": false,
+    "minify": false,
+    "compile": false,
+    "version": 70,
+   
+    "sendEmails": false,
+    "emailFrom": "admin@vwf.adlnet.gov",
+    "emailService": "Gmail",
+    "emailPassword": "",
+    "emailUsername": "robert.chadwick.ctr@adlnet.gov",
+   
+
+    "hostAssets": true,
+    "sessionSecret": "unsecure cookie secret",
+    "cache3DRData": true
+   
+}
