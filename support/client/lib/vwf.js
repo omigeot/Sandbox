@@ -3228,6 +3228,8 @@ this.setProperties = function( nodeID, properties ) {  // TODO: rework as a cove
 
     var node = nodes.existing[nodeID];
 
+    if(!node)
+        return;
     var entrants = this.setProperty.entrants;
 
     // Call settingProperties() on each model.
@@ -3313,6 +3315,8 @@ this.getProperties = function( nodeID ) {  // TODO: rework as a cover for getPro
 
     var node = nodes.existing[nodeID];
 
+    if(!node)
+        return;
     var entrants = this.getProperty.entrants;
 
     // Call gettingProperties() on each model.
@@ -3433,6 +3437,8 @@ this.setProperty = function( nodeID, propertyName, propertyValue ) {
 
     var node = nodes.existing[nodeID];
 
+    if(!node)
+        return;
     // Record calls into this function by nodeID and propertyName so that models may call
     // back here (directly or indirectly) to delegate responses further down the chain
     // without causing infinite recursion.
@@ -3611,6 +3617,11 @@ this.getProperty = function( nodeID, propertyName, ignorePrototype, testDelegati
     this.logger.debuggx( "getProperty", nodeID, propertyName );
 
     if(!nodeID) return undefined;
+
+    var node = nodes.existing[nodeID];
+
+    if(!node)
+        return;
 
     var propertyValue = undefined;
 
