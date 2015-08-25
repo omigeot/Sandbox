@@ -12,34 +12,6 @@ define(["module", "vwf/view"], function(module, view) {
         initialize: function() {
             this.guiNodes = {};
             window._GUIView = this;
-            $('#vwf-root').append('<div id="guioverlay_index-vwf"/>');
-            $('#guioverlay_index-vwf').css('position', 'fixed');
-            $('#guioverlay_index-vwf').css('top', '0%');
-            $('#guioverlay_index-vwf').css('left', '0%');
-            $('#guioverlay_index-vwf').css('width', '100%');
-            $('#guioverlay_index-vwf').css('height', '100%');
-            $('#guioverlay_index-vwf').css('z-index', '99');
-            $('#guioverlay_index-vwf').css('pointer-events', 'none');
-
-            //keep the overlay aligned over the 3D view
-            var oldtop, oldleft, oldwidth, oldheight;
-            window.setInterval(function() {
-                if (oldtop != $('#index-vwf').css('top') ||
-                    oldleft != $('#index-vwf').css('left') ||
-                    oldwidth != $('#index-vwf').css('width') ||
-                    oldheight != $('#index-vwf').css('height')) {
-                    oldtop = $('#index-vwf').css('top');
-                    oldleft = $('#index-vwf').css('left');
-                    oldwidth = $('#index-vwf').css('width');
-                    oldheight = $('#index-vwf').css('height');
-                    $('#guioverlay_index-vwf').css('top', oldtop);
-                    $('#guioverlay_index-vwf').css('left', oldleft);
-                    $('#guioverlay_index-vwf').css('width', oldwidth);
-                    $('#guioverlay_index-vwf').css('height', oldheight);
-                }
-
-
-            }, 30)
 
         },
         createDialog: function(title) {
@@ -379,168 +351,115 @@ define(["module", "vwf/view"], function(module, view) {
 
             var node = this.guiNodes[childID];
             if (!node) return;
-            if (this.isDialog(node.type)) {
-                if (propertyName == 'transform') {
-                    var x = propertyValue[12] + '%';
-                    var y = propertyValue[13] + '%';
-                    var z = propertyValue[14];
-                    node.div.inSetter = true;
+
+            if(propertyName == 'transform')
+            {
+                var x = propertyValue[12] + '%';
+                var y = propertyValue[13] + '%';
+                var z = propertyValue[14];
+
+                node.div.inSetter = true;
+                if(this.isDialog(node.type)){
                     $(node.div).parent().css('left', x);
                     $(node.div).parent().css('top', y);
-                    node.div.inSetter = false;
                 }
+                else {
+                    $(node.div).css('left', x);
+                    $(node.div).css('top', y);
+                    $(node.div).css('z-index', z);
+                }
+                node.div.inSetter = false;
+            }
+
+            if (propertyName == 'visible')
+            {
+                node.div.inSetter = true;
+                if(this.isDialog(node.type)){
+                    if (propertyValue)
+                        $(node.div).dialog('open');
+                    else
+                        $(node.div).dialog('close');
+                }
+                else {
+                    if(propertyValue)
+                        $(node.div).show();
+                    else
+                        $(node.div).hide();
+                }
+                node.div.inSetter = false;
+            }
+
+            if (propertyName == 'width')
+            {
+                node.div.inSetter = true;
+                if(this.isDialog(node.type))
+                    $(node.div).dialog('option', 'width', propertyValue);
+                else
+                    $(node.div).css('width', propertyValue);
+                node.div.inSetter = false;
+            }
+
+            if (propertyName == 'height')
+            {
+                node.div.inSetter = true;
+                if(this.isDialog(node.type))
+                    $(node.div).dialog('option', 'height', propertyValue);
+                else
+                    $(node.div).css('height', propertyValue);
+                node.div.inSetter = false;
+            }
+
+            if (this.isDialog(node.type)) {
                 if (propertyName == 'title') {
                     node.div.inSetter = true;
                     $(node.div).dialog('option', 'title', propertyValue);
                     node.div.inSetter = false;
                 }
-                if (propertyName == 'visible') {
-                    node.div.inSetter = true;
-                    if (propertyValue)
-                        $(node.div).dialog('open');
-                    else
-                        $(node.div).dialog('close');
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'width') {
-                    node.div.inSetter = true;
-                    $(node.div).dialog('option', 'width', propertyValue);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'height') {
-                    node.div.inSetter = true;
-                    $(node.div).dialog('option', 'height', propertyValue);
-                    node.div.inSetter = false;
-                }
             }
-            if (this.isSlider(node.type)) {
+            else if (this.isSlider(node.type)) {
                 if (propertyName == 'min') {
                     node.div.inSetter = true;
                     $(node.div).slider('option', 'min', propertyValue);
                     node.div.inSetter = false;
                 }
-                if (propertyName == 'max') {
+                else if (propertyName == 'max') {
                     node.div.inSetter = true;
                     $(node.div).slider('option', 'max', propertyValue);
                     node.div.inSetter = false;
                 }
-                if (propertyName == 'visible') {
-                    node.div.inSetter = true;
-                    if (propertyValue)
-                        $(node.div).show();
-                    else
-                        $(node.div).hide();
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'step') {
+                else if (propertyName == 'step') {
                     node.div.inSetter = true;
                     $(node.div).slider('option', 'step', propertyValue);
                     node.div.inSetter = false;
                 }
-                if (propertyName == 'value') {
+                else if (propertyName == 'value') {
                     node.div.inSetter = true;
                     $(node.div).slider('option', 'value', propertyValue);
                     node.div.inSetter = false;
                 }
-                if (propertyName == 'width') {
-                    node.div.inSetter = true;
-                    $(node.div).css('width', propertyValue);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'height') {
-                    node.div.inSetter = true;
-                    $(node.div).css('height', propertyValue);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'transform') {
-                    var x = propertyValue[12] + '%';
-                    var y = propertyValue[13] + '%';
-                    var z = propertyValue[14];
-                    node.div.inSetter = true;
-                    $(node.div).css('left', x);
-                    $(node.div).css('top', y);
-                    $(node.div).css('z-index', z);
-                    node.div.inSetter = false;
-                }
             }
-            if (this.isButton(node.type)) {
+            else if (this.isButton(node.type)) {
                 if (propertyName == 'text') {
                     $('#guioverlay_' + node.id + ' span').text(propertyValue);
                 }
-                if (propertyName == 'transform') {
-                    var x = propertyValue[12] + '%';
-                    var y = propertyValue[13] + '%';
-                    var z = propertyValue[14];
-                    node.div.inSetter = true;
-                    $(node.div).css('left', x);
-                    $(node.div).css('top', y);
-                    $(node.div).css('z-index', z);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'visible') {
-                    node.div.inSetter = true;
-                    if (propertyValue)
-                        $(node.div).show();
-                    else
-                        $(node.div).hide();
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'width') {
-                    node.div.inSetter = true;
-                    $(node.div).css('width', propertyValue);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'height') {
-                    node.div.inSetter = true;
-                    $(node.div).css('height', propertyValue);
-                    node.div.inSetter = false;
-                }
             }
-            if (this.isLabel(node.type)) {
+            else if (this.isLabel(node.type)) {
                 if (propertyName == 'text') {
                     $(node.div).text(propertyValue);
                 }
-                if (propertyName == 'transform') {
-                    var x = propertyValue[12] + '%';
-                    var y = propertyValue[13] + '%';
-                    var z = propertyValue[14];
-                    node.div.inSetter = true;
-                    $(node.div).css('left', x);
-                    $(node.div).css('top', y);
-                    $(node.div).css('z-index', z);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'visible') {
-                    node.div.inSetter = true;
-                    if (propertyValue)
-                        $(node.div).show();
-                    else
-                        $(node.div).hide();
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'width') {
-                    node.div.inSetter = true;
-                    $(node.div).css('width', propertyValue);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'height') {
-                    node.div.inSetter = true;
-                    $(node.div).css('height', propertyValue);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'font_color') {
+                else if (propertyName == 'font_color') {
 
                     $(node.div).css('color', toCSSColor(propertyValue));
                 }
-                if (propertyName == 'font_size') {
+                else if (propertyName == 'font_size') {
 
                     $(node.div).css('font-size', propertyValue + 'px');
                 }
-                if (propertyName == 'text_align') {
+                else if (propertyName == 'text_align') {
                     $(node.div).css('text-align', propertyValue);
                 }
             }
-            if (this.isCheckbox(node.type)) {
+            else if (this.isCheckbox(node.type)) {
                 if (propertyName == 'isChecked') {
                     node.div.inSetter = true;
                     if (propertyValue)
@@ -549,90 +468,14 @@ define(["module", "vwf/view"], function(module, view) {
                         $(node.div).removeAttr('checked');
                     node.div.inSetter = false;
                 }
-                if (propertyName == 'transform') {
-                    var x = propertyValue[12] + '%';
-                    var y = propertyValue[13] + '%';
-                    var z = propertyValue[14];
-                    node.div.inSetter = true;
-                    $(node.div).css('left', x);
-                    $(node.div).css('top', y);
-                    $(node.div).css('z-index', z);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'width') {
-                    node.div.inSetter = true;
-                    $(node.div).css('width', propertyValue);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'height') {
-                    node.div.inSetter = true;
-                    $(node.div).css('height', propertyValue);
-                    node.div.inSetter = false;
-                }  
-                if (propertyName == 'visible') {
-                    node.div.inSetter = true;
-                    if (propertyValue)
-                        $(node.div).show();
-                    else
-                        $(node.div).hide();
-                    node.div.inSetter = false;
-                }
 
             }
-            if (this.isImage(node.type)) {
-                if (propertyName == 'transform') {
-                    var x = propertyValue[12] + '%';
-                    var y = propertyValue[13] + '%';
-                    var z = propertyValue[14];
-                    node.div.inSetter = true;
-                    $(node.div).css('left', x);
-                    $(node.div).css('top', y);
-                    $(node.div).css('z-index', z);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'width') {
-                    node.div.inSetter = true;
-                    $(node.div).css('width', propertyValue);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'height') {
-                    node.div.inSetter = true;
-                    $(node.div).css('height', propertyValue);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'visible') {
-                    node.div.inSetter = true;
-                    if (propertyValue)
-                        $(node.div).show();
-                    else
-                        $(node.div).hide();
-                    node.div.inSetter = false;
-                }
+            else if (this.isImage(node.type)) {
                 if (propertyName == 'src') {
                     $(node.img).attr('src',propertyValue);
                 }
             }
-            if (this.isPanel(node.type)) {
-                if (propertyName == 'transform') {
-                    var x = propertyValue[12] + '%';
-                    var y = propertyValue[13] + '%';
-                    var z = propertyValue[14];
-                    node.div.inSetter = true;
-                    $(node.div).css('left', x);
-                    $(node.div).css('top', y);
-                    $(node.div).css('z-index', z);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'width') {
-                    node.div.inSetter = true;
-                    $(node.div).css('width', propertyValue);
-                    node.div.inSetter = false;
-                }
-                if (propertyName == 'height') {
-                    node.div.inSetter = true;
-                    $(node.div).css('height', propertyValue);
-                    node.div.inSetter = false;
-                }
+            else if (this.isPanel(node.type)) {
                 if (propertyName == 'background_visible') {
                     if (!propertyValue)
                         $(node.div).css('background-color', 'rgba(0,0,0,0)');
@@ -641,29 +484,20 @@ define(["module", "vwf/view"], function(module, view) {
                         propertyValue = vwf.getProperty(node.id, 'background_color');
                     }
                 }
-                if (propertyName == 'background_color') {
+                else if (propertyName == 'background_color') {
 
                     $(node.div).css('background-color', toCSSColor(propertyValue));
                 }
-                if (propertyName == 'border_width') {
+                else if (propertyName == 'border_width') {
                     $(node.div).css('border-width', propertyValue);
                     $(node.div).css('border-style', 'solid');
                 }
-                if (propertyName == 'border_radius') {
+                else if (propertyName == 'border_radius') {
                     $(node.div).css('border-radius', propertyValue);
                 }
-                if (propertyName == 'border_color') {
-
+                else if (propertyName == 'border_color') {
                     $(node.div).css('border-color', toCSSColor(propertyValue));
                 }  
-                if (propertyName == 'visible') {
-                    node.div.inSetter = true;
-                    if (propertyValue)
-                        $(node.div).show();
-                    else
-                        $(node.div).hide();
-                    node.div.inSetter = false;
-                }
             }
         },
         calledMethod: function(id, name, params) {
