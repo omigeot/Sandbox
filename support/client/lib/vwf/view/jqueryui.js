@@ -11,6 +11,7 @@ define(["module", "vwf/view"], function(module, view) {
 
         initialize: function() {
             this.guiNodes = {};
+            this.activeCameras = {};
             window._GUIView = this;
 
         },
@@ -352,6 +353,9 @@ define(["module", "vwf/view"], function(module, view) {
             var node = this.guiNodes[childID];
             if (!node) return;
 
+            /*
+             * by property
+             */
             if(propertyName == 'transform')
             {
                 var x = propertyValue[12] + '%';
@@ -371,7 +375,7 @@ define(["module", "vwf/view"], function(module, view) {
                 node.div.inSetter = false;
             }
 
-            if (propertyName == 'visible')
+            else if (propertyName == 'visible')
             {
                 node.div.inSetter = true;
                 if(this.isDialog(node.type)){
@@ -389,7 +393,7 @@ define(["module", "vwf/view"], function(module, view) {
                 node.div.inSetter = false;
             }
 
-            if (propertyName == 'width')
+            else if (propertyName == 'width')
             {
                 node.div.inSetter = true;
                 if(this.isDialog(node.type))
@@ -399,7 +403,7 @@ define(["module", "vwf/view"], function(module, view) {
                 node.div.inSetter = false;
             }
 
-            if (propertyName == 'height')
+            else if (propertyName == 'height')
             {
                 node.div.inSetter = true;
                 if(this.isDialog(node.type))
@@ -409,7 +413,22 @@ define(["module", "vwf/view"], function(module, view) {
                 node.div.inSetter = false;
             }
 
-            if (this.isDialog(node.type)) {
+            else if (propertyName == 'visibleToCamera')
+            {
+                node.visibleToCamera = propertyValue;
+                node.div.inSetter = true;
+                if((!propertyValue || propertyValue === this.activeCameras[vwf.moniker()]) && vwf.getProperty(node.id, 'visible'))
+                    $(node.div).show();
+                else
+                    $(node.div).hide();
+                node.div.inSetter = false;
+            }
+
+
+            /*
+             * by type
+             */
+            else if (this.isDialog(node.type)) {
                 if (propertyName == 'title') {
                     node.div.inSetter = true;
                     $(node.div).dialog('option', 'title', propertyValue);
@@ -501,7 +520,11 @@ define(["module", "vwf/view"], function(module, view) {
             }
         },
         calledMethod: function(id, name, params) {
+            if( id === 'index-vwf' && name === 'setClientCamera' ){
+                this.activeCameras[params[0]] = params[1];
 
+
+            }
         },
         //Update the sound volume based on the position of the camera and the position of the object
         ticked: function() {
