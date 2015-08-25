@@ -2961,7 +2961,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                 }, 500)
 
             }
-            if(window._RenderManager){
+            if(window._RenderManager && vwf.getProperty(vwf.application(), 'playMode') !== 'play'){
                 _RenderManager.flashHilightMult(findviewnode(childID));
                 _RenderManager.flashHilightMult(findviewnode(nodeID));
             }
