@@ -105,7 +105,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 //As it turns out, it's possible for vwfProp to be an array. The plot thickens.
                 if(Array.isArray(vwfProp)){
                     for (var i = 0; i < vwfProp.length; i++) {
-                        if(!(vwfProp in dest.properties)){
+                        if(!(vwfProp[i] in dest.properties)){
                             setDefaultValue(dest, vwfProp[i], editorData[key].type);
                         }
                     }
@@ -152,23 +152,38 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
                 //Some Editor properties can actually be an array of properties!!
                 if(Array.isArray(scope.property)){
+                    //Some properties have duplicates (maybe to designate defaults?) Remove them.
                     scope.property = getUniqueElems(scope.property);
                     var uniques = scope.property.slice();
                     uniques.map(function(elem, i){
                         uniques[i] = 'vwfNode.properties.' + elem;
                     });
 
-                    scope.$watchGroup(uniques, function(newVal, oldVal){
-                        console.log("Watch group change: ", newVal, oldVal);
-                        for (var i = 0; i < newVal.length; i++) {
-                            if(newVal[i] !== oldVal[i])
-                                setProperty(scope.vwfNode, scope.property[i], newVal[i]);
+                    var getWatchFn = function(propIndex){
+                        return function(newVal, oldVal){
+                            console.log("Watch group change: ", newVal, oldVal, scope.property[propIndex]);
+
+                            if(Array.isArray(newVal)){
+                                for (var i = 0; i < newVal.length; i++) {
+                                    if(newVal[i] !== oldVal[i]){
+                                        setProperty(scope.vwfNode, scope.property[propIndex], newVal);
+                                        return;
+                                    }
+                                }
+                            }
+                            else if(newVal !== oldVal){
+                                setProperty(scope.vwfNode, scope.property[propIndex], newVal);
+                            }
                         }
-                    });
+                    }
+
+                    for (var i = 0; i < uniques.length; i++) {
+                        scope.$watchCollection(uniques[i], getWatchFn(i));
+                    }
                 }
                 else{
                     scope.$watch('vwfNode.properties[property]', function(newVal, oldVal){
-                        console.log(scope.vwfProp, newVal, typeof newVal);
+                        console.log(scope.vwfProp, newVal, oldVal, typeof newVal);
                         if(newVal !== oldVal) setProperty(scope.vwfNode, scope.property, newVal);
                     }, true);
                 }

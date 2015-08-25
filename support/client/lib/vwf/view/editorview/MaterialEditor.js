@@ -371,9 +371,10 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			elem.button({label: scope.label});
 			scope.showPicker = function() {
 				_MapBrowser.setTexturePickedCallback(function(e) {
-					_MapBrowser.setTexturePickedCallback(null);
 					scope.value = e;
+					scope.$apply();
 				}.bind(elem.get(0)));
+
 				_MapBrowser.show();
 			}
 		}

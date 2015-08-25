@@ -63,14 +63,14 @@ block content
 	#vwf-template-vector(ng-non-bindable, style='display: none;')
 		.editorSliderLabel {{displayname}} 
 		div(ng-repeat='component in vwfNode.properties[vwfProp.property] track by $index')
-			input(type='number', ng-model='vwfNode.properties[vwfProp.property][$index]', ng-model-options='{updateOn: "click blur"}')
+			input(type='number', step='{{step || 1}}', ng-model='vwfNode.properties[vwfProp.property][$index]', ng-model-options='{updateOn: "click blur"}')
 	
 	#vwf-template-rangevector(ng-non-bindable, style='display: none;')
 		.editorSliderLabel {{displayname}} 
 		span min:
-		input(type='number', ng-repeat='min in vwfNode.properties[vwfProp.property[0]] track by $index', ng-model='min', )
+		input(type='number', step='{{step || 1}}', ng-repeat='min in vwfNode.properties[vwfProp.property[0]] track by $index', ng-model='vwfNode.properties[vwfProp.property[0]][$index]')
 		span max:
-		input(type='number', ng-repeat='max in vwfNode.properties[vwfProp.property[1]] track by $index', ng-model='max')
+		input(type='number', step='{{step || 1}}', ng-repeat='max in vwfNode.properties[vwfProp.property[1]] track by $index', ng-model='vwfNode.properties[vwfProp.property[1]][$index]')
 	
 	#vwf-template-text(ng-non-bindable, style='display: none;')
 		.editorSliderLabel {{displayname}} 
@@ -79,7 +79,7 @@ block content
 	#vwf-template-choice(ng-non-bindable, style='display: none;')
 		.editorSliderLabel {{displayname}}
 		select(ng-model='vwfNode.properties[vwfProp.property]')
-			option(ng-repeat='value in vwfProp.values' value='{{value}}') {{labels[$index]}}
+			option(ng-repeat='value in vwfProp.values' ng-selected='vwfNode.properties[vwfProp.property] == value' value='{{value}}') {{labels[$index]}}
 
 	#vwf-template-map(ng-non-bindable, style='display: none;')
 		.editorSliderLabel {{displayname}}	
