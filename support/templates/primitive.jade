@@ -85,7 +85,10 @@ block content
 		.editorSliderLabel {{displayname}}	
 		vwf-image-picker(label='displayname', value='vwfNode.properties[vwfProp.property]')
 			
-			
+	#vwf-template-nodeid(ng-non-bindable, style='display: none;')
+		.editorSliderLabel {{displayname}} 
+		input(ng-model='vwfNode.properties[vwfProp.property]', type='text', placeholder='{{displayname}}')
+		button(ng-click='pickNode(vwfNode, vwfProp)') Choose Node
 			
 			
 			

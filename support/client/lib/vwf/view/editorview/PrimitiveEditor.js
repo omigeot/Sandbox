@@ -121,13 +121,13 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
             if(value !== undefined){
                 dest.properties[key] = value;
-                vwf.setProperty(dest.id, key, value);
+                //vwf.setProperty(dest.id, key, value);
             }
             else if(type === "color" || type === "vector"){
 
                 var arr = [0, 0, 0];
                 dest.properties[key] = arr;
-                vwf.setProperty(dest.id, key, arr);
+                //vwf.setProperty(dest.id, key, arr);
             }
         }
 
@@ -142,7 +142,21 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
     }]);
 
     app.directive('vwfEditorProperty', ['$compile', function($compile){
-		function linkFn(scope, elem, attr){
+		function pickNode(srcNode, vwfProp){
+            _Editor.TempPickCallback = function(node) {
+                if(!node) return;
+
+                _RenderManager.flashHilight(findviewnode(node.id));
+                _Editor.TempPickCallback = null;
+                _Editor.SetSelectMode('Pick');
+
+                setProperty(srcNode, vwfProp.property, node.id);
+            };
+
+            _Editor.SetSelectMode('TempPick');
+        }
+
+        function linkFn(scope, elem, attr){
             if(scope.vwfProp){
                 var exclude = ["vwfKey", "vwfNode", "vwfProp"];
                 for(var key in scope.vwfProp){
@@ -186,6 +200,8 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                         console.log(scope.vwfProp, newVal, oldVal, typeof newVal);
                         if(newVal !== oldVal) setProperty(scope.vwfNode, scope.property, newVal);
                     }, true);
+
+                    if(scope.type === "nodeid") scope.pickNode = pickNode;
                 }
 
                 //Get template that corresponds with current type of property
