@@ -54,7 +54,7 @@ block content
 		input(type='checkbox', ng-model='vwfNode.properties[vwfProp.property]')
 		
 	#vwf-template-button(ng-non-bindable, style='display: none;')
-		span button
+		button(ng-click='callMethod(vwfNode, vwfProp)') {{vwfProp.label || vwfProp.method || 'Call Method'}}
 		
 	#vwf-template-rangeslider(ng-non-bindable, style='display: none;')
 		.editorSliderLabel {{displayname}} 
@@ -89,6 +89,16 @@ block content
 		.editorSliderLabel {{displayname}} 
 		input(ng-model='vwfNode.properties[vwfProp.property]', type='text', placeholder='{{displayname}}')
 		button(ng-click='pickNode(vwfNode, vwfProp)') Choose Node
+		
+	#vwf-template-sectionTitle(ng-non-bindable, style='display: none;')
+		.EditorDataSectionTitle {{displayname}}: 
+		
+	#vwf-template-label(ng-non-bindable, style='display: none;')
+		span {{displayname}}: 
+	
+	#vwf-template-prompt(ng-non-bindable, style='display: none;')
+		.editorSliderLabel {{displayname}}
+		button(ng-click='showPrompt(vwfNode, vwfProp, vwfNode.properties[vwfProp.property])') {{vwfNode.properties[vwfProp.property] || 'Set Value'}}
 			
 			
 			

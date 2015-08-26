@@ -142,7 +142,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
     }]);
 
     app.directive('vwfEditorProperty', ['$compile', function($compile){
-		function pickNode(srcNode, vwfProp){
+		function pickNode(vwfNode, vwfProp){
             _Editor.TempPickCallback = function(node) {
                 if(!node) return;
 
@@ -150,10 +150,32 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 _Editor.TempPickCallback = null;
                 _Editor.SetSelectMode('Pick');
 
-                setProperty(srcNode, vwfProp.property, node.id);
+                setProperty(vwfNode, vwfProp.property, node.id);
             };
 
             _Editor.SetSelectMode('TempPick');
+        }
+
+        function showPrompt(vwfNode, vwfProp, value){
+            alertify.prompt('Enter a value for ' + vwfProp.property, function(ok, value) {
+                if (ok) setProperty(vwfNode, vwfProp.property, value);
+            }, value);
+        }
+
+        function callMethod(vwfNode, vwfProp){
+            if (_UserManager.GetCurrentUserName() == null) {
+                _Notifier.notify('You must log in to participate');
+            }
+            else if (vwfNode.id != 'selection') {
+                if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(), vwfNode.id) == 0) {
+                    _Notifier.notify('You do not have permission to edit this object');
+                    return;
+                }
+                vwf_view.kernel.callMethod(vwfNode.id, vwfProp.method);
+            }
+            else {
+                alertify.alert('calling methods on multiple selections is not supported');
+            }
         }
 
         function linkFn(scope, elem, attr){
@@ -202,6 +224,8 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                     }, true);
 
                     if(scope.type === "nodeid") scope.pickNode = pickNode;
+                    else if(scope.type === "prompt") scope.showPrompt = showPrompt;
+                    else if(scope.type === "button") scope.callMethod = callMethod;
                 }
 
                 //Get template that corresponds with current type of property
