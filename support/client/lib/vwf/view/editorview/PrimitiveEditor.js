@@ -199,7 +199,7 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
 
 
 
-            $('#ui-dialog-title-ObjectProperties').text(vwf.getProperty(node.id, 'DisplayName') + " Properties");
+            $('#ui-dialog-title-ObjectProperties').html((vwf.getProperty(node.id, 'DisplayName') + " Properties").escape());
             $('#dispName').val(vwf.getProperty(node.id, 'DisplayName') || node.id);
 
             this.addPropertyEditorDialog(node.id, 'DisplayName', $('#dispName'), 'text');
@@ -254,7 +254,7 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
             } else {
                 $('#receiveShadows').prop('checked', '');
             }
-            $('#BaseSectionTitle').text(node.properties.type || "Type" + ": " + node.id);
+            $('#BaseSectionTitle').html((node.properties.type || "Type" + ": " + node.id).escape());
             this.SelectionTransformed(null, node);
             this.setupAnimationGUI(node, true);
             this.setupEditorData(node,node.id, true,vwf.getProperty(node.id, 'EditorData'));
@@ -549,7 +549,7 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
                     $('#basicSettings' + panelid).append('<div id="' + nodeid + editordata[i].property + 'value"></div>');
                     this.addPropertyEditorDialog(node.id, editordata[i].property, $('#' + nodeid + editordata[i].property + 'value'), 'label');
                     var val = vwf.getProperty(node.id, editordata[i].property);
-                    $('#' + nodeid + editordata[i].property + 'value').text(val);
+                    $('#' + nodeid + editordata[i].property + 'value').html((val).escape());
                 }
                 if (editordata[i].type == 'slider') {
                     var inputstyle = "";
@@ -773,7 +773,7 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
                 }
                 if (editordata[i].type == 'prompt') {
                     $('#basicSettings' + panelid).append('<div style="">' + editordata[i].displayname + '</div><div type="text" id="' + nodeid + i + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/>');
-                    $('#' + nodeid + i).text(vwf.getProperty(node.id, editordata[i].property));
+                    $('#' + nodeid + i).html((vwf.getProperty(node.id, editordata[i].property)).escape());
                     $('#' + nodeid + i).button();
                     $('#' + nodeid + i).css('width','100%');
                     $('#' + nodeid + i).click(function() {
