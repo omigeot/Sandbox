@@ -33,6 +33,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			$scope.worldIsSinglePlayer = instanceData.publishSettings.SinglePlayer;
 			$scope.worldIsNotLaunchable = !($scope.worldIsPersistent && $scope.userIsOwner) || $scope.worldIsSinglePlayer || $scope.isExample;
 			$scope.worldHasTerrain = !!window._dTerrain;
+			
 
 			//console.log('UserIsOwner:', $scope.userIsOwner);
 		});
@@ -591,14 +592,14 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 					alertify.confirm("Are you sure you want to share your camera position? Other users will be able to see from your camera!", function(ok) {
 						if (ok) {
 							_dView.shareCameraView();
-							$('#MenuCameraShare').text('Stop Camera Sharing');
+							$('#MenuCameraShare').html(('Stop Camera Sharing').escape());
 						}
 					}.bind(this));
 				} else {
 					alertify.confirm("You are currently sharing your camera view. Would you like to stop sharing?", function(ok) {
 						if (ok) {
 							_dView.stopShareCameraView();
-							$('#MenuCameraShare').text('Share Camera View');
+							$('#MenuCameraShare').html(('Share Camera View').escape());
 	
 						}
 					}.bind(this));
@@ -796,11 +797,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 				p.prompt(data);
 				
 			},
-	
-			
-	
-	
-	
+			MenuObjectCenters:function()
+			{
+				var off = !_Editor.GetMoveGizmo().transformOffsets;
+				_Editor.GetMoveGizmo().setApplyOffset(off);
+				$scope.fields.useObjectCenters = off;
+			},
 			LocationMoveToGround: function(e) {
 				_LocationTools.MoveToGround();
 			},

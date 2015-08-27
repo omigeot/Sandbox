@@ -271,7 +271,7 @@ define(["module", "vwf/view"], function(module, view) {
 
                     $(node.parentdiv).append('<div id="guioverlay_' + node.id + '"/>')
                     node.div = $('#guioverlay_' + node.id)[0];
-                    $(node.div).text('');
+                    $(node.div).html(('').escape());
                     $(node.div).button();
 
                     $(node.div).on("click", function(event, ui) {
@@ -282,20 +282,20 @@ define(["module", "vwf/view"], function(module, view) {
                 if (this.isLabel(node.type)) {
                     $(node.parentdiv).append('<div id="guioverlay_' + node.id + '"/>')
                     node.div = $('#guioverlay_' + node.id)[0];
-                    $(node.div).text('');
+                    $(node.div).html(('').escape());
                     $(node.div).css('position', 'absolute');
                     $(node.div).css('font-family', 'Verdana, Arial, sans-serif')
                 }
                 if (this.isPanel(node.type)) {
                     $(node.parentdiv).append('<div id="guioverlay_' + node.id + '"/>')
                     node.div = $('#guioverlay_' + node.id)[0];
-                    $(node.div).text('');
+                    $(node.div).html(('').escape());
                     $(node.div).css('position', 'absolute');
                 }
                 if (this.isImage(node.type)) {
                     $(node.parentdiv).append('<div id="guioverlay_' + node.id + '"/>')
                     node.div = $('#guioverlay_' + node.id)[0];
-                    $(node.div).text('');
+                    $(node.div).html(('').escape());
                     $(node.div).css('position', 'absolute');
                     $(node.div).append('<img src="" />');
                     $('#guioverlay_' + node.id + ' img').css('position','absolute');
@@ -308,7 +308,7 @@ define(["module", "vwf/view"], function(module, view) {
 
                     $(node.parentdiv).append('<input type="checkbox" id="guioverlay_' + node.id + '"/>')
                     node.div = $('#guioverlay_' + node.id)[0];
-                    $(node.div).text('');
+                    $(node.div).html(('').escape());
                     $(node.div).css('position', 'absolute');
 
                     $(node.div).on("click", function(event, ui) {
@@ -459,12 +459,12 @@ define(["module", "vwf/view"], function(module, view) {
             }
             else if (this.isButton(node.type)) {
                 if (propertyName == 'text') {
-                    $('#guioverlay_' + node.id + ' span').text(propertyValue);
+                    $('#guioverlay_' + node.id + ' span').html((propertyValue).escape());
                 }
             }
             else if (this.isLabel(node.type)) {
                 if (propertyName == 'text') {
-                    $(node.div).text(propertyValue);
+                    $(node.div).html((propertyValue).escape());
                 }
                 else if (propertyName == 'font_color') {
 

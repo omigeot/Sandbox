@@ -1167,6 +1167,18 @@ function MaterialCache() {
         this.getDefForMaterial = function(currentmat) {
             try {
 
+
+                if(currentmat instanceof THREE.MeshFaceMaterial)
+                {
+                    var def = [];
+                    for(var i in currentmat.materials)
+                    {
+                        def[i] = this.getDefForMaterial(currentmat.materials[i]);
+                    }
+                    return def;
+                }
+
+
                 var value = {};
                 value.color = {}
                 value.color.r = parseFloat(currentmat.color.r.toFixed(3));
