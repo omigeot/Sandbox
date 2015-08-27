@@ -20,6 +20,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		{
 			$rootScope.fields.selectedNode = node;
 			$rootScope.fields.selectedNodeIds = [];
+			
 			for(var i=0; i<_Editor.getSelectionCount(); i++)
 				$rootScope.fields.selectedNodeIds.push(_Editor.GetSelectedVWFID(i));
 

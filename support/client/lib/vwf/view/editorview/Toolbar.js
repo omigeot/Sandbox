@@ -65,7 +65,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/Menubar'], funct
 		$scope.xfSelected = 'move';
 		$scope.fields.coordSpaceSelected = 'world';
 		$scope.cameraSelected = 'orbit';
-
+		$scope.useObjectCenters = true;
 		$scope.triggerMenu = function(menuId, evt)
 		{
 			handlers[menuId](evt);

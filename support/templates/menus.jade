@@ -101,6 +101,8 @@ mixin menus_body
 							| Local Coords
 						li: a#MenuWorld(title="Present transform tools with respect to world (global) coordinates", ng-click='lookUpHandler($event)')
 							| World Coords
+						li: a#MenuObjectCenters(title="Transform the objects in place, or from the gizmo", ng-click='lookUpHandler($event)')
+							| Use Object Center	
 						li.divider
 
 						li
