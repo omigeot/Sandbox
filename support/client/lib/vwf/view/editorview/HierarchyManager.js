@@ -149,12 +149,13 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 
 		$scope.$watch('fields.selectedNode', function(newval)
 		{
-			if( !_SidePanel.isTabOpen('hierarchyManager') )
-				$('#hierarchyDisplay tree-node[node-id="'+newval.id+'"]').parents('tree-node:not(.collapsed)').addClass('collapsed');
 
 			if( newval )
 			{
 				$scope.selectedThreeNode = null;
+
+				if( !_SidePanel.isTabOpen('hierarchyManager') )
+					$('#hierarchyDisplay tree-node[node-id="'+newval.id+'"]').parents('tree-node:not(.collapsed)').addClass('collapsed');
 
 				// open ancestor nodes
 				$('#hierarchyDisplay tree-node[node-id="'+newval.id+'"]').parents('tree-node.collapsed').removeClass('collapsed');
@@ -178,12 +179,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 				// new selection = 0, add = 2, subtract = 3
 				if( !evt.ctrlKey )
 				{
-					_Editor.SelectObject(node.id, 0);
+					_Editor.SelectObjectPublic(node.id, 0);
 				}
 				else if( $scope.fields.selectedNodeIds.indexOf(node.id) === -1 )
-					_Editor.SelectObject(node.id, 2);
+					_Editor.SelectObjectPublic(node.id, 2);
 				else
-					_Editor.SelectObject(node.id, 3);
+					_Editor.SelectObjectPublic(node.id, 3);
 			}
 
 			// three.js nodes

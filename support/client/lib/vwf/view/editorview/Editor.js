@@ -283,7 +283,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             var dispName;
             if (vwfnode) dispName = vwf.getProperty(vwfnode, 'DisplayName');
             if (!dispName) dispName = vwfnode;
-            $('#ContextMenuName').text(dispName || vwfnode || "{none selected}");
+            $('#ContextMenuName').html((dispName || vwfnode || "{none selected}").escape());
             $('#ContextMenuName').attr('VWFID', vwfnode);
             $('#ContextMenu').show();
             $('#ContextMenu').css('z-index', '1000000');
@@ -625,9 +625,9 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
 
                     _UndoManager.recordDelete(SelectedVWFNodes[s].id);
                     vwf_view.kernel.deleteNode(SelectedVWFNodes[s].id);
-                    $('#StatusSelectedID').text('No Selection');
-                    $('#StatusSelectedName').text('No Selection');
-                    $('#StatusPickMode').text('Pick: None');
+                    $('#StatusSelectedID').html(('No Selection').escape());
+                    $('#StatusSelectedName').html(('No Selection').escape());
+                    $('#StatusPickMode').html(('Pick: None').escape());
 
                 }
                 if (_PrimitiveEditor.isOpen()) _PrimitiveEditor.hide();
@@ -828,7 +828,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                 }]);
             }
             if (window._Editor && propname == 'DisplayName' && _Editor.isSelected(id)) {
-                $('#StatusSelectedName').text(val);
+                $('#StatusSelectedName').html((val).escape());
             }
 
             
@@ -1151,12 +1151,12 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                 var mouseovernode = vwf.getProperty(vwf.views[0].lastPickId, 'DisplayName') || vwf.views[0].lastPickId;
                 //avoid triggering a repaint of the status bar if the value is not changed
                 if ($('#StatusMouseOverName').text() !== mouseovernode)
-                    $('#StatusMouseOverName').text(mouseovernode);
+                    $('#StatusMouseOverName').html((mouseovernode).escape());
             }
             else
             {
                 if ($('#StatusMouseOverName').text() !== 'Scene')
-                    $('#StatusMouseOverName').text('Scene');
+                    $('#StatusMouseOverName').html(('Scene').escape());
             }
            
             
@@ -1903,12 +1903,12 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             if(!node.properties) node.properties = {};
             return node;
         }
-        this.SelectObjectPublic = function(VWFNodeid) {
+        this.SelectObjectPublic = function(VWFNodeid, pickmod) {
             if (SelectMode == 'TempPick') {
                 if (this.TempPickCallback) this.TempPickCallback(_Editor.getNode(VWFNodeid));
             } else {
 
-                this.SelectObject(VWFNodeid, this.PickMod);
+                this.SelectObject(VWFNodeid, pickmod !== undefined ? pickmod : this.PickMod);
             }
         }
         this.SelectObject = function(VWFNode, selectmod, skipUndo) //the skip undo flag is necessary so that the undomanager can trigger new selections without messing up the undostack
@@ -2005,17 +2005,17 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                 }
 
 
-                $('#StatusSelectedID').text('No Selection');
-                $('#StatusSelectedName').text('No Selection');
+                $('#StatusSelectedID').html(('No Selection').escape());
+                $('#StatusSelectedName').html(('No Selection').escape());
                 if (SelectedVWFNodes.length > 0) {
                     if (SelectedVWFNodes.length == 1)
-                        $('#StatusSelectedID').text(SelectedVWFNodes[0].id);
+                        $('#StatusSelectedID').html((SelectedVWFNodes[0].id).escape());
                     else
-                        $('#StatusSelectedID').text(SelectedVWFNodes.length + ' objects');
+                        $('#StatusSelectedID').html((SelectedVWFNodes.length + ' objects').escape());
 
-                    $('#StatusSelectedName').text(vwf.getProperty(SelectedVWFNodes[0].id, 'DisplayName') || SelectedVWFNodes[0].id);
+                    $('#StatusSelectedName').html((vwf.getProperty(SelectedVWFNodes[0].id, 'DisplayName') || SelectedVWFNodes[0].id).escape());
                     for (var i = 1; i < SelectedVWFNodes.length; i++)
-                        $('#StatusSelectedName').text($('#StatusSelectedName').text() + ', ' + vwf.getProperty(SelectedVWFNodes[i].id, 'DisplayName'));
+                        $('#StatusSelectedName').html(($('#StatusSelectedName').text() + ', ' + vwf.getProperty(SelectedVWFNodes[i].id, 'DisplayName')).escape());
                 }
                 // do some hilighting of GUI nodes to refect selection
                 $('.guiselected').off('dblclick', this.guiNodeDragStart);
@@ -2417,7 +2417,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
         }
         this.SetSelectMode = function(e) {
             SelectMode = e;
-            $('#StatusPickMode').text('Pick: ' + e);
+            $('#StatusPickMode').html(('Pick: ' + e).escape());
             if (e == 'Pick') {
                 //$('#MenuSelectPickicon').addClass('iconselected')
                 $('#glyphOverlay').show();
@@ -2444,13 +2444,13 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
         this.SetCoordSystem = function(e) {
             CoordSystem = e;
             if (e == WorldCoords) {
-                $('#StatusCoords').text('World Coords');
+                $('#StatusCoords').html(('World Coords').escape());
 				setTimeout(function(){
 					angularapp.root.fields.coordSpaceSelected = 'world';
 					angularapp.root.$apply();
 				}, 0);
             } else {
-                $('#StatusCoords').text('Local Coords');
+                $('#StatusCoords').html(('Local Coords').escape());
 				setTimeout(function(){
 					angularapp.root.fields.coordSpaceSelected = 'local';
 					angularapp.root.$apply();
@@ -2464,7 +2464,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             RotateSnap = r;
             MoveSnap = m;
             ScaleSnap = s;
-            $('#StatusSnaps').text('Snaps: ' + (r / 0.0174532925) + 'deg, ' + m + 'm, ' + s + '%');
+            $('#StatusSnaps').html(('Snaps: ' + (r / 0.0174532925) + 'deg, ' + m + 'm, ' + s + '%').escape());
         }.bind(this);
         this.GetSelectedVWFID = function(i) {
             if(!i)
@@ -2961,7 +2961,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                 }, 500)
 
             }
-            if(window._RenderManager){
+            if(window._RenderManager && vwf.getProperty(vwf.application(), 'playMode') !== 'play'){
                 _RenderManager.flashHilightMult(findviewnode(childID));
                 _RenderManager.flashHilightMult(findviewnode(nodeID));
             }
