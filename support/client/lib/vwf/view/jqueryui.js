@@ -379,13 +379,13 @@ define(["module", "vwf/view"], function(module, view) {
             {
                 node.div.inSetter = true;
                 if(this.isDialog(node.type)){
-                    if (propertyValue)
+                    if ((!node.visibleToCamera || node.visibleToCamera === this.activeCameras[vwf.moniker()]) && propertyValue)
                         $(node.div).dialog('open');
                     else
                         $(node.div).dialog('close');
                 }
                 else {
-                    if(propertyValue)
+                    if ((!node.visibleToCamera || node.visibleToCamera === this.activeCameras[vwf.moniker()]) && propertyValue)
                         $(node.div).show();
                     else
                         $(node.div).hide();
