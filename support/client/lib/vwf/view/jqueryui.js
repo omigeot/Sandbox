@@ -131,13 +131,10 @@ define(["module", "vwf/view"], function(module, view) {
             });
         },
         getScreenCenter: function() {
-            var w = $(window).width() / 2;
-            var h = $(window).height() / 2;
-
             if (this.isGUINode(vwf.prototype(this.getCreateParentNode())))
                 return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-            return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 50, 0, 0]; //when creating on a 3D asset, default to center of screen
+            return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 50, 50, 0, 1]; //when creating on a 3D asset, default to center of screen
         },
         //when creating a gui node - if the parent is a 3D object, create normally. if it's a guinode, and that guiNode is not a panel or a dialog, create as child of world
         getCreateParentNode: function() {
@@ -188,7 +185,7 @@ define(["module", "vwf/view"], function(module, view) {
         },
         createdNode: function(nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
 
-            if (this.isGUINode(childExtendsID)) {
+            if (this.isGUINode(childExtendsID) && nodeID !== 0) {
 
                 var node = this.guiNodes[childID] = {};
                 node.id = childID;
@@ -368,6 +365,7 @@ define(["module", "vwf/view"], function(module, view) {
                     $(node.div).parent().css('top', y);
                 }
                 else {
+					$(node.div).css('transform', 'matrix3d('+propertyValue.slice(0,12).concat([0,0,0,1]).join(',')+')');
                     $(node.div).css('left', x);
                     $(node.div).css('top', y);
                     $(node.div).css('z-index', z);
