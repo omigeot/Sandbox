@@ -167,8 +167,8 @@ define(["module", "vwf/model", "vwf/model/buzz/buzz.min"], function(module, mode
                             Sound.unloop();
                         Sound.volume = vol;
                     }
-                    this.soundSources[i].updateSourcePosition();
-                    this.soundSources[i].updateVolume(campos);
+                    this.soundSources[soundid].updateSourcePosition();
+                    this.soundSources[soundid].updateVolume(campos);
 
                 }.bind(this), dist * 2.941); // 1 meter in 2.941 milliseconds. 340 meters per second, so 2.941 seconds per 1000m
             }
