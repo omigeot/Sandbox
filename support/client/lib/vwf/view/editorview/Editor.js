@@ -1759,18 +1759,13 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             
             //prefer the override value
 
-            var localView = _dView.viewTransformOverrides[this.GetSelectedVWFID()];
-            var localParentView = _dView.viewTransformOverrides[vwf.parent(this.GetSelectedVWFID())];
-
-            localView = localView && localView.override
-            localParentView = localParentView && localParentView.override
 
             if(CoordSystem == LocalCoords)
-                this.MoveGizmo.updateOrientation(localView || this.getTransformCallback(this.GetSelectedVWFID()));
+                this.MoveGizmo.updateOrientation(this.getTransformCallback(this.GetSelectedVWFID()));
             if(CoordSystem == WorldCoords)
                 this.MoveGizmo.updateOrientation(this.getTransformCallback(vwf.application()));
             if(CoordSystem == ParentCoords)
-                this.MoveGizmo.updateOrientation(localParentView || this.getTransformCallback(vwf.parent(this.GetSelectedVWFID())));
+                this.MoveGizmo.updateOrientation(this.getTransformCallback(vwf.parent(this.GetSelectedVWFID())));
         }.bind(this);
         this.triggerSelectionChanged = function(VWFNode) {
 

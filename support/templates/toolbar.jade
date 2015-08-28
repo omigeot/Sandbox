@@ -25,6 +25,8 @@ mixin toolbar_body
 			ng-class='{"icondisabled": !fields.selectedNode, "iconselected": fields.coordSpaceSelected === "world"}')
 		.icon.localspace(title='Use Local Coordinates', ng-click='triggerMenu("MenuLocal",$event)'
 			ng-class='{"icondisabled": !fields.selectedNode, "iconselected": fields.coordSpaceSelected === "local"}')
+		.icon.navigate(title='Use Object Centers', ng-click='triggerMenu("MenuObjectCenters",$event)'
+			ng-class='{"icondisabled": !fields.selectedNode, "iconselected": fields.useObjectCenters === true}')
 		.separator
 
 		.icon.pick(title='Select by clicking', ng-click='triggerMenu("MenuSelectPick",$event)')

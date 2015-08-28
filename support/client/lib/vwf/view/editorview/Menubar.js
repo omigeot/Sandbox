@@ -33,6 +33,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			$scope.worldIsSinglePlayer = instanceData.publishSettings.SinglePlayer;
 			$scope.worldIsNotLaunchable = !($scope.worldIsPersistent && $scope.userIsOwner) || $scope.worldIsSinglePlayer || $scope.isExample;
 			$scope.worldHasTerrain = !!window._dTerrain;
+			
 
 			//console.log('UserIsOwner:', $scope.userIsOwner);
 		});
@@ -796,11 +797,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 				p.prompt(data);
 				
 			},
-	
-			
-	
-	
-	
+			MenuObjectCenters:function()
+			{
+				var off = !_Editor.GetMoveGizmo().transformOffsets;
+				_Editor.GetMoveGizmo().setApplyOffset(off);
+				$scope.fields.useObjectCenters = off;
+			},
 			LocationMoveToGround: function(e) {
 				_LocationTools.MoveToGround();
 			},

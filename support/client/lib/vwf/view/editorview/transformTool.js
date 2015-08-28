@@ -13,6 +13,9 @@ var transformTool = function()
     this.transformOffsets = true;
     this.init = function()
     {
+        var _angularapp = require("vwf/view/editorview/angular-app");
+        _angularapp.root.fields.useObjectCenters = true;
+
         this.movegizbody = new THREE.Object3D();
         this.movegizbody.matrixAutoUpdate = false;
         this.axisSelected = -1;
@@ -809,6 +812,8 @@ var transformTool = function()
     this.setApplyOffset = function(o)
     {
         this.transformOffsets = o;
+        var _angularapp = require("vwf/view/editorview/angular-app");
+        _angularapp.root.fields.useObjectCenters = o;
     }
 }
 define([], function()
