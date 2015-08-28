@@ -2092,7 +2092,7 @@ this.getNode = function( nodeID, full, normalize ) {  // TODO: options to includ
     // changes. Otherwise, return the URI if this is the root of a URI component.
 
     if(nodeComponent.continues)
-        nodeComponent = objectDiff(nodeComponent,continuesDefs[nodeComponent.continues]);
+        nodeComponent = objectDiff(nodeComponent,continuesDefs[nodeComponent.continues + nodeID]);
 
     if ( full || ! node.patchable || patched ) {
         return nodeComponent;
@@ -2436,7 +2436,32 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
                 
                 $.getJSON(childComponent.continues,function(data)
                 {
-                    continuesDefs[childComponent.continues] = JSON.parse(JSON.stringify(data));
+                   
+
+                    var cleanChildNames = function(node)
+                    {
+                        if(node.children)
+                            for(var i in node.children)
+                                cleanChildNames(node.children[i])
+
+                        if(node.children)
+                        {
+                            var keys = Object.keys(node.children)
+                            for(var i =0; i < keys.length; i++)
+                            {   
+                                var oldName = keys[i];
+
+                                var child = node.children[oldName];
+                                delete node.children[oldName];
+                                node.children[childID + oldName] = child
+                            }        
+                        }
+
+                    }
+
+                    cleanChildNames(data);
+                    continuesDefs[childComponent.continues + childID] = JSON.parse(JSON.stringify(data));
+
                     $.extend(true,data,childComponent)
                     childComponent = data;
                     series_callback_async( undefined, undefined );
