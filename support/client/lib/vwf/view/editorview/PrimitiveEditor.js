@@ -794,10 +794,14 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
                     $('#basicSettings' + panelid).append('<div style="margin-top: 5px;margin-bottom: 5px;"><div >' + editordata[i].displayname + '</div><input type="text" style="background: black;display: inline;width: 50%;padding: 2px;border-radius: 5px;font-weight: bold;" id="' + nodeid + editordata[i].property + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/><div  style="float:right;width:45%;height:2em" id="' + nodeid + i + 'button" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/></div><div style="clear:both" />');
                     
                    
-                    $('#' + nodeid + editordata[i].property).attr('disabled', 'disabled');
+                    //$('#' + nodeid + editordata[i].property).attr('disabled', 'disabled');
                     $('#' + nodeid + i + 'button').button({
                         label: 'Choose Node'
                     });
+                    $('#' + nodeid + editordata[i].property).change(function(){
+                        _PrimitiveEditor.setProperty(nodeid, editordata[i].property, $(this).val());
+                    });
+
                     $('#' + nodeid + i + 'button').mouseover(function(){
 
                         var propname = $(this).attr('propname');
@@ -813,14 +817,12 @@ define(['vwf/view/editorview/panelEditor'], function(baseclass) {
 
                         _Editor.TempPickCallback = function(node) {
                             if(!node) return;
-                            $('#' + nodename + propname ).val(node.id);
-
+                            $('#' + nodename + propname ).val(node.id).change();
                             _RenderManager.flashHilight(findviewnode(node.id));
 
                             _Editor.TempPickCallback = null;
                             _Editor.SetSelectMode('Pick');
 
-                            _PrimitiveEditor.setProperty(nodename, propname, node.id);
                         };
                         _Editor.SetSelectMode('TempPick');
 
