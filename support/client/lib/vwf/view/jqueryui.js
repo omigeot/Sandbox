@@ -394,11 +394,11 @@ define(["module", "vwf/view"], function(module, view) {
                     $(node.div).parent().css('top', y);
                 }
                 else {
-                    if(propertyValue.slice(0,12).reduce(function(x,y){return x||!!y;},false))
+                    if((!node.style || !node.style.transform) && propertyValue.slice(0,12).reduce(function(x,y){return x||!!y;},false))
                         $(node.div).css('transform', 'matrix3d('+propertyValue.slice(0,12).concat([0,0,0,1]).join(',')+')');
-                    $(node.div).css('left', x);
-                    $(node.div).css('top', y);
-                    $(node.div).css('z-index', z);
+                    if(!node.style || !node.style.left) $(node.div).css('left', x);
+                    if(!node.style || !node.style.top) $(node.div).css('top', y);
+                    if(!node.style || !node.style['z-index']) $(node.div).css('z-index', z);
                 }
                 node.div.inSetter = false;
             }
@@ -416,7 +416,7 @@ define(["module", "vwf/view"], function(module, view) {
                 node.div.inSetter = true;
                 if(this.isDialog(node.type))
                     $(node.div).dialog('option', 'width', propertyValue);
-                else
+                else if(!node.style || !node.style.width)
                     $(node.div).css('width', propertyValue);
                 node.div.inSetter = false;
             }
@@ -426,7 +426,7 @@ define(["module", "vwf/view"], function(module, view) {
                 node.div.inSetter = true;
                 if(this.isDialog(node.type))
                     $(node.div).dialog('option', 'height', propertyValue);
-                else
+                else if(!node.style || !node.style.height)
                     $(node.div).css('height', propertyValue);
                 node.div.inSetter = false;
             }
@@ -440,6 +440,13 @@ define(["module", "vwf/view"], function(module, view) {
                     this.setNodeVisibility(node, false);
             }
 
+            else if (propertyName == 'style')
+            {
+                node.div.inSetter = true;
+                node.style = propertyValue;
+                $(node.div).css(propertyValue);
+                node.div.inSetter = false;
+            }
 
             /*
              * by type
@@ -512,25 +519,28 @@ define(["module", "vwf/view"], function(module, view) {
             }
             else if (this.isPanel(node.type)) {
                 if (propertyName == 'background_visible') {
-                    if (!propertyValue)
-                        $(node.div).css('background-color', 'rgba(0,0,0,0)');
+                    if (!propertyValue){
+                        propertyName = 'background_color';
+                        propertyValue = '';
+                    }
                     else {
                         propertyName = 'background_color';
                         propertyValue = vwf.getProperty(node.id, 'background_color');
                     }
                 }
-                else if (propertyName == 'background_color') {
+
+                if (propertyName == 'background_color' && !(node.style && node.style['background-color'])) {
 
                     $(node.div).css('background-color', toCSSColor(propertyValue));
                 }
-                else if (propertyName == 'border_width') {
+                else if (propertyName == 'border_width' && !(node.style && node.style['border-width'])) {
                     $(node.div).css('border-width', propertyValue);
                     $(node.div).css('border-style', 'solid');
                 }
-                else if (propertyName == 'border_radius') {
+                else if (propertyName == 'border_radius' && !(node.style && node.style['border-radius'])) {
                     $(node.div).css('border-radius', propertyValue);
                 }
-                else if (propertyName == 'border_color') {
+                else if (propertyName == 'border_color' && !(node.style && node.style['border-color'])) {
                     $(node.div).css('border-color', toCSSColor(propertyValue));
                 }  
             }
