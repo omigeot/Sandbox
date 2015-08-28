@@ -438,13 +438,77 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 configurable: false
             });
 
-
-           
-
+            
+            
+  
             if (nodeID)
                 this.addingChild(nodeID, childID, childName);
 
 
+        },
+        //hook up the system API. They are defined in properties, and we dont' want to cause the context to think it needs to set them
+        //so the user should not really call the APIs directly, but instead use these getters
+        hookUpAPIs : function(node)
+        {
+            
+            if(node.properties.hasOwnProperty("___transformAPI"))
+            {
+                Object.defineProperty(node, "transformAPI", { // TODO: only define on shared "node" prototype?
+                    get: function() {
+                        return vwf.getProperty(this.id,"___transformAPI");
+                    },
+                    enumerable: true,
+                });
+            }
+           if(node.properties.hasOwnProperty("___audioAPI"))
+            {
+                Object.defineProperty(node, "audioAPI", { // TODO: only define on shared "node" prototype?
+                    get: function() {
+                        return vwf.getProperty(this.id,"___audioAPI");
+                    },
+                    enumerable: true,
+                });
+            }
+            if(node.properties.hasOwnProperty("___physicsAPI"))
+            {
+                Object.defineProperty(node, "physicsAPI", { // TODO: only define on shared "node" prototype?
+                    get: function() {
+                        return vwf.getProperty(this.id,"___physicsAPI")},
+                    enumerable: true,
+                });
+            }
+            if(node.properties.hasOwnProperty("___clientAPI"))
+            {
+                Object.defineProperty(node, "clientAPI", { // TODO: only define on shared "node" prototype?
+                    get: function() {
+                        return vwf.getProperty(this.id,"___clientAPI")},
+                    enumerable: true,
+                });
+            }
+            if(node.properties.hasOwnProperty("___commsAPI"))
+            {
+                Object.defineProperty(node, "commsAPI", { // TODO: only define on shared "node" prototype?
+                    get: function() {
+                        return vwf.getProperty(this.id,"___commsAPI")},
+                    enumerable: true,
+                });
+            }
+            if(node.properties.hasOwnProperty("___xAPI"))
+            {
+                Object.defineProperty(node, "xAPI", { // TODO: only define on shared "node" prototype?
+                    get: function() {
+                        return vwf.getProperty(this.id,"___xAPI")},
+                    enumerable: true,
+                });
+            }
+            if(node.properties.hasOwnProperty("___traceAPI"))
+            {
+                Object.defineProperty(node, "traceAPI", { // TODO: only define on shared "node" prototype?
+                    get: function() {
+                        return vwf.getProperty(this.id,"___traceAPI")},
+                    enumerable: true,
+                });
+            }
         },
         //allow a behavior node to directly acess the properties of it's parent
         hookupBehaviorProperty: function(behaviorNode, parentid, propname) {
@@ -506,9 +570,9 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
             if (this.isBehavior(child)) {
                 this.hookupBehavior(child, nodeID);
-
-
             }
+
+            this.hookUpAPIs(child);
 
             var scriptText = "this.initialize && this.initialize()";
 

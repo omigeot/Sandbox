@@ -26,7 +26,7 @@ properties:
       displayname: "Render Depth"
       min: 0
       max: 100
-  audioAPI:
+  ___audioAPI:
     get: |
           if(!this._audioAPI)
           {
@@ -55,7 +55,7 @@ properties:
             }
            }
            return this._audioAPI;
-  transformAPI:
+  ___transformAPI:
     get: |
         if(!this._tapi)
         {
