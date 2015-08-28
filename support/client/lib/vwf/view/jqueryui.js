@@ -359,6 +359,7 @@ define(["module", "vwf/view"], function(module, view) {
             this.satProperty(childID, propertyName, propertyValue);
         },
         setNodeVisibility: function(node, show){
+            node.div.inSetter = true;
             if(this.isDialog(node.type)){
                 if(show)
                     $(node.div).dialog('open');
@@ -370,7 +371,8 @@ define(["module", "vwf/view"], function(module, view) {
                     $(node.div).show();
                 else
                     $(node.div).hide();
-                }
+            }
+            node.div.inSetter = false;
         },
         satProperty: function(childID, propertyName, propertyValue) {
 
@@ -403,12 +405,10 @@ define(["module", "vwf/view"], function(module, view) {
 
             else if (propertyName == 'visible')
             {
-                node.div.inSetter = true;
                 if ((!node.visibleToCamera || node.visibleToCamera === this.activeCamera) && propertyValue)
                     this.setNodeVisibility(node, true);
                 else
                     this.setNodeVisibility(node, false);
-                node.div.inSetter = false;
             }
 
             else if (propertyName == 'width')
@@ -434,12 +434,10 @@ define(["module", "vwf/view"], function(module, view) {
             else if (propertyName == 'visibleToCamera')
             {
                 node.visibleToCamera = propertyValue;
-                node.div.inSetter = true;
                 if((!propertyValue || propertyValue === this.activeCamera) && vwf.getProperty(node.id, 'visible'))
                     this.setNodeVisibility(node, true);
                 else
                     this.setNodeVisibility(node, false);
-                node.div.inSetter = false;
             }
 
 
