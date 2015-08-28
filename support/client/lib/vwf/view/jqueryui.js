@@ -465,7 +465,7 @@ define(["module", "vwf/view"], function(module, view) {
             }
             if (this.isButton(node.type)) {
                 if (propertyName == 'text') {
-                    $('#guioverlay_' + node.id + ' span').html((propertyValue).escape());
+                    $('#guioverlay_' + node.id + ' span').html((propertyValue +'').escape());
                 }
                 if (propertyName == 'transform') {
                     var x = propertyValue[12] + '%';
@@ -498,7 +498,7 @@ define(["module", "vwf/view"], function(module, view) {
             }
             if (this.isLabel(node.type)) {
                 if (propertyName == 'text') {
-                    $(node.div).html((propertyValue).escape());
+                    $(node.div).html((propertyValue+'').escape());
                 }
                 if (propertyName == 'transform') {
                     var x = propertyValue[12] + '%';
