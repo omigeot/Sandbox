@@ -11,7 +11,7 @@ define(["module", "vwf/view"], function(module, view) {
 
         initialize: function() {
             this.guiNodes = {};
-            this.activeCameras = {};
+            this.activeCamera = '';
             window._GUIView = this;
 
         },
@@ -24,7 +24,8 @@ define(["module", "vwf/view"], function(module, view) {
                     title: title,
                     transform: this.getScreenCenter(),
                     owner: _UserManager.GetCurrentUserName(),
-                    DisplayName: _Editor.GetUniqueName('Dialog')
+                    DisplayName: _Editor.GetUniqueName('Dialog'),
+                    visible: true
                 }
             });
         },
@@ -43,7 +44,9 @@ define(["module", "vwf/view"], function(module, view) {
                     width: 100,
                     transform: this.getScreenCenter(),
                     owner: _UserManager.GetCurrentUserName(),
-                    DisplayName: _Editor.GetUniqueName('Slider')
+                    DisplayName: _Editor.GetUniqueName('Slider'),
+                    visible: true
+
                 }
             });
         },
@@ -61,7 +64,9 @@ define(["module", "vwf/view"], function(module, view) {
                     top: 0,
                     transform: this.getScreenCenter(),
                     owner: _UserManager.GetCurrentUserName(),
-                    DisplayName: _Editor.GetUniqueName('Button')
+                    DisplayName: _Editor.GetUniqueName('Button'),
+                    visible: true
+
                 }
             });
         },
@@ -78,7 +83,9 @@ define(["module", "vwf/view"], function(module, view) {
                     top: 0,
                     transform: this.getScreenCenter(),
                     owner: _UserManager.GetCurrentUserName(),
-                    DisplayName: _Editor.GetUniqueName('Label')
+                    DisplayName: _Editor.GetUniqueName('Label'),
+                    visible: true
+
                 }
             });
         },
@@ -96,7 +103,9 @@ define(["module", "vwf/view"], function(module, view) {
                     border_color: [1, 1, 1],
                     transform: this.getScreenCenter(),
                     owner: _UserManager.GetCurrentUserName(),
-                    DisplayName: _Editor.GetUniqueName('Panel')
+                    DisplayName: _Editor.GetUniqueName('Panel'),
+                    visible: true
+
                 }
             });
         },
@@ -111,7 +120,9 @@ define(["module", "vwf/view"], function(module, view) {
                     top: 0,
                     transform: this.getScreenCenter(),
                     owner: _UserManager.GetCurrentUserName(),
-                    DisplayName: _Editor.GetUniqueName('Image')
+                    DisplayName: _Editor.GetUniqueName('Image'),
+                    visible: true
+
                 }
             });
         },
@@ -126,13 +137,15 @@ define(["module", "vwf/view"], function(module, view) {
                     top: 0,
                     transform: this.getScreenCenter(),
                     owner: _UserManager.GetCurrentUserName(),
-                    DisplayName: _Editor.GetUniqueName('Checkbox')
+                    DisplayName: _Editor.GetUniqueName('Checkbox'),
+                    visible: true
+
                 }
             });
         },
         getScreenCenter: function() {
             if (this.isGUINode(vwf.prototype(this.getCreateParentNode())))
-                return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
             return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 50, 50, 0, 1]; //when creating on a 3D asset, default to center of screen
         },
@@ -345,6 +358,20 @@ define(["module", "vwf/view"], function(module, view) {
         initializedProperty: function(childID, propertyName, propertyValue) {
             this.satProperty(childID, propertyName, propertyValue);
         },
+        setNodeVisibility: function(node, show){
+            if(this.isDialog(node.type)){
+                if(show)
+                    $(node.div).dialog('open');
+                else
+                    $(node.div).dialog('close');
+            }
+            else {
+                if(show)
+                    $(node.div).show();
+                else
+                    $(node.div).hide();
+                }
+        },
         satProperty: function(childID, propertyName, propertyValue) {
 
             var node = this.guiNodes[childID];
@@ -365,7 +392,8 @@ define(["module", "vwf/view"], function(module, view) {
                     $(node.div).parent().css('top', y);
                 }
                 else {
-					$(node.div).css('transform', 'matrix3d('+propertyValue.slice(0,12).concat([0,0,0,1]).join(',')+')');
+                    if(propertyValue.slice(0,12).reduce(function(x,y){return x||!!y;},false))
+                        $(node.div).css('transform', 'matrix3d('+propertyValue.slice(0,12).concat([0,0,0,1]).join(',')+')');
                     $(node.div).css('left', x);
                     $(node.div).css('top', y);
                     $(node.div).css('z-index', z);
@@ -376,18 +404,10 @@ define(["module", "vwf/view"], function(module, view) {
             else if (propertyName == 'visible')
             {
                 node.div.inSetter = true;
-                if(this.isDialog(node.type)){
-                    if ((!node.visibleToCamera || node.visibleToCamera === this.activeCameras[vwf.moniker()]) && propertyValue)
-                        $(node.div).dialog('open');
-                    else
-                        $(node.div).dialog('close');
-                }
-                else {
-                    if ((!node.visibleToCamera || node.visibleToCamera === this.activeCameras[vwf.moniker()]) && propertyValue)
-                        $(node.div).show();
-                    else
-                        $(node.div).hide();
-                }
+                if ((!node.visibleToCamera || node.visibleToCamera === this.activeCamera) && propertyValue)
+                    this.setNodeVisibility(node, true);
+                else
+                    this.setNodeVisibility(node, false);
                 node.div.inSetter = false;
             }
 
@@ -415,10 +435,10 @@ define(["module", "vwf/view"], function(module, view) {
             {
                 node.visibleToCamera = propertyValue;
                 node.div.inSetter = true;
-                if((!propertyValue || propertyValue === this.activeCameras[vwf.moniker()]) && vwf.getProperty(node.id, 'visible'))
-                    $(node.div).show();
+                if((!propertyValue || propertyValue === this.activeCamera) && vwf.getProperty(node.id, 'visible'))
+                    this.setNodeVisibility(node, true);
                 else
-                    $(node.div).hide();
+                    this.setNodeVisibility(node, false);
                 node.div.inSetter = false;
             }
 
@@ -518,8 +538,16 @@ define(["module", "vwf/view"], function(module, view) {
             }
         },
         calledMethod: function(id, name, params) {
-            if( id === 'index-vwf' && name === 'setClientCamera' ){
-                this.activeCameras[params[0]] = params[1];
+            if( id === 'index-vwf' && name === 'setClientCamera' && params[0] === vwf.moniker() ){
+                this.activeCamera = params[1];
+
+                for(var i in this.guiNodes){
+                    var node = this.guiNodes[i];
+                    if((!node.visibleToCamera || node.visibleToCamera === this.activeCamera) && vwf.getProperty(node.id, 'visible'))
+                        this.setNodeVisibility(node, true);
+                    else
+                        this.setNodeVisibility(node, false);
+                }
 
 
             }
