@@ -136,8 +136,8 @@ define(["module", "vwf/model", "vwf/model/buzz/buzz.min"], function(module, mode
                 var dist = MATH.distanceVec3(campos, vwf.getProperty(id, "worldPosition"));
                 if(loop) //no speed of sound sim for looping sounds
                 	dist = 0;
-                window.setTimeout(function()
-                {
+              //  window.setTimeout(function()
+               // {
 
                     //cache the sound - can only be played simultainously by different nodes
                     if (!Sound)
@@ -170,7 +170,7 @@ define(["module", "vwf/model", "vwf/model/buzz/buzz.min"], function(module, mode
                     this.soundSources[soundid].updateSourcePosition();
                     this.soundSources[soundid].updateVolume(campos);
 
-                }.bind(this), dist * 2.941); // 1 meter in 2.941 milliseconds. 340 meters per second, so 2.941 seconds per 1000m
+               // }.bind(this), dist * 2.941); // 1 meter in 2.941 milliseconds. 340 meters per second, so 2.941 seconds per 1000m
             }
             if (name == 'getSounds')
             {
