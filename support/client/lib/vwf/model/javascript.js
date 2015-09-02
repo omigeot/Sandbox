@@ -19,6 +19,14 @@ function defaultContext()
 {
     this.setProperty = function(id,name,val)
     {
+
+        //****remove this shim!
+        if(val.internal_val)
+        {
+            
+            val = val.internal_val;
+            delete val.internal_val;
+        }
         var now = performance.now();
         
         //here's the magic. If we are not the client simulating the node, send over the reflector
@@ -31,10 +39,25 @@ function defaultContext()
         propertiesSet[name] = 0;
         propertiesSet[name]+= (performance.now() - now);
     }
-    this.getProperty = function(id,name)
+    this.getProperty = function(id, name)
     {
-            var val = vwf.getProperty(id,name);
-            return val;
+        var val = vwf.getProperty(id, name);
+        if (val && typeof val == "object")
+        {
+            delete val.internal_val;
+            Object.defineProperty(val, 'internal_val',
+            {
+                get: function()
+                {
+                    console.warn("internal_val is deprecated");
+                    return val;
+                },
+                enumerable:false,
+                configurable:true
+            })
+        }
+        
+        return val;
     }
     this.postUpdates = function()
     {
@@ -770,7 +793,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
         initializingProperty: function(nodeID, propertyName, propertyValue) {
 
             var node = this.nodes[nodeID];
-
+            var APINames = ["transformAPI","physicsAPI","commsAPI","clientAPI","createAPI","audioAPI","xAPI","traceAPI"]
            
             Object.defineProperty(node.properties, propertyName, { // "this" is node.properties in get/set
                 //allow the code to get the property without marking it for possible set
@@ -783,8 +806,9 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 enumerable: true
             });
 
-          
-            if (!node.hasOwnProperty(propertyName)) // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+
+            //be sure not to allow properties to overwrite system APIS
+            if (!node.hasOwnProperty(propertyName) && APINames.indexOf(propertyName) == -1) // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             {
                 Object.defineProperty(node, propertyName, { // "this" is node in get/set
                     get: function() {
