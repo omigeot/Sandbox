@@ -42,20 +42,7 @@ function defaultContext()
     this.getProperty = function(id, name)
     {
         var val = vwf.getProperty(id, name);
-        if (val && typeof val == "object")
-        {
-            delete val.internal_val;
-            Object.defineProperty(val, 'internal_val',
-            {
-                get: function()
-                {
-                    console.warn("internal_val is deprecated");
-                    return val;
-                },
-                enumerable:false,
-                configurable:true
-            })
-        }
+       
         
         return val;
     }
@@ -65,10 +52,11 @@ function defaultContext()
     }
     this.callMethod = function(id,methodname,params)
     {
+        //node that this forces sync!
         if(vwf.isSimulating(id))
-            vwf.callMethod(id,methodname,params);
+            return vwf.callMethod(id,methodname,params);
         else
-            vwf.callMethod(id,methodname,params);
+            return vwf.callMethod(id,methodname,params);
     }
     this.fireEvent = function(id,eventName,params)
     {
@@ -108,6 +96,22 @@ function executionContext(parentContext)
             this.touchedProperties[id+name].originalVal = $.extend(true,{},this.touchedProperties[id+name].val);
             this.touchedProperties[id+name].val = val;
             }
+
+            if (val && typeof val == "object")
+            {
+                delete val.internal_val;
+                Object.defineProperty(val, 'internal_val',
+                {
+                    get: function()
+                    {
+                       // console.warn("internal_val is deprecated");
+                        return val;
+                    },
+                    enumerable:false,
+                    configurable:true
+                })
+            }
+
             return val;
         }
 
@@ -123,7 +127,7 @@ function executionContext(parentContext)
     }
     this.callMethod = function(id,methodname,params)
     {
-        this.parent.callMethod(id,methodname,params);
+        return this.parent.callMethod(id,methodname,params);
     }
     this.fireEvent = function(id,eventName,params)
     {
@@ -474,7 +478,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
         hookUpAPIs : function(node)
         {
             
-            if(node.properties.hasOwnProperty("___transformAPI"))
+            if(node.hasOwnProperty("___transformAPI"))
             {
                 Object.defineProperty(node, "transformAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
@@ -483,7 +487,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     enumerable: true,
                 });
             }
-           if(node.properties.hasOwnProperty("___audioAPI"))
+           if(node.hasOwnProperty("___audioAPI"))
             {
                 Object.defineProperty(node, "audioAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
@@ -492,7 +496,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     enumerable: true,
                 });
             }
-            if(node.properties.hasOwnProperty("___physicsAPI"))
+            if(node.hasOwnProperty("___physicsAPI"))
             {
                 Object.defineProperty(node, "physicsAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
@@ -500,7 +504,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     enumerable: true,
                 });
             }
-            if(node.properties.hasOwnProperty("___clientAPI"))
+            if(node.hasOwnProperty("___clientAPI"))
             {
                 Object.defineProperty(node, "clientAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
@@ -508,7 +512,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     enumerable: true,
                 });
             }
-            if(node.properties.hasOwnProperty("___commsAPI"))
+            if(node.hasOwnProperty("___commsAPI"))
             {
                 Object.defineProperty(node, "commsAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
@@ -516,7 +520,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     enumerable: true,
                 });
             }
-            if(node.properties.hasOwnProperty("___xAPI"))
+            if(node.hasOwnProperty("___xAPI"))
             {
                 Object.defineProperty(node, "xAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
@@ -524,7 +528,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     enumerable: true,
                 });
             }
-            if(node.properties.hasOwnProperty("___traceAPI"))
+            if(node.hasOwnProperty("___traceAPI"))
             {
                 Object.defineProperty(node, "traceAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
@@ -543,10 +547,10 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             var node = this.nodes[parentid];
             Object.defineProperty(behaviorNode, propname, { // "this" is node in get/set
                 get: function() {
-                    return node[propname];
+                    return behaviorNode[propname];
                 },
                 set: function(value) {
-                    node[propname] = value
+                    behaviorNode[propname] = value
                 },
                 enumerable: true
             });
@@ -849,12 +853,23 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
             if (!node) return; // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
 
+
             if (propertyName == 'DisplayName' && this.nodes[node.parentId]) {
 
                 var oldname = vwf.getProperty(nodeID, 'DisplayName');
                 delete this.nodes[node.parentId].__children_by_name[oldname];
                 this.nodes[node.parentId].__children_by_name[propertyValue] = node;
+                return;
             }
+
+            
+            if(this.isBehavior(node))
+            {
+                var parent = this.nodes[vwf.parent(nodeID)];
+                if(parent[propertyName] !== undefined)
+                    return vwf.setProperty(parent.id,propertyName,propertyValue);
+            }
+
             var setter = node.private.setters && node.private.setters[propertyName];
 
             if (setter && setter !== true) { // is there is a setter (and not just a guard value)
@@ -886,6 +901,12 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
         gettingProperty: function(nodeID, propertyName, propertyValue) {
             if (this.disabled) return;
             var node = this.nodes[nodeID];
+            if(this.isBehavior(node))
+            {
+                var parent = this.nodes[vwf.parent(nodeID)];
+                if(parent[propertyName] !== undefined)
+                    return vwf.getProperty(parent.id,propertyName,propertyValue);
+            }
             if (!node) return undefined;
             var getter = node.private.getters && node.private.getters[propertyName];
 
@@ -1014,7 +1035,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 configurable: true
             });
             try {
-                node.private.bodies[methodName] = eval(bodyScript(methodParameters || [], methodBody || ""));
+                node.private.bodies[methodName] = eval(bodyScript(methodParameters || [], methodBody || "",nodeID,methodName));
             } catch (e) {
                 this.logger.warn("creatingMethod", nodeID, methodName, methodParameters,
                     "exception evaluating body:", utility.exceptionMessage(e));
@@ -1307,7 +1328,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                         handler: null,
                         context: node
                     }
-                    handler.handler = eval(bodyScript(eventParameters || [], eventBody || ""));
+                    handler.handler = eval(bodyScript(eventParameters || [], eventBody || "",nodeID,eventName));
                     node.private.listeners[eventName].push(handler);
                 } catch (e) {
                     this.logger.warn("creatingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
@@ -1478,9 +1499,9 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
     // -- bodyScript -------------------------------------------------------------------------------
 
-    function bodyScript(parameters, body) {
+    function bodyScript(parameters, body,id,name) {
         var parameterString = (parameters.length ? " " + parameters.join(", ") + " " : "");
-        return accessorScript("( function(" + parameterString + ") {", body, "} )");
+        return accessorScript("( function(" + parameterString + ") {\n", body, "\n} )" + " \n //@ sourceURL="+id+'.'+name);
         // return accessorScript( "( function(" + ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  ) + ") {", body, "} )" );
     }
 
