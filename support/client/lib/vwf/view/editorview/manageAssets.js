@@ -371,8 +371,42 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 
 		uploadVWFObject = function(name, data, type, existingId, cb)
 		{
-			var cleanObj = _DataManager.getCleanNodePrototype(data);
+			
+			
+			var walk = function(node)
+			{
+				if(!node) return;
+				if(!node.children) return;
 
+				var childNames = Object.keys(node.children);
+				var newChildren = {};
+				for(var i in childNames)
+				{
+					var childName = childNames[i];
+					var originalName = node.children[childName].properties ? node.children[childName].properties.___assetServerOriginalID : null;
+					if(originalName)
+					{
+						newChildren[originalName] = node.children[childName]	
+					}else
+					{
+						if(node.children[childName].id)
+						{
+							
+							vwf_view.kernel.setProperty(node.children[childName].id,"___assetServerOriginalID",childName)
+						}
+						newChildren[childName] =  node.children[childName];
+						if(!newChildren[childName].properties)
+							newChildren[childName].properties = {};
+						newChildren[childName].properties.___assetServerOriginalID = childName;
+					}
+				}
+				node.children = newChildren;
+				for(var i in node.children)
+					walk(node.children[i])
+			}
+			walk(data); //walk once in order to set the values on the real nodes. 
+			var cleanObj = _DataManager.getCleanNodePrototype(data); //strip the IDs
+			walk(cleanObj); //undo the random rename 
 			if(!existingId)
 			{
 				$scope.resetNew();
