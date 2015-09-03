@@ -531,8 +531,10 @@ SceneManager.prototype.loadTexture = function(url, mapping, onLoad, onError) {
                     texture.magFilter = THREE.NearestFilter;
                 }
                 texture.needsUpdate = true;
-                if (onLoad) onLoad(texture);
-
+                img.onload = function()
+                {
+                    if (onLoad) onLoad(texture);    
+                }
             }
         }
         xhr.send();
@@ -717,7 +719,7 @@ SceneManager.prototype.getTexture = function(src, noclone) {
         var tex = this.textureList[src];
 
         var onload = function(texture) {
-
+            tex.needsUpdate = true;
             if (tex.clones) {
               
                 for (var i = 0; i < tex.clones.length; i++) {
@@ -731,7 +733,6 @@ SceneManager.prototype.getTexture = function(src, noclone) {
                     tex.clones[i].isActuallyCompressed = texture.isActuallyCompressed;
 
                 }   
-
 
             }
         }.bind(this);
