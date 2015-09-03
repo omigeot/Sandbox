@@ -201,6 +201,8 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 
 	app.controller('AssetManagerController', ['$scope','$http','AssetDataManager', function($scope, $http, assets)
 	{
+		var fileData = {};
+
 		$scope.assets = assets;
 
 		$scope.selectedAsset = null;
@@ -304,7 +306,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 				fr.onloadend = function(evt)
 				{
 					$scope.selected.filename = files[0].name;
-					$scope.selected.filedata = new Uint8Array(fr.result);
+					fileData[$scope.selected.id] = new Uint8Array(fr.result);
 
 					if( $scope.selected.name === '<new asset>' )
 						$scope.selected.name = files[0].name;
@@ -327,9 +329,9 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 					if( $scope.selected.type.slice(0,6) === 'image/' )
 					{
 						// get data url from buffer
-						var dataStr = '';
-						for(var offset=0; offset<$scope.selected.filedata.byteLength; offset += 0x8000){
-							dataStr += String.fromCharCode.apply(null, $scope.selected.filedata.subarray(offset, offset+0x8000));
+						var dataStr = '', buffer = fileData[$scoe.selected.id];
+						for(var offset=0; offset<buffer.byteLength; offset += 0x8000){
+							dataStr += String.fromCharCode.apply(null, buffer.subarray(offset, offset+0x8000));
 						}
 						var dataUrl = 'data:'+$scope.selected.type+';base64,'+btoa(dataStr);
 
@@ -375,7 +377,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 			{
 				$scope.resetNew();
 				$scope.selectedAsset = 'new';
-				$scope.new.filedata = strToBytes( JSON.stringify(cleanObj) );
+				fileData['new'] = strToBytes( JSON.stringify(cleanObj) );
 				$scope.new.filename = name;
 				$scope.new.type = type;
 				$scope.new._added = true;
@@ -385,7 +387,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 			else
 			{
 				$scope.selectedAsset = existingId;
-				$scope.assets[existingId].filedata = strToBytes( JSON.stringify(cleanObj) );
+				fileData[existingId] = strToBytes( JSON.stringify(cleanObj) );
 				$scope.assets[existingId].filename = name;
 				$scope.assets[existingId].type = type;
 				$scope.assets[existingId]._dirty = true;
@@ -440,7 +442,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 		{
 			if( !id || id === 'new' )
 			{
-				if( $scope.selected.filedata )
+				if( fileData.new )
 				{
 					var perms = $scope.getPackedPermissions();
 
@@ -488,6 +490,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 								$scope.selected._uploadCallback(xhr.responseText);
 
 							$scope.assets.refresh(xhr.responseText);
+							fileData.new = null;
 							$scope.selectedAsset = xhr.responseText;
 							$scope.resetNew();
 							$scope.clearFileInput();
@@ -504,7 +507,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 						xhr.setRequestHeader(appHeaderName, $http.defaults.headers.post[appHeaderName]);
 					}
 
-					xhr.send($scope.selected.filedata);
+					xhr.send(fileData.new);
 
 				}
 				else {
@@ -522,7 +525,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 					}
 				}
 
-				if( $scope.selected.filedata )
+				if( fileData[$scope.selected.id] )
 				{
 					toComplete += 1;
 
@@ -534,6 +537,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 						}
 						else {
 							$scope.clearFileInput();
+							fileData[$scope.selected.id] = null;
 						}
 						checkRemaining();
 					});
@@ -544,7 +548,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 						xhr.setRequestHeader(appHeaderName, $http.defaults.headers.post[appHeaderName]);
 					}
 
-					xhr.send($scope.selected.filedata);
+					xhr.send(fileData[$scope.selected.id]);
 				}
 
 				if($scope.selected._basicDirty)
