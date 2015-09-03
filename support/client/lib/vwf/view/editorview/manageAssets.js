@@ -595,18 +595,20 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 
 		$scope.deleteData = function(id)
 		{
-			alertify.confirm('Are you POSITIVE you want to delete this asset?', function()
+			alertify.confirm('Are you POSITIVE you want to delete this asset?', function(confirmed)
 			{
-				$http.delete($scope.assets.appPath+'/assets/'+id)
-				.success(function(){
-					$scope.assets.refresh(id);
-					$scope.selectedAsset = null;
-				})
-				.error(function(data){
-					alertify.alert('Delete failed: '+data);
-					$scope.assets.refresh(id);
-					$scope.selectedAsset = null;
-				});
+				if(confirmed){
+					$http.delete($scope.assets.appPath+'/assets/'+id)
+					.success(function(){
+						$scope.assets.refresh(id);
+						$scope.selectedAsset = null;
+					})
+					.error(function(data){
+						alertify.alert('Delete failed: '+data);
+						$scope.assets.refresh(id);
+						$scope.selectedAsset = null;
+					});
+				}
 			});
 		}
 
