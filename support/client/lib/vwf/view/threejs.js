@@ -748,7 +748,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                 var i = keys[j];
                 if (this.nodes[i].extends == 'SandboxCamera-vwf') {
                     idlist.push(i);
-                    namelist.push(vwf.getProperty(i, 'DisplayName'));
+                    namelist.push(vwf.getProperty(i, 'DisplayName') + "   (" + namelist.length +')');
                 }
             }
 
