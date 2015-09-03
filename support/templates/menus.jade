@@ -301,7 +301,7 @@ mixin menus_body
 						li: a#MenuAssetsSaveAsFile(title="Creates a new reusable asset via file upload", ng-click='lookUpHandler($event)')
 							.glyphicon.glyphicon-hdd
 							| From File
-				li(ng-class='{"disabled": !isEntityAsset || !isMaterialAsset}')
+				li(ng-class='{"disabled": !isEntityAsset && !isMaterialAsset}')
 					a#MenuAssetsSave
 						.glyphicon.glyphicon-floppy-save
 						| Refresh Asset
