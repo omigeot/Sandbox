@@ -36,7 +36,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		 */
 
 		// check for upstream materialDef changes when this value updates
-		$scope.$watch('fields.selectedNode.properties.materialDef', refresh);
+		$scope.$watchGroup(['fields.selectedNode.id','fields.selectedNode.properties.materialDef'], refresh);
 
 		// repoint materialDef when it's an array and the active material changes
 		$scope.$watch('activeMaterial', function(newval){
@@ -145,7 +145,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		function refresh()
 		{
 			// try to get a materialDef from property, or failing that, from the driver
-			var mat = $scope.fields.selectedNode && ($scope.fields.selectedNode.properties.materialDef || vwf_view.kernel.getProperty($scope.fields.selectedNode.id));
+			var mat = $scope.fields.selectedNode && ($scope.fields.selectedNode.properties.materialDef || vwf.getProperty($scope.fields.selectedNode.id, 'materialDef'));
 
 			if( mat && !$scope.suppressUndo && !angular.equals($scope.materialArray||$scope.materialDef, mat))
 			{
