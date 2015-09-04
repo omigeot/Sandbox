@@ -437,7 +437,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                 {
                     var original = (new THREE.Matrix4()).copy(node.matrix);
                     this.viewTransformOverrides[i].original = original;
-                    node.matrix.elements.set(this.viewTransformOverrides[i].override)    
+                    node.matrix.elements = (this.viewTransformOverrides[i].override)   
                     node.updateMatrixWorld(true);
                 }
             }
