@@ -35,7 +35,7 @@ define(["module", "vwf/view", "vwf/view/SAVE/api"], function(module, view, SAVEA
 			})
 		},
 		toolTray: null,
-		mode:null,
+		mode: null,
 		setToolTray: function(t)
 		{
 			this.toolTray = t;
@@ -52,9 +52,9 @@ define(["module", "vwf/view", "vwf/view/SAVE/api"], function(module, view, SAVEA
 				$("#EUIOptionsMenu").append("<div class='tooltraytitle' >Options</div");
 				$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIReset'>Reset</div");
 				$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIMessages'>Messages</div");
-				if(this.mode == "studentMode")
+				if (this.mode == "studentMode")
 					$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIAssessment'>Assessment</div");
-				if(this.mode == "instructorMode")
+				if (this.mode == "instructorMode")
 					$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIGenerate'>Generate Solution</div");
 				var self = this;
 				$('#EUIReset').click(function()
@@ -110,9 +110,92 @@ define(["module", "vwf/view", "vwf/view/SAVE/api"], function(module, view, SAVEA
 				}
 			}
 		},
-		generateSolution:function()
+		publishExercise: function(finished)
 		{
-			SAVEAPI.generateSolution(function(){
+			var saveData = null;
+			var newWorldID = null;
+			async.series([
+				function getSaveStateData(cb)
+				{
+					//get the save state data
+					var data = _DataManager.getSaveStateData();
+					var autoLoads = [];
+					for (var i in data)
+					{
+						var node = data[i];
+						if (node.properties && node.properties.autoLoad === true)
+						{
+							//store only the autoload objects
+							autoLoads.push(node);
+						}
+					}
+					//push the scene properties as well
+					autoLoads.push(data[data.length - 1])
+					saveData = autoLoads;
+					cb();
+				},
+				function duplicateThisWorld(cb)
+				{
+					var thisID = _DataManager.getCurrentSession();
+					$.get("./vwfdatamanager.svc/copyinstance?SID=" + thisID, function(data, xhr)
+					{
+						newWorldID = $.trim(data)
+						cb();
+					})
+				},
+				function postAutoLoads(cb)
+				{
+					$.ajax(
+					{
+						url: "./vwfdatamanager.svc/state?SID=" + newWorldID,
+						data: JSON.stringify(saveData),
+						contentType: "application/json; charset=utf-8",
+						dataType: "text",
+						method: "POST",
+						success: function(data, xhr)
+						{
+							cb();
+						},
+						error: function(data, xhr)
+						{
+							cb();
+						}
+					})
+				},
+				function setWorldMetadata(cb)
+				{
+					var testSettings = vwf.getProperty(vwf.application(), 'publishSettings') ||
+					{
+						SinglePlayer: true,
+						camera: null,
+						allowAnonymous: true,
+						createAvatar: false,
+						allowTools: false
+					};
+					var stateData = {publishSettings:testSettings};
+					stateData.title = _DataManager.getInstanceData().title + " exported"
+					jQuery.ajax(
+					{
+						type: 'POST',
+						url: './vwfDataManager.svc/stateData?SID=' + newWorldID,
+						data: JSON.stringify(stateData),
+						contentType: "application/json; charset=utf-8",
+						dataType: "text",
+						success: function(data, status, xhr) {
+							cb();
+						}
+					});
+				}
+			], function(err)
+			{
+				if (finished)
+					finished()
+			})
+		},
+		generateSolution: function()
+		{
+			SAVEAPI.generateSolution(function()
+			{
 				window.location.reload();
 			})
 		},
@@ -120,7 +203,7 @@ define(["module", "vwf/view", "vwf/view/SAVE/api"], function(module, view, SAVEA
 		{
 			$(document.body).append("<iframe class='SAVEMenu' id='SAVEAssessment'></iframe");
 			$("#SAVEAssessment").attr('src', this.getBaseServerAddress() + "/assessment");
-			$("#SAVEAssessment").attr('style',"width: 40%;height: 60%;left: 10%;top: 10%;");
+			$("#SAVEAssessment").attr('style', "width: 40%;height: 60%;left: 10%;top: 10%;");
 		},
 		reset: function()
 		{
