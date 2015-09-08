@@ -373,7 +373,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 		{
 			
 			
-			var walk = function(node)
+			function walk(node)
 			{
 				if(!node) return;
 				if(!node.children) return;
@@ -404,9 +404,10 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 				for(var i in node.children)
 					walk(node.children[i])
 			}
+
 			walk(data); //walk once in order to set the values on the real nodes. 
 			var cleanObj = _DataManager.getCleanNodePrototype(data); //strip the IDs
-			walk(cleanObj); //undo the random rename 
+
 			if(!existingId)
 			{
 				$scope.resetNew();
@@ -420,6 +421,8 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 			}
 			else
 			{
+				walk(cleanObj); //undo the random rename 
+
 				$scope.selectedAsset = existingId;
 				fileData[existingId] = strToBytes( JSON.stringify(cleanObj) );
 				$scope.assets[existingId].filename = name;
