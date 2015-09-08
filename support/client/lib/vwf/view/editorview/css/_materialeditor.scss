@@ -2,26 +2,10 @@
 
 #materialEditor
 {
-	.ui-accordion .ui-accordion-content {
-		padding: 10px;
-	}
-
 	.horizontalLayout.centered {
-		@include justify-content(center);
-
 		input[type=button] {
 			width: 80%;
 		}
-	}
-
-	.inline
-	{
-		@include display-flex();
-		@include align-items(center);
-		@include justify-content(space-between);
-
-		margin: 10px 0;
-		cursor: default;
 	}
 
 	#MaterialBasicSettings

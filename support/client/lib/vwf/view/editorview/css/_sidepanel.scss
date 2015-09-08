@@ -75,6 +75,28 @@
 			color: white;
 			background: url(vwf/view/editorview/css/images/ui-bg_hexagon_5_111111_12x10.png) 50% 50% repeat rgb(36, 32, 32);
 		}
+
+		.ui-accordion .ui-accordion-content {
+			padding: 10px;
+		}
+
+		.horizontalLayout.centered {
+			@include justify-content(center);
+		}
+
+		.inline
+		{
+			@include display-flex();
+			@include align-items(center);
+			@include justify-content(space-between);
+
+			margin: 10px 0;
+			cursor: default;
+		}
+
+		.vMargin {
+			margin: 10px 0;
+		}
 	}
 
 	label
