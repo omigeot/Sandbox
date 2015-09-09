@@ -184,7 +184,7 @@ define(["vwf/view/threejs/oldCameraController", "vwf/view/threejs/AvatarCameraCo
                     far = intersections[i][2];
             }
             near = Math.max(.001, near);
-            console.log(near, far);
+            
             //far = Math.min(.001,near);
             if (isFinite(near) && isFinite(far))
             {
