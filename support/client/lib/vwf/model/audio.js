@@ -91,14 +91,22 @@ define(["module", "vwf/model", "vwf/model/buzz/buzz.min"], function(module, mode
             window._SoundManager = this;
         },
 
-		playMode: false,
-		settingProperty: function(id, propertyName, propertyValue)
-		{
-			if(id === 'index-vwf' && propertyName === 'playMode'){
-				this.playMode = propertyValue === 'play';
-				console.log('playMode:', this.playMode);
-			}
-		},
+        _playMode: false,
+        settingProperty: function(id, propertyName, propertyValue)
+        {
+            if(id === 'index-vwf' && propertyName === 'playMode'){
+                this._playMode = propertyValue === 'play';
+                if(!this._playMode)
+                {
+                    for(var i in this.sounds){
+                        this.sounds[i].stop();
+                    }
+                    for(var i in this.soundSources){
+                        this.soundSources[i].stop();
+                    }
+                }
+            }
+        },
 
         //simple function for gui elements to play sounds
         playSound: function(url, volume)
@@ -108,7 +116,7 @@ define(["module", "vwf/model", "vwf/model/buzz/buzz.min"], function(module, mode
         callingMethod: function(id, name, params)
         {
             //if the scene played the sound, it has no position and just plays at full volume
-            if (name == 'playSound' && id == 'index-vwf')
+            if (name == 'playSound' && id == 'index-vwf' && this._playMode)
             {
                 var url = params[0];
                 var loop = params[1] || false;
@@ -135,7 +143,7 @@ define(["module", "vwf/model", "vwf/model/buzz/buzz.min"], function(module, mode
                 }
             }
             //Nodes that are not the scene use their position to adjust the volume
-            else if (name == 'playSound')
+            else if (name == 'playSound' && this._playMode)
             {
                 var url = params[0];
                 var loop = params[1] || false;
