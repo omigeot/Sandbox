@@ -22,22 +22,26 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
     app.controller('PrimitiveController', ['$scope', function($scope){
         window._PrimitiveEditor = $scope;
 
-        var flags = ["Visible","Static (does not move)", "Dynamic (moves frequently)", "Cast Shadows",
+        var flags = ["Name", "Owners", "Visible","Static (does not move)", "Dynamic (moves frequently)", "Cast Shadows",
                      "Receive Shadows", "Passable (collides with avatars)", "Selectable (visible to pick)",
                      "Inherit Parent Scale"];
-
-        //Find all bound ng-model properties in the DOM, then add watches
-        var watchProps = $('#primitive-accordion')
-            .find('[ng-model]')
-            .map(function(i, e){
-                var key = $(e).attr('ng-model');
-
-                //$scope[key] = '';
-                console.log(key);
-                return key;
-             });
+        var flagProps = ["DisplayName", "owner", "visible", "isStatic", "isDynamic", "castShadows", "receiveShadows", "passable", "isSelectable", "inheritScale"];
 
         $scope.flags = flags;
+        $scope.flagProps = flagProps;
+
+        var flagGroup = flagProps.map(function(elem){
+            return "node.properties." + elem;
+        });
+
+        $scope.$watchGroup(flagGroup, function(newVal, oldVal){
+            for(var i = 0; i < newVal.length; i++){
+                if(newVal[i] !== oldVal[i]){
+                    setProperty($scope.node, flagProps[i], newVal[i]);
+                }
+            }
+        });
+
         $scope.allEditorData = [];
         $scope.node = null;
 
@@ -50,11 +54,22 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
                 recursevlyAddPrototypes(node, {});
                 //buildEditorData(node.id);
+
+                setFlags();
             }
         });
 
         $scope.getProperty = function(node, prop){
             return node ? vwf.getProperty(node.id, prop) : null;
+        }
+
+        function setFlags(){
+            for(var i = 0; i < flagProps.length; i++){
+                if($scope.node.properties[flagProps[i]] === undefined){
+                    var temp = vwf.getProperty($scope.node.id, flagProps[i]);
+                    if(temp !== undefined) $scope.node.properties[flagProps[i]] = temp;
+                }
+            }
         }
 
         function buildEditorData(node, editorData, existingProps){

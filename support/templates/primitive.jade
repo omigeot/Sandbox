@@ -8,15 +8,10 @@ block content
 		h3 
 			a(href="#") Flags
 		#otherprops.accordian-flags		
-			label.inline Name
-				input#dispName(type="text", ng-model="DisplayName" ng-model-options="{updateOn: 'blur'}")
-			
-			label.inline Owners
-				input#dispOwner(type="text", disabled="disabled", ng-model="owner") 
-			
 			div(ng-repeat="flag in ::flags")
-				label.inline(for="{{flag}}") {{flag}}
-					input(type="checkbox" name="{{flag}}")
+				label.inline(for="{{::flag}}") {{::flag}}
+					input(type="text" ng-show="$index < 2" ng-disabled="flag == 'Owners'", ng-model="node.properties[flagProps[$index]]" ng-model-options="{updateOn: 'blur'}")
+					input(type="checkbox" ng-hide="$index < 2" name="{{::flag}}" ng-model="node.properties[flagProps[$index]]")
 				
 
 		h3
