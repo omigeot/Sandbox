@@ -90,6 +90,16 @@ define(["module", "vwf/model", "vwf/model/buzz/buzz.min"], function(module, mode
             //set this up as a global, so that we can play a click to indicate GUI actions
             window._SoundManager = this;
         },
+
+		playMode: false,
+		settingProperty: function(id, propertyName, propertyValue)
+		{
+			if(id === 'index-vwf' && propertyName === 'playMode'){
+				this.playMode = propertyValue === 'play';
+				console.log('playMode:', this.playMode);
+			}
+		},
+
         //simple function for gui elements to play sounds
         playSound: function(url, volume)
         {
