@@ -13,25 +13,19 @@ block content
 					input(type="text" ng-show="$index < 2" ng-disabled="flag == 'Owners'", ng-model="node.properties[flagProps[$index]]" ng-model-options="{updateOn: 'blur'}")
 					input(type="checkbox" ng-hide="$index < 2" name="{{::flag}}" ng-model="node.properties[flagProps[$index]]")
 				
-
 		h3
 			a(href="#") Transforms
 		.accordian-transforms
 			.EditorLabel Translation
-			#Translation
-				input.TransformEditorInput#PositionX
-				input.TransformEditorInput#PositionY
-				input.TransformEditorInput#PositionZ
+			#Translation.vector-input.vMargin
+				input(type="number", ng-model="transform.translation[$index]", ng-repeat="pos in transform.translation track by $index")
 			.EditorLabel Rotation
-			#Rotation
-				input.TransformEditorInput#RotationX
-				input.TransformEditorInput#RotationY
-				input.TransformEditorInput#RotationZ
+			#Rotation.vector-input.vMargin
+				input(type="number", ng-model="transform.rotation[$index]", ng-repeat="rot in transform.rotation track by $index")
 			.EditorLabel Scale
-			#Scale
-				input.TransformEditorInput#ScaleX(min=".0001", step=".05")
-				input.TransformEditorInput#ScaleY(min=".0001", step=".05")
-				input.TransformEditorInput#ScaleZ(min=".0001", step=".05")
+			#Scale.vector-input.vMargin
+				input(type="number", ng-model="transform.scale[$index]", min=".0001", step=".05", ng-repeat="scale in transform.scale track by $index")
+				
 		h3(ng-repeat-start="data in allEditorData") 
 			a(href="#") {{data.type}}: {{data.name}}
 		.accordion-properties(ng-repeat-end)
@@ -59,15 +53,15 @@ block content
 		
 	#vwf-template-vector(ng-non-bindable, style='display: none;')
 		label {{displayname}}: 
-		div(ng-repeat='component in vwfNode.properties[vwfProp.property] track by $index')
-			input(type='number', step='{{step || 1}}', ng-model='vwfNode.properties[vwfProp.property][$index]', ng-model-options='{updateOn: "click blur"}')
+		div.vector-input.vMargin
+			input(type='number', step='{{step || 1}}', ng-model='vwfNode.properties[vwfProp.property][$index]', ng-model-options='{updateOn: "click blur"}', ng-repeat='component in vwfNode.properties[vwfProp.property] track by $index')
 	
 	#vwf-template-rangevector(ng-non-bindable, style='display: none;')
-		label.vMargin {{displayname}}: 
-			span min:
-			input(type='number', step='{{step || 1}}', ng-repeat='min in vwfNode.properties[vwfProp.property[0]] track by $index', ng-model='vwfNode.properties[vwfProp.property[0]][$index]')
-			span max:
-			input(type='number', step='{{step || 1}}', ng-repeat='max in vwfNode.properties[vwfProp.property[1]] track by $index', ng-model='vwfNode.properties[vwfProp.property[1]][$index]')
+		label.vMargin {{displayname}}
+			.vector-input.vMargin min:
+				input(type='number', step='{{step || 1}}', ng-repeat='min in vwfNode.properties[vwfProp.property[0]] track by $index', ng-model='vwfNode.properties[vwfProp.property[0]][$index]')
+			.vector-input.vMargin max:
+				input(type='number', step='{{step || 1}}', ng-repeat='max in vwfNode.properties[vwfProp.property[1]] track by $index', ng-model='vwfNode.properties[vwfProp.property[1]][$index]')
 	
 	#vwf-template-text(ng-non-bindable, style='display: none;')
 		label.inline {{displayname}}: 
@@ -79,7 +73,7 @@ block content
 				option(ng-repeat='value in vwfProp.values' ng-selected='vwfNode.properties[vwfProp.property] == value' value='{{value}}') {{labels[$index]}}
 
 	#vwf-template-map(ng-non-bindable, style='display: none;')
-		label.vMargin {{displayname}}:	
+		label.vMargin.inline {{displayname}}:	
 			vwf-image-picker(label='displayname', value='vwfNode.properties[vwfProp.property]')
 			
 	#vwf-template-nodeid(ng-non-bindable, style='display: none;')

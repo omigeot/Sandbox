@@ -97,6 +97,18 @@
 		.vMargin {
 			margin: 10px 0;
 		}
+
+		.vector-input{
+			float:left;
+			width: 100%;
+			clear: both;
+			margin-top: 2px;
+
+			input{
+				width: 15%;
+				padding: 3px;
+			}
+		}
 	}
 
 	label

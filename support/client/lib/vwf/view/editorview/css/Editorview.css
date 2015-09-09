@@ -928,17 +928,27 @@
     /* line 97, _sidepanel.scss */
     #sidepanel .editorPanel .vMargin {
       margin: 10px 0; }
-  /* line 102, _sidepanel.scss */
+    /* line 101, _sidepanel.scss */
+    #sidepanel .editorPanel .vector-input {
+      float: left;
+      width: 100%;
+      clear: both;
+      margin-top: 2px; }
+      /* line 107, _sidepanel.scss */
+      #sidepanel .editorPanel .vector-input input {
+        width: 15%;
+        padding: 3px; }
+  /* line 114, _sidepanel.scss */
   #sidepanel label {
     display: block;
     margin: 0; }
-    /* line 107, _sidepanel.scss */
+    /* line 119, _sidepanel.scss */
     #sidepanel label input[type=checkbox] {
       margin: 0; }
-  /* line 112, _sidepanel.scss */
+  /* line 124, _sidepanel.scss */
   #sidepanel input:not([type=button]) {
     color: black; }
-  /* line 118, _sidepanel.scss */
+  /* line 130, _sidepanel.scss */
   #sidepanel slider .mantissa, #sidepanel slider .exponent {
     display: -webkit-box;
     display: -moz-flex;
@@ -950,17 +960,17 @@
     -ms-flex-align: center;
     -webkit-align-items: center;
     align-items: center; }
-  /* line 123, _sidepanel.scss */
+  /* line 135, _sidepanel.scss */
   #sidepanel slider .exponent {
     -webkit-box-pack: end;
     -moz-justify-content: flex-end;
     -ms-flex-pack: end;
     -webkit-justify-content: flex-end;
     justify-content: flex-end; }
-    /* line 127, _sidepanel.scss */
+    /* line 139, _sidepanel.scss */
     #sidepanel slider .exponent input {
       margin-left: 5px; }
-  /* line 132, _sidepanel.scss */
+  /* line 144, _sidepanel.scss */
   #sidepanel slider .ui-slider {
     -moz-flex-grow: 1;
     -ms-flex: 1 1;
@@ -970,10 +980,10 @@
     font-size: 11px;
     background-color: #87b7d8 !important;
     border-color: grey; }
-    /* line 141, _sidepanel.scss */
+    /* line 153, _sidepanel.scss */
     #sidepanel slider .ui-slider .ui-slider-handle {
       color: lightgrey !important; }
-  /* line 147, _sidepanel.scss */
+  /* line 159, _sidepanel.scss */
   #sidepanel slider input {
     -moz-flex-shrink: 0;
     -ms-flex-shrink: 0;
@@ -982,7 +992,7 @@
     width: 50px;
     color: initial;
     padding: initial; }
-  /* line 156, _sidepanel.scss */
+  /* line 168, _sidepanel.scss */
   #sidepanel .colorPickerIcon {
     width: 25px;
     height: 25px;
@@ -1122,6 +1132,10 @@
       /* line 164, _hierarchy.scss */
       #hierarchyManager #hierarchyDisplay .hierarchyicon.glyphicon-ban-circle {
         color: #444; }
+
+/* line 3, _primitive.scss */
+#primitiveEditor label {
+  width: 100%; }
 
 /* line 6, _materialeditor.scss */
 #materialEditor .horizontalLayout.centered input[type=button] {

@@ -42,6 +42,15 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             }
         });
 
+        $scope.transform = {
+            translation: [0, 0, 0],
+            rotation: [0, 0, 0],
+            scale: [1, 1, 1]
+        };
+
+        $scope.$watch('node.properties.transform', updateTransform, true);
+        $scope.$watch('transform', setTransform, true);
+
         $scope.allEditorData = [];
         $scope.node = null;
 
@@ -56,11 +65,99 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 //buildEditorData(node.id);
 
                 setFlags();
+                updateTransform();
             }
         });
 
-        $scope.getProperty = function(node, prop){
-            return node ? vwf.getProperty(node.id, prop) : null;
+        function rotationMatrix_2_XYZ(m) {
+            var x = Math.atan2(m[9], m[10]);
+            var y = Math.atan2(-m[8], Math.sqrt(m[9] * m[9] + m[10] * m[10]));
+            var z = Math.atan2(m[4], m[0]);
+            return [x, y, z];
+        }
+
+        function updateTransform(vwfTransform, oldTransform){
+            if(vwfTransform == oldTransform) return;
+            console.log("This is the transform: ", vwfTransform);
+
+            var node = $scope.node;
+            try {
+                //dont update the spinners when the user is typing in them, but when they drag the gizmo do.
+                if (node && (vwf.client() !== vwf.moniker()) || $("#index-vwf:focus").length ==1) {
+
+                    var mat = vwf.getProperty(node.id, 'transform');
+                    var angles = rotationMatrix_2_XYZ(mat);
+                    var pos = [mat[12],mat[13],mat[14]];
+
+                    var scl = [MATH.lengthVec3([mat[0],mat[4],mat[8]]),MATH.lengthVec3([mat[1],mat[5],mat[9]]),MATH.lengthVec3([mat[2],mat[6],mat[10]])]
+
+                    for(var i = 0; i < 3; i++){
+                        //since there is ambiguity in the matrix, we need to keep these values aroud. otherwise , the typeins don't really do what you would think
+                        $scope.transform.rotation[i] = Math.round(angles[i] * 57.2957795);
+                        $scope.transform.scale[i] = Math.floor(MATH.lengthVec3([mat[0],mat[1],mat[2]]) * 1000) / 1000;
+                        $scope.transform.translation[i] = Math.floor(pos[i] * 1000) / 1000;
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+         function setTransform(transform, oldTransform) {
+            if(transform == oldTransform) return;
+
+            console.log("Change in setTransform!");
+            var val = [0, 0, 0];
+            var scale = [1, 1, 1];
+            var pos = [0, 0, 0];
+
+            for(var i = 0; i < 3; i++){
+                val[i] = !isNaN(transform.rotation[i]) ? transform.rotation[i] : 0;
+                scale[i] = parseFloat(transform.scale[i]);
+                pos[i] = parseFloat(transform.translation[i]);
+
+                if(isNaN(pos[i])) pos[i] = 0;
+                if(isNaN(scale[i])) scale[i] = 1;
+            }
+
+            var rotmat = makeRotMat(parseFloat(val[0]) / 57.2957795, parseFloat(val[1]) / 57.2957795, parseFloat(val[2]) / 57.2957795);
+            rotmat = goog.vec.Mat4.scale(rotmat, scale[0], scale[1], scale[2]);
+
+            pos = goog.vec.Mat4.translate(goog.vec.Mat4.createIdentity(), pos[0], pos[1], pos[2])
+            var vwfTransform = goog.vec.Mat4.multMat(pos, rotmat, []);
+
+            async.nextTick(function(){
+                setProperty($scope.node, 'transform', vwfTransform);
+            });
+        }
+
+        function makeRotMat(x, y, z) {
+            var xm = [
+
+                1, 0, 0, 0,
+                0, Math.cos(x), -Math.sin(x), 0,
+                0, Math.sin(x), Math.cos(x), 0,
+                0, 0, 0, 1
+
+            ];
+
+            var ym = [
+
+                Math.cos(y), 0, Math.sin(y), 0,
+                0, 1, 0, 0, -Math.sin(y), 0, Math.cos(y), 0,
+                0, 0, 0, 1
+            ];
+
+            var zm = [
+
+                Math.cos(z), -Math.sin(z), 0, 0,
+                Math.sin(z), Math.cos(z), 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+
+            ];
+            return goog.vec.Mat4.multMat(xm, goog.vec.Mat4.multMat(ym, zm, []), []);
+
         }
 
         function setFlags(){
