@@ -24,8 +24,11 @@ function CreateParticleSystem(nodeID, childID, childName) {
         "   vColor = vertexColor + (random -0.5) * colorRange;\n" +
         "   vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n" +
         "   float psize = size + (random.y -0.5) * sizeRange;\n" +
-        "   psize *= screenSize;" +
-        "   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
+        //"   psize *= screenSize;" +
+        //"   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
+        "   vec4 p1 = vec4(mvPosition.x+0.5*psize, mvPosition.yzw);\n" +
+        "   vec4 p2 = vec4(mvPosition.x-0.5*psize, mvPosition.yzw);\n" +
+        "   gl_PointSize = length(projectionMatrix*p1 - projectionMatrix*p2); \n"+
         "   gl_Position = projectionMatrix * mvPosition;\n" +
         "   vRandom = random;" +
         "}    \n";
@@ -179,9 +182,9 @@ function CreateParticleSystem(nodeID, childID, childName) {
     });
     shaderMaterial_default.fog = true;
     //the interpolate shader blends from one simulation step to the next on the shader
-    //this	allows for a complex sim to run at a low framerate, but still have smooth motion
-    //this is very efficient, as it only requires sending data up to the gpu on each sim tick		
-    //reuse the frag shader from the normal material	
+    //this    allows for a complex sim to run at a low framerate, but still have smooth motion
+    //this is very efficient, as it only requires sending data up to the gpu on each sim tick        
+    //reuse the frag shader from the normal material    
     var vertShader_interpolate =
 
         "attribute float age; \n" +
@@ -204,8 +207,11 @@ function CreateParticleSystem(nodeID, childID, childName) {
         "   vFogPosition = (modelMatrix * vec4(mix(previousPosition,position,fractime),1.0)).xyz; \n" +
         "   vec4 mvPosition = modelViewMatrix * vec4(mix(previousPosition,position,fractime), 1.0 );\n" +
         "   float psize = mix(startSize,endSize,(age+fractime*6.66)/lifespan) + (random.y -0.5) * sizeRange;\n" +
-        "   psize *= screenSize;" +
-        "   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
+        //"   psize *= screenSize;" +
+        //"   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
+        "   vec4 p1 = vec4(mvPosition.x+0.5*psize, mvPosition.yzw);\n" +
+        "   vec4 p2 = vec4(mvPosition.x-0.5*psize, mvPosition.yzw);\n" +
+        "   gl_PointSize = length(projectionMatrix*p1 - projectionMatrix*p2); \n"+
         "   gl_Position = projectionMatrix * mvPosition;\n" +
         "   vRandom = random;" +
         "}    \n";
@@ -271,8 +277,11 @@ function CreateParticleSystem(nodeID, childID, childName) {
         "   vec4 mvPosition = modelViewMatrix * vec4( pos2.xyz, 1.0 );\n" +
         //find random size based on randomness, start and end size, and size range
         "   float psize = mix(startSize,endSize,lifetime/lifespan) + (random.y -0.5) * sizeRange;\n" +
-        "   psize *= screenSize;" +
-        "   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
+        //"   psize *= screenSize;" +
+        //"   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
+        "   vec4 p1 = vec4(mvPosition.x+0.5*psize, mvPosition.yzw);\n" +
+        "   vec4 p2 = vec4(mvPosition.x-0.5*psize, mvPosition.yzw);\n" +
+        "   gl_PointSize = length(projectionMatrix*p1 - projectionMatrix*p2); \n"+
         "   gl_Position = projectionMatrix * mvPosition;\n" +
         " vec4 nR = (random -0.5);\n" +
         //find random color based on start and endcolor, time and colorRange
@@ -621,7 +630,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
         var len = Math.min(this.regenParticles.length, this.maxRate * 15 * time_in_ticks);
         for (var i = 0; i < len; i++) {
 
-            //setup with new random values, and move randomly forward in time one step	
+            //setup with new random values, and move randomly forward in time one step    
             var particle = this.regenParticles.shift();
             this.setupParticle(particle, this.matrix, inv);
             if(this.maxRate < this.particleCount)
@@ -630,7 +639,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
         }
 
 
-        //only these things change, other properties are in the shader as they are linear WRT time	
+        //only these things change, other properties are in the shader as they are linear WRT time    
         this.geometry.verticesNeedUpdate = true;
         this.geometry.colorsNeedUpdate = true;
         this.material.attributes.vertexColor.needsUpdate = true;
@@ -657,7 +666,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
 
         var particles = this.geometry;
 
-        //timesliced tick give up after 5 steps - just cant go fast enough		
+        //timesliced tick give up after 5 steps - just cant go fast enough        
         if (Math.floor(this.lastTime) > 5)
             this.lastTime = 1;
         for (var i = 0; i < Math.floor(this.lastTime); i++) {
@@ -910,7 +919,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
 (function() {
     function particleSystem(childID, childSource, childName) {
 
-    	var ps = CreateParticleSystem();
+        var ps = CreateParticleSystem();
 
         this.inherits = ['vwf/model/threejs/transformable.js', 'vwf/model/threejs/visible.js'];
         //the node constructor
@@ -924,20 +933,20 @@ function CreateParticleSystem(nodeID, childID, childName) {
 
             if(propertyName == "particleCount" && propertyValue != ps[propertyName])
             {
-            	
-            	var propbackup = vwf.getProperties(this.ID);
-            	delete propbackup.particleCount;
-            	ps.geometry.dispose();
-            	var oldparent = ps.parent;
-            	ps.parent.remove(ps)
-            	ps = CreateParticleSystem();
-            	ps.particleCount = propertyValue;
-            	ps.setParticleCount(propertyValue);
-            	oldparent.add(ps);
-            	for(var i in propbackup)
-            	{
-            		this.settingProperty(i,propbackup[i]);
-            	}
+                
+                var propbackup = vwf.getProperties(this.ID);
+                delete propbackup.particleCount;
+                ps.geometry.dispose();
+                var oldparent = ps.parent;
+                ps.parent.remove(ps)
+                ps = CreateParticleSystem();
+                ps.particleCount = propertyValue;
+                ps.setParticleCount(propertyValue);
+                oldparent.add(ps);
+                for(var i in propbackup)
+                {
+                    this.settingProperty(i,propbackup[i]);
+                }
             }
 
             ps[propertyName] = propertyValue;
