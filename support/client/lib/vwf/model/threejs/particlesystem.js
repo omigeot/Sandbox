@@ -28,7 +28,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
         //"   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
         "   vec4 p1 = vec4(mvPosition.x+0.5*psize, mvPosition.yzw);\n" +
         "   vec4 p2 = vec4(mvPosition.x-0.5*psize, mvPosition.yzw);\n" +
-        "   gl_PointSize = length(projectionMatrix*p1 - projectionMatrix*p2); \n"+
+        "   gl_PointSize = max(1.0, screenSize/50.0 * length(projectionMatrix*p1 - projectionMatrix*p2) ); \n"+
         "   gl_Position = projectionMatrix * mvPosition;\n" +
         "   vRandom = random;" +
         "}    \n";
@@ -211,7 +211,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
         //"   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
         "   vec4 p1 = vec4(mvPosition.x+0.5*psize, mvPosition.yzw);\n" +
         "   vec4 p2 = vec4(mvPosition.x-0.5*psize, mvPosition.yzw);\n" +
-        "   gl_PointSize = length(projectionMatrix*p1 - projectionMatrix*p2); \n"+
+        "   gl_PointSize = max(1.0, screenSize*50.0 * length(projectionMatrix*p1 - projectionMatrix*p2) ); \n"+
         "   gl_Position = projectionMatrix * mvPosition;\n" +
         "   vRandom = random;" +
         "}    \n";
@@ -281,7 +281,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
         //"   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
         "   vec4 p1 = vec4(mvPosition.x+0.5*psize, mvPosition.yzw);\n" +
         "   vec4 p2 = vec4(mvPosition.x-0.5*psize, mvPosition.yzw);\n" +
-        "   gl_PointSize = length(projectionMatrix*p1 - projectionMatrix*p2); \n"+
+        "   gl_PointSize = max(1.0, screenSize/50.0 * length(projectionMatrix*p1 - projectionMatrix*p2) ); \n"+
         "   gl_Position = projectionMatrix * mvPosition;\n" +
         " vec4 nR = (random -0.5);\n" +
         //find random color based on start and endcolor, time and colorRange
@@ -823,7 +823,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
     particleSystem.update = function(time) {
 
         this.updateInner(time);
-        this.material.uniforms.screenSize.value = parseFloat($('#index-vwf').attr('height') / 1200);
+        this.material.uniforms.screenSize.value = parseFloat($('#index-vwf').attr('width'));
     }
     //Change the solver type for the system
     particleSystem.setSolverType = function(type) {
