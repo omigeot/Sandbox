@@ -75,6 +75,8 @@ define(["vwf/view/threejs/oldCameraController", "vwf/view/threejs/AvatarCameraCo
         if (!this.cameraControllers[this.cameramode]) return;
         this.cameraControllers[this.cameramode].prerender(e)
             //lets construct a screenspace rect of the selection region
+
+        return; //below code needs to be faster to be useful
         var top = 0;
         var left = 0
         var bottom = h;
