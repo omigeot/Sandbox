@@ -329,7 +329,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 					if( $scope.selected.type.slice(0,6) === 'image/' )
 					{
 						// get data url from buffer
-						var dataStr = '', buffer = fileData[$scoe.selected.id];
+						var dataStr = '', buffer = fileData[$scope.selected.id];
 						for(var offset=0; offset<buffer.byteLength; offset += 0x8000){
 							dataStr += String.fromCharCode.apply(null, buffer.subarray(offset, offset+0x8000));
 						}
