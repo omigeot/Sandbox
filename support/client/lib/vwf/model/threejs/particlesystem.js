@@ -226,6 +226,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
             value: []
         },
     };
+
     var shaderMaterial_interpolate = new THREE.ShaderMaterial({
         uniforms: uniforms_default,
         attributes: attributes_interpolate,
@@ -438,7 +439,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
         //the lifespan - stored per vertex
         particle.setLifespan = function(a) {
             this.lifespan = a;
-            self.shaderMaterial_interpolate.attributes.lifespan.value[this.i] = this.a;
+            self.shaderMaterial_interpolate.attributes.lifespan.value[this.i] = this.lifespan;
         }
 
         //This looks like it could be computed from the start and end plus random on the shader
@@ -666,6 +667,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
         //timesliced tick give up after 5 steps - just cant go fast enough		
         if (Math.floor(this.lastTime) > 5)
             this.lastTime = 1;
+
         for (var i = 0; i < Math.floor(this.lastTime); i++) {
             this.lastTime--;
 
@@ -691,16 +693,18 @@ function CreateParticleSystem(nodeID, childID, childName) {
                 this.setupParticle(particle, this.threeParticleSystem.matrix, inv);
                 this.updateParticleEuler(particle, this.threeParticleSystem.matrix, inv, Math.random() * 3.33);
                 particle.age = 0;
-                this.threeParticleSystem.material.attributes.lifespan.needsUpdate = true;
+              
             }
 
             //only need to send up the age, position, and previous position. other props handled in the shader
-            this.threeParticleSystem.geometry.verticesNeedUpdate = true;
-            this.threeParticleSystem.material.attributes.previousPosition.needsUpdate = true;
-
-            this.threeParticleSystem.material.attributes.age.needsUpdate = true;
+      
 
         }
+
+            this.threeParticleSystem.material.attributes.lifespan.needsUpdate = true;
+            this.threeParticleSystem.geometry.verticesNeedUpdate = true;
+            this.threeParticleSystem.material.attributes.previousPosition.needsUpdate = true;
+            this.threeParticleSystem.material.attributes.age.needsUpdate = true;
 
         //even if this is not a sim tick, we need to send the fractional time up to the shader for the interpolation
         this.threeParticleSystem.material.uniforms.fractime.value = this.lastTime;
@@ -820,6 +824,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
     this._emitterPosition = new THREE.Vector3(0,0,0);
     this.update = function(time) {
 
+        if(this.threeParticleSystem.visible == false) return;
         this.updateInner(time);
         this.threeParticleSystem.material.uniforms.screenSize.value = parseFloat($('#index-vwf').attr('height') / 1200);
     }
