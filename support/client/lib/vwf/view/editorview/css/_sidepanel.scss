@@ -99,15 +99,29 @@
 		}
 
 		.vector-input{
-			float:left;
+			float:right;
 			width: 100%;
 			clear: both;
 			margin-top: 2px;
+			text-align: right;
 
 			input{
 				width: 15%;
 				padding: 3px;
+				text-align: center;
 			}
+		}
+
+		#Translation, #Rotation, #Scale{
+			margin-top: 3px;
+			text-align: left;
+		}
+
+		.vwf-image-picker{
+			display: block;
+		    text-align: left;
+		    width: 95%;
+		    overflow: hidden;
 		}
 	}
 

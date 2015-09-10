@@ -57,11 +57,12 @@ block content
 			input(type='number', step='{{step || 1}}', ng-model='vwfNode.properties[vwfProp.property][$index]', ng-model-options='{updateOn: "click blur"}', ng-repeat='component in vwfNode.properties[vwfProp.property] track by $index')
 	
 	#vwf-template-rangevector(ng-non-bindable, style='display: none;')
-		label.vMargin {{displayname}}
+		label.vMargin 
+			div {{displayname}}
 			.vector-input.vMargin min:
-				input(type='number', step='{{step || 1}}', ng-repeat='min in vwfNode.properties[vwfProp.property[0]] track by $index', ng-model='vwfNode.properties[vwfProp.property[0]][$index]')
+				input(type='number', step='{{step || 1}}', ng-repeat='min in vwfNode.properties[vwfProp.property[0]] track by $index', ng-model='vwfNode.properties[vwfProp.property[0]][$index]', ng-model-options="{updateOn: 'blur'}")
 			.vector-input.vMargin max:
-				input(type='number', step='{{step || 1}}', ng-repeat='max in vwfNode.properties[vwfProp.property[1]] track by $index', ng-model='vwfNode.properties[vwfProp.property[1]][$index]')
+				input(type='number', step='{{step || 1}}', ng-repeat='max in vwfNode.properties[vwfProp.property[1]] track by $index', ng-model='vwfNode.properties[vwfProp.property[1]][$index]', ng-model-options="{updateOn: 'blur'}")
 	
 	#vwf-template-text(ng-non-bindable, style='display: none;')
 		label.inline {{displayname}}: 
@@ -73,7 +74,7 @@ block content
 				option(ng-repeat='value in vwfProp.values' ng-selected='vwfNode.properties[vwfProp.property] == value' value='{{value}}') {{labels[$index]}}
 
 	#vwf-template-map(ng-non-bindable, style='display: none;')
-		label.vMargin.inline {{displayname}}:	
+		label.vMargin
 			vwf-image-picker(label='displayname', value='vwfNode.properties[vwfProp.property]')
 			
 	#vwf-template-nodeid(ng-non-bindable, style='display: none;')

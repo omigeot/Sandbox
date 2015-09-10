@@ -366,9 +366,11 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 	 * Reusable angular wrapper around the image (map) picker
 	 */
 
-	 app.directive('vwfImagePicker', function(){
+	 app.directive('vwfImagePicker', ['$compile', function($compile){
 		function linkFn(scope, elem, attr){
 			elem.button({label: scope.label});
+			elem.prepend($compile('<img src="{{value}}"/>')(scope));
+
 			scope.showPicker = function() {
 				_MapBrowser.setTexturePickedCallback(function(e) {
 					scope.value = e;
@@ -379,13 +381,13 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			}
 		}
 		return {
-			template: '<div ng-click="showPicker()" class="vwf-image-picker"><img ng-src="value"/></div>',
+			template: '<div ng-click="showPicker()" class="vwf-image-picker ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"></div>',
 			restrict: 'E',
 			link: linkFn,
 			replace: true,
 			scope: { value: '=', label: '=' }
 		};
-	 });
+	 }]);
 
 	/*
 	 * Reusable angular wrapper around the color picker
