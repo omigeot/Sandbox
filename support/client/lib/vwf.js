@@ -1002,9 +1002,9 @@ this.send = function( nodeID, actionName, memberName, parameters, when, callback
         //the data traveled over the reflector
         fields = JSON.parse(JSON.stringify(fields));
         //must be careful that we do this actually async, or logic that expects async operation will fail
-        window.setImmediate(function(){
+        
             queue.insert( fields );;    
-        })
+       
         
 
     }
