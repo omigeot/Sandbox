@@ -26,22 +26,7 @@
 
     window.console && console.debug && console.debug( "loading vwf" );
 
-    function getUTF8Length(string) {
-    var utf8length = 0;
-    for (var n = 0; n < string.length; n++) {
-        var c = string.charCodeAt(n);
-        if (c < 128) {
-            utf8length++;
-        }
-        else if((c > 127) && (c < 2048)) {
-            utf8length = utf8length+2;
-        }
-        else {
-            utf8length = utf8length+3;
-        }
-    }
-    return utf8length;
- }
+    
 
     window.vwf = new function() {
 
@@ -315,6 +300,7 @@
 
             var requireArray = [
                 { library: "domReady", active: true },
+                { library: "vwf/socket", active: true },
                 { library: "vwf/configuration", active: true },
                 { library: "vwf/kernel/model", active: true },
                 { library: "vwf/model/javascript", active: true },
@@ -344,7 +330,7 @@
                 { library: "/socket.io/socket.io.js", active: true },
                 { library: "vwf/view/EditorView", active: true },
                 { library: "vwf/view/WebRTC", active: true },
-                { library: "vwf/view/audio", active: true },
+                { library: "vwf/model/audio", active: true },
                 { library: "messageCompress", active: true },
                 { library: "vwf/view/xapi", active: true }
 
@@ -359,7 +345,8 @@
                     { library: "vwf/model/cesium", active: false },
                     { library: "vwf/model/object", active: true },
                     { library: "vwf/model/wires", active: true },
-                    { library: "vwf/model/jqueryui", active: true }
+                    { library: "vwf/model/jqueryui", active: true },
+                    { library: "vwf/model/audio", active: true },
                 ],
                 view: [
                     { library: "vwf/view/glge", parameters: {"application-root":"#vwf-root"}, active: false },
@@ -372,7 +359,6 @@
                     { library: "vwf/view/webrtc", active: false},
                     { library: "vwf/view/EditorView", active: true },
                     { library: "vwf/view/WebRTC", active: true },
-                    { library: "vwf/view/audio", active: true },
                     { library: "vwf/view/xapi", active: true },
                     { library: "vwf/view/jqueryui", active: true },
 
@@ -495,6 +481,7 @@
                         "vwf/model/wires",
                         "vwf/model/threejs",
                         "vwf/model/jqueryui",
+                        "vwf/model/audio",
                         "vwf/model/object",
                     ];
 
@@ -507,7 +494,7 @@
                             "vwf/view/document",
                             "vwf/view/EditorView",
                             "vwf/view/WebRTC",
-                            "vwf/view/audio",
+                            
                             "vwf/view/xapi",
                             "vwf/view/jqueryui",
                         ];
@@ -777,7 +764,7 @@
         {
 
 
-            var loadBalancerAddress = {{loadBalancerAddress}};
+            var loadBalancerAddress = 'undefined';
         var instance = window.location.pathname;
 
         var instanceHost = $.ajax({
@@ -799,61 +786,15 @@
             var space = window.location.pathname.slice( 1,
                 window.location.pathname.lastIndexOf("/") );
             var protocol = window.location.protocol;
-            var host = {{host}};
-
-
-
-        if ( isSocketIO07()) {
+            var host = window.location.protocol +'//'+ window.location.host;
+        
+            var socketProxy = require('vwf/socket')
             if ( window.location.protocol === "https:" )
             {
-
-                socket = io(host, {secure:true, reconnection : false,transports:['websocket'],query:'pathname='+window.location.pathname});
+                socket = socketProxy(host, {secure:true, reconnection : false,transports:['websocket'],query:'pathname='+window.location.pathname});
             } else {
-                socket = io(host,{reconnection : false,transports:['websocket'],query:'pathname='+window.location.pathname});
+                socket = socketProxy(host,{reconnection : false,transports:['websocket'],query:'pathname='+window.location.pathname});
             }
-
-        } else {  // Ruby Server
-
-            socket = new io.Socket( undefined, {
-
-                // The socket is relative to the application path.
-
-                resource: window.location.pathname.slice( 1,
-                    window.location.pathname.lastIndexOf("/") ),
-
-                // Use a secure connection when the application comes from https.
-
-                secure: window.location.protocol === "https:",
-                reconnect:false,
-                port: window.location.port ||
-                    ( window.location.protocol === "https:" ? 443 : 80 ),
-
-                // The ruby socket.io server only supports WebSockets. Don't try the others.
-
-                transports: [
-                    'websocket',
-                    // 'flashsocket',
-                    // 'htmlfile',
-                    // 'xhr-multipart',
-                    // 'xhr-polling',
-                    // 'jsonp-polling',
-                ],
-
-                // Increase the timeout due to starvation while loading the scene. The server
-                // timeout must also be increased.
-                // TODO: reinstate if needed, but this needs to be handled by communicating during the load.
-
-                transportOptions: {
-                    "websocket": { timeout: 90000 }
-                    // "flashsocket": { timeout: 90000 },
-                    // "htmlfile": { timeout: 90000 },
-                    // "xhr-multipart": { timeout: 90000 },
-                    // "xhr-polling": { timeout: 90000 },
-                    // "jsonp-polling": { timeout: 90000 },
-                }
-
-            } );
-        }
 
     } catch ( e ) {
 
@@ -881,14 +822,12 @@
 
         socket.on( "connect", function() {
 
-            window.setInterval(vwf.socketMonitorInterval.bind(vwf),10000);
+           
             vwf.logger.infox( "-socket", "connected" );
 
-            if ( isSocketIO07() ) {
+           
                 vwf.moniker_ = this.id;
-            } else {  //Ruby Server
-                vwf.moniker_ = this.transport.sessionid;
-            }
+           
 
         } );
 
@@ -905,17 +844,9 @@
             // vwf.logger.debugx( "-socket", "message", message );
 
             try {   
-                vwf.socketBytesReceived += 34 + getUTF8Length(message);
-                if ( isSocketIO07() ) {
-
-                    if(message.constructor === String)
-                        var fields = JSON.parse(messageCompress.unpack(message));
-                    else
-                        var fields = message;
-
-                } else { // Ruby Server - Unpack the arguements
-                    var fields = JSON.parse( message );
-                }
+                
+              
+                var fields = message;
 
                 if(fields.action == 'goOffline')
                 {
@@ -960,11 +891,11 @@
 
         } );
 
-        if ( !isSocketIO07() ) {
+        
             // Start communication with the reflector. 
 
             socket.connect();  // TODO: errors can occur here too, particularly if a local client contains the socket.io files but there is no server; do the loopback here instead of earlier in response to new io.Socket.
-        }
+        
 
     } else if ( component_uri_or_json_or_object ) {
 
@@ -1055,11 +986,9 @@ this.send = function( nodeID, actionName, memberName, parameters, when, callback
 
     if ( socket ) {
 
-        // Send the message.
-        var message = JSON.stringify( fields );
-        message = messageCompress.pack(message);
-        vwf.socketBytesSent += 34 + getUTF8Length(message);
-        socket.send( message );
+       
+        
+        socket.send( fields );
 
     } else {
 
@@ -1073,9 +1002,9 @@ this.send = function( nodeID, actionName, memberName, parameters, when, callback
         //the data traveled over the reflector
         fields = JSON.parse(JSON.stringify(fields));
         //must be careful that we do this actually async, or logic that expects async operation will fail
-        window.setImmediate(function(){
+        
             queue.insert( fields );;    
-        })
+       
         
 
     }
@@ -1110,10 +1039,9 @@ this.respond = function( nodeID, actionName, memberName, parameters, result ) {
 
         // Send the message.
 
-        var message = JSON.stringify( fields );
-        message = messageCompress.pack(message);
-        vwf.socketBytesSent += 34 + getUTF8Length(message);
-        socket.send( message );
+        
+        
+        socket.send( fields );
 
     } else {
 
@@ -1990,6 +1918,10 @@ this.getNode = function( nodeID, full, normalize ) {  // TODO: options to includ
     // Start the descriptor.
 
     var nodeComponent = {};
+    if( node.continues)
+        nodeComponent.continues = node.continues;
+
+    
 
     // Arrange the component as a patch if the node originated in a URI component. We want
     // to refer to the original URI but apply any changes that have been made to the node
@@ -2160,6 +2092,9 @@ this.getNode = function( nodeID, full, normalize ) {  // TODO: options to includ
     // Return the descriptor created, unless it was arranged as a patch and there were no
     // changes. Otherwise, return the URI if this is the root of a URI component.
 
+    if(nodeComponent.continues)
+        nodeComponent = objectDiff(nodeComponent,continuesDefs[nodeComponent.continues + nodeID]);
+
     if ( full || ! node.patchable || patched ) {
         return nodeComponent;
     } else if ( node.uri ) {
@@ -2274,19 +2209,7 @@ this.promptSaveState = function()
 {
     _DataManager.saveToServer();
 }
-this.socketBytesSentLast = 0;
-this.socketBytesSent= 0;
-this.socketBytesReceivedLast = 0;
-this.socketBytesReceived= 0;
-this.socketMonitorInterval = function()
-{
-    this.socketBytesSentLast = this.socketBytesSent;
-    this.socketBytesSent = 0;
-    this.socketBytesReceivedLast = this.socketBytesReceived;
-    this.socketBytesReceived = 0;
-    console.log(this.socketBytesSentLast/10000 + 'KBps up',this.socketBytesReceivedLast/10000 +'KBps down');
-    
-},
+
 this.saveState = function(data)
 {
     var fields = {
@@ -2298,12 +2221,11 @@ this.saveState = function(data)
     if ( socket ) {
 
         // Send the message.
-        var message = JSON.stringify( fields );
-        message = messageCompress.pack(message);
+      
 
-        vwf.socketBytesSent += 34 + getUTF8Length(message);
+      
 
-        socket.send( message );
+        socket.send( fields );
     }
 
 }
@@ -2467,7 +2389,7 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
         childIndex = childURI;
     } else {  // descendant: parent id + next from parent's sequence
         if ( useLegacyID ) {  // TODO: fix static ID references and remove
-            childID = ( childComponent.extends || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
+            childID = ( childComponent.continues || childComponent.extends || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
             childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
             childIndex = this.children( nodeID ).length;
         } else {
@@ -2494,7 +2416,8 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
     // Register the node.
 
     child = nodes.create( childID, childPrototypeID, childBehaviorIDs, childURI, childName, nodeID );
-
+    child.continues = childComponent.continues;
+    child.id = childID;
     // Register the node in vwf/model/object. Since the kernel delegates many node
     // information functions to vwf/model/object, this serves to register it with the
     // kernel. The node must be registered before any async operations occur to ensure that
@@ -2507,6 +2430,57 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
     // Construct the node.
 
     async.series( [
+
+         function( series_callback_async /* ( err, results ) */ ) {
+
+            if ( componentIsDescriptor( childComponent ) && childComponent.continues && componentIsURI( childComponent.continues ) ) {  // TODO: for "includes:", accept an already-loaded component (which componentIsURI exludes) since the descriptor will be loaded again
+                
+                $.getJSON(childComponent.continues,function(data)
+                {
+                   
+
+                    var cleanChildNames = function(node)
+                    {
+                        if(node.children)
+                            for(var i in node.children)
+                                cleanChildNames(node.children[i])
+
+                        if(node.children)
+                        {
+                            var keys = Object.keys(node.children)
+                            for(var i =0; i < keys.length; i++)
+                            {   
+                                var oldName = keys[i];
+
+                                var child = node.children[oldName];
+                                delete node.children[oldName];
+                                node.children[childID + oldName] = child
+                            }        
+                        }
+
+                    }
+
+                    cleanChildNames(data);
+                    continuesDefs[childComponent.continues + childID] = JSON.parse(JSON.stringify(data));
+
+                    $.extend(true,data,childComponent)
+                    childComponent = data;
+                    series_callback_async( undefined, undefined );
+                })
+                
+            
+            } else {
+
+                queue.suspend( "before beginning " + childID ); // suspend the queue
+
+                async.nextTick( function() {
+                    series_callback_async( undefined, undefined );
+                    queue.resume( "after beginning " + childID ); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                } );
+
+            }
+
+        },
 
         function( series_callback_async /* ( err, results ) */ ) {
 
@@ -2558,6 +2532,8 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
             }
 
         },
+
+       
 
         function( series_callback_async /* ( err, results ) */ ) {
 
@@ -2628,7 +2604,7 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
             // Re-register the node now that we have the prototypes and behaviors.
 
             child = nodes.create( childID, childPrototypeID, childBehaviorIDs, childURI, childName, nodeID );
-
+            child.continues = childComponent.continues;
             // Re-register the node in vwf/model/object now that we have the prototypes and
             // behaviors. vwf/model/object knows that we call it more than once and only
             // updates the new information.
@@ -5495,6 +5471,75 @@ var nodeCollectionPrototype = {
 /// data about this arrangement.
 /// 
 /// @name module:vwf~nodes
+
+function objectDiff (obj1, obj2) {
+   var delta = {};
+
+    if( obj1 != obj2 && typeof obj1 == typeof obj2 && typeof obj1 == "number")
+        return obj1
+
+   if(typeof obj1 !== typeof obj2)
+   return obj1;
+   if(obj2 == null && obj1)
+        return obj1
+
+   if(obj1 == null && obj2)
+        return obj1;     
+   if(obj2 == null && obj1 == null)
+        return obj1;     
+   if(obj1.constructor != obj2.constructor)
+        return obj1;
+   if(obj1.constructor == String)
+   {
+      if($.trim(obj1) == $.trim(obj2))
+      return undefined;
+      else
+      return obj1;
+   }
+
+   if(obj1.constructor == Array)
+   {
+      var diff = false;
+      var ret = obj1.slice(0);
+      if(obj1.length !== obj2.length)
+        return obj1;
+
+      for(var i in obj1)
+      {
+         var ret2 = objectDiff(obj1[i],obj2[i])
+         if(ret2)
+         {
+            diff = true;
+            ret[i] = ret2;
+         }
+      }
+      if(diff)
+        return ret;
+   }
+
+   for(var i in obj1)
+   {
+        if(obj2.hasOwnProperty(i))
+            {
+                var ret = objectDiff(obj1[i],obj2[i])
+                if(ret)
+                    delta[i] = ret;
+            }else
+            {
+                delta[i] = obj1[i];
+            }
+
+   }
+   if(Object.keys(delta).length > 0)
+   return delta;
+   
+   return undefined;
+}
+
+
+var continuesDefs = {
+
+}
 
 // Note: this is a first step towards moving authoritative data out of the vwf/model/object
 // and vwf/model/javascript drivers and removing the kernel's dependency on them as special

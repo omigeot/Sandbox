@@ -96,7 +96,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                         cb(assetLoader.cache[type][url]);
                         return;
                     }
-                    assetLoader.load(type, url, function()
+                    assetLoader.load(url, type, function()
                     {
                         cb(assetLoader.cache[type][url]);
                     });
@@ -153,6 +153,35 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                                         o.geometry.faceVertexUvs[0].push([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()]);
                                 }
                             }
+                            if(o instanceof THREE.SkinnedMesh && o.material)
+                            {
+                                if(o.material instanceof THREE.MeshFaceMaterial)
+                                    for(var i in o.material.materials)
+                                        o.material.materials[i].skinning = true;
+                                else 
+                                    o.material.skinning = true;
+                            }
+                            if(o.material)
+                            {
+                                if(o.material instanceof THREE.MeshFaceMaterial)
+                                    for(var i in o.material.materials)
+                                        o.material.materials[i].lights = true;
+                                else 
+                                    o.material.lights = true;
+                            }
+
+                            //use the code in materialCache to clean up materials before it hits the renderer
+                            {
+                                var matCache = require("./vwf/model/threejs/materialCache");
+                                if(o.material)
+                                {
+                                    var def = matCache.getDefForMaterial(o.material);
+                                    matCache.setMaterial(o,def);
+                                }
+
+
+                            }
+
                             //lets set all animations to frame 0
                             if (o.animationHandle)
                             {
@@ -615,7 +644,8 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                     this.addType('unknown', this.loadUnknown);
                     this.startProgressGui = function(total)
                         {
-                            $(document.body).append('<div id = "preloadGUIBack" class=""><span id="fullscreenlink">Please enter full screen mode. Click here or hit F11.</span><img id="loadingSplash" /><div id = "preloadGUI" class=""><div class="preloadCenter"><div id="preloadprogress"><p class="progress-label">Loading...</p></div></div><div class=""><div class="" id="preloadguiText">Loading...</div></div></div></div>');
+                            //$(document.body).append('<div id = "preloadGUIBack" class=""><span id="fullscreenlink">Please enter full screen mode. Click here or hit F11.</span><img id="loadingSplash" /><div id = "preloadGUI" class=""><div class="preloadCenter"><div id="preloadprogress"><p class="progress-label">Loading...</p></div></div><div class=""><div class="" id="preloadguiText">Loading...</div></div></div></div>');
+							$('#preloadGUIBack').css('display','block');
                             $('#preloadprogress').progressbar();
                             $('#preloadprogress').progressbar("value", 0);
                             $('#preloadprogress .progress-label').text("0%");

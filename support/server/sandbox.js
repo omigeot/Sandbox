@@ -6,7 +6,8 @@ var libpath = require('path'),
     fs = require('fs-extra'),
     url = require("url"),
     mime = require('mime'),
-    YAML = require('js-yaml');
+    YAML = require('js-yaml'),
+	sass = require('node-sass');
 var logger = require('./logger');
 
 
@@ -122,7 +123,8 @@ function startVWF() {
                     logger.info('Configuration read.')
                 } catch (e) {
                     configSettings = {};
-                    logger.error('Could not read config file. Loading defaults.')
+                    logger.error(e.message);
+                    logger.error('Could not read config file. Loading defaults.');
                 }
                 //save configuration into global scope so other modules can use.
                 global.configuration = configSettings;
@@ -231,20 +233,24 @@ function startVWF() {
 
 			function registerAssetServer(cb)
 			{
-				if( global.configuration.hostAssets )
+				if(global.configuration.hostAssets === undefined)
+					global.configuration.hostAssets = true;
+
+				if( global.configuration.hostAssets || !global.configuration.remoteAssetServerURL )
 				{
+					global.configuration.assetDataDir = global.configuration.assetDataDir || 'assets';
 					var datadir = libpath.resolve(__dirname, '..','..', global.configuration.assetDataDir);
 
 					fs.mkdirs(datadir, function()
 					{
 						global.configuration.assetAppPath = '/sas';
 
-						var assetServer = require('SandboxAssetServer');
+						var assetServer = require('sandbox-asset-server');
 						app.use(global.configuration.assetAppPath, assetServer({
-							dataDir: libpath.resolve(__dirname, '..','..', global.configuration.assetDataDir),
+							dataDir: datadir,
 							sessionCookieName: 'session',
-							sessionHeader: global.configuration.assetSessionHeader,
-							sessionSecret: global.configuration.sessionSecret
+							sessionHeader: global.configuration.assetSessionHeader || 'X-Session-Header',
+							sessionSecret: global.configuration.sessionSecret || 'unsecure cookie secret'
 						}));
 						logger.info('Hosting assets locally at', global.configuration.assetAppPath);
 					});
@@ -318,9 +324,25 @@ function startVWF() {
                         var path2 = libpath.normalize('../../support/client/lib/index.css'); //trick the filecache
                         path2 = libpath.resolve(__dirname, path2);
 
-                        FileCache.insertFile([path, path2], contents, fs.statSync(buildname), "utf8", cb);
-
-
+						sass.render({
+							file: libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/Editorview.scss'),
+							includePaths: [libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/')],
+							outputStyle: 'compressed',
+							functions: {
+								'getImgPath()': function(){
+									return new sass.types.String('vwf/view/editorview');
+								}
+							}
+						}, function(err,result){
+							if(err){
+								logger.error('Error compiling sass:', err);
+	                        	FileCache.insertFile([path, path2], contents, fs.statSync(buildname), "utf8", cb);
+							}
+							else {
+								var scss = result.css.toString('utf8');
+	                        	FileCache.insertFile([path, path2], contents+scss, fs.statSync(buildname), "utf8", cb);
+							}
+						});
                     }
                     //first, check if the build file already exists. if so, skip this step
                     if (fs.existsSync(libpath.resolve(libpath.join(__dirname, '..', '..', 'build', 'index.css')))) {

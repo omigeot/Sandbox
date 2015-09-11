@@ -1,4 +1,4 @@
-define(function() {
+define(['vwf/view/editorview/panelEditor'], function(baseclass) {
     var PrimEditor = {};
     var isInitialized = false;
     return {
@@ -6,11 +6,11 @@ define(function() {
             if (!isInitialized) {
                 
                
-                var baseclass = require("vwf/view/editorview/panelEditor");
+                //var baseclass = require("vwf/view/editorview/panelEditor");
                 //var base = new baseclass('hierarchyManager','Hierarchy','hierarchy',false,true,'#sidepanel')
                 //base.init();
                 //$.extend(HierarchyManager,base);
-                baseclass(PrimEditor,'PrimitiveEditor','Properties','properties',true,true,'#sidepanel')
+                baseclass(PrimEditor,'PrimitiveEditor','Properties','properties',true,true,'#sidepanel .main')
                 
                 PrimEditor.init()
                 initialize.call(PrimEditor);
@@ -127,7 +127,7 @@ define(function() {
             //prevent the handlers from firing setproperties when the GUI is first setup;
             if (this.inSetup) return;
 
-            if (document.PlayerNumber == null) {
+            if (_UserManager.GetCurrentUserName() == null) {
                 _Notifier.notify('You must log in to participate');
                 return;
             }
@@ -158,7 +158,7 @@ define(function() {
         }
 
         this.callMethod = function(id, method) {
-            if (document.PlayerNumber == null) {
+            if (_UserManager.GetCurrentUserName() == null) {
                 _Notifier.notify('You must log in to participate');
                 return;
             }
@@ -199,7 +199,7 @@ define(function() {
 
 
 
-            $('#ui-dialog-title-ObjectProperties').text(vwf.getProperty(node.id, 'DisplayName') + " Properties");
+            $('#ui-dialog-title-ObjectProperties').html((vwf.getProperty(node.id, 'DisplayName') + " Properties").escape());
             $('#dispName').val(vwf.getProperty(node.id, 'DisplayName') || node.id);
 
             this.addPropertyEditorDialog(node.id, 'DisplayName', $('#dispName'), 'text');
@@ -254,11 +254,11 @@ define(function() {
             } else {
                 $('#receiveShadows').prop('checked', '');
             }
-            $('#BaseSectionTitle').text(node.properties.type || "Type" + ": " + node.id);
+            $('#BaseSectionTitle').html((node.properties.type || "Type" + ": " + node.id).escape());
             this.SelectionTransformed(null, node);
             this.setupAnimationGUI(node, true);
             this.setupEditorData(node,node.id, true,vwf.getProperty(node.id, 'EditorData'));
-            this.recursevlyAddPrototypes(node);
+            this.recursevlyAddPrototypes(vwf.prototype(node.id),node.id);
             this.recursevlyAddModifiers(node);
             this.addBehaviors(node);
             $("#accordion").accordion({
@@ -274,22 +274,22 @@ define(function() {
                 'active': lastTab
             });
         }
-        this.recursevlyAddPrototypes = function(node) {
+        this.recursevlyAddPrototypes = function(nodeid,selectionID) {
             
             
-            var oldID = node.id;
-            node = _Editor.getNode(vwf.prototype(node.id)); 
-             if(!node){
+            if(!nodeid) return;
+            node = _Editor.getNode(nodeid); 
+            if(!node){
                 return;  
             }
-            var currentID = node.id;
+            
             //must be careful... we don't actually want to set the properties on the prototype
             //we want to set them on the current node
-            node.id = oldID;
-
-            this.setupEditorData(node,currentID, false,vwf.getProperty(currentID, 'EditorData'));
-            node.id = currentID; // careful not to recurse forever
-            this.recursevlyAddPrototypes(node);
+            var protoID = vwf.prototype(nodeid);
+            var currentID = node.id;
+            node.id = selectionID;
+            this.setupEditorData(node,currentID, false,vwf.getProperty(nodeid, 'EditorData'));
+            this.recursevlyAddPrototypes(protoID,selectionID);
                 
             
         }
@@ -527,7 +527,7 @@ define(function() {
             }
             if (editordatanames.length == 0) return;
             editordatanames.sort();
-            section = '<h3 class="modifiersection" ><a href="#"><div style="font-weight:bold;display:inline">' + (vwf.getProperty(node.id, 'type') || "Type") + ": </div>" + (node.properties.DisplayName || "None") + '</a></h3>' + '<div class="modifiersection" id="basicSettings' + panelid + '">' + '</div>';
+            section = '<h3 class="modifiersection" ><a href="#"><div style="font-weight:bold;display:inline">' + (vwf.getProperty(node.id, 'type') || "Type") + ": </div>" + (node.properties.DisplayName || panelid) + '</a></h3>' + '<div class="modifiersection" id="basicSettings' + panelid + '">' + '</div>';
            
             $("#accordion").append(section);
 
@@ -549,7 +549,7 @@ define(function() {
                     $('#basicSettings' + panelid).append('<div id="' + nodeid + editordata[i].property + 'value"></div>');
                     this.addPropertyEditorDialog(node.id, editordata[i].property, $('#' + nodeid + editordata[i].property + 'value'), 'label');
                     var val = vwf.getProperty(node.id, editordata[i].property);
-                    $('#' + nodeid + editordata[i].property + 'value').text(val);
+                    $('#' + nodeid + editordata[i].property + 'value').html((val).escape());
                 }
                 if (editordata[i].type == 'slider') {
                     var inputstyle = "";
@@ -773,7 +773,7 @@ define(function() {
                 }
                 if (editordata[i].type == 'prompt') {
                     $('#basicSettings' + panelid).append('<div style="">' + editordata[i].displayname + '</div><div type="text" id="' + nodeid + i + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/>');
-                    $('#' + nodeid + i).text(vwf.getProperty(node.id, editordata[i].property));
+                    $('#' + nodeid + i).html((vwf.getProperty(node.id, editordata[i].property)).escape());
                     $('#' + nodeid + i).button();
                     $('#' + nodeid + i).css('width','100%');
                     $('#' + nodeid + i).click(function() {
@@ -794,10 +794,14 @@ define(function() {
                     $('#basicSettings' + panelid).append('<div style="margin-top: 5px;margin-bottom: 5px;"><div >' + editordata[i].displayname + '</div><input type="text" style="background: black;display: inline;width: 50%;padding: 2px;border-radius: 5px;font-weight: bold;" id="' + nodeid + editordata[i].property + '" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/><div  style="float:right;width:45%;height:2em" id="' + nodeid + i + 'button" nodename="' + nodeid + '" propname="' + editordata[i].property + '"/></div><div style="clear:both" />');
                     
                    
-                    $('#' + nodeid + editordata[i].property).attr('disabled', 'disabled');
+                    //$('#' + nodeid + editordata[i].property).attr('disabled', 'disabled');
                     $('#' + nodeid + i + 'button').button({
                         label: 'Choose Node'
                     });
+                    $('#' + nodeid + editordata[i].property).change(function(){
+                        _PrimitiveEditor.setProperty(nodeid, editordata[i].property, $(this).val());
+                    });
+
                     $('#' + nodeid + i + 'button').mouseover(function(){
 
                         var propname = $(this).attr('propname');
@@ -813,14 +817,12 @@ define(function() {
 
                         _Editor.TempPickCallback = function(node) {
                             if(!node) return;
-                            $('#' + nodename + propname ).val(node.id);
-
+                            $('#' + nodename + propname ).val(node.id).change();
                             _RenderManager.flashHilight(findviewnode(node.id));
 
                             _Editor.TempPickCallback = null;
                             _Editor.SetSelectMode('Pick');
 
-                            _PrimitiveEditor.setProperty(nodename, propname, node.id);
                         };
                         _Editor.SetSelectMode('TempPick');
 
@@ -899,7 +901,7 @@ define(function() {
         }
         this.deleteButtonClicked = function() {
             
-            if (document.PlayerNumber == null) {
+            if (_UserManager.GetCurrentUserName() == null) {
                 _Notifier.notify('You must log in to participate');
                 return;
             }
@@ -1067,6 +1069,10 @@ define(function() {
             {
             	_PrimitiveEditor.SelectionChanged(null, _Editor.GetSelectedVWFNode());
             }
+            if(_Editor.GetSelectedVWFID() == nodeID && propName == "transform")
+            {
+                this.SelectionTransformed(null,{id:nodeID});
+            }
         }
         this.addPropertyEditorDialog = function(nodeid, propname, element, type) {
             this.propertyEditorDialogs.push({
@@ -1081,11 +1087,13 @@ define(function() {
             this.propertyEditorDialogs = [];
         }
         this.SelectionTransformed = function(e, node) {
-            try {
+            
                 //dont update the spinners when the user is typing in them, but when they drag the gizmo do. 
                 if (node && (vwf.client() !== vwf.moniker()) || $("#index-vwf:focus").length ==1) {
 
-                    var mat = vwf.getProperty(node.id, 'transform');
+                    //this is a much faster form of get property, because it queries only the last value set in the engine,
+                    //and does not give all the various parts of the engine a chance to respond
+                    var mat = vwf.models.object.gettingProperty(node.id, 'transform');
                     var angles = this.rotationMatrix_2_XYZ(mat);
                     var pos = [mat[12],mat[13],mat[14]];
 
@@ -1107,14 +1115,12 @@ define(function() {
                     $('#ScaleY').val((Math.floor(MATH.lengthVec3([mat[4],mat[5],mat[6]]) * 1000)) / 1000);
                     $('#ScaleZ').val((Math.floor(MATH.lengthVec3([mat[8],mat[9],mat[10]]) * 1000)) / 1000);
 
-                }
-            } catch (e) {
-                //console.log(e);
-            }
+                
+            } 
         }
         
         $(document).bind('modifierCreated', this.SelectionChanged.bind(this));
-        $(document).bind('selectionTransformedLocal', this.SelectionTransformed.bind(this));
+        
        
         $('#PositionX').on( "spinchange",this.positionChanged.bind(this));
         $('#PositionY').on( "spinchange",this.positionChanged.bind(this));

@@ -4,7 +4,9 @@ var libpath = require('path'),
 	url = require("url"),
 	mime = require('mime'),
 	sio = require('socket.io'),
-	YAML = require('js-yaml');
+	YAML = require('js-yaml'),
+	sass = require('node-sass');
+
 require('./hash.js');
 var _3DR_proxy = require('./3dr_proxy.js');
 var safePathRE = RegExp('/\//' + (libpath.sep == '/' ? '\/' : '\\') + '/g');
@@ -22,7 +24,6 @@ var sessions = require('./sessions');
 var mailTools = require('./mailTools');
 var xapi = require('./xapi');
 var logger = require('./logger');
-var libraryFormatter = require('./libraryFormatter.js');
 
 // default path to data. over written by setup flags
 //generate a random id.
@@ -442,7 +443,7 @@ function CreateProfile(URL, data, response)
 			return;
 		}
 		//dont check the pass - it's a big hash, so complexity rules are meaningless
-		data.Password = Hash(URL.query.P);
+		data.Password = Hash(URL.query.P || data.Password);
 		if (validateUsername(data.Username) !== true)
 		{
 			respond(response, 500, 'Bad Username');
@@ -754,10 +755,11 @@ function CopyInstance(URL, SID, response)
 					],
 					function copyExampleComplete(err)
 					{
+						var displayID = newid.replace("_adl_sandbox",global.configuration.appPath.replace(/\//g,"_"));
 						if (err)
 							respond(response, 500, 'Error in trying to copy world');
 						else
-							respond(response, 200, newid);
+							respond(response, 200, displayID);
 					})
 			}
 		});
@@ -1221,6 +1223,50 @@ function makeid()
 	return text;
 }
 
+
+function setState(URL, data, response)
+{
+	if (!URL.loginData)
+	{
+		respond(response, 401, 'Anonymous users cannot edit instances');
+		return;
+	}
+	try
+	{
+		data = JSON.parse(data);
+	}
+	catch (e)
+	{
+		logger.error(e);
+		respond(response, 500, 'parse error');
+		return;
+	}
+	var sid = URL.query.SID;
+	var statedata = {};
+	sid = sid.replace(/\//g, '_');
+	
+	DAL.getInstance(sid, function(state)
+	{
+		if (!state)
+		{
+			respond(response, 401, 'State not found. State ' + sid);
+			return;
+		}
+		if (state.owner == URL.loginData.UID || URL.loginData.UID == global.adminUID)
+		{
+			DAL.saveInstanceState(sid, data, function()
+			{
+				respond(response, 200, 'Saved world state ' + sid);
+			});
+		}
+		else
+		{
+			respond(response, 401, 'Not authorized to edit state ' + sid);
+		}
+	});
+}
+
+
 function setStateData(URL, data, response)
 {
 	if (!URL.loginData)
@@ -1291,9 +1337,10 @@ function createState(URL, data, response)
 		var id = "/adl/sandbox".replace(/\//g, "_") + '_' + makeid() + '_';
 		DAL.createInstance(id, statedata, function()
 		{
-			respond(response, 200, 'Created state ' + id);
-			mailTools.newWorld(URL.loginData.UID, data.title, id);
-			xapi.sendStatement(URL.loginData.UID, xapi.verbs.created, id, data.title, data.description);
+			var displayID = id.replace("_adl_sandbox",global.configuration.appPath.replace(/\//g,"_"));
+			respond(response, 200, displayID);
+			mailTools.newWorld(URL.loginData.UID, data.title, displayID);
+			xapi.sendStatement(URL.loginData.UID, xapi.verbs.created, displayID, data.title, data.description);
 		});
 	}
 	//Just return the state data, dont serve a response
@@ -1430,6 +1477,7 @@ function LogError(URL, error, response)
 function serve(request, response)
 {
 	var URL = url.parse(request.url, true);
+	URL.pathname = decodeURIComponent(URL.pathname)
 	var serviceRoute = "vwfdatamanager.svc/";
 	var pathAfterRoute = URL.pathname.substr(URL.pathname.toLowerCase()
 		.lastIndexOf(serviceRoute) + serviceRoute.length);
@@ -1738,20 +1786,27 @@ function serve(request, response)
 						}
 					}
 					break;
-				case "library":
+				case "geteditorcss":
 					{
-						if( /my-entities$/.test(pathAfterCommand) )
-							libraryFormatter.entitiesToLibrary(UID, 'entity', response);
-						else if( /my-materials$/.test(pathAfterCommand) )
-							libraryFormatter.entitiesToLibrary(UID, 'material', response);
-						else if( /my-behaviors$/.test(pathAfterCommand) )
-							libraryFormatter.entitiesToLibrary(UID, 'behavior', response);
-						else if( /my-textures$/.test(pathAfterCommand) )
-							libraryFormatter.entitiesToLibrary(UID, 'texture', response);
-						else if( /my-models$/.test(pathAfterCommand) )
-							libraryFormatter.entitiesToLibrary(UID, 'model', response);
-						else
-							_404(response);
+						sass.render({
+							file: libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/Editorview.scss'),
+							includePaths: [libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/')],
+							sourceComments: true,
+							functions: {
+								'getImgPath()': function(){
+									return new sass.types.String('../vwf/view/editorview');
+								}
+							}
+						}, function(err,result){
+							if(err){
+								logger.error('Error compiling sass:', err);
+								response.sendStatus(500);
+							}
+							else {
+								response.set('Content-Type', 'text/css');
+								response.send(result.css);
+							}
+						});
 					}
 					break;
 				default:
@@ -1809,6 +1864,11 @@ function serve(request, response)
 						setStateData(URL, body, response);
 					}
 					break;
+				case "state":
+					{
+						setState(URL, body, response);
+					}
+					break;	
 				case "globalasset":
 					{
 						addGlobalInventoryItem(URL, body, response);
