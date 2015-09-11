@@ -24,8 +24,11 @@ function CreateParticleSystem(nodeID, childID, childName) {
         "   vColor = vertexColor + (random -0.5) * colorRange;\n" +
         "   vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n" +
         "   float psize = size + (random.y -0.5) * sizeRange;\n" +
-        "   psize *= screenSize;" +
-        "   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
+        //"   psize *= screenSize;" +
+        //"   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
+        "   vec4 p1 = vec4(mvPosition.x+0.5*psize, mvPosition.yzw);\n" +
+        "   vec4 p2 = vec4(mvPosition.x-0.5*psize, mvPosition.yzw);\n" +
+        "   gl_PointSize = max(1.0, screenSize/2.0 * 1.0/length(mvPosition.xyz) * length(projectionMatrix*p1 - projectionMatrix*p2) ); \n"+
         "   gl_Position = projectionMatrix * mvPosition;\n" +
         "   vRandom = random;" +
         "}    \n";
@@ -88,7 +91,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
         },
         texture: {
             type: "t",
-            value: THREE.ImageUtils.loadTexture("textures/sprites/ball.png")
+            value: _SceneManager.getTexture("textures/sprites/ball.png")
         },
         pCount:{
             type:'f',
@@ -179,9 +182,9 @@ function CreateParticleSystem(nodeID, childID, childName) {
     });
     shaderMaterial_default.fog = true;
     //the interpolate shader blends from one simulation step to the next on the shader
-    //this	allows for a complex sim to run at a low framerate, but still have smooth motion
-    //this is very efficient, as it only requires sending data up to the gpu on each sim tick		
-    //reuse the frag shader from the normal material	
+    //this    allows for a complex sim to run at a low framerate, but still have smooth motion
+    //this is very efficient, as it only requires sending data up to the gpu on each sim tick        
+    //reuse the frag shader from the normal material    
     var vertShader_interpolate =
 
         "attribute float age; \n" +
@@ -204,8 +207,11 @@ function CreateParticleSystem(nodeID, childID, childName) {
         "   vFogPosition = (modelMatrix * vec4(mix(previousPosition,position,fractime),1.0)).xyz; \n" +
         "   vec4 mvPosition = modelViewMatrix * vec4(mix(previousPosition,position,fractime), 1.0 );\n" +
         "   float psize = mix(startSize,endSize,(age+fractime*6.66)/lifespan) + (random.y -0.5) * sizeRange;\n" +
-        "   psize *= screenSize;" +
-        "   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
+        //"   psize *= screenSize;" +
+        //"   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
+        "   vec4 p1 = vec4(mvPosition.x+0.5*psize, mvPosition.yzw);\n" +
+        "   vec4 p2 = vec4(mvPosition.x-0.5*psize, mvPosition.yzw);\n" +
+        "   gl_PointSize = max(1.0, screenSize/2.0 * 1.0/length(mvPosition.xyz) * length(projectionMatrix*p1 - projectionMatrix*p2) ); \n"+
         "   gl_Position = projectionMatrix * mvPosition;\n" +
         "   vRandom = random;" +
         "}    \n";
@@ -272,8 +278,11 @@ function CreateParticleSystem(nodeID, childID, childName) {
         "   vec4 mvPosition = modelViewMatrix * vec4( pos2.xyz, 1.0 );\n" +
         //find random size based on randomness, start and end size, and size range
         "   float psize = mix(startSize,endSize,lifetime/lifespan) + (random.y -0.5) * sizeRange;\n" +
-        "   psize *= screenSize;" +
-        "   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
+        //"   psize *= screenSize;" +
+        //"   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
+        "   vec4 p1 = vec4(mvPosition.x+0.5*psize, mvPosition.yzw);\n" +
+        "   vec4 p2 = vec4(mvPosition.x-0.5*psize, mvPosition.yzw);\n" +
+        "   gl_PointSize = max(1.0, screenSize/2.0 * 1.0/length(mvPosition.xyz) * length(projectionMatrix*p1 - projectionMatrix*p2) ); \n"+
         "   gl_Position = projectionMatrix * mvPosition;\n" +
         " vec4 nR = (random -0.5);\n" +
         //find random color based on start and endcolor, time and colorRange
@@ -628,7 +637,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
         var len = Math.min(this.regenParticles.length, this.maxRate * 15 * time_in_ticks);
         for (var i = 0; i < len; i++) {
 
-            //setup with new random values, and move randomly forward in time one step	
+            //setup with new random values, and move randomly forward in time one step    
             var particle = this.regenParticles.shift();
             this.setupParticle(particle, this.threeParticleSystem.matrix, inv);
             if(this.maxRate < this.particleCount)
@@ -664,7 +673,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
 
         var particles = this.threeParticleSystem.geometry;
 
-        //timesliced tick give up after 5 steps - just cant go fast enough		
+        //timesliced tick give up after 5 steps - just cant go fast enough        
         if (Math.floor(this.lastTime) > 5)
             this.lastTime = 1;
 
@@ -826,7 +835,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
 
         if(this.threeParticleSystem.visible == false) return;
         this.updateInner(time);
-        this.threeParticleSystem.material.uniforms.screenSize.value = parseFloat($('#index-vwf').attr('height') / 1200);
+        this.threeParticleSystem.material.uniforms.screenSize.value = parseFloat($('#index-vwf').attr('width'));
     }
     //Change the solver type for the system
     this.setSolverType = function(type) {
@@ -1064,9 +1073,9 @@ function CreateParticleSystem(nodeID, childID, childName) {
                // this.ps.setSolverType(propertyValue)
             }
             if (propertyName == 'image') {
-                this.ps.shaderMaterial_default.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
+                this.ps.shaderMaterial_default.uniforms.texture.value = _SceneManager.getTexture(propertyValue);
                 this.ps.shaderMaterial_default.uniforms.useTexture.value = 1.0;
-                this.ps.shaderMaterial_analytic.uniforms.texture.value = THREE.ImageUtils.loadTexture(propertyValue);
+                this.ps.shaderMaterial_analytic.uniforms.texture.value = _SceneManager.getTexture(propertyValue);
                 this.ps.shaderMaterial_analytic.uniforms.useTexture.value = 1.0;
 
             }
