@@ -128,6 +128,7 @@ define([], function() {
             var s = _Editor.getNode(vwf.application());
 
             function walk(node) {
+                if(!node)return;
                 for (var i in node.properties) {
                     //4th param as true returns whether or not delegation happened during get. if so, no need to store this property.
                     if (vwf.getProperty(node.id, i, false, true)) {
@@ -210,6 +211,7 @@ define([], function() {
         }
         this.restoreState_imp = function(s) {
             //when stopping a published world, there will be no backup
+            debugger;
             if (!s) return;
             vwf.private.queue.suspend();
             vwf.models.kernel.disable();
@@ -227,13 +229,13 @@ define([], function() {
                 }
                 //async walk the graph and create nodes that don't exist. if htey do exist, set all their props
             var walk = function(node, walkCallback) {
-                if (!node.children) {
+                if (!node || !node.children) {
                     walkCallback();
                     return;
                 }
                 async.eachSeries(Object.keys(node.children), function(i, eachSeriesCallback) {
 
-
+                    console.log(node.id,i)
                     //does the node exist?
                     var exists = false;
                     try {
@@ -285,6 +287,7 @@ define([], function() {
                 //synchronous walk of graph to find children that exist in the current state but not the old one. Delete nodes that were created
                 var walk2 = function(node) {
                     //don't delete avatars
+                    if(!node) return;
                     if (!find(s, node.id) && node.extends != 'character.vwf') {
                         vwf.deleteNode(node.id);
                     } else {
