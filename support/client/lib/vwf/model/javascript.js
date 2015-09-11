@@ -15,21 +15,58 @@
 var jsDriverSelf = this;
 
 
+
 function defaultContext()
 {
     this.setProperty = function(id,name,val)
     {
-       vwf.setProperty(id,name,val);
+
+        //****remove this shim!
+        if(val.internal_val)
+        {
+            
+            val = val.internal_val;
+            delete val.internal_val;
+        }
+        var now = performance.now();
+        
+        //here's the magic. If we are not the client simulating the node, send over the reflector
+        if(vwf.isSimulating(id))
+            vwf.setProperty(id,name,val);
+        else
+            vwf_view.kernel.setProperty(id,name,val);
+
+        if(!propertiesSet[name])
+        propertiesSet[name] = 0;
+        propertiesSet[name]+= (performance.now() - now);
     }
-    this.getProperty = function(id,name)
+    this.getProperty = function(id, name)
     {
-            var val = vwf.getProperty(id,name);
-            return val;
+        var val = vwf.getProperty(id, name);
+       
+        
+        return val;
     }
     this.postUpdates = function()
     {
         throw new Error('Should never get here!')
     }
+    this.callMethod = function(id,methodname,params)
+    {
+        //node that this forces sync!
+        if(vwf.isSimulating(id))
+            return vwf.callMethod(id,methodname,params);
+        else
+            return vwf.callMethod(id,methodname,params);
+    }
+    this.fireEvent = function(id,eventName,params)
+    {
+        if(vwf.isSimulating(id))
+            vwf_view.kernel.fireEvent(id,eventName,params);
+        else
+            vwf_view.kernel.callMethod(id,methodname,params);
+    }
+    //this is also where we should be notifiying the refelector of new methods, events, properties and nodes
 }
 //when a function is called, a context is created to observe changes. When the funtion return, we post changes to VWF.
 function executionContext(parentContext)
@@ -60,6 +97,22 @@ function executionContext(parentContext)
             this.touchedProperties[id+name].originalVal = $.extend(true,{},this.touchedProperties[id+name].val);
             this.touchedProperties[id+name].val = val;
             }
+
+            if (val && typeof val == "object")
+            {
+                delete val.internal_val;
+                Object.defineProperty(val, 'internal_val',
+                {
+                    get: function()
+                    {
+                       // console.warn("internal_val is deprecated");
+                        return val;
+                    },
+                    enumerable:false,
+                    configurable:true
+                })
+            }
+
             return val;
         }
 
@@ -72,6 +125,14 @@ function executionContext(parentContext)
             if(!(Object.deepEquals(this.touchedProperties[i].val,this.touchedProperties[i].originalVal)))
                 this.parent.setProperty(this.touchedProperties[i].id,this.touchedProperties[i].name,this.touchedProperties[i].val);
         }
+    }
+    this.callMethod = function(id,methodname,params)
+    {
+        return this.parent.callMethod(id,methodname,params);
+    }
+    this.fireEvent = function(id,eventName,params)
+    {
+        this.parent.fireEvent(id,eventName,params);
     }
 }
 
