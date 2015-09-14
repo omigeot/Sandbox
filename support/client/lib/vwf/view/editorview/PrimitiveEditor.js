@@ -22,10 +22,10 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
     app.controller('PrimitiveController', ['$scope', function($scope){
         window._PrimitiveEditor = $scope;
 
-        var flags = ["Name", "Owners", "Visible","Static (does not move)", "Dynamic (moves frequently)", "Cast Shadows",
+        var flags = ["Name", "Visible","Static (does not move)", "Dynamic (moves frequently)", "Cast Shadows",
                      "Receive Shadows", "Passable (collides with avatars)", "Selectable (visible to pick)",
                      "Inherit Parent Scale"];
-        var flagProps = ["DisplayName", "owner", "visible", "isStatic", "isDynamic", "castShadows", "receiveShadows", "passable", "isSelectable", "inheritScale"];
+        var flagProps = ["DisplayName", "visible", "isStatic", "isDynamic", "castShadows", "receiveShadows", "passable", "isSelectable", "inheritScale"];
 
         $scope.flags = flags;
         $scope.flagProps = flagProps;
@@ -66,8 +66,33 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
                 setFlags();
                 updateTransform();
+                setupAnimation();
             }
         });
+
+        $scope.animationPlayState = false;
+        $scope.playAnimation = function(){
+            var method = $scope.animationPlayState ? "play" : "pause";
+            callMethod($scope.node, {method: method});
+        }
+
+        function setupAnimation(){
+            var node = $scope.node;
+            var animationLength = vwf.getProperty(node.id, 'animationLength');
+
+            if(animationLength > 0){
+                //This should be moved into a yaml file and implemented by all objects that support animations
+                $scope.animationEditorData = {
+                    animationFrame: {displayname: "Animation Frame", property: "animationFrame", type: "slider", min: 0, max: parseFloat(animationLength), step: .01},
+                    animationCycle: {displayname: "Animation Cycle", property: ["animationStart","animationEnd"], type: "rangeslider", min: 0, max: animationLength, step: .1},
+                    animationSpeed: {displayname: "Animation Speed", property: "animationSpeed", type: "slider", min: 0, max: 10, step: .01},
+                }
+            }
+
+            else if($scope.animationEditorData){
+                $scope.animationEditorData = null;
+            }
+        }
 
         function rotationMatrix_2_XYZ(m) {
             var x = Math.atan2(m[9], m[10]);
@@ -274,22 +299,6 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             }, value);
         }
 
-        function callMethod(vwfNode, vwfProp){
-            if (_UserManager.GetCurrentUserName() == null) {
-                _Notifier.notify('You must log in to participate');
-            }
-            else if (vwfNode.id != 'selection') {
-                if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(), vwfNode.id) == 0) {
-                    _Notifier.notify('You do not have permission to edit this object');
-                    return;
-                }
-                vwf_view.kernel.callMethod(vwfNode.id, vwfProp.method);
-            }
-            else {
-                alertify.alert('calling methods on multiple selections is not supported');
-            }
-        }
-
         function linkFn(scope, elem, attr){
             if(scope.vwfProp){
                 var exclude = ["vwfKey", "vwfNode", "vwfProp"];
@@ -314,12 +323,14 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                             if(Array.isArray(newVal)){
                                 for (var i = 0; i < newVal.length; i++) {
                                     if(newVal[i] !== oldVal[i]){
+                                        //scope.vwfNode[scope.property[propIndex]] = newVal;
                                         setProperty(scope.vwfNode, scope.property[propIndex], newVal);
                                         return;
                                     }
                                 }
                             }
                             else if(newVal !== oldVal){
+                                //scope.vwfNode[scope.property[propIndex]] = newVal;
                                 setProperty(scope.vwfNode, scope.property[propIndex], newVal);
                             }
                         }
@@ -332,7 +343,11 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 else{
                     scope.$watch('vwfNode.properties[property]', function(newVal, oldVal){
                         console.log(scope.vwfProp, newVal, oldVal, typeof newVal);
-                        if(newVal !== oldVal) setProperty(scope.vwfNode, scope.property, newVal);
+
+                        if(newVal !== oldVal){
+                            //scope.vwfNode[scope.property] = newVal;
+                            setProperty(scope.vwfNode, scope.property, newVal);
+                        }
                     }, true);
 
                     if(scope.type === "nodeid") scope.pickNode = pickNode;
@@ -355,6 +370,22 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             scope: { vwfProp: "=", vwfKey: "@", vwfNode: "=" },
 		};
 	}]);
+
+    function callMethod(vwfNode, vwfProp){
+        if (_UserManager.GetCurrentUserName() == null) {
+            _Notifier.notify('You must log in to participate');
+        }
+        else if (vwfNode.id != 'selection') {
+            if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(), vwfNode.id) == 0) {
+                _Notifier.notify('You do not have permission to edit this object');
+                return;
+            }
+            vwf_view.kernel.callMethod(vwfNode.id, vwfProp.method);
+        }
+        else {
+            alertify.alert('calling methods on multiple selections is not supported');
+        }
+    }
 
     function setProperty(node, prop, val) {
         if (_UserManager.GetCurrentUserName() == null) {

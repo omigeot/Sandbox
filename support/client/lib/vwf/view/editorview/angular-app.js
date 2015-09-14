@@ -44,7 +44,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 	app.apply = debounce(function(){
 		if(!playing) app.root.$apply();
 	},200);
-	
+
 	function sortChildren(nodeId)
 	{
 		var parent = app.root.fields.nodes[nodeId];
@@ -56,9 +56,9 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				a = app.root.fields.nodes[a];
 				b = app.root.fields.nodes[b];
 
-				if( !b || !b.name && a.name || a.name.toLowerCase() < b.name.toLowerCase() )
+				if( !b || !b.name && a.name || a.name && a.name.toLowerCase() < b.name.toLowerCase() )
 					return -1;
-				else if( !a || !a.name && b.name || b.name.toLowerCase() < a.name.toLowerCase() )
+				else if( !a || !a.name && b.name || b.name && b.name.toLowerCase() < a.name.toLowerCase() )
 					return 1;
 				else
 					return 0;
@@ -103,7 +103,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		}
 	}
 
-	
+
 	app.initializedProperty = app.createdProperty = app.satProperty = function(id, prop, val)
 	{
 		var apply = false;

@@ -10,8 +10,8 @@ block content
 		#otherprops.accordian-flags		
 			div(ng-repeat="flag in ::flags")
 				label.inline(for="{{::flag}}") {{::flag}}
-					input(type="text" ng-show="$index < 2" ng-disabled="flag == 'Owners'", ng-model="node.properties[flagProps[$index]]" ng-model-options="{updateOn: 'blur'}")
-					input(type="checkbox" ng-hide="$index < 2" name="{{::flag}}" ng-model="node.properties[flagProps[$index]]")
+					input(type="text" ng-show="$index == 0" ng-model="node.properties[flagProps[0]]" ng-model-options="{updateOn: 'blur'}")
+					input(type="checkbox" ng-hide="$index == 0" name="{{::flag}}" ng-model="node.properties[flagProps[$index]]")
 				
 		h3
 			a(href="#") Transforms
@@ -31,6 +31,14 @@ block content
 		.accordion-properties(ng-repeat-end)
 			div(ng-repeat="(key, value) in data.editorProps")
 				vwf-editor-property(vwf-prop="value", vwf-key="{{key}}", vwf-node="node")
+				
+		h3(ng-show="animationEditorData")
+			a(href="#") Animation
+		.accordian-animation(ng-show="animationEditorData")
+			div(ng-repeat="(key, value) in animationEditorData")
+				vwf-editor-property(vwf-prop="value", vwf-key="{{key}}", vwf-node="node")
+			label.inline(style="margin-top:10px;") Play animation during simulation: 
+				input(type='checkbox', ng-model="animationPlayState", ng-change='playAnimation()')
 	
 	#vwf-template-slider(ng-non-bindable, style='display: none;') 
 		label.vMargin {{displayname}}: 
