@@ -42,7 +42,8 @@ block content
 						option(value=2, label='None') None
 
 				label.inline Diffuse color:
-					color-picker(color-obj='materialDef.color', disabled='!materialDef', sliding='suppressUndo')
+					//-color-picker(color-obj='materialDef.color', alpha='materialDef.alpha', disabled='!materialDef', sliding='suppressUndo')
+					html-palette(rgb-color='materialDef.color', disabled='!materialDef', popup-edge='w', update-trigger-bg=true, use-alpha=true, style='width: 25px; height: 25px;')
 
 				.inline Ambient color:
 					.verticalLayout(style='align-items: flex-end;')
