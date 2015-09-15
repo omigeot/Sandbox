@@ -1,6 +1,6 @@
-define(['vwf/view/editorview/lib/angular'], function(angular)
+define(['vwf/view/editorview/lib/angular', './lib/html-palette.min'], function(angular)
 {
-	var app = angular.module('SandboxEditor', []);
+	var app = angular.module('SandboxEditor', ['html-palette']);
 	var playing = false;
 
 	app.run(['$timeout', '$rootScope', function($timeout, $rootScope)
