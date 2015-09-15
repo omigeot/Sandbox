@@ -55,11 +55,28 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			}
 		});
 
+		$scope.$watch('materialDef.color.a', function(newval){
+			if(newval !== undefined){
+				$scope.materialDef.alpha = newval;
+			}
+		});
+		$scope.$watch('materialDef.specularColor.a', function(newval){
+			if(newval !== undefined){
+				$scope.materialDef.specularLevel = newval;
+			}
+		});
+
 		// recursively watch materialDef, and setProperty if changes were made by the material editor
+		var handle = null;
 		$scope.$watch('materialArray || materialDef', function(newval)
 		{
 			if(newval && newval === oldMaterialDef){
+				$scope.suppressUndo = true;
 				applyDef(newval);
+				if(handle) $timeout.cancel(handle);
+				handle = $timeout(function(){
+					$scope.suppressUndo = false;
+				}, 500);
 			}
 
 			if( $scope.materialDef )
@@ -173,6 +190,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				$scope.materialDef = null;
 				$scope.ambientLinked = true;
 				lastUndo = null;
+				$('#materialEditor html-palette').css('background', '#aaaaaa');
 				//_SidePanel.hideTab('materialEditor');
 			}
 		}
