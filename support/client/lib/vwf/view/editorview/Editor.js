@@ -2488,8 +2488,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                     self.toSelect.splice(self.toSelect.indexOf(n), 1);
                     if (self.toSelect.length == 0) {
                         self.createNodeCallback = null;
-                        self.SelectObject(null);
-                        self.SelectObject(self.tempSelect, Add);
+                        self.SelectObject(self.tempSelect, NewSelect);
                     }
                 }
             });
@@ -2853,7 +2852,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
         }
         this.initialize = function() {
             this.BuildMoveGizmo();
-            this.SelectObject(null);
+            this.SelectObject(null, 2, true);
             _dView.bind('prerender', this.updateGizmo.bind(this));
             document.oncontextmenu = function() {
                 return false;
