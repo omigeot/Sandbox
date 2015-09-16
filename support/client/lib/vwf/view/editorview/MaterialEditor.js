@@ -70,7 +70,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 
 		// when undo events stop being suppressed, push an undo frame
 		$scope.$watch('suppressUndo', function(newval){
-			if(!newval){
+			if(!newval && ($scope.materialArray || $scope.materialDef)){
 				applyDef($scope.materialArray || $scope.materialDef);
 			}
 		});

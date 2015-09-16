@@ -42,11 +42,11 @@ block content
 	
 	#vwf-template-slider(ng-non-bindable, style='display: none;') 
 		label.vMargin {{displayname}}: 
-			slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property]', sliding='suppressUndo')
+			slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property]', sliding='isUpdating')
 	
 	#vwf-template-color(ng-non-bindable, style='display: none;')
 		label.inline {{displayname}}: 
-			color-picker(color-arr='vwfNode.properties[vwfProp.property]', color-obj='{r:0,g:0,b:0}', sliding='suppressUndo')
+			color-picker(color-arr='vwfNode.properties[vwfProp.property]', color-obj='{r:0,g:0,b:0}', sliding='isUpdating')
 		
 	#vwf-template-check(ng-non-bindable, style='display: none;')
 		label.inline {{displayname}}: 
@@ -57,7 +57,7 @@ block content
 		
 	#vwf-template-rangeslider(ng-non-bindable, style='display: none;')
 		label.vMargin {{displayname}}: 
-			slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property[0]]', upper-value='vwfNode.properties[vwfProp.property[1]]', range="true", sliding='suppressUndo')
+			slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property[0]]', upper-value='vwfNode.properties[vwfProp.property[1]]', range="true", sliding='isUpdating')
 		
 	#vwf-template-vector(ng-non-bindable, style='display: none;')
 		label {{displayname}}: 

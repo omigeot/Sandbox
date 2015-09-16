@@ -101,10 +101,9 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             return [x, y, z];
         }
 
+        var transformFromVWF = false;
         function updateTransform(vwfTransform, oldTransform){
             if(vwfTransform == oldTransform) return;
-            console.log("This is the transform: ", vwfTransform);
-
             var node = $scope.node;
             try {
                 //dont update the spinners when the user is typing in them, but when they drag the gizmo do.
@@ -118,9 +117,21 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
                     for(var i = 0; i < 3; i++){
                         //since there is ambiguity in the matrix, we need to keep these values aroud. otherwise , the typeins don't really do what you would think
-                        $scope.transform.rotation[i] = Math.round(angles[i] * 57.2957795);
-                        $scope.transform.scale[i] = Math.floor(MATH.lengthVec3([mat[0],mat[1],mat[2]]) * 1000) / 1000;
-                        $scope.transform.translation[i] = Math.floor(pos[i] * 1000) / 1000;
+                        var newRot = Math.round(angles[i] * 57.2957795);
+                        var newScale = Math.floor(MATH.lengthVec3([mat[0],mat[1],mat[2]]) * 1000) / 1000;
+                        var newPos = Math.floor(pos[i] * 1000) / 1000;
+
+                        //If newX == oldX, then this is the tailend of the Angular-VWF roundtrip initiated by the Sandbox
+                        if(newRot != $scope.transform.rotation[i] ||
+                            newScale != $scope.transform.scale[i]  ||
+                            newPos != $scope.transform.translation[i]){
+
+                            $scope.transform.rotation[i] = newRot;
+                            $scope.transform.scale[i] = newScale;
+                            $scope.transform.translation[i] = newPos;
+
+                            transformFromVWF = true;
+                        }
                     }
                 }
             } catch (e) {
@@ -128,32 +139,33 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             }
         }
 
-         function setTransform(transform, oldTransform) {
-            if(transform == oldTransform) return;
 
-            console.log("Change in setTransform!");
-            var val = [0, 0, 0];
-            var scale = [1, 1, 1];
-            var pos = [0, 0, 0];
+        function setTransform(transform, oldTransform) {
+            if(transform != oldTransform && !transformFromVWF){
+                var val = [0, 0, 0];
+                var scale = [1, 1, 1];
+                var pos = [0, 0, 0];
 
-            for(var i = 0; i < 3; i++){
-                val[i] = !isNaN(transform.rotation[i]) ? transform.rotation[i] : 0;
-                scale[i] = parseFloat(transform.scale[i]);
-                pos[i] = parseFloat(transform.translation[i]);
+                for(var i = 0; i < 3; i++){
+                    val[i] = !isNaN(transform.rotation[i]) ? transform.rotation[i] : 0;
+                    scale[i] = parseFloat(transform.scale[i]);
+                    pos[i] = parseFloat(transform.translation[i]);
 
-                if(isNaN(pos[i])) pos[i] = 0;
-                if(isNaN(scale[i])) scale[i] = 1;
+                    if(isNaN(pos[i])) pos[i] = 0;
+                    if(isNaN(scale[i])) scale[i] = 1;
+                }
+
+                var rotmat = makeRotMat(parseFloat(val[0]) / 57.2957795, parseFloat(val[1]) / 57.2957795, parseFloat(val[2]) / 57.2957795);
+                rotmat = goog.vec.Mat4.scale(rotmat, scale[0], scale[1], scale[2]);
+
+                pos = goog.vec.Mat4.translate(goog.vec.Mat4.createIdentity(), pos[0], pos[1], pos[2])
+                var vwfTransform = goog.vec.Mat4.multMat(pos, rotmat, []);
+
+                pushUndoEvent($scope.node, 'transform', vwfTransform);
+                setProperty($scope.node, 'transform', vwfTransform);
             }
 
-            var rotmat = makeRotMat(parseFloat(val[0]) / 57.2957795, parseFloat(val[1]) / 57.2957795, parseFloat(val[2]) / 57.2957795);
-            rotmat = goog.vec.Mat4.scale(rotmat, scale[0], scale[1], scale[2]);
-
-            pos = goog.vec.Mat4.translate(goog.vec.Mat4.createIdentity(), pos[0], pos[1], pos[2])
-            var vwfTransform = goog.vec.Mat4.multMat(pos, rotmat, []);
-
-            async.nextTick(function(){
-                setProperty($scope.node, 'transform', vwfTransform);
-            });
+            transformFromVWF = false;
         }
 
         function makeRotMat(x, y, z) {
@@ -300,6 +312,8 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
         }
 
         function linkFn(scope, elem, attr){
+            scope.isUpdating = false;
+
             if(scope.vwfProp){
                 var exclude = ["vwfKey", "vwfNode", "vwfProp"];
                 for(var key in scope.vwfProp){
@@ -341,14 +355,36 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                     }
                 }
                 else{
+                    var lastValue = null;
                     scope.$watch('vwfNode.properties[property]', function(newVal, oldVal){
-                        console.log(scope.vwfProp, newVal, oldVal, typeof newVal);
+                        console.log(scope.vwfProp, scope, newVal, oldVal, typeof newVal);
 
                         if(newVal !== oldVal){
-                            //scope.vwfNode[scope.property] = newVal;
-                            setProperty(scope.vwfNode, scope.property, newVal);
+                            if(lastValue === null){
+                                window.setTimeout(function(){
+                                    if(!scope.isUpdating) pushUndoEvent(scope.vwfNode, scope.property, lastValue);
+
+                                    setProperty(scope.vwfNode, scope.property, lastValue);
+                                    lastValue = null;
+                                }, 75);
+                            }
+
+                            lastValue = newVal;
                         }
                     }, true);
+
+                    var valueBeforeSliding;
+                    scope.$watch('isUpdating', function(newVal, oldVal){
+                        //Per the Angular docs, if newVal === oldVal, then this is the initial run of this watch. Ignore.
+                        if(newVal !== oldVal){
+                            //On initial slide, save value
+                            if(newVal) valueBeforeSliding = scope.vwfNode.properties[scope.property];
+
+                            //Once done sliding, push value onto undo stack
+                            else pushUndoEvent(scope.vwfNode, scope.property, newVal, valueBeforeSliding);
+
+                        }
+                    });
 
                     if(scope.type === "nodeid") scope.pickNode = pickNode;
                     else if(scope.type === "prompt") scope.showPrompt = showPrompt;
@@ -385,6 +421,13 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
         else {
             alertify.alert('calling methods on multiple selections is not supported');
         }
+    }
+
+    function pushUndoEvent(node, prop, newVal, oldVal){
+        if(oldVal != undefined)
+            _UndoManager.pushEvent( new _UndoManager.SetPropertyEvent(node.id, prop, newVal, oldVal) );
+        else
+            _UndoManager.pushEvent( new _UndoManager.SetPropertyEvent(node.id, prop, newVal) );
     }
 
     function setProperty(node, prop, val) {
