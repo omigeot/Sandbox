@@ -178,6 +178,7 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', './lib/html-palette.
 		var node = app.root.fields.nodes[newId] = {};
 		node.id = newId;
 		node.prototype = newExtends;
+		node.continues = vwf.getNode(newId).continues;
 		node.subtype = newType;
 		node.name = newId;
 		node.children = [];
