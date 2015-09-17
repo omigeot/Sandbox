@@ -252,12 +252,11 @@ define(["module", "vwf/view", "vwf/view/SAVE/api"], function(module, view, SAVEA
 			{
 				if (!window._EntityLibrary)
 					self.setupEUI();
-				self.mouseDown = false;
-				self.lastMouse = {
+  				self.mouseDown = false;
+  				self.lastMouse = {
 					x: 0,
 					y: 0
 				}
-				self.issueAutoLoads();
 				$('#index-vwf').mousedown(function(e)
 				{
 					if (e.which !== 3) return;
