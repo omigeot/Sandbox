@@ -240,11 +240,11 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			template: [
 				'<div class="mantissa">',
 					'<div class="slider"></div>',
-					'<input type="number" min="{{min}}" max="{{max}}" step="{{step}}" ng-model="value" ng-disabled="disabled" ng-hide="range"></input>',
+					'<input type="number" min="{{min}}" max="{{max}}" step="{{step}}" ng-model="value" ng-disabled="disabled" ng-hide="range" ng-change="change()"></input>',
 				'</div>',
 				'<div class="exponent" ng-show="useExponent">',
 					'Exponent: ',
-					'<input type="number" min="0" step="1" ng-model="exponent" ng-disabled="disabled"></input>',
+					'<input type="number" min="0" step="1" ng-model="exponent" ng-disabled="disabled" ng-change="change()"></input>',
 				'</div>',
 			].join(''),
 			scope: {
@@ -253,6 +253,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				max: '=',
 				step: '=',
 				range: '=?',
+				change: '&?',
 
 				useExponent: '=',  // determine if the final value should be represented in exponential notation
 				value: '=',        // two-way binding for the final value of the widget
@@ -266,7 +267,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 
 				$scope.mantissa = $scope.value || $scope.min;
 				$scope.exponent = 0;
-
+				$scope.change = $scope.change || $.noop;
 				var opts = {
 					min: $scope.min,
 					max: $scope.max,
@@ -368,6 +369,8 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 
 	 app.directive('vwfImagePicker', ['$compile', function($compile){
 		function linkFn(scope, elem, attr){
+			scope.change = scope.change || $.noop;
+
 			elem.button({label: scope.label});
 			elem.prepend($compile('<img src="{{value}}"/>')(scope));
 
@@ -375,6 +378,8 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				_MapBrowser.setTexturePickedCallback(function(e) {
 					scope.value = e;
 					scope.$apply();
+
+					scope.change();
 				}.bind(elem.get(0)));
 
 				_MapBrowser.show();
@@ -385,7 +390,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			restrict: 'E',
 			link: linkFn,
 			replace: true,
-			scope: { value: '=', label: '=' }
+			scope: { value: '=', label: '=', change: '&?' }
 		};
 	 }]);
 

@@ -34,10 +34,18 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             return "node.properties." + elem;
         });
 
+        //Watch flags for changes
         $scope.$watchGroup(flagGroup, function(newVal, oldVal){
             for(var i = 0; i < newVal.length; i++){
-                if(newVal[i] !== oldVal[i]){
-                    setProperty($scope.node, flagProps[i], newVal[i]);
+                var current = vwf.getProperty($scope.node.id, flagProps[i]);
+
+                if(newVal[i] !== oldVal[i] && newVal[i] !== current){
+                    if(newVal[i] || typeof newVal[i] === "boolean"){
+                        setProperty($scope.node, flagProps[i], newVal[i]);
+                    }
+                    else if(i == 0 && !newVal[i]){
+                        setProperty($scope.node, flagProps[0], $scope.node.id);
+                    }
                 }
             }
         });
@@ -62,7 +70,6 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 $scope.allEditorData.length = 0;
 
                 recursevlyAddPrototypes(node, {});
-                //buildEditorData(node.id);
 
                 setFlags();
                 updateTransform();
@@ -201,7 +208,9 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             for(var i = 0; i < flagProps.length; i++){
                 if($scope.node.properties[flagProps[i]] === undefined){
                     var temp = vwf.getProperty($scope.node.id, flagProps[i]);
-                    if(temp !== undefined) $scope.node.properties[flagProps[i]] = temp;
+                    if(temp !== undefined){
+                        $scope.node.properties[flagProps[i]] = temp;
+                    }
                 }
             }
         }
@@ -299,6 +308,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 _Editor.TempPickCallback = null;
                 _Editor.SetSelectMode('Pick');
 
+                pushUndoEvent(vwfNode, vwfProp.property, node.id);
                 setProperty(vwfNode, vwfProp.property, node.id);
             };
 
@@ -307,12 +317,26 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
         function showPrompt(vwfNode, vwfProp, value){
             alertify.prompt('Enter a value for ' + vwfProp.property, function(ok, value) {
-                if (ok) setProperty(vwfNode, vwfProp.property, value);
+                if (ok){
+                    pushUndoEvent(vwfNode, vwfProp.property, value);
+                    setProperty(vwfNode, vwfProp.property, value);
+                }
             }, value);
         }
 
         function linkFn(scope, elem, attr){
             scope.isUpdating = false;
+            scope.onChange = function(){
+                //setTimeout is necessary because the model is not up-to-date when this event is fired
+                window.setTimeout(function(){
+                    var node = scope.vwfNode, prop = scope.property, value;
+                    if(Array.isArray(prop)){}
+                    else value = node.properties[prop];
+
+                    pushUndoEvent(node, prop, value);
+                    setProperty(node, prop, value);
+                }, 50);
+            };
 
             if(scope.vwfProp){
                 var exclude = ["vwfKey", "vwfNode", "vwfProp"];
@@ -354,16 +378,15 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                         scope.$watchCollection(uniques[i], getWatchFn(i));
                     }
                 }
-                else{
+                else if(scope.type.indexOf("slider") > -1 || scope.type == "color"){
                     var lastValue = null;
                     scope.$watch('vwfNode.properties[property]', function(newVal, oldVal){
                         console.log(scope.vwfProp, scope, newVal, oldVal, typeof newVal);
 
-                        if(newVal !== oldVal){
+                        //Update occasionally only while user is sliding
+                        if(newVal !== oldVal && scope.isUpdating){
                             if(lastValue === null){
                                 window.setTimeout(function(){
-                                    if(!scope.isUpdating) pushUndoEvent(scope.vwfNode, scope.property, lastValue);
-
                                     setProperty(scope.vwfNode, scope.property, lastValue);
                                     lastValue = null;
                                 }, 75);
@@ -377,19 +400,18 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                     scope.$watch('isUpdating', function(newVal, oldVal){
                         //Per the Angular docs, if newVal === oldVal, then this is the initial run of this watch. Ignore.
                         if(newVal !== oldVal){
-                            //On initial slide, save value
-                            if(newVal) valueBeforeSliding = scope.vwfNode.properties[scope.property];
+                            var sliderValue = scope.vwfNode.properties[scope.property];
 
+                            //On initial slide, save value before slide occurred
                             //Once done sliding, push value onto undo stack
-                            else pushUndoEvent(scope.vwfNode, scope.property, newVal, valueBeforeSliding);
-
+                            if(newVal) valueBeforeSliding = sliderValue;
+                            else pushUndoEvent(scope.vwfNode, scope.property, sliderValue, valueBeforeSliding);
                         }
                     });
-
-                    if(scope.type === "nodeid") scope.pickNode = pickNode;
-                    else if(scope.type === "prompt") scope.showPrompt = showPrompt;
-                    else if(scope.type === "button") scope.callMethod = callMethod;
                 }
+                else if(scope.type === "nodeid") scope.pickNode = pickNode;
+                else if(scope.type === "prompt") scope.showPrompt = showPrompt;
+                else if(scope.type === "button") scope.callMethod = callMethod;
 
                 //Get template that corresponds with current type of property
                 var template = $("#vwf-template-" + scope.type).html();
@@ -424,6 +446,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
     }
 
     function pushUndoEvent(node, prop, newVal, oldVal){
+        console.log("New undo event!", prop, newVal, oldVal);
         if(oldVal != undefined)
             _UndoManager.pushEvent( new _UndoManager.SetPropertyEvent(node.id, prop, newVal, oldVal) );
         else

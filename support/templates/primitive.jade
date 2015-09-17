@@ -42,7 +42,7 @@ block content
 	
 	#vwf-template-slider(ng-non-bindable, style='display: none;') 
 		label.vMargin {{displayname}}: 
-			slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property]', sliding='isUpdating')
+			slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property]', sliding='isUpdating', change='onChange()')
 	
 	#vwf-template-color(ng-non-bindable, style='display: none;')
 		label.inline {{displayname}}: 
@@ -50,7 +50,7 @@ block content
 		
 	#vwf-template-check(ng-non-bindable, style='display: none;')
 		label.inline {{displayname}}: 
-			input(type='checkbox', ng-model='vwfNode.properties[vwfProp.property]')
+			input(type='checkbox', ng-model='vwfNode.properties[vwfProp.property]', ng-change='onChange()')
 		
 	#vwf-template-button(ng-non-bindable, style='display: none;')
 		button(ng-click='callMethod(vwfNode, vwfProp)') {{vwfProp.label || vwfProp.method || 'Call Method'}}
@@ -74,16 +74,16 @@ block content
 	
 	#vwf-template-text(ng-non-bindable, style='display: none;')
 		label.inline {{displayname}}: 
-			input(ng-model='vwfNode.properties[vwfProp.property]', type='text', placeholder='{{displayname}}')
+			input(ng-model='vwfNode.properties[vwfProp.property]', type='text', placeholder='{{displayname}}', ng-change='onChange()')
 				
 	#vwf-template-choice(ng-non-bindable, style='display: none;')
 		label.inline {{displayname}}:
-			select(ng-model='vwfNode.properties[vwfProp.property]')
+			select(ng-model='vwfNode.properties[vwfProp.property]', ng-change='onChange()')
 				option(ng-repeat='value in vwfProp.values' ng-selected='vwfNode.properties[vwfProp.property] == value' value='{{value}}') {{labels[$index]}}
 
 	#vwf-template-map(ng-non-bindable, style='display: none;')
 		label.vMargin
-			vwf-image-picker(label='displayname', value='vwfNode.properties[vwfProp.property]')
+			vwf-image-picker(label='displayname', value='vwfNode.properties[vwfProp.property]', change='onChange()')
 			
 	#vwf-template-nodeid(ng-non-bindable, style='display: none;')
 		label.vMargin {{displayname}}: 
