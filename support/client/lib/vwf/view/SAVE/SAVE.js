@@ -240,7 +240,7 @@ define(["module", "vwf/view", "vwf/view/SAVE/api"], function(module, view, SAVEA
 					var _KbId = data[0].KbIds;
 					vwf_view.kernel.setProperty(node.id, "KbId", _KbId)
 					console.log("got " + _KbId);
-				}, function() {})
+				});
 			}
 		},
 		initialize: function()
@@ -372,67 +372,13 @@ define(["module", "vwf/view", "vwf/view/SAVE/api"], function(module, view, SAVEA
 				_assetLoader.s3dToVWF(name, ID, rootKbId, asset, s3d, mapping, function(def)
 				{
 					def.properties.DisplayName = DisplayName;
-					//hook up all the children with their KBID
-					/*function walkDef(node, parent, cb)
-						{
-							//Only Groups get KBIDs
-							if (node.extends == SAVE_GROUP_DEF)
-							{
-								async.series([
-									//Get ID for self
-									function getMyID(cb2)
-									{
-										var ID = node.properties.DisplayName;
-										var parentID = parent ? parent.properties.KbId : null
-										SAVEAPI.KbId(ID, parentID, function(data)
-										{
-											var _KbId = data.KbIds[0];
-											node.properties["KbId"] = _KbId;
-											console.log("got " + _KbId);
-											cb2(); //goTo walkChildren
-										}, function()
-										{
-											node.properties["KbId"] = GUID();
-											cb2(); //goTo walkChildren
-										})
-									},
-									//Async walk of children
-									function walkChildren(cb2)
-									{
-										var keys = Object.keys(node.children);
-										async.eachSeries(keys, function walkOneChild(childNodeName, nextChildNode)
-										{
-											//Walk the child node
-											walkDef(node.children[childNodeName], node, nextChildNode)
-										}, function(err)
-										{
-											if (err) console.error(err);
-											cb2(); //finished walking all children
-										})
-									}
-								], function nodeWalkComplete(err)
-								{
-									if (err) console.error(err);
-									cb(err, node) //finished walking this node
-								})
-							}
-							else
-							{
-								cb(null, node); //this node does not need IDs
-							}
-						}*/
-					//hookup the KB_IDS
-					// walkDef(def, null, function()
-					//moving this to observer for autoloads
+					var behavior = ("./vwf/view/SAVE/test/" + DisplayName.replace(/ /g, "_") + "_dae.eui");
+					$.get(behavior, function(code)
 					{
-						var behavior = ("./vwf/view/SAVE/test/" + DisplayName.replace(/ /g, "_") + "_dae.eui");
-						$.get(behavior, function(code)
-						{
-							$.extend(true, def, code);
-							def.properties.transform = transform
-							vwf_view.kernel.createChild(vwf.application(), name, def);
-						})
-					}
+						$.extend(true, def, code);
+						def.properties.transform = transform
+						vwf_view.kernel.createChild(vwf.application(), name, def);
+					})
 				});
 			});
 		},
@@ -490,8 +436,8 @@ define(["module", "vwf/view", "vwf/view/SAVE/api"], function(module, view, SAVEA
 					var self = this;
 					var query = [node.properties.DisplayName + "_KbId"];
 					console.log("getting KBID for " + node.properties.DisplayName)
-						//this really is not a great place to do this...
-						//but it's all good because it's synchronous. 
+					//this really is not a great place to do this...
+					//but it's all good because it's synchronous.
 					var ID = node.properties.DisplayName;
 					var parent = this.nodes[vwf.parent(nodeID)];
 					var parentID = parent ? parent.properties.KbId : null
