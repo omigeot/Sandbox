@@ -36,6 +36,8 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
         //Watch flags for changes
         $scope.$watchGroup(flagGroup, function(newVal, oldVal){
+            if(newVal == oldVal) return;
+
             for(var i = 0; i < newVal.length; i++){
                 var current = vwf.getProperty($scope.node.id, flagProps[i]);
 
@@ -333,8 +335,11 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                     if(Array.isArray(prop)){}
                     else value = node.properties[prop];
 
-                    pushUndoEvent(node, prop, value);
-                    setProperty(node, prop, value);
+                    if(value !== vwf.getProperty(node.id, prop)){
+                        pushUndoEvent(node, prop, value);
+                        setProperty(node, prop, value);
+                    }
+
                 }, 50);
             };
 
@@ -398,6 +403,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
                     var valueBeforeSliding;
                     scope.$watch('isUpdating', function(newVal, oldVal){
+                        console.log("Change in isUpdating!");
                         //Per the Angular docs, if newVal === oldVal, then this is the initial run of this watch. Ignore.
                         if(newVal !== oldVal){
                             var sliderValue = scope.vwfNode.properties[scope.property];
@@ -412,6 +418,9 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 else if(scope.type === "nodeid") scope.pickNode = pickNode;
                 else if(scope.type === "prompt") scope.showPrompt = showPrompt;
                 else if(scope.type === "button") scope.callMethod = callMethod;
+                else if(scope.type === "vector"){
+                    scope.vwfNode.properties[scope.property] = scope.vwfNode.properties[scope.property].slice();
+                }
 
                 //Get template that corresponds with current type of property
                 var template = $("#vwf-template-" + scope.type).html();

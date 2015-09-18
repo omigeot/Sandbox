@@ -149,7 +149,17 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', './lib/html-palette.
 
 		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id )
 		{
-			app.root.fields.selectedNode.properties[prop] = val;
+			// See issue #267 on Github for why this change is necessary
+			var property = app.root.fields.selectedNode.properties[prop];
+			if(Array.isArray(property) && Array.isArray(val) && val.length < 32){
+				for(var i = 0; i < val.length; i++){
+					property[i] = val[i];
+				}
+			}
+			else{
+				app.root.fields.selectedNode.properties[prop] = val;
+			}
+
 			apply = true;
 		}
 

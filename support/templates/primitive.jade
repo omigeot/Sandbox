@@ -62,7 +62,7 @@ block content
 	#vwf-template-vector(ng-non-bindable, style='display: none;')
 		label {{displayname}}: 
 		div.vector-input.vMargin
-			input(type='number', step='{{step || 1}}', ng-model='vwfNode.properties[vwfProp.property][$index]', ng-model-options='{updateOn: "click blur"}', ng-repeat='component in vwfNode.properties[vwfProp.property] track by $index')
+			input(type='number', step='{{step || 1}}', ng-change='onChange()', ng-model='vwfNode.properties[vwfProp.property][$index]', ng-model-options='{updateOn: "click blur"}', ng-repeat='component in vwfNode.properties[vwfProp.property] track by $index')
 	
 	#vwf-template-rangevector(ng-non-bindable, style='display: none;')
 		label.vMargin 

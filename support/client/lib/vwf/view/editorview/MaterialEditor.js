@@ -502,7 +502,9 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 						color(hex);
 
 						if(handle) $timeout.cancel(handle);
-						handle = $timeout(function(){ $scope.sliding = false; }, 500);
+
+						//500ms isn't enough time to determine whether or not sliding has actually "stopped"
+						handle = $timeout(function(){ $scope.sliding = false; }, 1500);
 					}
 				});
 
