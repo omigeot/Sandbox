@@ -68,9 +68,9 @@ block content
 		label.vMargin 
 			div {{displayname}}
 			.vector-input.vMargin min:
-				input(type='number', step='{{step || 1}}', ng-repeat='min in vwfNode.properties[vwfProp.property[0]] track by $index', ng-model='vwfNode.properties[vwfProp.property[0]][$index]', ng-model-options="{updateOn: 'blur'}")
+				input(type='number', step='{{step || 1}}', ng-change='onChange(0)', ng-repeat='min in vwfNode.properties[vwfProp.property[0]] track by $index', ng-model='vwfNode.properties[vwfProp.property[0]][$index]', ng-model-options="{updateOn: 'blur'}")
 			.vector-input.vMargin max:
-				input(type='number', step='{{step || 1}}', ng-repeat='max in vwfNode.properties[vwfProp.property[1]] track by $index', ng-model='vwfNode.properties[vwfProp.property[1]][$index]', ng-model-options="{updateOn: 'blur'}")
+				input(type='number', step='{{step || 1}}', ng-change='onChange(1)', ng-repeat='max in vwfNode.properties[vwfProp.property[1]] track by $index', ng-model='vwfNode.properties[vwfProp.property[1]][$index]', ng-model-options="{updateOn: 'blur'}")
 	
 	#vwf-template-text(ng-non-bindable, style='display: none;')
 		label.inline {{displayname}}: 
