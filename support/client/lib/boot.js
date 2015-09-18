@@ -11,6 +11,9 @@ require.config({
             deps: ['vwf/view/editorview/sha256', "vwf/view/editorview/_3DRIntegration"],
             exports: 'XAPIWrapper'
         },
+		'vwf/view/editorview/lib/html-palette.min': {
+			exports: 'HtmlPalette'
+		},
         'vwf/model/threejs/_THREERayTracer': {
             deps: ["vwf/model/threejs",'vwf/model/threejs/MATH']
         },
@@ -53,7 +56,7 @@ define([
     "vwf/view/googleEarth",
     "vwf/utility",
     "vwf/view/WebRTC",
-    "vwf/view/audio",
+    "vwf/model/audio",
     "messageCompress",
     "vwf/view/xapi",
     "assetLoader",

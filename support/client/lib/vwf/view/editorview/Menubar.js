@@ -13,7 +13,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 				return nodeInherits( vwf.prototype(node), ancestor );
 		}
 
-		$scope.$watchGroup(['fields.selectedNode.id','fields.worldIsReady'], function(newvals)
+		$scope.$watchGroup([
+			'fields.worldIsReady',
+			'fields.selectedNode.id',
+			'fields.selectedNode.properties.sourceAssetId',
+			'fields.selectedNode.properties.materialDef.sourceAssetId'
+		], function(newvals)
 		{
 			//console.log('Updating menu state');
 			var node = _Editor.GetSelectedVWFNode();
@@ -33,6 +38,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			$scope.worldIsSinglePlayer = instanceData.publishSettings.SinglePlayer;
 			$scope.worldIsNotLaunchable = !($scope.worldIsPersistent && $scope.userIsOwner) || $scope.worldIsSinglePlayer || $scope.isExample;
 			$scope.worldHasTerrain = !!window._dTerrain;
+			$scope.hasContinuesFlag = /[?&]allowContinues/.test(window.location.search);
 
 			//console.log('UserIsOwner:', $scope.userIsOwner);
 		});
@@ -404,8 +410,6 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 				_Editor.CreateBehavior('methodtrigger', _UserManager.GetCurrentUserName());
 			},
 	
-	
-	
 			MenuHelpBrowse: function(e) {
 				window.open('http://sandboxdocs.readthedocs.org/en/latest/', '_blank');
 			},
@@ -591,14 +595,14 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 					alertify.confirm("Are you sure you want to share your camera position? Other users will be able to see from your camera!", function(ok) {
 						if (ok) {
 							_dView.shareCameraView();
-							$('#MenuCameraShare').text('Stop Camera Sharing');
+							$('#MenuCameraShare').html(('Stop Camera Sharing').escape());
 						}
 					}.bind(this));
 				} else {
 					alertify.confirm("You are currently sharing your camera view. Would you like to stop sharing?", function(ok) {
 						if (ok) {
 							_dView.stopShareCameraView();
-							$('#MenuCameraShare').text('Share Camera View');
+							$('#MenuCameraShare').html(('Share Camera View').escape());
 	
 						}
 					}.bind(this));
@@ -735,6 +739,14 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 	
 			},
 	
+			MenuCreateContinuesNode: function(e){
+				alertify.prompt('Input a URL to an entity JSON body.', function(ok, val){
+					if(ok && val){
+						vwf.createChild('index-vwf', GUID(), {continues: val});
+					}
+				});
+			},
+	
 	
 			MenuCreateEmpty: function(e) {
 				_Editor.CreatePrim('node', _Editor.GetInsertPoint(), null, null, _UserManager.GetCurrentUserName(), '');
@@ -796,11 +808,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 				p.prompt(data);
 				
 			},
-	
-			
-	
-	
-	
+			MenuObjectCenters:function()
+			{
+				var off = !_Editor.GetMoveGizmo().transformOffsets;
+				_Editor.GetMoveGizmo().setApplyOffset(off);
+				$scope.fields.useObjectCenters = off;
+			},
 			LocationMoveToGround: function(e) {
 				_LocationTools.MoveToGround();
 			},

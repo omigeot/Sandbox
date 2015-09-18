@@ -330,7 +330,7 @@
                 { library: "/socket.io/socket.io.js", active: true },
                 { library: "vwf/view/EditorView", active: true },
                 { library: "vwf/view/WebRTC", active: true },
-                { library: "vwf/view/audio", active: true },
+                { library: "vwf/model/audio", active: true },
                 { library: "messageCompress", active: true },
                 { library: "vwf/view/xapi", active: true }
 
@@ -345,7 +345,8 @@
                     { library: "vwf/model/cesium", active: false },
                     { library: "vwf/model/object", active: true },
                     { library: "vwf/model/wires", active: true },
-                    { library: "vwf/model/jqueryui", active: true }
+                    { library: "vwf/model/jqueryui", active: true },
+                    { library: "vwf/model/audio", active: true },
                 ],
                 view: [
                     { library: "vwf/view/glge", parameters: {"application-root":"#vwf-root"}, active: false },
@@ -358,7 +359,6 @@
                     { library: "vwf/view/webrtc", active: false},
                     { library: "vwf/view/EditorView", active: true },
                     { library: "vwf/view/WebRTC", active: true },
-                    { library: "vwf/view/audio", active: true },
                     { library: "vwf/view/xapi", active: true },
                     { library: "vwf/view/jqueryui", active: true },
 
@@ -481,6 +481,7 @@
                         "vwf/model/wires",
                         "vwf/model/threejs",
                         "vwf/model/jqueryui",
+                        "vwf/model/audio",
                         "vwf/model/object",
                     ];
 
@@ -493,7 +494,7 @@
                             "vwf/view/document",
                             "vwf/view/EditorView",
                             "vwf/view/WebRTC",
-                            "vwf/view/audio",
+                            
                             "vwf/view/xapi",
                             "vwf/view/jqueryui",
                         ];
@@ -763,7 +764,7 @@
         {
 
 
-            var loadBalancerAddress = {{loadBalancerAddress}};
+            var loadBalancerAddress = 'undefined';
         var instance = window.location.pathname;
 
         var instanceHost = $.ajax({
@@ -785,7 +786,7 @@
             var space = window.location.pathname.slice( 1,
                 window.location.pathname.lastIndexOf("/") );
             var protocol = window.location.protocol;
-            var host = {{host}};
+            var host = window.location.protocol +'//'+ window.location.host;
         
             var socketProxy = require('vwf/socket')
             if ( window.location.protocol === "https:" )
@@ -1917,7 +1918,8 @@ this.getNode = function( nodeID, full, normalize ) {  // TODO: options to includ
     // Start the descriptor.
 
     var nodeComponent = {};
-    nodeComponent.continues = node.continues;
+    if( node.continues)
+        nodeComponent.continues = node.continues;
 
     
 
@@ -2091,7 +2093,7 @@ this.getNode = function( nodeID, full, normalize ) {  // TODO: options to includ
     // changes. Otherwise, return the URI if this is the root of a URI component.
 
     if(nodeComponent.continues)
-        nodeComponent = objectDiff(nodeComponent,continuesDefs[nodeComponent.continues]);
+        nodeComponent = objectDiff(nodeComponent,continuesDefs[nodeComponent.continues + nodeID]);
 
     if ( full || ! node.patchable || patched ) {
         return nodeComponent;
@@ -2435,7 +2437,32 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
                 
                 $.getJSON(childComponent.continues,function(data)
                 {
-                    continuesDefs[childComponent.continues] = JSON.parse(JSON.stringify(data));
+                   
+
+                    var cleanChildNames = function(node)
+                    {
+                        if(node.children)
+                            for(var i in node.children)
+                                cleanChildNames(node.children[i])
+
+                        if(node.children)
+                        {
+                            var keys = Object.keys(node.children)
+                            for(var i =0; i < keys.length; i++)
+                            {   
+                                var oldName = keys[i];
+
+                                var child = node.children[oldName];
+                                delete node.children[oldName];
+                                node.children[childID + oldName] = child
+                            }        
+                        }
+
+                    }
+
+                    cleanChildNames(data);
+                    continuesDefs[childComponent.continues + childID] = JSON.parse(JSON.stringify(data));
+
                     $.extend(true,data,childComponent)
                     childComponent = data;
                     series_callback_async( undefined, undefined );
@@ -5453,8 +5480,15 @@ function objectDiff (obj1, obj2) {
 
    if(typeof obj1 !== typeof obj2)
    return obj1;
+   if(obj2 == null && obj1)
+        return obj1
+
+   if(obj1 == null && obj2)
+        return obj1;     
+   if(obj2 == null && obj1 == null)
+        return obj1;     
    if(obj1.constructor != obj2.constructor)
-   return obj1;
+        return obj1;
    if(obj1.constructor == String)
    {
       if($.trim(obj1) == $.trim(obj2))

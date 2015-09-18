@@ -80,10 +80,15 @@ html
 				div
 					div#preloadguiText Loading...
 
-		if needsTools
-			+editorTools_body
-		else
-			#vwf-root.verticalLayout
+		mixin vwf-root
+			#vwf-root
 				canvas#index-vwf.vwf-scene(width='100', height='100')
 				#glyphOverlay(style='display: none;')
+				#guioverlay_index-vwf
 				iframe#resizer(href='about:blank', frameborder='0')
+
+		if needsTools
+			+editorTools_body
+				+vwf-root
+		else
+			+vwf-root
