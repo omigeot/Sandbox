@@ -1,18 +1,18 @@
 // Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
 // Secretary of Defense (Personnel & Readiness).
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License. You may obtain a copy of the License at
-// 
+//
 //   http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software distributed under the License
 // is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 var SAVE_GROUP_DEF = "./vwf/model/SAVE/semantic_entity.vwf";
 var SAVE_GROUP_DEF_Extends = "-vwf-model-SAVE-semantic_entity-vwf";
-define(["module", "vwf/view", "vwf/view/SAVE/api"], function(module, view, SAVEAPI)
+define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], function(module, view, SAVEAPI)
 {
 	// vwf/view/test.js is a dummy driver used for tests.
 	return view.load(module,
@@ -103,7 +103,7 @@ define(["module", "vwf/view", "vwf/view/SAVE/api"], function(module, view, SAVEA
 						$("#" + id).click(function()
 						{
 							var newname = GUID();
-							self.rezzedNames.push(newname)
+							self.rezzedNames.push(newname);
 							self.createS3D(newname, item.ID, item.name, vwf.getProperty('http-vwf-example-com-node3-vwf-N63f37e3e', 'transform'));
 						})
 					})()
@@ -225,7 +225,7 @@ define(["module", "vwf/view", "vwf/view/SAVE/api"], function(module, view, SAVEA
 		},
 		setupEUI: function()
 		{
-			this.loadToolTray();
+//			this.loadToolTray();
 			this.issueAutoLoads();
 		},
 		autoLoadedNodes: [],
@@ -359,7 +359,32 @@ define(["module", "vwf/view", "vwf/view/SAVE/api"], function(module, view, SAVEA
 		},
 		//public facing function to  trigger load of an S3D file. Normally this probably would live in the _Editor
 		// or in the _EntityLibrary
-		createS3D: function(name, ID, DisplayName, transform)
+
+    createS3D: function(name, ID, assetUrl, KbId, grouping)
+    {
+      var newname = GUID();
+      self.rezzedNames.push(newname);
+      var transform = vwf.getProperty('http-vwf-example-com-node3-vwf-N63f37e3e', 'transform');
+      var s3d = grouping;
+      var asset = assetURL;
+      var mapping = null;
+      var rootKbId = KbId;
+
+      _assetLoader.s3dToVWF(name, ID, rootKbId, asset, s3d, mapping, function(def)
+      {
+        def.properties.DisplayName = DisplayName;
+        var behavior = ("./vwf/view/SAVE/test/" + DisplayName.replace(/ /g, "_") + "_dae.eui");
+        $.get(behavior, function(code)
+        {
+          $.extend(true, def, code);
+          def.properties.transform = transform
+          vwf_view.kernel.createChild(vwf.application(), name, def);
+        })
+      });
+    },
+
+
+		createS3DOld: function(name, ID, DisplayName, transform)
 		{
 			//Get the VWF node definition
 			var self = this;
