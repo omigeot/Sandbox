@@ -225,6 +225,7 @@ define(['vwf/view/editorview/angular-app','vwf/view/editorview/strToBytes', 'vwf
 		// build resonable defaults for new uploads
 		$scope.resetNew = function(){
 			$scope.new = {
+				id: 'new',
 				name: '<new asset>',
 				type: '???',
 				license: 'CC-BY',
