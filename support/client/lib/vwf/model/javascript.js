@@ -2064,7 +2064,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
     function bodyScript(parameters, body) {
         var parameterString = (parameters.length ? " " + parameters.join(", ") + " " : "");
-        return accessorScript("( function(" + parameterString + ") {", body, "} )");
+        return accessorScript("( function(" + parameterString + ") {\n", body, "\n} )");
         // return accessorScript( "( function(" + ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  ) + ") {", body, "} )" );
     }
 
