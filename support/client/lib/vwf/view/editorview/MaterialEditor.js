@@ -152,7 +152,10 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				}
 
 				if( !$scope.suppressUndo ){
-					_UndoManager.pushEvent(undoEvent);
+					if($scope.fields.selectedNodeIds.length === 1)
+						_UndoManager.pushEvent(undoEvent.list[0]);
+					else
+						_UndoManager.pushEvent(undoEvent);
 					lastUndo = angular.copy(def);
 				}
 			}
