@@ -305,21 +305,37 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
         var lastValue = null;
         var valueBeforeSliding;
 
-        function updateSliderValue(node, prop, value){
-            console.log("Change in isUpdating!");
-            var sliderValue = node.properties[prop];
+        function updateSliderValue(node, prop, isUpdating){
+            if(Array.isArray(prop)){
 
-            //On initial slide, save value before slide occurred
-            //Once done sliding, push value onto undo stack
-            if(value) valueBeforeSliding = sliderValue;
-            else pushUndoEvent(node, prop, sliderValue, valueBeforeSliding);
+                if(!valueBeforeSliding) valueBeforeSliding = [];
+                for(var i = 0; i < prop.length; i++){
+                    var sliderValue = node.properties[prop[i]];
+
+                    if(isUpdating) valueBeforeSliding[i] = sliderValue;
+                    else if(sliderValue !== valueBeforeSliding[i]){
+                        pushUndoEvent(node, prop[i], sliderValue, valueBeforeSliding[i]);
+                        break;
+                    }
+                }
+            }
+            else{
+                var sliderValue = node.properties[prop];
+
+                //On initial slide, save value before slide occurred
+                //Once done sliding, push value onto undo stack
+                if(isUpdating) valueBeforeSliding = sliderValue;
+                else pushUndoEvent(node, prop, sliderValue, valueBeforeSliding);
+
+                console.log("Change in isUpdating!", prop, value, sliderValue, valueBeforeSliding);
+            }
         }
 
         function delayedUpdate(node, prop, value){
-            console.log("delayedUpdate", value);
-
             if(lastValue === null){
                 window.setTimeout(function(){
+                    console.log("delayedUpdate", value);
+
                     setProperty(node, prop, lastValue);
                     lastValue = null;
                 }, 75);
@@ -402,7 +418,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                             else if(scope.type === "rangeslider"){
                                 //Update occasionally only while user is sliding
                                 if(newVal !== oldVal && scope.isUpdating){
-                                    delayedUpdate(scope.vwfNode, scope.property, newVal);
+                                    delayedUpdate(scope.vwfNode, scope.property[propIndex], newVal);
                                 }
                             }
                             else if(newVal !== oldVal){
@@ -418,14 +434,19 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                             var temp = scope.property[i];
                             scope.vwfNode.properties[temp] = scope.vwfNode.properties[temp].slice();
                         }
-
-                        scope.$watch('isUpdating', function(newVal, oldVal){
-                            if(newVal !== oldVal) updateSliderValue(vwfNode, scope.property, newVal);
-                        });
                     }
                     else{
                         for (var i = 0; i < uniques.length; i++) {
-                            scope.$watchCollection(uniques[i], getWatchFn(i));
+                            //The assumption here is that these properties are min, max pairs pointed
+                            //at primitive values (numbers). Thus they shouldn't be need "watchCollection"
+                            //getWatchFn simply creates a closure so we know which property has changed.
+                            scope.$watch(uniques[i], getWatchFn(i));
+                        }
+
+                        if(scope.type === "rangeslider"){
+                            scope.$watch('isUpdating', function(newVal, oldVal){
+                                if(newVal !== oldVal) updateSliderValue(scope.vwfNode, scope.property, newVal);
+                            });
                         }
                     }
                 }
@@ -440,7 +461,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                     }, true);
 
                     scope.$watch('isUpdating', function(newVal, oldVal){
-                        if(newVal !== oldVal) updateSliderValue(vwfNode, scope.property, newVal);
+                        if(newVal !== oldVal) updateSliderValue(scope.vwfNode, scope.property, newVal);
                     });
                 }
                 else if(scope.type === "nodeid") scope.pickNode = pickNode;
