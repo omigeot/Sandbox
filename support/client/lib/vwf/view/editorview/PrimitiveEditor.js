@@ -62,6 +62,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
         $scope.$watch('transform', setTransform, true);
 
         $scope.allEditorData = [];
+        $scope.childrenEditorData = [];
         $scope.node = null;
 
         $scope.$watch('fields.selectedNode', function(node){
@@ -70,14 +71,30 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             if(node){
                 $scope.node = node;
                 $scope.allEditorData.length = 0;
+                if(!$scope.children) $scope.children = {};
 
-                recursevlyAddPrototypes(node, {});
+                recursevlyAddPrototypes(node, {}, $scope.node, $scope.allEditorData);
 
                 setFlags();
                 updateTransform();
                 setupAnimation();
+                setupChildren();
             }
         });
+
+        $scope.$watchCollection('fields.selectedNodeChildren', function(child, old){
+            console.log("Change in children... yippe!", child, old);
+        });
+
+        function setupChildren(){
+            if(!$scope.node) return;
+
+            var children = $scope.fields.selectedNodeChildren;
+            for(var child in children){
+                console.log("Keys in $scope.node: ", child);
+                //recursevlyAddPrototypes(node, {}, $scope.node, $scope.allEditorData);
+            }
+        }
 
         $scope.animationPlayState = false;
         $scope.playAnimation = function(){
@@ -217,7 +234,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             }
         }
 
-        function buildEditorData(node, editorData, existingProps){
+        function buildEditorData(node, editorData, existingProps, scopeNode, scopeEditorData){
             if(editorData){
 
                 var outEditorData = {};
@@ -228,7 +245,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                         outEditorData[key] = editorData[key];
                         existingProps[key] = true;
 
-                        //If propArr is an array, remove any duplicate elements
+                        //If props is an array, remove any duplicate elements
                         var props = outEditorData[key].property;
                         if(Array.isArray(props))
                             outEditorData[key].property = getUniqueElems(props);
@@ -237,8 +254,6 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
                 if(numAdds == 0) return;
 
-                //Remove duplicates in outEditorData[i].property if it's an array
-
                 var props = node.properties;
                 var obj = {
                     name: props.DisplayName || node.id,
@@ -246,8 +261,8 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                     editorProps: outEditorData
                 };
 
-                $scope.allEditorData.push(obj);
-                setInheritedProperties($scope.node, outEditorData);
+                scopeEditorData.push(obj);
+                setInheritedProperties(scopeNode, outEditorData);
             }
         }
 
@@ -291,12 +306,12 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             }
         }
 
-        function recursevlyAddPrototypes(node, existingProps){
+        function recursevlyAddPrototypes(node, existingProps, scopeNode, scopeEditorData){
             if(node){
                 var protoId = vwf.prototype(node.id);
 
-                buildEditorData(node, vwf.getProperty(node.id, "EditorData"), existingProps);
-                if(protoId) recursevlyAddPrototypes(_Editor.getNode(protoId), existingProps);
+                buildEditorData(node, vwf.getProperty(node.id, "EditorData"), existingProps, scopeNode, scopeEditorData);
+                if(protoId) recursevlyAddPrototypes(_Editor.getNode(protoId), existingProps, scopeNode, scopeEditorData);
             }
         }
     }]);
@@ -313,6 +328,8 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                     var sliderValue = node.properties[prop[i]];
 
                     if(isUpdating) valueBeforeSliding[i] = sliderValue;
+
+                    //The assumption here is only one property can change at a time...
                     else if(sliderValue !== valueBeforeSliding[i]){
                         pushUndoEvent(node, prop[i], sliderValue, valueBeforeSliding[i]);
                         break;

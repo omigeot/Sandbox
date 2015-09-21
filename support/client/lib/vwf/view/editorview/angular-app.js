@@ -9,6 +9,7 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', './lib/html-palette.
 		$rootScope.fields = {
 			selectedNode: null,
 			selectedNodeIds: [],
+			selectedNodeChildren: [],
 			worldIsReady: false,
 			nodes: {},
 			cameras: [],
@@ -97,6 +98,28 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', './lib/html-palette.
 				else
 					return 0;
 			});
+		}
+	}
+
+	function getSelectedNodeChildren(arr){
+		var fields = app.root.fields;
+		var nodes = fields.nodes;
+
+		if(!fields.selectedNode)
+			return;
+
+		else if(!arr){
+			fields.selectedNodeChildren.length = 0;
+
+			var id = fields.selectedNode.id;
+			arr = fields.nodes[id].children;
+		}
+
+		for(var i = 0; i < arr.length; i++){
+			fields.selectedNodeChildren.push(nodes[arr[i]]);
+
+			if(nodes[arr[i]] && nodes[arr[i]].children)
+				getSelectedNodeChildren(nodes[arr[i]].children);
 		}
 	}
 
@@ -202,6 +225,8 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', './lib/html-palette.
 		if(newExtends === 'SandboxCamera-vwf')
 			app.root.fields.cameras.push(newId);
 
+		getSelectedNodeChildren();
+
 		this.apply()
 	}
 
@@ -230,6 +255,8 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', './lib/html-palette.
 
 		if( app.root.fields.cameras.indexOf(nodeId) > -1 )
 			app.root.fields.cameras.splice( app.root.fields.cameras.indexOf(nodeId), 1 );
+
+		getSelectedNodeChildren();
 
 		this.apply();
 	}

@@ -39,6 +39,14 @@ block content
 				vwf-editor-property(vwf-prop="value", vwf-key="{{key}}", vwf-node="node")
 			label.inline(style="margin-top:10px;") Play animation during simulation: 
 				input(type='checkbox', ng-model="animationPlayState", ng-change='playAnimation()')
+				
+		h3(ng-show="node.properties.children")
+			a(href="#") Animation
+		.accordian-animation(ng-show="animationEditorData")
+			div(ng-repeat="(key, value) in animationEditorData")
+				vwf-editor-property(vwf-prop="value", vwf-key="{{key}}", vwf-node="node")
+			label.inline(style="margin-top:10px;") Play animation during simulation: 
+				input(type='checkbox', ng-model="animationPlayState", ng-change='playAnimation()')
 	
 	#vwf-template-slider(ng-non-bindable, style='display: none;') 
 		label.vMargin {{displayname}}: 
