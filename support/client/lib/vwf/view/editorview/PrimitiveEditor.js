@@ -16,11 +16,15 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             }
 
             return primEditor;
-        }
+        },
+        isOpen: function(){
+            return _SidePanel.isTabOpen("primitiveEditor");
+        },
+        hide: $.noop
     };
 
     app.controller('PrimitiveController', ['$scope', function($scope){
-        window._PrimitiveEditor = $scope;
+        //window._PrimitiveEditor = $scope;
 
         var flags = ["Name", "Visible","Static (does not move)", "Dynamic (moves frequently)", "Cast Shadows",
                      "Receive Shadows", "Passable (collides with avatars)", "Selectable (visible to pick)",
@@ -64,6 +68,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
         $scope.allEditorData = [];
         $scope.childrenEditorData = [];
         $scope.node = null;
+        $scope.refreshAccordion = 0;
 
         $scope.$watch('fields.selectedNode', function(node){
             console.log("node", node);
@@ -71,29 +76,39 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             if(node){
                 $scope.node = node;
                 $scope.allEditorData.length = 0;
+                $scope.childrenEditorData.length = 0;
                 if(!$scope.children) $scope.children = {};
 
-                recursevlyAddPrototypes(node, {}, $scope.node, $scope.allEditorData);
+                recursevlyAddPrototypes($scope.node, {}, $scope.node, $scope.allEditorData);
 
                 setFlags();
                 updateTransform();
                 setupAnimation();
-                setupChildren();
+
             }
+
+            $scope.refreshAccordion = ($scope.refreshAccordion + 1) % 1000;
         });
 
         $scope.$watchCollection('fields.selectedNodeChildren', function(child, old){
-            console.log("Change in children... yippe!", child, old);
+            if(child && child != old){
+                console.log('fields.selectedNodeChildren changed!', child);
+                setupChildren();
+            }
+
+            $scope.refreshAccordion = ($scope.refreshAccordion + 1) % 1000;
         });
 
         function setupChildren(){
             if(!$scope.node) return;
 
             var children = $scope.fields.selectedNodeChildren;
-            for(var child in children){
-                console.log("Keys in $scope.node: ", child);
-                //recursevlyAddPrototypes(node, {}, $scope.node, $scope.allEditorData);
+            for(var i = 0; i < children.length; i++){
+                var child = children[i];
+                recursevlyAddPrototypes(child, {}, child, $scope.childrenEditorData);
             }
+
+            var a;
         }
 
         $scope.animationPlayState = false;
@@ -258,6 +273,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 var obj = {
                     name: props.DisplayName || node.id,
                     type: props.type || vwf.getProperty(node.id, 'type'),
+                    node: scopeNode,
                     editorProps: outEditorData
                 };
 
@@ -344,7 +360,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 if(isUpdating) valueBeforeSliding = sliderValue;
                 else pushUndoEvent(node, prop, sliderValue, valueBeforeSliding);
 
-                console.log("Change in isUpdating!", prop, value, sliderValue, valueBeforeSliding);
+                console.log("Change in isUpdating!", prop, isUpdating, sliderValue, valueBeforeSliding);
             }
         }
 
@@ -469,7 +485,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 }
                 else if(scope.type.indexOf("slider") > -1 || scope.type == "color"){
                     scope.$watch('vwfNode.properties[property]', function(newVal, oldVal){
-                        console.log(scope.vwfProp, scope, newVal, oldVal, typeof newVal);
+                        console.log(scope.vwfProp, scope.vwfNode.id, newVal);
 
                         //Update occasionally only while user is sliding
                         if(newVal !== oldVal && scope.isUpdating){

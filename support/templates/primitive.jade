@@ -4,7 +4,7 @@ block vars
 	- var settings = { name: 'primitiveEditor', controller: 'PrimitiveController', title: 'Properties', icon: 'properties', requiresSelection: true };
 
 block content
-	#primitive-accordion(vws-accordion='fields.selectedNode', ng-class="fields.selectedNode?'':'editorPanelDisable'")
+	#primitive-accordion(vws-accordion='refreshAccordion', ng-class="fields.selectedNode?'':'editorPanelDisable'")
 		h3 
 			a(href="#") Flags
 		#otherprops.accordian-flags		
@@ -40,13 +40,13 @@ block content
 			label.inline(style="margin-top:10px;") Play animation during simulation: 
 				input(type='checkbox', ng-model="animationPlayState", ng-change='playAnimation()')
 				
-		h3(ng-show="node.properties.children")
-			a(href="#") Animation
-		.accordian-animation(ng-show="animationEditorData")
-			div(ng-repeat="(key, value) in animationEditorData")
-				vwf-editor-property(vwf-prop="value", vwf-key="{{key}}", vwf-node="node")
-			label.inline(style="margin-top:10px;") Play animation during simulation: 
-				input(type='checkbox', ng-model="animationPlayState", ng-change='playAnimation()')
+		h3(ng-repeat-start="data in childrenEditorData") 
+			a(href="#") {{data.type}}: {{data.name}}
+		.accordion-properties(ng-repeat-end)
+			div(ng-repeat="(key, value) in data.editorProps")
+				vwf-editor-property(vwf-prop="value", vwf-key="key", vwf-node="data.node")
+			
+			
 	
 	#vwf-template-slider(ng-non-bindable, style='display: none;') 
 		label.vMargin {{displayname}}: 

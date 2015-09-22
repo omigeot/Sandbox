@@ -24,6 +24,7 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', 'vwf/view/editorview
 		{
 			$rootScope.fields.selectedNode = node;
 			$rootScope.fields.selectedNodeIds = [];
+			$rootScope.fields.selectedNodeChildren.length = 0;
 
 			for(var i=0; i<_Editor.getSelectionCount(); i++)
 				$rootScope.fields.selectedNodeIds.push(_Editor.GetSelectedVWFID(i));
@@ -32,6 +33,7 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', 'vwf/view/editorview
 				node.methods = node.methods || {};
 				node.events = node.events || {};
 				node.properties = node.properties || {};
+				getSelectedNodeChildren();
 			}
 
 			$timeout($rootScope.$apply.bind($rootScope));
@@ -107,10 +109,7 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', 'vwf/view/editorview
 		var fields = app.root.fields;
 		var nodes = fields.nodes;
 
-		if(!fields.selectedNode)
-			return;
-
-		else if(!arr){
+		if(!arr){
 			fields.selectedNodeChildren.length = 0;
 
 			var id = fields.selectedNode.id;
@@ -118,12 +117,30 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', 'vwf/view/editorview
 		}
 
 		for(var i = 0; i < arr.length; i++){
-			fields.selectedNodeChildren.push(nodes[arr[i]]);
+			var node = nodes[arr[i]];
 
-			if(nodes[arr[i]] && nodes[arr[i]].children)
-				getSelectedNodeChildren(nodes[arr[i]].children);
+			//Only add to array and descend if this node is a modifier or behavior
+			if( _hasPrototype(node.id, 'http-vwf-example-com-behavior-vwf') ||
+			    vwf.getProperty(node.id, 'isModifier') === true ) {
+
+				node.properties = vwf.getProperties(node.id);
+				fields.selectedNodeChildren.push(node);
+
+				if(nodes[arr[i]] && nodes[arr[i]].children)
+					getSelectedNodeChildren(nodes[arr[i]].children);
+			}
 		}
+
+		//Only call apply after the initial run of getSelectedNodeChildren has completed
+		if(!arr) app.apply();
 	}
+
+	//Private function used exclusively by getSelectedNodeChildren
+	function _hasPrototype(id, prototype) {
+        if (!id) return false;
+        if (id == prototype) return true;
+        else return _hasPrototype(vwf.prototype(id), prototype);
+    }
 
 	app.createdMethod = function(id, name, params, body)
 	{
@@ -166,25 +183,35 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', 'vwf/view/editorview
 	app.initializedProperty = app.createdProperty = app.satProperty = function(id, prop, val)
 	{
 		var apply = false;
+		var fields =  app.root.fields;
+		var selectedNode = fields.selectedNode;
 
 		if( id === 'index-vwf' && prop === 'playMode' ){
 			playing = val === 'play';
 			if( !playing ) apply = true;
 		}
 
-		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id )
+		if( selectedNode && id === selectedNode.id )
 		{
 			// See issue #267 on Github for why this change is necessary
-			var property = app.root.fields.selectedNode.properties[prop];
+			var property = selectedNode.properties[prop];
 			if(Array.isArray(property) && Array.isArray(val) && val.length < 32){
 				for(var i = 0; i < val.length; i++){
-					property[i] = val[i];
+					if(property[i] !== val[i]){
+						property[i] = val[i];
+						apply = true;
+					}
 				}
 			}
 			else{
-				app.root.fields.selectedNode.properties[prop] = val;
+				selectedNode.properties[prop] = val;
+				apply = true;
 			}
+		}
 
+		// if this node is a child of the selected node...
+		else if(fields.selectedNodeChildren.indexOf(fields.nodes[id]) > -1){
+			fields.nodes[id].properties[prop] = val;
 			apply = true;
 		}
 
@@ -227,7 +254,8 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', 'vwf/view/editorview
 		if(newExtends === 'SandboxCamera-vwf')
 			app.root.fields.cameras.push(newId);
 
-		getSelectedNodeChildren();
+		if(app.root.fields.selectedNode)
+			window.setTimeout(getSelectedNodeChildren, 150);
 
 		this.apply()
 	}
@@ -258,7 +286,8 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', 'vwf/view/editorview
 		if( app.root.fields.cameras.indexOf(nodeId) > -1 )
 			app.root.fields.cameras.splice( app.root.fields.cameras.indexOf(nodeId), 1 );
 
-		getSelectedNodeChildren();
+		if(app.root.fields.selectedNode)
+			window.setTimeout(getSelectedNodeChildren, 1000);
 
 		this.apply();
 	}
