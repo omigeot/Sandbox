@@ -1,4 +1,6 @@
-define(['vwf/view/editorview/lib/angular', './UndoManager', './lib/html-palette.min'], function(angular, UndoManager)
+
+
+define(['vwf/view/editorview/lib/angular', './UndoManager', 'vwf/view/editorview/lib/html-palette.min'], function(angular, UndoManager)
 {
 	var app = angular.module('SandboxEditor', ['html-palette']);
 	var playing = false;
