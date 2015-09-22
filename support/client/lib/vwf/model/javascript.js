@@ -276,7 +276,6 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                configurable: false
             });
 
-
             Object.defineProperty(node, "signal", { // same as "in"  // TODO: only define on shared "node" prototype?
                 value:function(id,signal,data)
                 {
