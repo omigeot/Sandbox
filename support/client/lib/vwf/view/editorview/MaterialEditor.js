@@ -40,8 +40,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 
 		// repoint materialDef when it's an array and the active material changes
 		$scope.$watch('activeMaterial', function(newval){
-			if( $scope.materialArray && newval >= 0 && newval < $scope.materialArray.length )
-			{
+			if( $scope.materialArray && newval >= 0 && newval < $scope.materialArray.length ){
 				$scope.materialDef = $scope.materialArray[newval];
 			}
 		});
@@ -70,7 +69,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		var handle = null;
 		$scope.$watch('materialArray || materialDef', function(newval)
 		{
-			if(newval && newval === oldMaterialDef){
+			if(newval && (newval === oldMaterialDef || Array.isArray(oldMaterialDef) && oldMaterialDef.indexOf(newval) > -1)){
 				$scope.suppressUndo = true;
 				applyDef(newval);
 				if(handle) $timeout.cancel(handle);
