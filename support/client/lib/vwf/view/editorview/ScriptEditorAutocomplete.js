@@ -407,9 +407,11 @@ define(['./angular-app'], function(app)
         //hide or show the function top based on the inputs
         this.methodEditor.on('change', function(e)
         {
-            console.log('Editor changed');
             self.autoComplete(self.methodEditor);
             self.triggerFunctionTip(self.methodEditor);
+
+			if(e.data) e = e.data;
+
             //hide if removing an open paren
             if (e.data.action == "removeText")
             {
