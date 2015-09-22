@@ -10,9 +10,12 @@ block content
 		h3: a(href="#") Material Base
 		#MaterialBasicSettings
 
-			label#materialIndex(ng-show='materialArray') Editor material index: 
+			label#materialIndex(ng-show='materialArray') Editing material 
 				input(type='number', min=0, max='{{materialArray.length-1}}', step=1, ng-model='activeMaterial')
 				|  of {{materialArray.length-1}}
+
+			.horizontalLayout.centered(ng-show='materialArray')
+				input(type='button', value='Flatten Materials', ng-click='materialArray = null')
 
 			label.inline Material Type: 
 				select(ng-model='materialDef.type', ng-disabled='!materialDef')
