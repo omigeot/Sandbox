@@ -27,7 +27,6 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		$scope.ambientLinked = true;     // determines whether the ambient color should be updated along with diffuse
 		var oldMaterialDef = null;       // makes sure setProperty isn't called when the selection changes
 		$scope.videoTextureSource = '';  // value buffer between the input box and materialDef.videosrc
-		$scope.suppressUndo = false;     // makes sure the sliders don't generate strings of undo frames
 		var lastUndo = null;             // a snapshot of materialDef before live preview setProperty's
 		
 
@@ -71,12 +70,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		$scope.$watch('materialArray || materialDef', function(newval)
 		{
 			if(newval && newval === oldMaterialDef){
-				$scope.suppressUndo = true;
 				applyDef(newval);
-				if(handle) $timeout.cancel(handle);
-				handle = $timeout(function(){
-					$scope.suppressUndo = false;
-				}, 500);
 			}
 
 			if( $scope.materialDef )
@@ -84,13 +78,6 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 
 			oldMaterialDef = newval;
 		}, true);
-
-		// when undo events stop being suppressed, push an undo frame
-		$scope.$watch('suppressUndo', function(newval){
-			if(!newval){
-				applyDef($scope.materialArray || $scope.materialDef);
-			}
-		});
 
 
 		/*
@@ -130,8 +117,19 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		}
 
 		// validate and apply changes to the material definition
+		var applyHandle = null;
 		function applyDef(def)
 		{
+			if(applyHandle) clearTimeout(applyHandle);
+			applyHandle = setTimeout(function(){
+				applyDef_internal(def);
+				applyHandle = null;
+			}, 100);
+		}
+
+		function applyDef_internal(def)
+		{
+			console.log('applying material');
 			if( _UserManager.GetCurrentUserName() == null ){
 				_Notifier.notify('You must log in to participate');
 			}
@@ -151,13 +149,12 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 					}
 				}
 
-				if( !$scope.suppressUndo ){
-					if($scope.fields.selectedNodeIds.length === 1)
-						_UndoManager.pushEvent(undoEvent.list[0]);
-					else
-						_UndoManager.pushEvent(undoEvent);
-					lastUndo = angular.copy(def);
-				}
+				if($scope.fields.selectedNodeIds.length === 1)
+					_UndoManager.pushEvent(undoEvent.list[0]);
+				else
+					_UndoManager.pushEvent(undoEvent);
+
+				lastUndo = angular.copy(def);
 			}
 		}
 
@@ -167,7 +164,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			// try to get a materialDef from property, or failing that, from the driver
 			var mat = $scope.fields.selectedNode &&  vwf.getProperty($scope.fields.selectedNode.id, 'materialDef');
 
-			if( mat && !$scope.suppressUndo && !angular.equals($scope.materialArray||$scope.materialDef, mat))
+			if( mat && !$scope._cooldown && !angular.equals($scope.materialArray||$scope.materialDef, mat))
 			{
 				lastUndo = angular.copy(mat);
 
