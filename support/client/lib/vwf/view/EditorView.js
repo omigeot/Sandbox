@@ -220,7 +220,7 @@ define([
         },
 
         initializedNode: function(nodeID, childID) {
-            this.viewAPINotify('initializedNode', arguments);
+            this.viewAPINotify('initializedNode', [nodeID, childID]);
             if (childID == 'index-vwf') {
                 if (window._Editor) {
                     _Editor.initialize();
@@ -240,13 +240,13 @@ define([
             }
         },
         createdProperty: function(nodeID, propertyName, propertyValue) {
-            this.viewAPINotify('createdProperty', arguments);
+            this.viewAPINotify('createdProperty', [nodeID, propertyName, propertyValue]);
         },
         initializedProperty: function(nodeID, propertyName, propertyValue) {
-            this.viewAPINotify('initializedProperty', arguments);
+            this.viewAPINotify('initializedProperty', [nodeID, propertyName, propertyValue]);
         },
         deletedNode: function(nodeID) {
-            this.viewAPINotify('deletedNode', arguments);
+            this.viewAPINotify('deletedNode', [nodeID]);
             if (window._Editor && _Editor.SelectedVWFID == nodeID) {
                 _Editor.SelectObject(null);
             }
@@ -255,29 +255,29 @@ define([
             this.viewAPINotify('satProperty', [nodeID, propertyName, propertyValue]);
         },
         createdMethod: function(nodeID, methodName, methodParameters, methodBody) {
-            this.viewAPINotify('createdMethod', arguments);
+            this.viewAPINotify('createdMethod', [nodeID, methodName, methodParameters, methodBody]);
         },
         calledMethod: function(nodeID, methodName, methodParameters) {
-            this.viewAPINotify('calledMethod', arguments);
+            this.viewAPINotify('calledMethod', [nodeID, methodName, methodParameters]);
         },
         deletedMethod: function(nodeID, methodName, methodParameters, body){
-            this.viewAPINotify('deletedMethod', arguments);
+            this.viewAPINotify('deletedMethod', [nodeID, methodName, methodParameters, body]);
         },
         createdEvent: function(nodeID, eventName, eventParameters) {
-            this.viewAPINotify('createdEvent', arguments);
+            this.viewAPINotify('createdEvent', [nodeID, eventName, eventParameters]);
         },
         firedEvent: function(nodeID, eventName, eventParameters) {
-            this.viewAPINotify('firedEvent', arguments);
+            this.viewAPINotify('firedEvent', [nodeID, eventName, eventParameters]);
         },
         deletedEvent: function(nodeID, eventName, eventParams){
-            this.viewAPINotify('deletedEvent', arguments);
+            this.viewAPINotify('deletedEvent', [nodeID, eventName, eventParams]);
         },
         executed: function(nodeID, scriptText, scriptType) {
-            this.viewAPINotify('executed', arguments);
+            this.viewAPINotify('executed', [nodeID, scriptText, scriptType]);
         },
         ticked:function()
         {
-            this.viewAPINotify('ticked', arguments);  
+            this.viewAPINotify('ticked', []);  
         }
     });
 });

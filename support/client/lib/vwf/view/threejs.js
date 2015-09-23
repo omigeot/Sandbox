@@ -207,6 +207,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
         },
         updateGlyphs: function(e, viewprojection, wh, ww) {
 
+            if(vwf.getProperty(vwf.application(),'playMode') == 'play') return;
             for (var i = 0; i < this.glyphs.length; i++) {
                 if (vwf.getProperty(this.glyphs[i], 'showGlyph') == false) continue;
                 var div = $('#glyph' + ToSafeID(this.glyphs[i]))[0];
