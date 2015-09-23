@@ -209,6 +209,7 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', 'vwf/view/editorview
 	app.deletedNode = function(nodeId)
 	{
 		var node = app.root.fields.nodes[nodeId];
+		if(!node) return;
 		var parent = app.root.fields.nodes[node.parent];
 
 		for(var i=0; i<parent.children.length; i++){

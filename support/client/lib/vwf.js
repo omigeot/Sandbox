@@ -3135,7 +3135,7 @@ this.setProperties = function( nodeID, properties ) {  // TODO: rework as a cove
     this.logger.debuggx( "setProperties", nodeID, properties );
 
     var node = nodes.existing[nodeID];
-
+    if(!node) return;
     var entrants = this.setProperty.entrants;
 
     // Call settingProperties() on each model.
@@ -3220,7 +3220,7 @@ this.getProperties = function( nodeID ) {  // TODO: rework as a cover for getPro
     this.logger.debuggx( "getProperties", nodeID );
 
     var node = nodes.existing[nodeID];
-
+    if(!node) return;
     var entrants = this.getProperty.entrants;
 
     // Call gettingProperties() on each model.
@@ -3340,6 +3340,7 @@ this.setProperty = function( nodeID, propertyName, propertyValue ) {
     } );
 
     var node = nodes.existing[nodeID];
+    if(!node) return;
 
     // Record calls into this function by nodeID and propertyName so that models may call
     // back here (directly or indirectly) to delegate responses further down the chain
