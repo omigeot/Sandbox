@@ -102,13 +102,13 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
         function setupChildren(){
             if(!$scope.node) return;
 
+            $scope.childrenEditorData.length = 0;
             var children = $scope.fields.selectedNodeChildren;
+
             for(var i = 0; i < children.length; i++){
                 var child = children[i];
-                recursevlyAddPrototypes(child, {}, child, $scope.childrenEditorData);
+                recursevlyAddPrototypes(child, {}, child, $scope.childrenEditorData, true);
             }
-
-            var a;
         }
 
         $scope.animationPlayState = false;
@@ -322,12 +322,12 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             }
         }
 
-        function recursevlyAddPrototypes(node, existingProps, scopeNode, scopeEditorData){
+        function recursevlyAddPrototypes(node, existingProps, scopeNode, scopeEditorData, ignoreBase){
             if(node){
                 var protoId = vwf.prototype(node.id);
 
                 buildEditorData(node, vwf.getProperty(node.id, "EditorData"), existingProps, scopeNode, scopeEditorData);
-                if(protoId) recursevlyAddPrototypes(_Editor.getNode(protoId), existingProps, scopeNode, scopeEditorData);
+                if(protoId && !ignoreBase) recursevlyAddPrototypes(_Editor.getNode(protoId), existingProps, scopeNode, scopeEditorData);
             }
         }
     }]);

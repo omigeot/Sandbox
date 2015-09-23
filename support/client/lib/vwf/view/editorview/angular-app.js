@@ -130,9 +130,6 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', 'vwf/view/editorview
 					getSelectedNodeChildren(nodes[arr[i]].children);
 			}
 		}
-
-		//Only call apply after the initial run of getSelectedNodeChildren has completed
-		if(!arr) app.apply();
 	}
 
 	//Private function used exclusively by getSelectedNodeChildren
@@ -255,7 +252,7 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', 'vwf/view/editorview
 			app.root.fields.cameras.push(newId);
 
 		if(app.root.fields.selectedNode)
-			window.setTimeout(getSelectedNodeChildren, 150);
+			getSelectedNodeChildren();
 
 		this.apply()
 	}
@@ -287,7 +284,7 @@ define(['vwf/view/editorview/lib/angular', './UndoManager', 'vwf/view/editorview
 			app.root.fields.cameras.splice( app.root.fields.cameras.indexOf(nodeId), 1 );
 
 		if(app.root.fields.selectedNode)
-			window.setTimeout(getSelectedNodeChildren, 1000);
+			getSelectedNodeChildren();
 
 		this.apply();
 	}
