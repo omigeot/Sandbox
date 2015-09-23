@@ -2433,43 +2433,58 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
 
          function( series_callback_async /* ( err, results ) */ ) {
 
-            if ( componentIsDescriptor( childComponent ) && childComponent.continues && componentIsURI( childComponent.continues ) ) {  // TODO: for "includes:", accept an already-loaded component (which componentIsURI exludes) since the descriptor will be loaded again
-                
-                $.getJSON(childComponent.continues,function(data)
+            if (componentIsDescriptor(childComponent) && childComponent.continues && componentIsURI(childComponent.continues))
+            { // TODO: for "includes:", accept an already-loaded component (which componentIsURI exludes) since the descriptor will be loaded again
+                function continueBaseLoaded(data)
                 {
-                   
-
+                    //cache for future use
+                    if (!continuesDefs[childComponent.continues])
+                        continuesDefs[childComponent.continues] = JSON.parse(JSON.stringify(data));
                     var cleanChildNames = function(node)
                     {
-                        if(node.children)
-                            for(var i in node.children)
+                        if (node.children)
+                            for (var i in node.children)
                                 cleanChildNames(node.children[i])
-
-                        if(node.children)
+                        if (node.children)
                         {
                             var keys = Object.keys(node.children)
-                            for(var i =0; i < keys.length; i++)
-                            {   
+                            for (var i = 0; i < keys.length; i++)
+                            {
                                 var oldName = keys[i];
-
                                 var child = node.children[oldName];
                                 delete node.children[oldName];
                                 node.children[childID + oldName] = child
-                            }        
+                            }
                         }
-
                     }
-
                     cleanChildNames(data);
                     continuesDefs[childComponent.continues + childID] = JSON.parse(JSON.stringify(data));
-
-                    $.extend(true,data,childComponent)
+                    $.extend(true, data, childComponent)
                     childComponent = data;
-                    series_callback_async( undefined, undefined );
-                }).error(function() { series_callback_async( "Error loading continues base URL", undefined ); });
-                
-            
-            } else {
+
+                    series_callback_async(undefined, undefined);
+                    queue.resume( "after beginning " + childID );
+                }
+
+                if (!continuesDefs[childComponent.continues])
+                {
+                     queue.suspend( "before beginning " + childID ); // suspend the queue
+                    $.getJSON(childComponent.continues,
+                        continueBaseLoaded).error(function()
+                    {
+                       
+                        series_callback_async("Error loading continues base URL: " + childComponent.continues, undefined);
+                         queue.resume( "after beginning " + childID );
+                    });
+                }
+                else
+                {
+                    queue.suspend( "before beginning " + childID ); // suspend the queue
+                    continueBaseLoaded(JSON.parse(JSON.stringify(continuesDefs[childComponent.continues])));
+                }
+            }
+            else
+            {
 
                 queue.suspend( "before beginning " + childID ); // suspend the queue
 
