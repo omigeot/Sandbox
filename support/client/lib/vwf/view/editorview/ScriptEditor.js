@@ -200,7 +200,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 					else
 						$scope.sessions[item.id].setMode("ace/mode/javascript");
 
-					$scope.sessions[item.id].$worker.on('annotate', function(data){
+					$scope.sessions[item.id].on('changeAnnotation', function(data){
 						$scope.$emit('codeLinted', data);
 					});
 				}
@@ -503,20 +503,24 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 			if(checkerCb) checkerCb();
 		});
 
-		$scope.checkSyntax = function(dialog)
+		$scope.checkSyntax = function(dialog, fromSave)
 		{
 			if(!annotations)
 			{
 				// postpone check until checker comes back
 				checkerCb = function(){
-					$scope.checkSyntax(dialog);
+					if(fromSave)
+						$scope.save();
+					else
+						$scope.checkSyntax(dialog);
 					checkerCb = null;
 				}
+				return false;
 			}
 			else
 			{
 				var editor = document.querySelector('ace-code-editor')._editor;
-				var s = editor.getSession().getAnnotations();
+				var s = annotations;
 				var errors = "";
 				for (var i = 0; i < s.length; i++) {
 					if (s[i].type == 'error') errors += "<br/> line: " + s[i].row + "-" + s[i].text;
@@ -537,7 +541,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 		// The 'Save Method/Event/Property' click handler
 		$scope.save = function()
 		{
-			if( checkPermission() && $scope.checkSyntax() && $scope.dirty[$scope.selectedField.id] && $scope.fields.selectedNode.id !== 'index-vwf' )
+			if( checkPermission() && $scope.checkSyntax(false, true) && $scope.dirty[$scope.selectedField.id] && $scope.fields.selectedNode.id !== 'index-vwf' )
 			{
 				var editor = document.querySelector('ace-code-editor')._editor;
 
