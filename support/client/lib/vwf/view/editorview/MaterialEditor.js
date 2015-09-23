@@ -162,9 +162,9 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		function refresh()
 		{
 			// try to get a materialDef from property, or failing that, from the driver
-			var mat = $scope.fields.selectedNode &&  vwf.getProperty($scope.fields.selectedNode.id, 'materialDef');
+			var mat = $scope.fields.selectedNode && vwf.getProperty($scope.fields.selectedNode.id, 'materialDef');
 
-			if( mat && !$scope._cooldown && !angular.equals($scope.materialArray||$scope.materialDef, mat))
+			if( mat && !angular.equals($scope.materialArray||$scope.materialDef, mat))
 			{
 				lastUndo = angular.copy(mat);
 
