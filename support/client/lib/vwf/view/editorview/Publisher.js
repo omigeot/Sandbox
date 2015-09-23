@@ -289,7 +289,9 @@ define([], function() {
                     //don't delete avatars
                     if(!node) return;
                     if (!find(s, node.id) && node.extends != 'character.vwf') {
-                        vwf.deleteNode(node.id);
+                        try{
+                            vwf.deleteNode(node.id);
+                        }catch(e){}
                     } else {
                         for (var i in node.children) {
                             walk2(node.children[i]);

@@ -25,8 +25,12 @@ require.config({
         },
         'vwf/model/threejs/helvetiker_regular.typeface.js': {
             deps: ["vwf/model/threejs"]
+        },
+        'vwf/view/editorview/lib/html-palette.min':
+        {
+            deps: ['vwf/view/editorview/lib/angular'],
+            exports:"HtmlPalette"
         }
-
     },
     waitSeconds: 15
 });

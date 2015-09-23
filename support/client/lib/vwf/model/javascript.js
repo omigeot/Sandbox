@@ -409,8 +409,9 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                enumerable: false,
                configurable: false
             });
+
             Object.defineProperty(node, "signal", { // same as "in"  // TODO: only define on shared "node" prototype?
-                function(id,signal,data)
+                value:function(id,signal,data)
                 {
                     var self = this;
                     var thisid = self.id;
@@ -1914,7 +1915,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
     function bodyScript(parameters, body) {
         var parameterString = (parameters.length ? " " + parameters.join(", ") + " " : "");
-        return accessorScript("( function(" + parameterString + ") {", body, "} )");
+        return accessorScript("( function(" + parameterString + ") {\n", body, "\n} )");
         // return accessorScript( "( function(" + ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  ) + ") {", body, "} )" );
     }
 

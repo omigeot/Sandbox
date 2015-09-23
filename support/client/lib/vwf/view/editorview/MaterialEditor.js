@@ -40,8 +40,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 
 		// repoint materialDef when it's an array and the active material changes
 		$scope.$watch('activeMaterial', function(newval){
-			if( $scope.materialArray && newval >= 0 && newval < $scope.materialArray.length )
-			{
+			if( $scope.materialArray && newval >= 0 && newval < $scope.materialArray.length ){
 				$scope.materialDef = $scope.materialArray[newval];
 			}
 		});
@@ -55,11 +54,28 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			}
 		});
 
+		$scope.$watch('materialDef.color.a', function(newval){
+			if(newval !== undefined){
+				$scope.materialDef.alpha = newval;
+			}
+		});
+		$scope.$watch('materialDef.specularColor.a', function(newval){
+			if(newval !== undefined){
+				$scope.materialDef.specularLevel = newval;
+			}
+		});
+
 		// recursively watch materialDef, and setProperty if changes were made by the material editor
+		var handle = null;
 		$scope.$watch('materialArray || materialDef', function(newval)
 		{
-			if(newval && newval === oldMaterialDef){
+			if(newval && (newval === oldMaterialDef || Array.isArray(oldMaterialDef) && oldMaterialDef.indexOf(newval) > -1)){
+				$scope.suppressUndo = true;
 				applyDef(newval);
+				if(handle) $timeout.cancel(handle);
+				handle = $timeout(function(){
+					$scope.suppressUndo = false;
+				}, 500);
 			}
 
 			if( $scope.materialDef )
@@ -135,7 +151,10 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				}
 
 				if( !$scope.suppressUndo ){
-					_UndoManager.pushEvent(undoEvent);
+					if($scope.fields.selectedNodeIds.length === 1)
+						_UndoManager.pushEvent(undoEvent.list[0]);
+					else
+						_UndoManager.pushEvent(undoEvent);
 					lastUndo = angular.copy(def);
 				}
 			}
@@ -173,6 +192,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				$scope.materialDef = null;
 				$scope.ambientLinked = true;
 				lastUndo = null;
+				$('#materialEditor html-palette').css('background', '#aaaaaa');
 				//_SidePanel.hideTab('materialEditor');
 			}
 		}

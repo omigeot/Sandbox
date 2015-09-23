@@ -2176,15 +2176,20 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                                 
 
                                 var node = _DataManager.getCleanNodePrototype(id);
-                                var childmat = toGMat(this.findviewnode(id).matrixWorld);
-                                var parentmat = toGMat(this.findviewnode(parentnode.id).matrixWorld);
-                                var invparentmat = MATH.inverseMat4(parentmat);
-                                childmat = MATH.mulMat4(invparentmat, childmat);
-                                delete node.properties.translation;
-                                delete node.properties.rotation;
-                                delete node.properties.quaternion;
-                                delete node.properties.scale;
-                                node.properties.transform = MATH.transposeMat4(childmat);
+
+								if(this.findviewnode(id))
+								{
+	                                var childmat = toGMat(this.findviewnode(id).matrixWorld);
+	                                var parentmat = toGMat(this.findviewnode(parentnode.id).matrixWorld);
+	                                var invparentmat = MATH.inverseMat4(parentmat);
+	                                childmat = MATH.mulMat4(invparentmat, childmat);
+	                                delete node.properties.translation;
+	                                delete node.properties.rotation;
+	                                delete node.properties.quaternion;
+	                                delete node.properties.scale;
+	                                node.properties.transform = MATH.transposeMat4(childmat);
+								}
+
                                 var newname = GUID();
                                 newnames.push(newname)
                                 this.createChild(parentnode.id, newname, node);
@@ -2194,11 +2199,11 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                         } 
                     } 
                 }
-                 this.DeleteSelection();
-                                this.TempPickCallback = null;
-                                self.SelectOnNextCreate(newnames);
-                                this.SetSelectMode('Pick');
-                                _UndoManager.stopCompoundEvent();
+                this.DeleteSelection();
+                this.TempPickCallback = null;
+                self.SelectOnNextCreate(newnames);
+                this.SetSelectMode('Pick');
+                _UndoManager.stopCompoundEvent();
             } 
 
         }
@@ -2209,12 +2214,17 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                     var id = this.GetSelectedVWFNode(i).id;
                     _RenderManager.flashHilight(findviewnode(vwf.parent(id)));
                     var node = _DataManager.getCleanNodePrototype(id);
-                    var childmat = toGMat(this.findviewnode(id).matrixWorld);
-                    delete node.properties.translation;
-                    delete node.properties.rotation;
-                    delete node.properties.quaternion;
-                    delete node.properties.scale;
-                    node.properties.transform = MATH.transposeMat4(childmat);
+
+					if( this.findviewnode(id) )
+					{
+	                    var childmat = toGMat(this.findviewnode(id).matrixWorld);
+	                    delete node.properties.translation;
+	                    delete node.properties.rotation;
+	                    delete node.properties.quaternion;
+	                    delete node.properties.scale;
+	                    node.properties.transform = MATH.transposeMat4(childmat);
+					}
+
                     var newname = GUID();
                     newnames.push(newname);
                     this.createChild('index-vwf', newname, node);
@@ -2231,7 +2241,8 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                 _Notifier.alert('No object selected. Select the desired child, then use this to choose the parent.');
                 return;
             }
-            if (this.findviewnode(this.GetSelectedVWFID()).initializedFromAsset) {
+			var viewnode = this.findviewnode(this.GetSelectedVWFID());
+            if (viewnode && viewnode.initializedFromAsset) {
                 _Notifier.alert('This object is part of a 3D asset, and cannot have its heirarchy modified');
                 return;
             }
@@ -2486,8 +2497,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                     self.toSelect.splice(self.toSelect.indexOf(n), 1);
                     if (self.toSelect.length == 0) {
                         self.createNodeCallback = null;
-                        self.SelectObject(null);
-                        self.SelectObject(self.tempSelect, Add);
+                        self.SelectObject(self.tempSelect, NewSelect);
                     }
                 }
             });
@@ -2851,7 +2861,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
         }
         this.initialize = function() {
             this.BuildMoveGizmo();
-            this.SelectObject(null);
+            this.SelectObject(null, 2, true);
             _dView.bind('prerender', this.updateGizmo.bind(this));
             document.oncontextmenu = function() {
                 return false;
