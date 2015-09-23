@@ -21,13 +21,7 @@ function defaultContext()
     this.setProperty = function(id,name,val)
     {
 
-        //****remove this shim!
-        if(val.internal_val)
-        {
-            
-            val = val.internal_val;
-            delete val.internal_val;
-        }
+        
        
         
         
@@ -93,21 +87,7 @@ function executionContext(parentContext)
             this.touchedProperties[id+name].val = val;
             }
 
-            if (val && typeof val == "object")
-            {
-                delete val.internal_val;
-                Object.defineProperty(val, 'internal_val',
-                {
-                    get: function()
-                    {
-                       // console.warn("internal_val is deprecated");
-                        return val;
-                    },
-                    enumerable:false,
-                    configurable:true
-                })
-            }
-
+            
             return val;
         }
 
@@ -889,8 +869,8 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 enumerable: true
             });
 
-          
-            if (!node.hasOwnProperty(propertyName)) // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
+            var APIs = ["transformAPI","traceAPI","commsAPI","clientAPI","physicsAPI","audioAPI","xAPI"];
+            if (!node.hasOwnProperty(propertyName) && APIs.indexOf(propertyName) == -1) // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             {
                 Object.defineProperty(node, propertyName, { // "this" is node in get/set
                     get: function() {
@@ -1159,7 +1139,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
         {
              try {
                     var ret = body.apply(node, methodParameters);
-                    if (ret && ret.internal_val) return ret.internal_val;
+                    
                     return ret;
                 } catch (e) {
                     console.warn(e.toString() + " Node:'" + (node.properties.DisplayName || node.id) + "' during: '" + methodName + "' with '" + JSON.stringify(methodParameters) + "'");
@@ -1255,12 +1235,12 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     this.enterNewContext(["enter" , nodeID, methodName]);
                 try {
                     var ret = this.tryExec(node,body,methodParameters);//body.apply(node, methodParameters);
-                    if (ret && ret.internal_val) return ret.internal_val;
-                    {
+                 
+                    
                         if(!inContext)
                             this.exitContext(["exit",nodeID, methodName]);
                         return ret;
-                    }
+                    
                 } catch (e) {
                     console.warn(e.toString() + " Node:'" + (node.properties.DisplayName || nodeID) + "' during: '" + methodName + "' with '" + JSON.stringify(methodParameters) + "'");
                     //            this.logger.warn( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
@@ -1427,26 +1407,24 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 }
             }
         },
-        callMethodTraverse: function(node, method, args) {
-
+        callMethodTraverse: function(node, method, args)
+        {
             if (!node) return;
-
-
             var body = node.private.bodies && node.private.bodies[method];
-
-            if (body) {
-                var inContext = this.contextStack.length > 1;
-                if(!inContext)
-                    this.enterNewContext();
-                this.tryExec(node,body,args);
-                if(!inContext)
-                    this.exitContext();
+            var inContext = this.contextStack.length > 1;
+            if (!inContext)
+                this.enterNewContext();
+            if (body)
+            {
+                this.tryExec(node, body, args);
             }
-
             if (node.children)
-                for (var i = 0; i < node.children.length; i++) {
+                for (var i = 0; i < node.children.length; i++)
+                {
                     this.callMethodTraverse(node.children[i], method, args);
                 }
+            if (!inContext)
+                this.exitContext();
         },
         ticking: function() {
             this.callMethodTraverse(this.nodes['index-vwf'], 'tick', []);

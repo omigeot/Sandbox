@@ -26,36 +26,37 @@ properties:
       displayname: "Render Depth"
       min: 0
       max: 100
-  audioAPI:
+  ___audioAPI:
     get: |
           if(!this._audioAPI)
           {
             Object.defineProperty(this,"_audioAPI",{enumerable:false,writable:true});
             this._audioAPI = {};
             this._audioAPI.___self = this;
+            var self = this;
             this._audioAPI.playSound=function(soundURL /* the url of the sound */, loop /* loop or not */, volume)
             {
-                vwf.callMethod(this.___self.id,'playSound',[soundURL,loop,volume])
+                vwf.callMethod(self.id,'playSound',[soundURL,loop,volume])
                 
             }
             this._audioAPI.stopSound=function(soundURL /* the url of the sound */)
             {
-                vwf.callMethod(this.___self.id,'stopSound',[soundURL])
+                vwf.callMethod(self.id,'stopSound',[soundURL])
                
             }
            this._audioAPI.pauseSound=function(soundURL /* the url of the sound */)
             {
-                vwf.callMethod(this.___self.id,'pauseSound',[soundURL])
+                vwf.callMethod(self.id,'pauseSound',[soundURL])
                
             }
             this._audioAPI.deleteSound=function(soundURL /* the url of the sound */)
             {
-                vwf.callMethod(this.___self.id,'deleteSound',[soundURL])
+                vwf.callMethod(self.id,'deleteSound',[soundURL])
                 
             }
            }
            return this._audioAPI;
-  transformAPI:
+  ___transformAPI:
     get: |
         if(!this._tapi)
         {
