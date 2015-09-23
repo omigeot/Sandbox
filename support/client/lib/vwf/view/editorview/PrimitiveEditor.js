@@ -3,6 +3,7 @@
 define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor'], function(app, baseClass){
     var primEditor = {};
     var isInitialized = false;
+    var inSetup = true;
 
     window._PrimitiveEditor = {
         getSingleton: function(){
@@ -20,7 +21,9 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
         isOpen: function(){
             return _SidePanel.isTabOpen("primitiveEditor");
         },
-        hide: $.noop
+        hide: $.noop,
+        callMethod: callMethod,
+        setProperty: _setProperty,
     };
 
     app.controller('PrimitiveController', ['$scope', function($scope){
@@ -330,6 +333,8 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 if(protoId && !ignoreBase) recursevlyAddPrototypes(_Editor.getNode(protoId), existingProps, scopeNode, scopeEditorData);
             }
         }
+
+        inSetup = false;
     }]);
 
     app.directive('vwfEditorProperty', ['$compile', function($compile){
@@ -529,7 +534,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 _Notifier.notify('You do not have permission to edit this object');
                 return;
             }
-            vwf_view.kernel.callMethod(vwfNode.id, vwfProp.method);
+            vwf_view.kernel.callMethod(vwfNode.id || vwfNode, vwfProp.method || vwfProp);
         }
         else {
             alertify.alert('calling methods on multiple selections is not supported');
@@ -544,12 +549,18 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             _UndoManager.pushEvent( new _UndoManager.SetPropertyEvent(node.id, prop, newVal) );
     }
 
-    function setProperty(node, prop, val) {
+    function _setProperty(id, prop, val, skipUndo){
+        setProperty({id: id}, prop, val, skipUndo);
+    }
+    function setProperty(node, prop, val, skipUndo) {
+        //prevent the handlers from firing setproperties when the GUI is first setup;
+        if(inSetup) return;
+
         if (_UserManager.GetCurrentUserName() == null) {
             _Notifier.notify('You must log in to participate');
             return;
         }
-        else if (node && node.id) {
+        else if (node && node.id && node.id != 'selection') {
             if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(), node.id) == 0) {
                 _Notifier.notify('You do not have permission to edit this object');
                 return;
