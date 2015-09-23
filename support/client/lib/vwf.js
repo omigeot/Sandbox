@@ -2466,7 +2466,7 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
                     $.extend(true,data,childComponent)
                     childComponent = data;
                     series_callback_async( undefined, undefined );
-                })
+                }).error(function() { series_callback_async( "Error loading continues base URL", undefined ); });
                 
             
             } else {
@@ -2920,7 +2920,10 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
         // Always complete asynchronously so that the stack doesn't grow from node to node
         // while createChild() recursively traverses a component.
 
-
+        if(err)
+        {
+            console.error("Error loading entity: " + err);
+        }
         if ( callback_async ) {
 
             
