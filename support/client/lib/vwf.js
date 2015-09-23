@@ -2093,7 +2093,7 @@ this.getNode = function( nodeID, full, normalize ) {  // TODO: options to includ
     // changes. Otherwise, return the URI if this is the root of a URI component.
 
     if(nodeComponent.continues)
-        nodeComponent = objectDiff(nodeComponent,continuesDefs[nodeComponent.continues + nodeID]);
+        nodeComponent = objectDiff(nodeComponent,continuesDefs[nodeComponent.continues + nodeID],false,false);
 
     if ( full || ! node.patchable || patched ) {
         return nodeComponent;
@@ -5472,7 +5472,7 @@ var nodeCollectionPrototype = {
 /// 
 /// @name module:vwf~nodes
 
-function objectDiff (obj1, obj2) {
+function objectDiff (obj1, obj2,noRecurse,stringCompare) {
    var delta = {};
 
     if( obj1 != obj2 && typeof obj1 == typeof obj2 && typeof obj1 == "number")
@@ -5486,7 +5486,12 @@ function objectDiff (obj1, obj2) {
    if(obj1 == null && obj2)
         return obj1;     
    if(obj2 == null && obj1 == null)
-        return obj1;     
+        return obj1;
+   if(stringCompare)
+   {
+        if(JSON.stringify(obj1) !== JSON.stringify(obj2))
+            return obj1;
+   }          
    if(obj1.constructor != obj2.constructor)
         return obj1;
    if(obj1.constructor == String)
@@ -5505,8 +5510,15 @@ function objectDiff (obj1, obj2) {
         return obj1;
 
       for(var i in obj1)
-      {
-         var ret2 = objectDiff(obj1[i],obj2[i])
+      { 
+         var ret2 = undefined;
+         if(!noRecurse) //do the full walk
+            ret2 = objectDiff(obj1[i],obj2[i],false,false)
+         else
+         {
+            //do a simple compare
+             ret2 = objectDiff(obj1[i],obj2[i],true,true)
+         }
          if(ret2)
          {
             diff = true;
@@ -5519,9 +5531,21 @@ function objectDiff (obj1, obj2) {
 
    for(var i in obj1)
    {
-        if(obj2.hasOwnProperty(i))
+        //don't deep compare properties - they are either changed or not, can't be patched
+        if(i == 'properties')
+        {   
+            var ret = objectDiff(obj1[i],obj2[i],true,false)
+            if(ret)
+                delta[i] = ret;
+
+        }
+        else if(obj2.hasOwnProperty(i))
             {
-                var ret = objectDiff(obj1[i],obj2[i])
+                var ret = undefined;
+                if(!noRecurse) //do the full walk
+                    ret = objectDiff(obj1[i],obj2[i],false,false)
+                else
+                    ret = objectDiff(obj1[i],obj2[i],true,true)
                 if(ret)
                     delta[i] = ret;
             }else
