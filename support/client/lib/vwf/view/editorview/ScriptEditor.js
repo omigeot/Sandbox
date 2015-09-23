@@ -151,9 +151,11 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 
 				editor.on('change', function(){
 					$scope.dirty[$scope.selectedField.id] = true;
+					$scope.$emit('codeChanged');
 					$scope.$apply();
 				});
 
+				
 				var autocomplete = AC.initialize(editor);
 
 				$scope.sessions = {};
@@ -162,9 +164,8 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 				{
 					if(newvals[0])
 					{
-						if( !$scope.sessions[newvals[0].id] || !newvals[1] ){
+						if( !$scope.sessions[newvals[0].id] || !newvals[1] )
 							regenerateBody(newvals[0]);
-						}
 
 						editor.setSession( $scope.sessions[newvals[0].id] );
 						editor.clearSelection();
@@ -198,6 +199,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 						$scope.sessions[item.id].setMode("ace/mode/json");
 					else
 						$scope.sessions[item.id].setMode("ace/mode/javascript");
+
+					$scope.sessions[item.id].on('changeAnnotation', function(data){
+						$scope.$emit('codeLinted', data);
+					});
 				}
 
 				$('textarea.ace_text-input', elem).keydown(function(e)
@@ -244,7 +249,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 		window._ScriptEditor = $scope;
 
 		$scope.guiState = {
-			openTab: '',
+			openTab: 'methods',
 			showHiddenProperties: false,
 			inheritPrototype: false
 		};
@@ -325,6 +330,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 				if( $scope.selectedField && !$scope.selectedField.id ){
 					$scope.selectedField.id = [$scope.fields.selectedNode.id, $scope.guiState.openTab, newvals[1]].join('_');
 				}
+				$scope.checkingSyntax = false;
 			}
 			else {
 				$scope.selectedField = null;
@@ -407,13 +413,13 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 				$scope.propertyList.selected = oldProperties.selected;
 			}
 
-			if( !$scope.fields.selectedNode ){
+			/*if( !$scope.fields.selectedNode ){
 				$scope.guiState.openTab = '';
 				return;
 			}
 			else if( !$scope.guiState.openTab ){
 				$scope.guiState.openTab = 'methods';
-			}
+			}*/
 
 			// populate lists
 			var curNode = $scope.fields.selectedNode;
@@ -486,31 +492,56 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 		}
 
 		// determine if Ace has detected any syntax errors in the current code window
-		$scope.checkSyntax = function(dialog)
-		{
-			var editor = document.querySelector('ace-code-editor')._editor;
-			var s = editor.getSession().getAnnotations();
-			var errors = "";
-			for (var i = 0; i < s.length; i++) {
-				if (s[i].type == 'error') errors += "<br/> line: " + s[i].row + "-" + s[i].text;
-			}
-			if (errors != "") {
-				alertify.alert('This script contains syntax errors, and cannot be saved. The errors are: \n' + errors.toString());
+		var annotations = null, checkerCb = null;
+		$scope.$on('codeChanged', function(evt){
+			console.log('changed');
+			annotations = null;
+		});
+		$scope.$on('codeLinted', function(evt, ann){
+			console.log('linted');
+			annotations = ann;
+			if(checkerCb) checkerCb();
+		});
 
+		$scope.checkSyntax = function(dialog, fromSave)
+		{
+			if(!annotations)
+			{
+				// postpone check until checker comes back
+				checkerCb = function(){
+					if(fromSave)
+						$scope.save();
+					else
+						$scope.checkSyntax(dialog);
+					checkerCb = null;
+				}
 				return false;
 			}
+			else
+			{
+				var editor = document.querySelector('ace-code-editor')._editor;
+				var s = annotations;
+				var errors = "";
+				for (var i = 0; i < s.length; i++) {
+					if (s[i].type == 'error') errors += "<br/> line: " + s[i].row + "-" + s[i].text;
+				}
 
-			if(dialog){
-				alertify.alert('This script contains no syntax errors.');
+				if (errors != "") {
+					alertify.alert('This script contains syntax errors, and cannot be saved. The errors are: \n' + errors.toString());
+					return false;
+				}
+				if(dialog){
+					alertify.alert('This script contains no syntax errors.');
+				}
+
+				return true;
 			}
-
-			return true;
 		}
 
 		// The 'Save Method/Event/Property' click handler
 		$scope.save = function()
 		{
-			if( checkPermission() && $scope.checkSyntax() && $scope.dirty[$scope.selectedField.id] && $scope.fields.selectedNode.id !== 'index-vwf' )
+			if( checkPermission() && $scope.checkSyntax(false, true) && $scope.dirty[$scope.selectedField.id] && $scope.fields.selectedNode.id !== 'index-vwf' )
 			{
 				var editor = document.querySelector('ace-code-editor')._editor;
 
