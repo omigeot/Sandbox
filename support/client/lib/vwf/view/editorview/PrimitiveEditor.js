@@ -5,6 +5,9 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
     var isInitialized = false;
     var inSetup = true;
 
+    //This allows us to keep the current log statements in place...
+    var console = { log: $.noop };
+
     window._PrimitiveEditor = {
         getSingleton: function(){
             if(!isInitialized){

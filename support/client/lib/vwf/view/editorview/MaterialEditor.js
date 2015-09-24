@@ -285,7 +285,6 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			},
 			link: function($scope, elem, attrs)
 			{
-				console.log("Directive link called...", attrs);
 				var rangeMode = $scope.range === true;
 
 				$scope.softLimit = attrs.softlimit ? true : false;
