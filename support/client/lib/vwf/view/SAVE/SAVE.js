@@ -19,10 +19,6 @@ define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], func
 	{
 		// == Module Definition ====================================================================
 		// -- initialize ---------------------------------------------------------------------------
-		instance: function(data)
-		{
-			this.createS3D(GUID(), data.ID, data.name);
-		},
 		loadToolTray: function()
 		{
 			var self = this;
@@ -86,29 +82,29 @@ define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], func
 				}
 				_EntityLibrary.addLibrary("Semantic 3D", lib);
 			}
-			else
-			{
-				this.buildEUIOptions();
-				$(document.body).append("<div class='SAVEMenu' id='EUIToolTray'></div");
-				$("#EUIToolTray").append("<div class='tooltraytitle' >Tools</div");
-				for (var i in this.toolTray)
-				{
-					var id = GUID();
-					var self = this;
-					$("#EUIToolTray").append("<div class='tooltrayItem' id='" + id + "'></div");
-					$("#" + id).text(this.toolTray[i].name);
-					(function()
-					{
-						var item = self.toolTray[i];
-						$("#" + id).click(function()
-						{
-							var newname = GUID();
-							self.rezzedNames.push(newname);
-							self.createS3D(newname, item.ID, item.name, vwf.getProperty('http-vwf-example-com-node3-vwf-N63f37e3e', 'transform'));
-						})
-					})()
-				}
-			}
+			// else
+			// {
+			// 	this.buildEUIOptions();
+			// 	$(document.body).append("<div class='SAVEMenu' id='EUIToolTray'></div");
+			// 	$("#EUIToolTray").append("<div class='tooltraytitle' >Tools</div");
+			// 	for (var i in this.toolTray)
+			// 	{
+			// 		var id = GUID();
+			// 		var self = this;
+			// 		$("#EUIToolTray").append("<div class='tooltrayItem' id='" + id + "'></div");
+			// 		$("#" + id).text(this.toolTray[i].name);
+			// 		(function()
+			// 		{
+			// 			var item = self.toolTray[i];
+			// 			$("#" + id).click(function()
+			// 			{
+			// 				var newname = GUID();
+			// 				self.rezzedNames.push(newname);
+			// 				self.createS3D(newname, item.ID, item.name, vwf.getProperty('http-vwf-example-com-node3-vwf-N63f37e3e', 'transform'));
+			// 			})
+			// 		})()
+			// 	}
+			// }
 		},
 		publishExercise: function(finished)
 		{
@@ -359,57 +355,34 @@ define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], func
 		},
 		//public facing function to  trigger load of an S3D file. Normally this probably would live in the _Editor
 		// or in the _EntityLibrary
-
     createS3D: function(name, ID, assetURL, KbId, grouping)
     {
-      var self = this;
       var newname = GUID();
-
-      self.rezzedNames.push(newname);
-
-      var transform = vwf.getProperty('http-vwf-example-com-node3-vwf-N63f37e3e', 'transform');
+      this.rezzedNames.push(newname);
       var s3d = grouping;
       var asset = assetURL;
-      var mapping = null;
       var rootKbId = KbId;
 
-      _assetLoader.s3dToVWF(newname, ID, rootKbId, asset, s3d, mapping, function(def)
+//XXX ID I can drop ID it is not needed for the view driver or asset loader
+console.log(name);
+console.log(newname);
+console.log(ID);
+console.log(rootKbId);
+console.log(asset);
+console.log(s3d);
+
+      _assetLoader.s3dToVWF(newname, rootKbId, asset, s3d, function(def)
       {
         def.properties.DisplayName = name;
         var behavior = ("./vwf/view/SAVE/test/" + name.replace(/ /g, "_") + "_dae.eui");
         $.get(behavior, function(code)
         {
           $.extend(true, def, code);
-          def.properties.transform = transform
-          vwf_view.kernel.createChild(vwf.application(), name, def);
+          def.properties.transform = vwf.getProperty('http-vwf-example-com-node3-vwf-N63f37e3e', 'transform');
+          vwf_view.kernel.createChild(vwf.application(), newname, def);
         })
       });
     },
-
-
-		createS3DOld: function(name, ID, DisplayName, transform)
-		{
-			//Get the VWF node definition
-			var self = this;
-			SAVEAPI.create(ID, false, function(data)
-			{
-				var s3d = data[0].grouping;
-				var asset = data[0].assetURL;
-				var mapping = null;
-				var rootKbId = data[0].KbId;
-				_assetLoader.s3dToVWF(name, ID, rootKbId, asset, s3d, mapping, function(def)
-				{
-					def.properties.DisplayName = DisplayName;
-					var behavior = ("./vwf/view/SAVE/test/" + DisplayName.replace(/ /g, "_") + "_dae.eui");
-					$.get(behavior, function(code)
-					{
-						$.extend(true, def, code);
-						def.properties.transform = transform
-						vwf_view.kernel.createChild(vwf.application(), name, def);
-					})
-				});
-			});
-		},
 		createdMethod: function(childID, methodName, body)
 		{
 			var node = this.nodes[childID]
