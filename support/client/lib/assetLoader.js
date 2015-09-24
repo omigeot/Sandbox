@@ -1,6 +1,6 @@
 //this is a very async bit of code, that loads all assets and parses them before continuing to boot up the VWF
 //over time, we might expand this to include sounds and other assets, now only works on 3D models and textures.
-//Note that the sim can go forward before the textures are loaded - the scene manager just fills them with blue 
+//Note that the sim can go forward before the textures are loaded - the scene manager just fills them with blue
 //textures and replaces them when loaded. So, we don't have to cache texture here, but we do let the scenemanager know to fire up
 //and start loading, just to give the textures a head start.
 define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.js-0.3.9/src/alertify", "vwf/model/threejs/BufferGeometryUtils", 'vwf/model/threejs/ColladaLoaderOptimized', "vwf/view/SAVE/js/g2js.bundle"],
@@ -190,7 +190,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                                 _SceneManager.defaultPickOptions, []); //this is sort of a silly way to initialize the bone handles, but it works
                             o.animationHandle.setKey(this.animationFrame);
                             o.updateMatrixWorld();
-                            //odd, does not seem to update matrix on first child bone. 
+                            //odd, does not seem to update matrix on first child bone.
                             //how does the bone relate to the skeleton?
                             for (var j = 0; j < o.children.length; j++)
                             {
@@ -441,7 +441,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                         }, node.animOnly);
                     }, 1);
                 }
-                //we need to queue up our entry to this module, since it cannot handle re-entry. This means that while it 
+                //we need to queue up our entry to this module, since it cannot handle re-entry. This means that while it
                 //is an async function, it cannot be entered again before it completes
                 THREE.glTFLoader.queue.push(
                 {
@@ -618,118 +618,104 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
             {
                 return G2JS.g2js(s3dXML);
             }
-            //turn and S3D file into a VWF node def            
+            //turn and S3D file into a VWF node def
             this.s3dToVWF = function(name, url, rootKbId, asset, s3d, mapping,  cb2)
             {
+//XXX url is tooltray ID and not needed
                 var vwfDef = {};
-                //Get the s3d
-                //$.get(s3d_url, function(s3dXML)
-                //{
-                    //convert to JSON
-                    //s3d = G2JS.g2js(s3dXML);
-                    //mapping = G2JS.s2js(s3dXML);
-
-                    //Setup root node
-                    vwfDef.source = url;
-                    vwfDef.type = 'subDriver/threejs/asset/vnd.SAVE+json';
-                    vwfDef.children = {};
-                    vwfDef.properties = {}
-                    vwfDef.extends = "./vwf/model/SAVE/semantic_entity.vwf"
-                    //vwfDef.properties.flora_ref = mapping.semantic_mapping.asset.flora_ref;
-                    //vwfDef.properties.sid = mapping.semantic_mapping.asset.sid;
-                    //vwfDef.properties.flora_uri = mapping.semantic_mapping.asset.uri;
-                    vwfDef.properties.KbId = rootKbId;
-                    //find the semantic mapping for an node
-                    function findMapping(s3dNode)
-                    {
-                        if(!mapping) return;
-                        for (var i in mapping.semantic_mapping.asset.groups)
-                            if (mapping.semantic_mapping.asset.groups[i].name == s3dNode)
-                                return mapping.semantic_mapping.asset.groups[i];
-                        for (var i in mapping.semantic_mapping.asset.objs)
-                            if (mapping.semantic_mapping.asset.objs[i].name == s3dNode)
-                                return mapping.semantic_mapping.asset.objs[i];
-                    }
-                    //recurse and translate
-                    function processGroups(vwfnode, s3dnode)
-                    {
-                        for (var i in s3dnode.groups)
-                        {
-                            var newChild = {};
-                            newChild.source = s3dnode.groups[i].name;
-                            newChild.type = "link_existing/threejs"
-                            newChild.children = {};
-                            newChild.extends = "./vwf/model/SAVE/semantic_entity.vwf"
-                            newChild.properties = findMapping(s3dnode.groups[i].name) ||
-                            {};
-                            if (newChild.properties && newChild.properties.node)
-                                delete newChild.properties.node;
-                            newChild.properties.DisplayName = newChild.source; //pretty print the name
-                            vwfnode.children[ /*s3dnode.groups[i].name*/ GUID()] = newChild; //We link up nodes differently. Names should be unique. The source value is the node to link to
-                            processGroups(newChild, s3dnode.groups[i])
-                        }
-                        for (var j in s3dnode.parts)
-                        {
-                            var newPart = {};
-                            newPart.source = s3dnode.parts[j];
-                            newPart.type = "link_existing/threejs"
-                            newPart.extends = "asset.vwf"
-                            newPart.properties = findMapping(s3dnode.parts[j]) ||
-                            {};
-                            if (newPart.properties && newPart.properties.node)
-                                delete newPart.properties.node;
-                            newPart.properties.DisplayName = newPart.source;
-                            vwfnode.children[GUID()] = newPart;
-                        }
-
-                    }
-                    processGroups(vwfDef, s3d);
-
-
-                    cb2(vwfDef);
-                //});
-        }
-        this.getBaseServerAddress = function()
-        {
-            return vwf.getProperty(vwf.application(),'baseServerAddress') || "http://localhost:3001/exercises/071-100-0032/step01/m4_flora_clear";
-        }
-        //load the SAVE JSON, get the asset file, modify the scenegraph as required, return to engine
-        this.loadSAVE = function(url, cb2)
-        {
-            var SAVE_BACKEND_URL_OBJECT = _assetLoader.getBaseServerAddress() + "/object";
-
-
-            var JSON_Groups = null;
-            var JSON_S3D = null;
-            var COLLADA = null;
-            var assetURL = null;
-            async.series([
-                //John, I don't fully understand the difference between JSON_S3D and JSON_Groups
-                //get and parse the SAVE data
-                function getSAVEJSON(cb)
+                //Setup root node
+                vwfDef.source = JSON.stringify({ url: asset, grouping: s3d });
+                vwfDef.type = 'subDriver/threejs/asset/vnd.SAVE+json';
+                vwfDef.children = {};
+                vwfDef.properties = {}
+                vwfDef.extends = "./vwf/model/SAVE/semantic_entity.vwf"
+                //vwfDef.properties.flora_ref = mapping.semantic_mapping.asset.flora_ref;
+                //vwfDef.properties.sid = mapping.semantic_mapping.asset.sid;
+                //vwfDef.properties.flora_uri = mapping.semantic_mapping.asset.uri;
+                vwfDef.properties.KbId = rootKbId;
+                //find the semantic mapping for an node
+                function findMapping(s3dNode)
                 {
-                   
-                     var postData = {object:{}};
-                     postData.object.auto = false;
-                     postData.object.ID = url;
-                     postData.object.type = "create";
-                     postData.object = JSON.stringify(postData.object);
-                    $.post(SAVE_BACKEND_URL_OBJECT, postData, function(data)
+                    if(!mapping) return;
+                    for (var i in mapping.semantic_mapping.asset.groups)
+                        if (mapping.semantic_mapping.asset.groups[i].name == s3dNode)
+                            return mapping.semantic_mapping.asset.groups[i];
+                    for (var i in mapping.semantic_mapping.asset.objs)
+                        if (mapping.semantic_mapping.asset.objs[i].name == s3dNode)
+                            return mapping.semantic_mapping.asset.objs[i];
+                }
+                //recurse and translate
+                function processGroups(vwfnode, s3dnode)
+                {
+                    for (var i in s3dnode.groups)
                     {
-                        JSON_Groups = data[0].grouping;
-                        assetURL = data[0].assetURL;    
-                        cb();
-                    });
-               /* {
-                var s3d = data[0].grouping;
+                        var newChild = {};
+                        newChild.source = s3dnode.groups[i].name;
+                        newChild.type = "link_existing/threejs"
+                        newChild.children = {};
+                        newChild.extends = "./vwf/model/SAVE/semantic_entity.vwf"
+                        newChild.properties = findMapping(s3dnode.groups[i].name) ||
+                        {};
+                        if (newChild.properties && newChild.properties.node)
+                            delete newChild.properties.node;
+                        newChild.properties.DisplayName = newChild.source; //pretty print the name
+                        vwfnode.children[ /*s3dnode.groups[i].name*/ GUID()] = newChild; //We link up nodes differently. Names should be unique. The source value is the node to link to
+                        processGroups(newChild, s3dnode.groups[i])
+                    }
+                    for (var j in s3dnode.parts)
+                    {
+                        var newPart = {};
+                        newPart.source = s3dnode.parts[j];
+                        newPart.type = "link_existing/threejs"
+                        newPart.extends = "asset.vwf"
+                        newPart.properties = findMapping(s3dnode.parts[j]) ||
+                        {};
+                        if (newPart.properties && newPart.properties.node)
+                            delete newPart.properties.node;
+                        newPart.properties.DisplayName = newPart.source;
+                        vwfnode.children[GUID()] = newPart;
+                    }
 
-                    $.get(url, function(s3dXML)
-                    {
-                        JSON_Groups = G2JS.g2js(s3dXML);
-                        JSON_S3D = G2JS.s2js(s3dXML)
-                        cb();
-                    });*/
-                },
+                }
+                processGroups(vwfDef, s3d);
+                cb2(vwfDef);
+            }
+            // this.getBaseServerAddress = function()
+            // {
+            //     return vwf.getProperty(vwf.application(),'baseServerAddress') || "http://localhost:3001/exercises/071-100-0032/step01/m4_flora_clear";
+            // }
+            //load the SAVE JSON, get the asset file, modify the scenegraph as required, return to engine
+            this.loadSAVE = function(url, cb2)
+            {
+                console.log(url)
+
+                var url = JSON.parse(url);
+
+                console.log(url)
+
+//              var SAVE_BACKEND_URL_OBJECT = _assetLoader.getBaseServerAddress() + "/object";
+//              var JSON_Groups = null;
+                var JSON_Groups = url.grouping;
+//              var JSON_S3D = null;
+                var COLLADA = null;
+//              var assetURL = null;
+                var assetURL = url.url;
+                async.series([
+                // function getSAVEJSON(cb)
+                // {
+                //
+                //      var postData = {object:{}};
+                //      postData.object.auto = false;
+                //      postData.object.ID = url;
+                //      postData.object.type = "create";
+                //      postData.object = JSON.stringify(postData.object);
+                //     $.post(SAVE_BACKEND_URL_OBJECT, postData, function(data)
+                //     {
+                //         JSON_Groups = data[0].grouping;
+                //         assetURL = data[0].assetURL;
+                //         cb();
+                //     });
+                // },
                 //Grab the associated asset file
                 function getCOLLADAFile(cb)
                 {
