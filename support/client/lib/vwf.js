@@ -2093,7 +2093,7 @@ this.getNode = function( nodeID, full, normalize ) {  // TODO: options to includ
     // changes. Otherwise, return the URI if this is the root of a URI component.
 
     if(nodeComponent.continues)
-        nodeComponent = objectDiff(nodeComponent,continuesDefs[nodeComponent.continues + nodeID]);
+        nodeComponent = objectDiff(nodeComponent,continuesDefs[nodeComponent.continues + nodeID],false,false);
 
     if ( full || ! node.patchable || patched ) {
         return nodeComponent;
@@ -2433,43 +2433,58 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
 
          function( series_callback_async /* ( err, results ) */ ) {
 
-            if ( componentIsDescriptor( childComponent ) && childComponent.continues && componentIsURI( childComponent.continues ) ) {  // TODO: for "includes:", accept an already-loaded component (which componentIsURI exludes) since the descriptor will be loaded again
-                
-                $.getJSON(childComponent.continues,function(data)
+            if (componentIsDescriptor(childComponent) && childComponent.continues && componentIsURI(childComponent.continues))
+            { // TODO: for "includes:", accept an already-loaded component (which componentIsURI exludes) since the descriptor will be loaded again
+                function continueBaseLoaded(data)
                 {
-                   
-
+                    //cache for future use
+                    if (!continuesDefs[childComponent.continues])
+                        continuesDefs[childComponent.continues] = JSON.parse(JSON.stringify(data));
                     var cleanChildNames = function(node)
                     {
-                        if(node.children)
-                            for(var i in node.children)
+                        if (node.children)
+                            for (var i in node.children)
                                 cleanChildNames(node.children[i])
-
-                        if(node.children)
+                        if (node.children)
                         {
                             var keys = Object.keys(node.children)
-                            for(var i =0; i < keys.length; i++)
-                            {   
+                            for (var i = 0; i < keys.length; i++)
+                            {
                                 var oldName = keys[i];
-
                                 var child = node.children[oldName];
                                 delete node.children[oldName];
                                 node.children[childID + oldName] = child
-                            }        
+                            }
                         }
-
                     }
-
                     cleanChildNames(data);
                     continuesDefs[childComponent.continues + childID] = JSON.parse(JSON.stringify(data));
-
-                    $.extend(true,data,childComponent)
+                    $.extend(true, data, childComponent)
                     childComponent = data;
-                    series_callback_async( undefined, undefined );
-                })
-                
-            
-            } else {
+
+                    series_callback_async(undefined, undefined);
+                    queue.resume( "after beginning " + childID );
+                }
+
+                if (!continuesDefs[childComponent.continues])
+                {
+                     queue.suspend( "before beginning " + childID ); // suspend the queue
+                    $.getJSON(childComponent.continues,
+                        continueBaseLoaded).error(function()
+                    {
+                       
+                        series_callback_async("Error loading continues base URL: " + childComponent.continues, undefined);
+                         queue.resume( "after beginning " + childID );
+                    });
+                }
+                else
+                {
+                    queue.suspend( "before beginning " + childID ); // suspend the queue
+                    continueBaseLoaded(JSON.parse(JSON.stringify(continuesDefs[childComponent.continues])));
+                }
+            }
+            else
+            {
 
                 queue.suspend( "before beginning " + childID ); // suspend the queue
 
@@ -2920,7 +2935,10 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
         // Always complete asynchronously so that the stack doesn't grow from node to node
         // while createChild() recursively traverses a component.
 
-
+        if(err)
+        {
+            console.error("Error loading entity: " + err);
+        }
         if ( callback_async ) {
 
             
@@ -3117,7 +3135,7 @@ this.setProperties = function( nodeID, properties ) {  // TODO: rework as a cove
     this.logger.debuggx( "setProperties", nodeID, properties );
 
     var node = nodes.existing[nodeID];
-
+    if(!node) return;
     var entrants = this.setProperty.entrants;
 
     // Call settingProperties() on each model.
@@ -3202,7 +3220,7 @@ this.getProperties = function( nodeID ) {  // TODO: rework as a cover for getPro
     this.logger.debuggx( "getProperties", nodeID );
 
     var node = nodes.existing[nodeID];
-
+    if(!node) return;
     var entrants = this.getProperty.entrants;
 
     // Call gettingProperties() on each model.
@@ -3322,6 +3340,7 @@ this.setProperty = function( nodeID, propertyName, propertyValue ) {
     } );
 
     var node = nodes.existing[nodeID];
+    if(!node) return;
 
     // Record calls into this function by nodeID and propertyName so that models may call
     // back here (directly or indirectly) to delegate responses further down the chain
@@ -5472,7 +5491,7 @@ var nodeCollectionPrototype = {
 /// 
 /// @name module:vwf~nodes
 
-function objectDiff (obj1, obj2) {
+function objectDiff (obj1, obj2,noRecurse,stringCompare) {
    var delta = {};
 
     if( obj1 != obj2 && typeof obj1 == typeof obj2 && typeof obj1 == "number")
@@ -5486,7 +5505,12 @@ function objectDiff (obj1, obj2) {
    if(obj1 == null && obj2)
         return obj1;     
    if(obj2 == null && obj1 == null)
-        return obj1;     
+        return obj1;
+   if(stringCompare)
+   {
+        if(JSON.stringify(obj1) !== JSON.stringify(obj2))
+            return obj1;
+   }          
    if(obj1.constructor != obj2.constructor)
         return obj1;
    if(obj1.constructor == String)
@@ -5505,8 +5529,15 @@ function objectDiff (obj1, obj2) {
         return obj1;
 
       for(var i in obj1)
-      {
-         var ret2 = objectDiff(obj1[i],obj2[i])
+      { 
+         var ret2 = undefined;
+         if(!noRecurse) //do the full walk
+            ret2 = objectDiff(obj1[i],obj2[i],false,false)
+         else
+         {
+            //do a simple compare
+             ret2 = objectDiff(obj1[i],obj2[i],true,true)
+         }
          if(ret2)
          {
             diff = true;
@@ -5519,9 +5550,21 @@ function objectDiff (obj1, obj2) {
 
    for(var i in obj1)
    {
-        if(obj2.hasOwnProperty(i))
+        //don't deep compare properties - they are either changed or not, can't be patched
+        if(i == 'properties')
+        {   
+            var ret = objectDiff(obj1[i],obj2[i],true,false)
+            if(ret)
+                delta[i] = ret;
+
+        }
+        else if(obj2.hasOwnProperty(i))
             {
-                var ret = objectDiff(obj1[i],obj2[i])
+                var ret = undefined;
+                if(!noRecurse) //do the full walk
+                    ret = objectDiff(obj1[i],obj2[i],false,false)
+                else
+                    ret = objectDiff(obj1[i],obj2[i],true,true)
                 if(ret)
                     delta[i] = ret;
             }else
