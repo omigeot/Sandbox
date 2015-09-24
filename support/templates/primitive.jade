@@ -50,7 +50,7 @@ block content
 	
 	#vwf-template-slider(ng-non-bindable, style='display: none;') 
 		label.vMargin {{displayname}}: 
-			slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property]', sliding='isUpdating', change='onChange()')
+			slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property]', sliding='isUpdating', change='onChange()', softlimit="true")
 	
 	#vwf-template-color(ng-non-bindable, style='display: none;')
 		label.inline {{displayname}}: 

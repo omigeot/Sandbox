@@ -261,7 +261,8 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			template: [
 				'<div class="mantissa">',
 					'<div class="slider"></div>',
-					'<input type="number" min="{{min}}" max="{{max}}" step="{{step}}" ng-model="value" ng-disabled="disabled" ng-hide="range" ng-change="change()"></input>',
+					'<input type="number" min="{{min}}" max="{{max}}" step="{{step}}" ng-model="value" ng-disabled="disabled || softLimit" ng-hide="range || softLimit" ng-change="change()"></input>',
+					'<input type="number" step="{{step}}" ng-model="value" ng-disabled="disabled || !softLimit" ng-hide="range || !softLimit" ng-change="change()"></input>',
 				'</div>',
 				'<div class="exponent" ng-show="useExponent">',
 					'Exponent: ',
@@ -284,9 +285,11 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			},
 			link: function($scope, elem, attrs)
 			{
+				console.log("Directive link called...", attrs);
 				var rangeMode = $scope.range === true;
 
-				$scope.mantissa = $scope.value || $scope.min;
+				$scope.softLimit = attrs.softlimit ? true : false;
+				$scope.mantissa = !isNaN($scope.value) ? $scope.value : $scope.min;
 				$scope.exponent = 0;
 				$scope.change = $scope.change || $.noop;
 				var opts = {
@@ -361,12 +364,18 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 					// compute new output value when mantissa or exponent are updated
 					$scope.$watch('mantissa + exponent', function(newval){
 						if( !$scope.disabled ){
-							if( $scope.useExponent )
+							if( $scope.useExponent ) {
 								$scope.value = $scope.mantissa * Math.pow(10, $scope.exponent);
-							else
+								slider.slider('option', 'value', $scope.mantissa);
+							}
+
+							else {
 								$scope.value = $scope.mantissa;
 
-							slider.slider('option', 'value', $scope.mantissa);
+								//This keeps the slider in bounds...
+								var val = Math.min( Math.max( $scope.mantissa, $scope.min ), $scope.max );
+								slider.slider('option', 'value', val);
+							}
 						}
 					});
 				}
