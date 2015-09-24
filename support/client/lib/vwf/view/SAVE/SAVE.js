@@ -226,7 +226,7 @@ define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], func
 		setupEUI: function()
 		{
 //			this.loadToolTray();
-			this.issueAutoLoads();
+//			this.issueAutoLoads();
 		},
 		autoLoadedNodes: [],
 		issueAutoLoads: function()
@@ -360,20 +360,23 @@ define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], func
 		//public facing function to  trigger load of an S3D file. Normally this probably would live in the _Editor
 		// or in the _EntityLibrary
 
-    createS3D: function(name, ID, assetUrl, KbId, grouping)
+    createS3D: function(name, ID, assetURL, KbId, grouping)
     {
+      var self = this;
       var newname = GUID();
+
       self.rezzedNames.push(newname);
+
       var transform = vwf.getProperty('http-vwf-example-com-node3-vwf-N63f37e3e', 'transform');
       var s3d = grouping;
       var asset = assetURL;
       var mapping = null;
       var rootKbId = KbId;
 
-      _assetLoader.s3dToVWF(name, ID, rootKbId, asset, s3d, mapping, function(def)
+      _assetLoader.s3dToVWF(newname, ID, rootKbId, asset, s3d, mapping, function(def)
       {
-        def.properties.DisplayName = DisplayName;
-        var behavior = ("./vwf/view/SAVE/test/" + DisplayName.replace(/ /g, "_") + "_dae.eui");
+        def.properties.DisplayName = name;
+        var behavior = ("./vwf/view/SAVE/test/" + name.replace(/ /g, "_") + "_dae.eui");
         $.get(behavior, function(code)
         {
           $.extend(true, def, code);
