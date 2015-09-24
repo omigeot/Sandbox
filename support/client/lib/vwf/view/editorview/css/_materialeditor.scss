@@ -26,6 +26,7 @@
 
 			input {
 				margin-left: 5px;
+				border-top: none;
 			}
 		}
 
@@ -69,7 +70,7 @@
 	}
 
 	input:not([type=button]) {
-		color: black;
+		color: white;
 	}
 
 	.horizontalLayout.centered {

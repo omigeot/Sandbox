@@ -403,7 +403,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                     pushUndoEvent(vwfNode, vwfProp.property, value);
                     setProperty(vwfNode, vwfProp.property, value);
                 }
-            }, value);
+            }, "" + value);
         }
 
         function linkFn(scope, elem, attr){

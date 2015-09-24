@@ -879,7 +879,7 @@
   /* line 58, _sidepanel.scss */
   #sidepanel .editorPanel {
     width: 100%; }
-    /* line 64, _sidepanel.scss */
+    /* line 65, _sidepanel.scss */
     #sidepanel .editorPanel .title {
       padding: 3px 4px;
       font: 1.5em sans-serif;
@@ -888,7 +888,7 @@
       -ms-flex-shrink: 0;
       -webkit-flex-shrink: 0;
       flex-shrink: 0; }
-    /* line 72, _sidepanel.scss */
+    /* line 73, _sidepanel.scss */
     #sidepanel .editorPanel .content {
       -moz-flex-grow: 1;
       -ms-flex: 1 1;
@@ -896,17 +896,17 @@
       flex-grow: 1;
       color: white;
       background: url(vwf/view/editorview/css/images/ui-bg_hexagon_5_111111_12x10.png) 50% 50% repeat #242020; }
-    /* line 79, _sidepanel.scss */
+    /* line 80, _sidepanel.scss */
     #sidepanel .editorPanel .ui-accordion .ui-accordion-content {
       padding: 10px; }
-    /* line 83, _sidepanel.scss */
+    /* line 84, _sidepanel.scss */
     #sidepanel .editorPanel .horizontalLayout.centered {
       -webkit-box-pack: center;
       -moz-justify-content: center;
       -ms-flex-pack: center;
       -webkit-justify-content: center;
       justify-content: center; }
-    /* line 87, _sidepanel.scss */
+    /* line 88, _sidepanel.scss */
     #sidepanel .editorPanel .inline {
       display: -webkit-box;
       display: -moz-flex;
@@ -925,42 +925,51 @@
       justify-content: space-between;
       margin: 10px 0;
       cursor: default; }
-    /* line 97, _sidepanel.scss */
+    /* line 98, _sidepanel.scss */
     #sidepanel .editorPanel .vMargin {
-      margin: 10px 0; }
-    /* line 101, _sidepanel.scss */
+      margin: 15px 0; }
+    /* line 102, _sidepanel.scss */
     #sidepanel .editorPanel .vector-input {
       float: right;
       width: 100%;
       clear: both;
       margin-top: 2px;
       text-align: right; }
-      /* line 108, _sidepanel.scss */
+      /* line 109, _sidepanel.scss */
       #sidepanel .editorPanel .vector-input input {
         width: 15%;
         padding: 3px;
-        text-align: center; }
-    /* line 115, _sidepanel.scss */
+        text-align: center;
+        margin-right: 5px;
+        border: 1px solid #909090; }
+    /* line 118, _sidepanel.scss */
     #sidepanel .editorPanel #Translation, #sidepanel .editorPanel #Rotation, #sidepanel .editorPanel #Scale {
       margin-top: 3px;
       text-align: left; }
-    /* line 120, _sidepanel.scss */
+    /* line 123, _sidepanel.scss */
     #sidepanel .editorPanel .vwf-image-picker {
       display: block;
       text-align: left;
       width: 95%;
       overflow: hidden; }
-  /* line 128, _sidepanel.scss */
+    /* line 130, _sidepanel.scss */
+    #sidepanel .editorPanel input {
+      background: black;
+      color: white;
+      border: 1px solid #909090;
+      padding: 2px; }
+  /* line 138, _sidepanel.scss */
   #sidepanel label {
     display: block;
     margin: 0; }
-    /* line 133, _sidepanel.scss */
+    /* line 143, _sidepanel.scss */
     #sidepanel label input[type=checkbox] {
       margin: 0; }
-  /* line 138, _sidepanel.scss */
+  /* line 148, _sidepanel.scss */
   #sidepanel input:not([type=button]) {
-    color: black; }
-  /* line 144, _sidepanel.scss */
+    color: white;
+    background: transparent; }
+  /* line 155, _sidepanel.scss */
   #sidepanel slider .mantissa, #sidepanel slider .exponent {
     display: -webkit-box;
     display: -moz-flex;
@@ -972,17 +981,17 @@
     -ms-flex-align: center;
     -webkit-align-items: center;
     align-items: center; }
-  /* line 149, _sidepanel.scss */
+  /* line 160, _sidepanel.scss */
   #sidepanel slider .exponent {
     -webkit-box-pack: end;
     -moz-justify-content: flex-end;
     -ms-flex-pack: end;
     -webkit-justify-content: flex-end;
     justify-content: flex-end; }
-    /* line 153, _sidepanel.scss */
+    /* line 164, _sidepanel.scss */
     #sidepanel slider .exponent input {
       margin-left: 5px; }
-  /* line 158, _sidepanel.scss */
+  /* line 169, _sidepanel.scss */
   #sidepanel slider .ui-slider {
     -moz-flex-grow: 1;
     -ms-flex: 1 1;
@@ -992,10 +1001,10 @@
     font-size: 11px;
     background-color: #87b7d8 !important;
     border-color: grey; }
-    /* line 167, _sidepanel.scss */
+    /* line 178, _sidepanel.scss */
     #sidepanel slider .ui-slider .ui-slider-handle {
       color: lightgrey !important; }
-  /* line 173, _sidepanel.scss */
+  /* line 184, _sidepanel.scss */
   #sidepanel slider input {
     -moz-flex-shrink: 0;
     -ms-flex-shrink: 0;
@@ -1004,7 +1013,7 @@
     width: 50px;
     color: initial;
     padding: initial; }
-  /* line 182, _sidepanel.scss */
+  /* line 193, _sidepanel.scss */
   #sidepanel .colorPickerIcon {
     width: 25px;
     height: 25px;
@@ -1151,9 +1160,18 @@
       #hierarchyManager #hierarchyDisplay .hierarchyicon.glyphicon-ban-circle {
         color: #444; }
 
-/* line 3, _primitive.scss */
+/* line 5, _primitive.scss */
 #primitiveEditor label {
   width: 100%; }
+/* line 9, _primitive.scss */
+#primitiveEditor button {
+  float: right;
+  background: black;
+  color: white;
+  border: 1px solid #909090;
+  padding: 2px;
+  width: 30%;
+  border-radius: 5px; }
 
 /* line 5, _materialeditor.scss */
 .htmlPalette.extrawide {
@@ -1183,8 +1201,9 @@
   justify-content: flex-end; }
   /* line 27, _materialeditor.scss */
   #materialEditor slider .exponent input {
-    margin-left: 5px; }
-/* line 32, _materialeditor.scss */
+    margin-left: 5px;
+    border-top: none; }
+/* line 33, _materialeditor.scss */
 #materialEditor slider .ui-slider {
   -moz-flex-grow: 1;
   -ms-flex: 1 1;
@@ -1194,10 +1213,10 @@
   font-size: 11px;
   background-color: #87b7d8 !important;
   border-color: grey; }
-  /* line 41, _materialeditor.scss */
+  /* line 42, _materialeditor.scss */
   #materialEditor slider .ui-slider .ui-slider-handle {
     color: lightgrey !important; }
-/* line 47, _materialeditor.scss */
+/* line 48, _materialeditor.scss */
 #materialEditor slider input {
   -moz-flex-shrink: 0;
   -ms-flex-shrink: 0;
@@ -1206,7 +1225,7 @@
   width: 50px;
   color: initial;
   padding: initial; }
-/* line 56, _materialeditor.scss */
+/* line 57, _materialeditor.scss */
 #materialEditor .colorPickerIcon, #materialEditor html-palette {
   width: 25px;
   height: 25px;
@@ -1214,16 +1233,16 @@
   background-color: #aaaaaa;
   background-image: url(../images/select3.png);
   background-position: center; }
-/* line 67, _materialeditor.scss */
+/* line 68, _materialeditor.scss */
 #materialEditor .ui-accordion .ui-accordion-content {
   padding: 10px; }
-/* line 71, _materialeditor.scss */
+/* line 72, _materialeditor.scss */
 #materialEditor input:not([type=button]) {
-  color: black; }
-/* line 76, _materialeditor.scss */
+  color: white; }
+/* line 77, _materialeditor.scss */
 #materialEditor .horizontalLayout.centered input[type=button] {
   width: 80%; }
-/* line 83, _materialeditor.scss */
+/* line 84, _materialeditor.scss */
 #materialEditor #MaterialBasicSettings label#materialIndex {
   display: -webkit-box;
   display: -moz-flex;
@@ -1241,29 +1260,29 @@
   -webkit-align-items: center;
   align-items: center;
   font-size: 15px; }
-  /* line 90, _materialeditor.scss */
+  /* line 91, _materialeditor.scss */
   #materialEditor #MaterialBasicSettings label#materialIndex input {
     padding: 0;
     margin: 0 5px;
     width: 30px; }
-/* line 98, _materialeditor.scss */
+/* line 99, _materialeditor.scss */
 #materialEditor #MaterialFlags {
   -webkit-box-pack: center;
   -moz-justify-content: center;
   -ms-flex-pack: center;
   -webkit-justify-content: center;
   justify-content: center; }
-  /* line 102, _materialeditor.scss */
+  /* line 103, _materialeditor.scss */
   #materialEditor #MaterialFlags label {
     margin: 10px 0; }
-/* line 110, _materialeditor.scss */
+/* line 111, _materialeditor.scss */
 #materialEditor .textureLayer .texPreview {
   -webkit-box-align: center;
   -moz-align-items: center;
   -ms-flex-align: center;
   -webkit-align-items: center;
   align-items: center; }
-  /* line 114, _materialeditor.scss */
+  /* line 115, _materialeditor.scss */
   #materialEditor .textureLayer .texPreview img {
     margin: 5px;
     height: 128px;
@@ -2449,12 +2468,10 @@ div#Translation .ui-spinner, div#Rotation .ui-spinner, div#Scale .ui-spinner {
 
 /* line 1198, Editorview.scss */
 div#otherprops input[type=text] {
-  color: black;
   /* border-radius: 5px; */
-  padding: 0px;
   margin: 2px; }
 
-/* line 1205, Editorview.scss */
+/* line 1203, Editorview.scss */
 .ui-selectmenu-button {
   float: right;
   margin-top: 2px;
@@ -2462,55 +2479,55 @@ div#otherprops input[type=text] {
   border-radius: 3px;
   width: 30px; }
 
-/* line 1213, Editorview.scss */
+/* line 1211, Editorview.scss */
 .ui-selectmenu-button span.ui-selectmenu-text {
   padding: 0px; }
 
-/* line 1217, Editorview.scss */
+/* line 1215, Editorview.scss */
 .ui-spinner {
   border-radius: 3px;
   margin-top: 2px; }
 
-/* line 1222, Editorview.scss */
+/* line 1220, Editorview.scss */
 .ui-spinner-input {
   margin: 0px 10px 0px 0px; }
 
-/* line 1226, Editorview.scss */
+/* line 1224, Editorview.scss */
 .ui-button-text {
   display: inline-block !important; }
 
-/* line 1230, Editorview.scss */
+/* line 1228, Editorview.scss */
 .ui-button-text-only img {
   width: 50px;
   height: 50px;
   display: inline-block; }
 
-/* line 1236, Editorview.scss */
+/* line 1234, Editorview.scss */
 .ui-dialog .ui-dialog-titlebar-close {
   margin: -12px 0 0; }
 
-/* line 1240, Editorview.scss */
+/* line 1238, Editorview.scss */
 #ModelSearchTerm {
   background: black; }
 
-/* line 1244, Editorview.scss */
+/* line 1242, Editorview.scss */
 #InventoryRename {
   color: black; }
 
-/* line 1248, Editorview.scss */
+/* line 1246, Editorview.scss */
 .jstree-default .jstree-wholerow-clicked {
   background: #274857; }
 
-/* line 1252, Editorview.scss */
+/* line 1250, Editorview.scss */
 .jstree-default .jstree-wholerow-hovered {
   background: #5b89b6;
   /* color: black !important; */ }
 
-/* line 1257, Editorview.scss */
+/* line 1255, Editorview.scss */
 #guioverlay_index-vwf {
   outline: none !important; }
 
-/* line 1261, Editorview.scss */
+/* line 1259, Editorview.scss */
 #entitylibrarytray {
   margin-left: 1em;
   font-size: 22.2px;
@@ -2518,19 +2535,19 @@ div#otherprops input[type=text] {
   margin-bottom: 6px;
   cursor: pointer; }
 
-/* line 1269, Editorview.scss */
+/* line 1267, Editorview.scss */
 #entitylibrarytray:hover {
   color: #84b9ff; }
 
-/* line 1273, Editorview.scss */
+/* line 1271, Editorview.scss */
 ul li a .glyphicon {
   margin-right: 1em; }
 
-/* line 1277, Editorview.scss */
+/* line 1275, Editorview.scss */
 .ui-slider {
   clear: both; }
 
-/* line 1281, Editorview.scss */
+/* line 1279, Editorview.scss */
 .editorPanelDisableOverlay {
   position: absolute;
   top: 0;
@@ -2542,32 +2559,32 @@ ul li a .glyphicon {
   cursor: not-allowed;
   display: none; }
 
-/* line 1293, Editorview.scss */
+/* line 1291, Editorview.scss */
 .editorPanelDisable {
   color: #5e5e5e !important;
   cursor: not-allowed;
   pointer-events: none;
-  opacity: 0.85; }
+  opacity: 0.45; }
 
-/* line 1300, Editorview.scss */
+/* line 1298, Editorview.scss */
 .sidetab-editor-title {
   background: #3a8fff 50% 50% repeat-x;
   cursor: pointer;
   border-radius: 2px; }
 
-/* line 1306, Editorview.scss */
+/* line 1304, Editorview.scss */
 .sidetab-editor-title:hover {
   text-decoration: underline; }
 
-/* line 1310, Editorview.scss */
+/* line 1308, Editorview.scss */
 .sidetab-editor-title-active {
   background: #3a8fff 50% 50% repeat-x; }
 
-/* line 1314, Editorview.scss */
+/* line 1312, Editorview.scss */
 .sidetab-editor-title-active:hover {
   text-decoration: underline; }
 
-/* line 1318, Editorview.scss */
+/* line 1316, Editorview.scss */
 .downarrowclass {
   display: none; }
 
