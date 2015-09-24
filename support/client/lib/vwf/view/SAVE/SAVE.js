@@ -355,7 +355,7 @@ define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], func
 		},
 		//public facing function to  trigger load of an S3D file. Normally this probably would live in the _Editor
 		// or in the _EntityLibrary
-    createS3D: function(name, ID, assetURL, KbId, grouping)
+    createS3D: function(name, assetURL, KbId, grouping)
     {
       var newname = GUID();
       this.rezzedNames.push(newname);
@@ -363,15 +363,13 @@ define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], func
       var asset = assetURL;
       var rootKbId = KbId;
 
-//XXX ID I can drop ID it is not needed for the view driver or asset loader
 console.log(name);
 console.log(newname);
-console.log(ID);
 console.log(rootKbId);
 console.log(asset);
 console.log(s3d);
 
-      _assetLoader.s3dToVWF(newname, rootKbId, asset, s3d, function(def)
+      _assetLoader.s3dToVWF(rootKbId, asset, s3d, function(def)
       {
         def.properties.DisplayName = name;
         var behavior = ("./vwf/view/SAVE/test/" + name.replace(/ /g, "_") + "_dae.eui");

@@ -20783,8 +20783,6 @@
 	  value: true
 	});
 
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 	var _react = __webpack_require__(6);
@@ -20931,6 +20929,9 @@
 	      return response.json();
 	    }).then(function (json) {
 	      _this3.processFetchedExercises(json);
+	    }).then(function () {
+	      // call window._dSAVE.issueautoloads...
+	      // and call a _dSAVE function to set the baseServerAddress property
 	    })['catch'](function (e) {
 	      return console.error(e);
 	    });
@@ -21048,10 +21049,27 @@
 	    var exerciseList = _state2.exerciseList;
 	    var instructorToggle = _state2.instructorToggle;
 	    var loadedExerciseList = _state2.loadedExerciseList;
+	    var reloadTray = _state2.reloadTray;
 	    var selectedExerciseListIndex = _state2.selectedExerciseListIndex;
 	    var serverErrorText = _state2.serverErrorText;
 
-	    var controlsOther = { instructorMode: this.state.instructorToggle };
+	    var controlsProps = {
+	      baseServerAddress: this.baseServerAddress,
+	      forceUpdate: reloadTray,
+	      instructorMode: instructorToggle,
+	      onAssessment: this.showAssessment,
+	      onInstructorModeChange: this.instructorModeChange,
+	      onReset: this.reset,
+	      onSave: this.saveSolution,
+	      onToolTrayItemClick: this.handleToolTrayItemClick,
+	      savePrimaryText: 'Save',
+	      type: 'EUI'
+	    };
+	    var controlsIconButtonProps = {
+	      disabled: !loadedExerciseList,
+	      onClick: this.handleControlsClick,
+	      tooltip: 'Controls'
+	    };
 
 	    return _react2['default'].createElement(
 	      Paper,
@@ -21096,7 +21114,7 @@
 	                style: { display: 'inline-block', width: 42 } }) : null,
 	              _react2['default'].createElement(
 	                IconButton,
-	                { onClick: this.handleControlsClick, tooltip: 'Controls' },
+	                controlsIconButtonProps,
 	                _react2['default'].createElement(_materialUiLibSvgIconsNavigationMenu2['default'], null)
 	              )
 	            )
@@ -21106,17 +21124,7 @@
 	      _react2['default'].createElement(
 	        _ComponentDialogJsx2['default'],
 	        { onDismiss: this.dialogDismiss, ref: 'controlsComponentDialog', title: 'EUI Controls' },
-	        _react2['default'].createElement(_ControlsJsx2['default'], _extends({
-	          baseServerAddress: this.baseServerAddress,
-	          forceUpdate: this.state.reloadTray
-	        }, controlsOther, {
-	          onAssessment: this.showAssessment,
-	          onInstructorModeChange: this.instructorModeChange,
-	          onReset: this.reset,
-	          onSave: this.saveSolution,
-	          onToolTrayItemClick: this.handleToolTrayItemClick,
-	          savePrimaryText: 'Save',
-	          type: 'EUI' }))
+	        _react2['default'].createElement(_ControlsJsx2['default'], controlsProps)
 	      ),
 	      _react2['default'].createElement(
 	        _ComponentDialogJsx2['default'],
@@ -21141,7 +21149,7 @@
 	        ref: 'snackbarStudentMode' }),
 	      !this.state.noSnackbarSimulateBackend ? _react2['default'].createElement(Snackbar, {
 	        action: 'Simulate',
-	        autoHideDuration: 3500,
+	        autoHideDuration: 10000,
 	        message: 'Backend',
 	        onActionTouchTap: this.simulateBackend,
 	        onDismiss: this.dismissedSimulateBackend,
@@ -21308,13 +21316,12 @@
 	  handleToolTrayItemClick: function handleToolTrayItemClick(itemIdx, json) {
 	    var tti = tooltrayItems[itemIdx];
 	    var name = tti.name;
-	    var ID = tti.ID;
 	    var assetURL = json[0].assetURL;
 	    var KbId = json[0].KbId;
 	    var grouping = json[0].grouping;
 
 	    tooltrayItems.splice(itemIdx, 1);
-	    window._dSAVE.createS3D(name, ID, assetURL, KbId, grouping);
+	    window._dSAVE.createS3D(name, assetURL, KbId, grouping);
 	    this.props.onToolTrayItemClick(itemIdx);
 	  },
 

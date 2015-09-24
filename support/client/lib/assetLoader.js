@@ -619,9 +619,8 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                 return G2JS.g2js(s3dXML);
             }
             //turn and S3D file into a VWF node def
-            this.s3dToVWF = function(name, rootKbId, asset, s3d, cb2)
+            this.s3dToVWF = function(rootKbId, asset, s3d, cb2)
             {
-//XXX name is not used and can be dropped
                 var vwfDef = {};
                 //Setup root node
                 vwfDef.source = JSON.stringify({ source: asset, grouping: s3d });
