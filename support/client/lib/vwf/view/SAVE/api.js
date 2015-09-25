@@ -2,32 +2,6 @@ define([], function()
 {
 
 	return {
-		reset: function(done, fail)
-		{
-			jQuery.ajax(
-				{
-					url: this.getBaseServerAddress() + "/query",
-					type: 'post',
-					cache: false,
-					data:
-					{
-						query: JSON.stringify(
-						{
-							type: "Reset",
-						})
-					},
-				})
-				.done(function(data)
-				{
-					if (done)
-						done(data)
-				})
-				.fail(function(data)
-				{
-					if (fail)
-						fail(data)
-				})
-		},
 		create: function(ID, auto, done)
 		{
 			var postData = {
@@ -39,7 +13,7 @@ define([], function()
 			postData.object.type = "create";
 			postData.object = JSON.stringify(postData.object)
 			var self = this;
-			$.post(this.getBaseServerAddress() + "/object", postData, function(data)
+			$.post(this.baseServerAddress + "/object", postData, function(data)
 			{
 				if (done)
 					done(data);
@@ -52,7 +26,7 @@ define([], function()
 				arguments: arguments,
 				names: names
 			};
-			$.post(this.getBaseServerAddress() + "/action", json, function()
+			$.post(this.baseServerAddress + "/action", json, function()
 			{
 				if (done)
 					done()
@@ -64,7 +38,7 @@ define([], function()
 
 			jQuery.ajax(
 				{
-					url: this.getBaseServerAddress() + "/query",
+					url: this.baseServerAddress + "/query",
 					type: 'post',
 					cache: false,
 					data:
@@ -89,40 +63,9 @@ define([], function()
 						fail();
 				})
 		},
-		inventory: function(done, fail)
+		setBaseServerAddress: function(addr)
 		{
-			var url = this.getBaseServerAddress() + '/inventory';
-			$.ajax(
-				{
-					url: url,
-					type: 'get',
-					cache: false
-				})
-				.done(function(data)
-				{
-					if (done)
-						done(data)
-				})
-				.fail(function(jqXHR, textStatus, errorThrown)
-				{
-					if (fail)
-						fail(textStatus)
-				});
-		},
-		generateSolution:function(done)
-		{
-			$.get(this.getBaseServerAddress() + "/PutExercise/generateSolution",function(){
-				if(done)
-					done()
-			});
-		},
-		getBaseServerAddress: function()
-		{
-			return this.baseServerAddress;
-		},
-		setBaseServerAddress: function(add)
-		{
-			this.baseServerAddress = add;
+			this.baseServerAddress = addr;
 		}
 	}
 })

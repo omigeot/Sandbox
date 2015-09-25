@@ -108,26 +108,16 @@ define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], func
 		// 		window.location.reload();
 		// 	})
 		// },
-		// assessment: function()
-		// {
-		// 	$(document.body).append("<iframe class='SAVEMenu' id='SAVEAssessment'></iframe");
-		// 	$("#SAVEAssessment").attr('src', this.getBaseServerAddress() + "/assessment");
-		// 	$("#SAVEAssessment").attr('style', "width: 40%;height: 60%;left: 10%;top: 10%;");
-		// },
-		// reset: function()
-		// {
-		// 	var self = this;
-		// 	SAVEAPI.reset(function()
-		// 	{
-		// 		for (var i in self.rezzedIDs)
-		// 		{
-		// 			vwf_view.kernel.deleteNode(self.rezzedIDs[i])
-		// 		}
-		// 		self.rezzedIDs = [];
-		// 		self.rezzedNames = [];
-		// 		self.issueAutoLoads();
-		// 	})
-		// },
+		reset: function()
+		{
+			for (var i in this.rezzedIDs)
+			{
+				vwf_view.kernel.deleteNode(this.rezzedIDs[i])
+			}
+			this.rezzedIDs = [];
+			this.rezzedNames = [];
+			this.issueAutoLoads();
+		},
 		setBaseServerAddress: function(value)
 		{
 			return vwf.setProperty(vwf.application(), "baseServerAddress", [ value ]);
@@ -147,7 +137,7 @@ define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], func
 				{
 					var _KbId = data[0].KbIds;
 					vwf_view.kernel.setProperty(node.id, "KbId", _KbId)
-					console.log("got " + _KbId);
+					console.info("got " + _KbId);
 				});
 			}
 		},
