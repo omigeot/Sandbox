@@ -439,6 +439,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
         //set the size - stored per vertex
         particle.setSize = function(s) {
             self.threeParticleSystem.material.attributes.size.value[this.i] = s;
+            this.size = s;
         }
         //set the age - stored per vertex
         particle.setAge = function(a) {
@@ -464,8 +465,18 @@ function CreateParticleSystem(nodeID, childID, childName) {
     this.generatePoint = function() {
         //generate from a point
         //TODO: specify point?
+        var emit = new THREE.Vector3(0,0,0);
+        
+        var motion = new THREE.Vector3(0,0,0);
+      
+        motion.copy(this._emitterPosition).sub(this._previousEmitterPosition);
+        motion.multiplyScalar(Math.random());
+        emit.sub(motion);
+        emit.add(this._emitterPosition);
+        var frameOffset = this._emitterPosition
+
         if (this.emitterType.toLowerCase() == 'point') {
-            return new THREE.Vector3(0, 0, 0).add(this._emitterPosition);
+            return new THREE.Vector3(0, 0, 0).add(emit);
         }
         //Generate in a box
         //assumes centered at 0,0,0
@@ -474,7 +485,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
             var y = this.emitterSize[1] * Math.random() - this.emitterSize[1] / 2;
             var z = this.emitterSize[2] * Math.random() - this.emitterSize[2] / 2;
 
-            return new THREE.Vector3(x, y, z).add(this._emitterPosition);
+            return new THREE.Vector3(x, y, z).add(emit);
         }
         //Generate in a sphere
         //assumes centered at 0,0,0
@@ -489,7 +500,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
             var z = u;
 
 
-            return new THREE.Vector3(x, y, z).setLength(r).add(this._emitterPosition);
+            return new THREE.Vector3(x, y, z).setLength(r).add(emit);
         }
 
     }
@@ -640,9 +651,10 @@ function CreateParticleSystem(nodeID, childID, childName) {
             //setup with new random values, and move randomly forward in time one step    
             var particle = this.regenParticles.shift();
             this.setupParticle(particle, this.threeParticleSystem.matrix, inv);
+            particle.waitForRegen = false;
             if(this.maxRate < this.particleCount)
                 this.updateParticleAnalytic(particle, this.threeParticleSystem.matrix, inv, Math.random() * 3.33);
-            particle.waitForRegen = false;
+           
         }
 
 
@@ -724,6 +736,11 @@ function CreateParticleSystem(nodeID, childID, childName) {
     this.updateParticleAnalytic = function(particle, mat, inv, delta_time) {
         particle.age += delta_time;
 
+        if(particle.waitForRegen)
+        {
+            particle.setSize(0);
+            return;
+        }
         //Make the particle dead. Hide it until it can be reused
         if (particle.age >= particle.lifespan && !particle.waitForRegen) {
             this.regenParticles.push(particle);
@@ -732,6 +749,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
             particle.y = 0;
             particle.z = 0;
             particle.color.w = 0.0;
+            particle.setSize(0);
         } else {
             //Run the formula to get position.
             var percent = particle.age / particle.lifespan;
@@ -781,7 +799,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
             particle.prevworld.y = 0;
             particle.prevworld.z = 0;
             particle.color.w = 1.0;
-            particle.size = 100;
+            particle.setSize(0);
         } else {
 
 
@@ -831,11 +849,13 @@ function CreateParticleSystem(nodeID, childID, childName) {
         }
     }
     this._emitterPosition = new THREE.Vector3(0,0,0);
+    this._previousEmitterPosition = new THREE.Vector3(0,0,0);
     this.update = function(time) {
 
         if(this.threeParticleSystem.visible == false) return;
         this.updateInner(time);
         this.threeParticleSystem.material.uniforms.screenSize.value = parseFloat($('#index-vwf').attr('width'));
+        
     }
     //Change the solver type for the system
     this.setSolverType = function(type) {
@@ -1007,9 +1027,11 @@ function CreateParticleSystem(nodeID, childID, childName) {
             }
             if(propertyName == 'emitterPosition')
             {
+                this.ps._previousEmitterPosition.copy(this.ps._emitterPosition);
                 this.ps._emitterPosition.x = propertyValue[0];
                 this.ps._emitterPosition.y = propertyValue[1];
                 this.ps._emitterPosition.z = propertyValue[2];
+
             }
             if (propertyName == 'startSize') {
                 this.ps.shaderMaterial_analytic.uniforms.startSize.value = propertyValue;
