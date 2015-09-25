@@ -116,6 +116,7 @@ define({
 			if(timeout) clearTimeout(timeout);
 			timeout = setTimeout(function()
 			{
+
 				var viewport = $('#vwf-root');
 				var canvas = $('#index-vwf', viewport);
 				var resolutionScale = _SettingsManager.getKey('resolutionScale');
@@ -138,10 +139,10 @@ define({
 
 		$('#vwf-root > #resizer')[0].contentDocument.defaultView.addEventListener('resize', window._resizeCanvas);
 		$('#vwf-root > canvas').on('focusin', function(e){
-			$(this).parent().css({border: '4px ridge #82b8ff'});
+			$(this).css({border: '4px ridge #82b8ff'});
 		});
 		$('#vwf-root > canvas').on('focusout', function(e){
-			$(this).parent().css({border: 'none'});
+			$(this).css({border: 'none'});
 		});
         
         window.hideTools = function() {
