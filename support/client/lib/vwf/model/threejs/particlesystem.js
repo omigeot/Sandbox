@@ -932,7 +932,7 @@ function CreateParticleSystem(nodeID, childID, childName) {
         
     	this.ps = new CreateParticleSystem();
 
-        this.inherits = ['vwf/model/threejs/transformable.js', 'vwf/model/threejs/visible.js'];
+        this.inherits = ['vwf/model/threejs/transformable.js', 'vwf/model/threejs/visible.js' , 'vwf/model/threejs/renderDepth.js'];
         //the node constructor
         this.settingProperty = function(propertyName, propertyValue) {
 
