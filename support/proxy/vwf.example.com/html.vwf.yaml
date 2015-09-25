@@ -15,3 +15,6 @@
 extends: http://vwf.example.com/panel.vwf
 properties:
     __innerHTML:
+methods:
+    getHtml: |
+        return $("#guioverlay_index-vwf #guioverlay_"+this.id).children();
