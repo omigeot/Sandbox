@@ -619,11 +619,11 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                 return G2JS.g2js(s3dXML);
             }
             //turn and S3D file into a VWF node def
-            this.s3dToVWF = function(rootKbId, asset, s3d, cb2)
+            this.semanticAssetToVWF = function(rootKbId, assetURL, grouping, cb2)
             {
                 var vwfDef = {};
                 //Setup root node
-                vwfDef.source = JSON.stringify({ source: asset, grouping: s3d });
+                vwfDef.source = JSON.stringify({ source: assetURL, grouping: grouping });
                 vwfDef.type = 'subDriver/threejs/asset/vnd.SAVE+json';
                 vwfDef.children = {};
                 vwfDef.properties = {}
@@ -631,12 +631,12 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                 vwfDef.properties.KbId = rootKbId;
 
                 //recurse and translate
-                function processGroups(vwfnode, s3dnode)
+                function processGroups(vwfnode, gObj)
                 {
-                    for (var i in s3dnode.groups)
+                    for (var i in gObj.groups)
                     {
                         var newChild = {};
-                        newChild.source = s3dnode.groups[i].name;
+                        newChild.source = gObj.groups[i].name;
                         newChild.type = "link_existing/threejs"
                         newChild.children = {};
                         newChild.extends = "./vwf/model/SAVE/semantic_entity.vwf"
@@ -645,12 +645,12 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                             delete newChild.properties.node;
                         newChild.properties.DisplayName = newChild.source; //pretty print the name
                         vwfnode.children[GUID()] = newChild; //We link up nodes differently. Names should be unique. The source value is the node to link to
-                        processGroups(newChild, s3dnode.groups[i])
+                        processGroups(newChild, gObj.groups[i])
                     }
-                    for (var j in s3dnode.parts)
+                    for (var j in gObj.parts)
                     {
                         var newPart = {};
-                        newPart.source = s3dnode.parts[j];
+                        newPart.source = gObj.parts[j];
                         newPart.type = "link_existing/threejs"
                         newPart.extends = "asset.vwf"
                         newPart.properties = {};
@@ -660,7 +660,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                         vwfnode.children[GUID()] = newPart;
                     }
                 }
-                processGroups(vwfDef, s3d);
+                processGroups(vwfDef, grouping);
                 cb2(vwfDef);
             }
             //load the SAVE JSON, get the asset file, modify the scenegraph as required, return to engine

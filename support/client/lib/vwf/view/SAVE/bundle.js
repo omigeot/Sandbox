@@ -20877,6 +20877,11 @@
 
 	    this.baseServer = host || this.baseServer;
 	    this.baseServerAddress = this.baseServer + exercise;
+
+	    if (exercise !== '') {
+	      window._dSAVE.setBaseServerAddress(this.baseServerAddress);
+	      // call window._dSAVE.issueautoloads...
+	    }
 	  },
 
 	  dismissedSimulateBackend: function dismissedSimulateBackend() {
@@ -20929,9 +20934,6 @@
 	      return response.json();
 	    }).then(function (json) {
 	      _this3.processFetchedExercises(json);
-	    }).then(function () {
-	      // call window._dSAVE.issueautoloads...
-	      // and call a _dSAVE function to set the baseServerAddress property
 	    })['catch'](function (e) {
 	      return console.error(e);
 	    });
@@ -21321,7 +21323,7 @@
 	    var grouping = json[0].grouping;
 
 	    tooltrayItems.splice(itemIdx, 1);
-	    window._dSAVE.createS3D(name, assetURL, KbId, grouping);
+	    window._dSAVE.createSemanticAsset(name, assetURL, KbId, grouping);
 	    this.props.onToolTrayItemClick(itemIdx);
 	  },
 
@@ -43307,12 +43309,14 @@
 	    case 'http://localhost:3001/CAT/inventory':
 	      return inventoryCATFetch();
 	    case 'http://localhost:3001/inventory':
+	    case 'http://localhost:3001/PutExercise/inventory':
 	    case 'http://localhost:3001/exercises/071-100-0032/step01/m4_flora_clear/inventory':
 	      return inventoryEUIFetch();
 	    case 'http://localhost:3001/query':
 	    case 'http://localhost:3001/exercises/071-100-0032/step01/m4_flora_clear/query':
 	      return queryEUIFetch(options);
 	    case 'http://localhost:3001/object':
+	    case 'http://localhost:3001/PutExercise/object':
 	    case 'http://localhost:3001/exercises/071-100-0032/step01/m4_flora_clear/object':
 	      return objectEUIFetch(options);
 	    case 'http://localhost:3001/generateSolution':

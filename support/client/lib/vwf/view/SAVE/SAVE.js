@@ -19,93 +19,6 @@ define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], func
 	{
 		// == Module Definition ====================================================================
 		// -- initialize ---------------------------------------------------------------------------
-		loadToolTray: function()
-		{
-			var self = this;
-			SAVEAPI.inventory(function(data)
-			{
-				debugger;
-				self.setToolTray(data.tooltray);
-				self.setMode(data.instructorMode ? "instructorMode" : "studentMode");
-				self.buildToolTrayGUI();
-			})
-		},
-		toolTray: null,
-		mode: null,
-		setToolTray: function(t)
-		{
-			this.toolTray = t;
-		},
-		setMode: function(m)
-		{
-			this.mode = m;
-		},
-		buildEUIOptions: function()
-		{
-			if (!window._EntityLibrary)
-			{
-				$(document.body).append("<div class='SAVEMenu' style='right:1px' id='EUIOptionsMenu'></div");
-				$("#EUIOptionsMenu").append("<div class='tooltraytitle' >Options</div");
-				$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIReset'>Reset</div");
-				$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIMessages'>Messages</div");
-				if (this.mode == "studentMode")
-					$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIAssessment'>Assessment</div");
-				if (this.mode == "instructorMode")
-					$("#EUIOptionsMenu").append("<div class='tooltrayItem' id='EUIGenerate'>Generate Solution</div");
-				var self = this;
-				$('#EUIReset').click(function()
-				{
-					self.reset();
-				})
-				$('#EUIAssessment').click(function()
-				{
-					self.assessment();
-				})
-				$('#EUIGenerate').click(function()
-				{
-					self.generateSolution();
-				})
-			}
-		},
-		buildToolTrayGUI: function()
-		{
-			if (window._EntityLibrary)
-			{
-				_EntityLibrary.removeLibrary("Semantic 3D")
-				var lib = {};
-				for (var i in this.toolTray)
-				{
-					lib[this.toolTray[i].name] = {};
-					lib[this.toolTray[i].name].name = this.toolTray[i].name;
-					lib[this.toolTray[i].name].ID = this.toolTray[i].ID;
-					lib[this.toolTray[i].name].type = "semantic3D";
-				}
-				_EntityLibrary.addLibrary("Semantic 3D", lib);
-			}
-			// else
-			// {
-			// 	this.buildEUIOptions();
-			// 	$(document.body).append("<div class='SAVEMenu' id='EUIToolTray'></div");
-			// 	$("#EUIToolTray").append("<div class='tooltraytitle' >Tools</div");
-			// 	for (var i in this.toolTray)
-			// 	{
-			// 		var id = GUID();
-			// 		var self = this;
-			// 		$("#EUIToolTray").append("<div class='tooltrayItem' id='" + id + "'></div");
-			// 		$("#" + id).text(this.toolTray[i].name);
-			// 		(function()
-			// 		{
-			// 			var item = self.toolTray[i];
-			// 			$("#" + id).click(function()
-			// 			{
-			// 				var newname = GUID();
-			// 				self.rezzedNames.push(newname);
-			// 				self.createS3D(newname, item.ID, item.name, vwf.getProperty('http-vwf-example-com-node3-vwf-N63f37e3e', 'transform'));
-			// 			})
-			// 		})()
-			// 	}
-			// }
-		},
 		publishExercise: function(finished)
 		{
 			var saveData = null;
@@ -188,41 +101,40 @@ define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], func
 					finished()
 			})
 		},
-		generateSolution: function()
+		// generateSolution: function()
+		// {
+		// 	SAVEAPI.generateSolution(function()
+		// 	{
+		// 		window.location.reload();
+		// 	})
+		// },
+		// assessment: function()
+		// {
+		// 	$(document.body).append("<iframe class='SAVEMenu' id='SAVEAssessment'></iframe");
+		// 	$("#SAVEAssessment").attr('src', this.getBaseServerAddress() + "/assessment");
+		// 	$("#SAVEAssessment").attr('style', "width: 40%;height: 60%;left: 10%;top: 10%;");
+		// },
+		// reset: function()
+		// {
+		// 	var self = this;
+		// 	SAVEAPI.reset(function()
+		// 	{
+		// 		for (var i in self.rezzedIDs)
+		// 		{
+		// 			vwf_view.kernel.deleteNode(self.rezzedIDs[i])
+		// 		}
+		// 		self.rezzedIDs = [];
+		// 		self.rezzedNames = [];
+		// 		self.issueAutoLoads();
+		// 	})
+		// },
+		setBaseServerAddress: function(value)
 		{
-			SAVEAPI.generateSolution(function()
-			{
-				window.location.reload();
-			})
-		},
-		assessment: function()
-		{
-			$(document.body).append("<iframe class='SAVEMenu' id='SAVEAssessment'></iframe");
-			$("#SAVEAssessment").attr('src', this.getBaseServerAddress() + "/assessment");
-			$("#SAVEAssessment").attr('style', "width: 40%;height: 60%;left: 10%;top: 10%;");
-		},
-		reset: function()
-		{
-			var self = this;
-			SAVEAPI.reset(function()
-			{
-				for (var i in self.rezzedIDs)
-				{
-					vwf_view.kernel.deleteNode(self.rezzedIDs[i])
-				}
-				self.rezzedIDs = [];
-				self.rezzedNames = [];
-				self.issueAutoLoads();
-			})
+			return vwf.setProperty(vwf.application(), "baseServerAddress", [ value ]);
 		},
 		getBaseServerAddress: function()
 		{
 			return vwf.getProperty(vwf.application(), "baseServerAddress");
-		},
-		setupEUI: function()
-		{
-//			this.loadToolTray();
-//			this.issueAutoLoads();
 		},
 		autoLoadedNodes: [],
 		issueAutoLoads: function()
@@ -247,7 +159,6 @@ define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], func
 			$(document).on('setstatecomplete', function()
 			{
 				if (!window._EntityLibrary)
-					self.setupEUI();
   				self.mouseDown = false;
   				self.lastMouse = {
 					x: 0,
@@ -355,29 +266,21 @@ define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], func
 		},
 		//public facing function to  trigger load of an S3D file. Normally this probably would live in the _Editor
 		// or in the _EntityLibrary
-    createS3D: function(name, assetURL, KbId, grouping)
+    createSemanticAsset: function(displayName, assetURL, rootKbId, grouping)
     {
-      var newname = GUID();
-      this.rezzedNames.push(newname);
-      var s3d = grouping;
-      var asset = assetURL;
-      var rootKbId = KbId;
+      var childUniqueName = GUID();
+      this.rezzedNames.push(childUniqueName);
+      console.info('Creating ' + displayName + ' with name:' + childUniqueName + ' KbId:' + rootKbId + ' assetURL:' + assetURL);
 
-console.log(name);
-console.log(newname);
-console.log(rootKbId);
-console.log(asset);
-console.log(s3d);
-
-      _assetLoader.s3dToVWF(rootKbId, asset, s3d, function(def)
+      _assetLoader.semanticAssetToVWF(rootKbId, assetURL, grouping, function(def)
       {
-        def.properties.DisplayName = name;
-        var behavior = ("./vwf/view/SAVE/test/" + name.replace(/ /g, "_") + "_dae.eui");
+        def.properties.DisplayName = displayName;
+        var behavior = ("./vwf/view/SAVE/test/" + displayName.replace(/ /g, "_") + "_dae.eui");
         $.get(behavior, function(code)
         {
           $.extend(true, def, code);
           def.properties.transform = vwf.getProperty('http-vwf-example-com-node3-vwf-N63f37e3e', 'transform');
-          vwf_view.kernel.createChild(vwf.application(), newname, def);
+          vwf_view.kernel.createChild(vwf.application(), childUniqueName, def);
         })
       });
     },
