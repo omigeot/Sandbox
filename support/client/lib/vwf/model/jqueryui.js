@@ -17,6 +17,13 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
     // vwf/model/object.js is a backstop property store.
 
+    function isHtmlNode(childExtendsID)
+    {
+        if (childExtendsID == 'http-vwf-example-com-html-vwf') return true;
+        else if (!childExtendsID) return false;
+        else return isHtmlNode(vwf.prototype(childExtendsID));
+    }
+
     return model.load( module, {
 
         // == Module Definition ====================================================================
@@ -32,7 +39,23 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
 
-           
+        	if( isHtmlNode(childExtendsID) )
+			{
+				callback(false);
+
+				// fetch data
+				$.get(childSource)
+				.done(function(data, textStatus, xhr){
+					vwf.setProperty(childID, '__innerHTML', xhr.responseText);
+				})
+				.fail(function(xhr, textStatus){
+					alertify.alert('Failed to fetch ' + childSource + ': ' + textStatus);
+				})
+				.always(function(){
+					callback(true);
+				});
+				// set property
+			}
         },
 
         // -- initializingNode ---------------------------------------------------------------------
