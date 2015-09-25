@@ -158,30 +158,30 @@ define(["module", "vwf/view"], function(module, view)
                 }
             });
         },
-		createHtml: function()
-		{
-			alertify.prompt('Input a URL to the document. Please note: this must serve from a CORS capable host!', function(ok, val) {
-				if(ok){
-					var parent = this.getCreateParentNode();
-					vwf_view.kernel.createChild(parent, GUID(),
-					{
-						extends: "http://vwf.example.com/html.vwf",
-						source: val,
-						properties: {
-							width: 100,
-							height: 100,
+        createHtml: function()
+        {
+            alertify.prompt('Input a URL to the document. Please note: this must serve from a CORS capable host!', function(ok, val) {
+                if(ok){
+                    var parent = this.getCreateParentNode();
+                    vwf_view.kernel.createChild(parent, GUID(),
+                    {
+                        extends: "http://vwf.example.com/html.vwf",
+                        source: val,
+                        properties: {
+                            width: 100,
+                            height: 100,
                             background_color: [1, 0, 0],
                             background_visible: true,
                             border_color: [1, 1, 1],
-							transform: this.getScreenCenter(),
-							owner: _UserManager.GetCurrentUserName(),
-							DisplayName: _Editor.GetUniqueName('Html'),
-							visible: true
-						}
-					});
-				}
-			}.bind(this), 'http://');
-		},
+                            transform: this.getScreenCenter(),
+                            owner: _UserManager.GetCurrentUserName(),
+                            DisplayName: _Editor.GetUniqueName('Html'),
+                            visible: true
+                        }
+                    });
+                }
+            }.bind(this), 'http://');
+        },
         getScreenCenter: function()
         {
             if (this.isGUINode(vwf.prototype(this.getCreateParentNode())))
@@ -615,10 +615,10 @@ define(["module", "vwf/view"], function(module, view)
                 {
                     $(node.div).css('border-color', toCSSColor(propertyValue));
                 }
-				else if( propertyName == '__innerHTML' && this.isHtml(node.type))
-				{
-					$(node.div).html(propertyValue);
-				}
+                else if( propertyName == '__innerHTML' && this.isHtml(node.type))
+                {
+                    $(node.div).html(propertyValue);
+                }
             }
         },
         updateVisiblity: function()
@@ -647,8 +647,11 @@ define(["module", "vwf/view"], function(module, view)
     function toCSSColor(array)
     {
         if (!array)
-            array = [0, 0, 0];
-        array = [Math.floor(array[0] * 255), Math.floor(array[1] * 255), Math.floor(array[2] * 255)];
-        return 'rgb(' + (array.join(',') + ')');
+            array = [0, 0, 0, 0];
+        else if(array[3] === undefined)
+            array = array.concat([1,1,1,1]).slice(4);
+
+        array = [Math.floor(array[0] * 255), Math.floor(array[1] * 255), Math.floor(array[2] * 255), Math.floor(array[3])];
+        return 'rgba(' + (array.join(',') + ')');
     }
 });

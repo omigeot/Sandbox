@@ -39,23 +39,21 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
         creatingNode: function( nodeID, childID, childExtendsID, childImplementsIDs,childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
 
-        	if( isHtmlNode(childExtendsID) )
-			{
-				callback(false);
+            if( isHtmlNode(childExtendsID) )
+            {
+                callback(false);
 
-				// fetch data
-				$.get(childSource)
-				.done(function(data, textStatus, xhr){
-					vwf.setProperty(childID, '__innerHTML', xhr.responseText);
-				})
-				.fail(function(xhr, textStatus){
-					alertify.alert('Failed to fetch ' + childSource + ': ' + textStatus);
-				})
-				.always(function(){
-					callback(true);
-				});
-				// set property
-			}
+                // fetch data
+                $.get(childSource)
+                .done(function(data, textStatus, xhr){
+                    callback(true);
+                    vwf.setProperty(childID, '__innerHTML', xhr.responseText);
+                })
+                .fail(function(xhr, textStatus){
+                    callback(true);
+                    alertify.alert('Failed to fetch ' + childSource + ': ' + textStatus);
+                });
+            }
         },
 
         // -- initializingNode ---------------------------------------------------------------------
