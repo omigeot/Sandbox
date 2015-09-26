@@ -20953,16 +20953,21 @@
 	  saveSolution: function saveSolution() {
 	    var _this2 = this;
 
+	    var _refs = this.refs;
+	    var controlsComponentDialog = _refs.controlsComponentDialog;
+	    var snackbarStudentMode = _refs.snackbarStudentMode;
+	    var snackbarInstructorMode = _refs.snackbarInstructorMode;
+
 	    fetch(this.baseServerAddress + '/generateSolution', { mode: 'cors' }).then(function () {
-	      if (_this2.refs.controlsComponentDialog.isOpen()) _this2.refs.controlsComponentDialog.dismiss(); // do this first since it does a setState!
+	      if (controlsComponentDialog.isOpen()) controlsComponentDialog.dismiss(); // do this first since it does a setState!
 
 	      _this2.setState({
 	        reloadTray: true,
 	        instructorToggle: false
 	      });
-	      _this2.refs.snackbarStudentMode.show();
+	      snackbarStudentMode.show();
 	    })['catch'](function (e) {
-	      _this2.refs.snackbarInstructorMode.show();
+	      snackbarInstructorMode.show();
 	      console.error(e);
 	    });
 	  },
@@ -34153,10 +34158,20 @@
 	var queryEUIFetch = function queryEUIFetch(options) {
 	  var body = options.body;
 	  var o = JSON.parse(body.replace('query=', ''));
+	  var jsonData = undefined;
 
 	  console.log(o);
-	  instructorMode = true;
-	  return Promise.resolve(new window.Response(null, httpResponse));
+
+	  switch (o.type) {
+	    case 'Reset':
+	      instructorMode = true;
+	      break;
+	    case 'KbId':
+	      jsonData = [o.query[0] + Date.now()];
+	      break;
+	  }
+
+	  return Promise.resolve(new window.Response(JSON.stringify({ KbIds: jsonData }), httpResponse));
 	};
 
 	var objectEUIFetch = function objectEUIFetch(options) {

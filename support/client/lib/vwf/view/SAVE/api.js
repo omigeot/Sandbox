@@ -34,34 +34,27 @@ define([], function()
 		},
 		KbId: function(ID, parent_KbID, done, fail)
 		{
-			var query = [ID + "_KbId"];
+	    var data = JSON.stringify(
+      {
+        type: 'KbId',
+        parent: parent_KbID,
+        query: [ID + "_KbId"]
+      });
 
-			jQuery.ajax(
-				{
-					url: this.baseServerAddress + "/query",
-					type: 'post',
-					cache: false,
-					data:
-					{
-						type: "KbId",
-						query: JSON.stringify(
-						{
-							type: 'KbId',
-							parent: parent_KbID,
-							query: query
-						})
-					},
-				})
-				.done(function(data)
-				{
-					if (done)
-						done(data)
-				})
-				.fail(function()
-				{
-					if (fail)
-						fail();
-				})
+      fetch(this.baseServerAddress + '/query', {
+        method: 'post',
+        mode: 'cors',
+        body: 'query=' + data,
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(json) {
+        if (done) done(json);
+      })
+      .catch(function(e) {
+        console.error(e);
+
+        if (fail) fail();
+      });
 		},
 		setBaseServerAddress: function(addr)
 		{
