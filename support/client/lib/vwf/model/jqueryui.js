@@ -24,6 +24,8 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         else return isHtmlNode(vwf.prototype(childExtendsID));
     }
 
+    var sourceCache = {};
+
     return model.load( module, {
 
         // == Module Definition ====================================================================
@@ -41,18 +43,29 @@ define( [ "module", "vwf/model" ], function( module, model ) {
 
             if( isHtmlNode(childExtendsID) )
             {
-                callback(false);
+                // get absolute url
+                var a = document.createElement('a');
+                a.href = childSource;
 
-                // fetch data
-                $.get(childSource)
-                .done(function(data, textStatus, xhr){
-                    callback(true);
-                    vwf.setProperty(childID, '__innerHTML', xhr.responseText);
-                })
-                .fail(function(xhr, textStatus){
-                    callback(true);
-                    alertify.alert('Failed to fetch ' + childSource + ': ' + textStatus);
-                });
+                if(sourceCache[a.href]){
+                    vwf.setProperty(childID, '__innerHTML', sourceCache[a.href]);
+                }
+                else
+                {
+                    callback(false);
+
+                    // fetch data
+                    $.get(childSource)
+                    .done(function(data, textStatus, xhr){
+                        callback(true);
+                        sourceCache[a.href] = xhr.responseText;
+                        vwf.setProperty(childID, '__innerHTML', xhr.responseText);
+                    })
+                    .fail(function(xhr, textStatus){
+                        callback(true);
+                        alertify.alert('Failed to fetch ' + childSource + ': ' + textStatus);
+                    });
+                }
             }
         },
 
@@ -73,7 +86,7 @@ define( [ "module", "vwf/model" ], function( module, model ) {
         // -- prototyping --------------------------------------------------------------------------
 
         prototyping: function( nodeID ) {  // TODO: not for global anchor node 0
-           	
+               
         },
 
         // -- behavioring --------------------------------------------------------------------------
