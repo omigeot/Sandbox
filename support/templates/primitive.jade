@@ -18,13 +18,13 @@ block content
 		.accordian-transforms
 			.EditorLabel Translation
 			#Translation.vector-input.vMargin
-				input(type="number", ng-model="transform.translation[$index]", ng-repeat="pos in transform.translation track by $index")
+				input(type="number", ng-change="onChangeTransform()", ng-model="transform.translation[$index]", ng-repeat="pos in transform.translation track by $index", ng-model-options="{updateOn: 'blur click'}")
 			.EditorLabel Rotation
 			#Rotation.vector-input.vMargin
-				input(type="number", ng-model="transform.rotation[$index]", ng-repeat="rot in transform.rotation track by $index")
+				input(type="number", ng-model="transform.rotation[$index]", ng-repeat="rot in transform.rotation track by $index", ng-model-options="{updateOn: 'blur click'}")
 			.EditorLabel Scale
 			#Scale.vector-input.vMargin
-				input(type="number", ng-model="transform.scale[$index]", min=".0001", step=".05", ng-repeat="scale in transform.scale track by $index")
+				input(type="number", ng-model="transform.scale[$index]", min=".0001", step=".05", ng-repeat="scale in transform.scale track by $index", ng-model-options="{updateOn: 'blur click'}")
 				
 		h3(ng-repeat-start="data in allEditorData") 
 			a(href="#") {{data.type}}: {{data.name}}

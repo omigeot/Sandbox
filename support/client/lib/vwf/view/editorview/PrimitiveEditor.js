@@ -194,12 +194,9 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 var pos = [0, 0, 0];
 
                 for(var i = 0; i < 3; i++){
-                    val[i] = !isNaN(transform.rotation[i]) ? transform.rotation[i] : 0;
-                    scale[i] = parseFloat(transform.scale[i]);
-                    pos[i] = parseFloat(transform.translation[i]);
-
-                    if(isNaN(pos[i])) pos[i] = 0;
-                    if(isNaN(scale[i])) scale[i] = 1;
+                    val[i] = isNum(transform.rotation[i]) ? transform.rotation[i] : 0;
+                    scale[i] = isNum(transform.scale[i]) ? parseFloat(transform.scale[i]) : 1;
+                    pos[i] = isNum(transform.translation[i]) ? parseFloat(transform.translation[i]) : 0;
                 }
 
                 var rotmat = makeRotMat(parseFloat(val[0]) / 57.2957795, parseFloat(val[1]) / 57.2957795, parseFloat(val[2]) / 57.2957795);
@@ -213,6 +210,10 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             }
 
             transformFromVWF = false;
+
+            function isNum(val){
+                return typeof val === "number" && !isNaN(val);
+            }
         }
 
         function makeRotMat(x, y, z) {
