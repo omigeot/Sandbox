@@ -867,6 +867,16 @@
     ParticleSystem.prototype.generatePoint = function(point)
     {
 
+        var emit = new THREE.Vector3(0,0,0);
+        
+        var motion = new THREE.Vector3(0,0,0);
+      
+        motion.copy(this._emitterPosition).sub(this._previousEmitterPosition);
+        motion.multiplyScalar(Math.random());
+        emit.sub(motion);
+        emit.add(this._emitterPosition);
+      
+
         point.x = 0;
         point.y = 0;
         point.z = 0;
@@ -874,7 +884,7 @@
         //TODO: specify point?
         if (this.emitterType.toLowerCase() == 'point')
         {
-            return point.add(this._emitterPosition);
+            return point.add(emit);
         }
         //Generate in a box
         //assumes centered at 0,0,0
@@ -884,7 +894,7 @@
             var y = this.emitterSize[1] * Math.random() - this.emitterSize[1] / 2;
             var z = this.emitterSize[2] * Math.random() - this.emitterSize[2] / 2;
 
-            return point.add(this._emitterPosition);
+            return point.add(emit);
         }
         //Generate in a sphere
         //assumes centered at 0,0,0
@@ -900,7 +910,7 @@
             var z = u;
 
 
-            return point.set(x, y, z).setLength(r).add(this._emitterPosition);
+            return point.set(x, y, z).setLength(r).add(emit);
         }
 
     }
