@@ -95,6 +95,7 @@ block content
 			
 	#vwf-template-nodeid(ng-non-bindable, style='display: none;')
 		label.vMargin {{displayname}}: 
+			br
 			input(ng-model='vwfNode.properties[vwfProp.property]', type='text', placeholder='{{displayname}}')
 			button(ng-click='pickNode(vwfNode, vwfProp)') Choose Node
 		
