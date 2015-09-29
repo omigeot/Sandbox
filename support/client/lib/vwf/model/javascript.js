@@ -635,7 +635,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     enumerable: true,
                 });
             }
-            if(node.hasOwnProperty("___xAPI"))
+            if(node["___xAPI"])
             {
                 Object.defineProperty(node, "xAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
