@@ -674,7 +674,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     return eval(scriptText)
                 }).call(child, scriptText);
             } catch (e) {
-                this.logger.warn("initializingNode", childID,
+                console.error("initializingNode", childID,
                     "exception in initialize:", utility.exceptionMessage(e));
             }
 
@@ -726,7 +726,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     return eval(scriptText)
                 }).call(child, scriptText);
             } catch (e) {
-                this.logger.warn("deinitializingNode", childID,
+                console.error("deinitializingNode", childID,
                     "exception in deinitialize:", utility.exceptionMessage(e));
             }
 
@@ -762,7 +762,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     return eval(scriptText)
                 }).call(child, scriptText);
             } catch (e) {
-                this.logger.warn("addingChild", childID,
+                console.error("addingChild", childID,
                     "exception in addingChild:", utility.exceptionMessage(e));
             }
 
@@ -773,7 +773,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     return eval(scriptText)
                 }).call(node, scriptText);
             } catch (e) {
-                this.logger.warn("addingChild", childID,
+                console.error("addingChild", childID,
                     "exception in addingChild:", utility.exceptionMessage(e));
             }
 
@@ -905,7 +905,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             try {
                 return setter.call(node, propertyValue);
             } catch (e) {
-                this.logger.warn("settingProperty", node.ID, propertyName, propertyValue,
+                console.error("settingProperty", node.ID, propertyName, propertyValue,
                     "exception in setter:", utility.exceptionMessage(e));
             }
         //    this.exitContext();
@@ -947,7 +947,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 
                 return ret;
             } catch (e) {
-                this.logger.warn("gettingProperty", node.id,
+                console.error("gettingProperty", node.id,
                     "exception in getter:", utility.exceptionMessage(e));
                 return undefined;
             }
@@ -1072,7 +1072,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             try {
                 node.private.bodies[methodName] = eval(bodyScript(methodParameters || [], methodBody || ""));
             } catch (e) {
-                this.logger.warn("creatingMethod", nodeID, methodName, methodParameters,
+                console.error("creatingMethod", nodeID, methodName, methodParameters,
                     "exception evaluating body:", utility.exceptionMessage(e));
             }
 
@@ -1109,7 +1109,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     delete node.private.methods[methodName];
 
                 } catch (e) {
-                    this.logger.warn("deletingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
+                    console.error("deletingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
                         "exception:", utility.exceptionMessage(e));
                 }
             }
@@ -1138,7 +1138,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     
                     return ret;
                 } catch (e) {
-                    console.warn(e.toString() + " Node:'" + (node.properties.DisplayName || node.id) + "' during: '" + methodName + "' with '" + JSON.stringify(methodParameters) + "'");
+                    console.error(e.toString() + " Node:'" + (node.properties.DisplayName || node.id) + "' during: '" + methodName + "' with '" + JSON.stringify(methodParameters) + "'");
                     //            this.logger.warn( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
                     //              "exception:", utility.exceptionMessage( e ) );
                     return;
@@ -1238,7 +1238,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                         return ret;
                     
                 } catch (e) {
-                    console.warn(e.toString() + " Node:'" + (node.properties.DisplayName || nodeID) + "' during: '" + methodName + "' with '" + JSON.stringify(methodParameters) + "'");
+                    console.error(e.toString() + " Node:'" + (node.properties.DisplayName || nodeID) + "' during: '" + methodName + "' with '" + JSON.stringify(methodParameters) + "'");
                     //            this.logger.warn( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
                     //              "exception:", utility.exceptionMessage( e ) );
                 }
@@ -1366,7 +1366,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     node.private.listeners[eventName].push(handler);
                     node.private.events[eventName].push({name:eventName,body:eventBody,parameters:eventParameters});
                 } catch (e) {
-                    this.logger.warn("creatingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
+                    console.error("creatingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
                         "exception:", utility.exceptionMessage(e));
                 }
             }
@@ -1390,7 +1390,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     if (node.events.hasOwnProperty(eventName))
                         delete node.events[eventName];
                 } catch (e) {
-                    this.logger.warn("deletingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
+                    console.error("deletingEvent", nodeID, eventName, eventParameters, // TODO: limit methodParameters for log
                         "exception:", utility.exceptionMessage(e));
                 }
             }
@@ -1403,6 +1403,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 try{
                     return body.apply(node,args);
                 }catch(e){
+                    console.error("Error executing " + node.id,,body,args,e)
                     return undefined;
                 }
             }
