@@ -649,9 +649,9 @@ define(["module", "vwf/view"], function(module, view)
         if (!array)
             array = [0, 0, 0, 0];
         else if(array[3] === undefined)
-            array = array.concat([1,1,1,1]).slice(4);
+            array = array.concat([1,1,1,1]).slice(0,4);
 
-        array = [Math.floor(array[0] * 255), Math.floor(array[1] * 255), Math.floor(array[2] * 255), Math.floor(array[3])];
-        return 'rgba(' + (array.join(',') + ')');
+        array = [Math.round(array[0] * 255), Math.round(array[1] * 255), Math.round(array[2] * 255), array[3]];
+        return 'rgba(' + array.join(',') + ')';
     }
 });

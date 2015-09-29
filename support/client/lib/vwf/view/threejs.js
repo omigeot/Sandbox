@@ -1210,7 +1210,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
         function GetParticleSystems(node, list) {
 
-            return node.__pointclouds;
+            return window.particleRegistry;
         }
 
         function resetMaterial(material) {
@@ -1341,9 +1341,9 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
             //if (_SceneManager)
             //    _SceneManager.update(timepassed);
 
-            pss = GetParticleSystems(sceneNode.threeScene);
+            pss = GetParticleSystems();
             if (pss)
-                for (var i = 0; i < pss.length; i++) {
+                for (var i in pss) {
                     if (pss[i].update && pss[i].visible === true)
                         pss[i].update(timepassed || 0);
                 }
