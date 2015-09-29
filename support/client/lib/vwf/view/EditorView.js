@@ -265,9 +265,9 @@ define([
         {
             this.viewAPINotify('deletedMethod', [nodeID, methodName, methodParameters, body]);
         },
-        createdEvent: function(nodeID, eventName, eventParameters)
+        createdEvent: function(nodeID, eventName, eventParameters, eventBody)
         {
-            this.viewAPINotify('createdEvent', [nodeID, eventName, eventParameters]);
+            this.viewAPINotify('createdEvent', [nodeID, eventName, eventParameters,eventBody]);
         },
         firedEvent: function(nodeID, eventName, eventParameters)
         {
