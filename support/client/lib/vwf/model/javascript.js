@@ -1403,7 +1403,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 try{
                     return body.apply(node,args);
                 }catch(e){
-                    console.error("Error executing " + node.id,,body,args,e)
+                    console.error("Error executing " + node.id,body,args,e)
                     return undefined;
                 }
             }
