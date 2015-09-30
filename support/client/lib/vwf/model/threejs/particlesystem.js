@@ -533,7 +533,7 @@
         this.additive = false;
         this.image = null;
 
-
+        this.initialized = false;
         this.counter = 0;
         this.testtime = 0;
         this.totaltime = 0;
@@ -914,20 +914,33 @@
         }
 
     }
+    ParticleSystem.prototype.initialize = function()
+    {
+        this.initialized = true;
+        this.rebuildParticles();
+    }
     //setup the particles with new values
     ParticleSystem.prototype.rebuildParticles = function()
     {
-        for (var i = 0; i < this.threeParticleSystem.geometry.vertices.length; i++)
+        if(!this.initialized) return;
+        var count = this.solver == "AnalyticShader" ? this.threeParticleSystem.geometry.vertices.length : Math.floor(this.maxRate * 3);
+        for (var i = 0; i < count; i++)
         {
             this.setupParticle(this.threeParticleSystem.geometry.vertices[i], this.threeParticleSystem.matrix, this.threeParticleSystem.matrix);
             this.threeParticleSystem.geometry.vertices[i].waitForRegen = false;
         }
         this.regenParticles.length = 0;
+        for (var i = count; i < this.threeParticleSystem.geometry.vertices.length; i++)
+        {
+            this.threeParticleSystem.geometry.vertices[i].waitForRegen = true;
+            this.regenParticles.push(this.threeParticleSystem.geometry.vertices[i]);
+        }
+        
     }
     //set the particles initial values. Used when creating and resuing particles
     ParticleSystem.prototype.setupParticle = function(particle, mat, inv)
     {
-
+        
 
         particle.x = 0;
         particle.y = 0;
@@ -1369,7 +1382,7 @@
         }
         this.initializingNode = function() {
 
-
+            this.ps.initialize();
         }
         this.gettingProperty = function(propertyName)
         {
