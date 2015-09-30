@@ -94,7 +94,8 @@ define(["module", "vwf/view"], function(module, view)
                     transform: this.getScreenCenter(),
                     owner: _UserManager.GetCurrentUserName(),
                     DisplayName: _Editor.GetUniqueName('Label'),
-                    visible: true
+                    visible: true,
+					font_color: [0,0,0]
                 }
             });
         },
