@@ -64,7 +64,8 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 					var cookie = /session=([A-Za-z0-9_.-]+)/.exec(document.cookie);
 					if (cookie) {
 						$http.defaults.headers.post[appHeaderName] = cookie[1];
-						$http.defaults.headers.delete = $http.defaults.headers.delete || {};
+						$http.defaults.headers.delete = $http.defaults.headers.delete ||
+						{};
 						$http.defaults.headers.delete[appHeaderName] = cookie[1];
 					}
 				});
@@ -134,7 +135,8 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 	app.directive('adlScrollTo', ['$timeout', function($timeout) {
 		return {
 			restrict: 'A',
-			scope: {
+			scope:
+			{
 				scrollTo: '=adlScrollTo'
 			},
 			link: function(scope, element, attr) {
@@ -186,16 +188,20 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 				name: '<new asset>',
 				type: '???',
 				license: 'CC-BY',
-				permissions: {
-					user: {
+				permissions:
+				{
+					user:
+					{
 						read: true,
 						write: true,
 						delete: true
 					},
-					group: {
+					group:
+					{
 						read: true
 					},
-					other: {
+					other:
+					{
 						read: true
 					}
 				}
@@ -262,7 +268,8 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 					else if(/\.json$/i.test(files[0].name)){
 						$scope.selected.type = 'application/json';
 					}*/
-					else {
+					else
+					{
 						$scope.selected.type = '';
 					}
 					// attempt to determine image resolution
