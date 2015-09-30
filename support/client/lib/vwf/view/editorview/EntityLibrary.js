@@ -449,7 +449,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			proto.properties.transform[12] = pos[0];
 			proto.properties.transform[13] = pos[1];
 			proto.properties.transform[14] = pos[2];
-					
+			proto.properties.___sourceAssetTimestamp = (new Date()).toString();		
 			if(data.dropOffset)
 			{
 				var dropOffset = new THREE.Matrix4();
