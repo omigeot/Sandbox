@@ -123,7 +123,8 @@ function startVWF() {
                     logger.info('Configuration read.')
                 } catch (e) {
                     configSettings = {};
-                    logger.error('Could not read config file. Loading defaults.')
+                    logger.error(e.message);
+                    logger.error('Could not read config file. Loading defaults.');
                 }
                 //save configuration into global scope so other modules can use.
                 global.configuration = configSettings;
@@ -232,6 +233,11 @@ function startVWF() {
 
 			function registerAssetServer(cb)
 			{
+				if(global.configuration.hostAssets === undefined)
+					global.configuration.hostAssets = true;
+
+				global.configuration.assetAppPath = '/sas';
+
 				if( global.configuration.hostAssets || !global.configuration.remoteAssetServerURL )
 				{
 					global.configuration.assetDataDir = global.configuration.assetDataDir || 'assets';
@@ -239,8 +245,6 @@ function startVWF() {
 
 					fs.mkdirs(datadir, function()
 					{
-						global.configuration.assetAppPath = '/sas';
-
 						var assetServer = require('sandbox-asset-server');
 						app.use(global.configuration.assetAppPath, assetServer({
 							dataDir: datadir,
@@ -252,6 +256,10 @@ function startVWF() {
 					});
 				}
 				else {
+					app.all(global.configuration.assetAppPath+'/*', function(req,res){
+						var actualPath = req.path.slice(global.configuration.assetAppPath.length);
+						res.redirect(global.configuration.remoteAssetServerURL+actualPath);
+					});
 					logger.info('Hosting assets remotely at', global.configuration.remoteAssetServerURL);
 				}
 				cb();

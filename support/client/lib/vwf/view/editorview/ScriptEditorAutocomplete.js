@@ -249,8 +249,10 @@ define(['./angular-app'], function(app)
             {
                 //get the keys
                 self.keys = vwf.callMethod(self.currentNode.id, 'JavascriptEvalKeys', [line]);
-                if (line == 'window')
+                if (!line || !self.keys)
                 {
+                       if(!self.keys)
+                       self.keys = [];
                     var session = editor.getSession();
                     var locals = ArrNoDupe(session.getValue().split(/[ ;=\[\]\n]/).filter(function(e)
                     {
@@ -353,8 +355,10 @@ define(['./angular-app'], function(app)
                     var lineinfo = self.filterLine(line);
                     if (!lineinfo.value)
                     {
-                        $("#AutoComplete").hide();
-                        return;
+                        //$("#AutoComplete").hide();
+                        //return;
+                        lineinfo.value = lineinfo.filter;
+                        lineinfo.value = null;
                     }
                     //don't show autocomplete for lines that contain a (, because we'll be calling a functio ntaht might have side effects
                     //if (line.indexOf('(') == -1 && line.indexOf('=') == -1)
@@ -407,23 +411,25 @@ define(['./angular-app'], function(app)
         //hide or show the function top based on the inputs
         this.methodEditor.on('change', function(e)
         {
-            console.log('Editor changed');
             self.autoComplete(self.methodEditor);
             self.triggerFunctionTip(self.methodEditor);
+
+            if(e.data) e = e.data;
+
             //hide if removing an open paren
-            if (e.data.action == "removeText")
+            if (e.action == "removeText")
             {
-                if (e.data.text.indexOf('(') != -1)
+                if (e.text.indexOf('(') != -1)
                     $('#FunctionTip').hide();
-                if (/[\.\[]/.exec(e.data.text))
+                if (/[\.\[]/.exec(e.text))
                     $('#AutoComplete').hide();
             }
             //hide if inserting a close paren
-            if (e.data.action == "insertText")
+            if (e.action == "insertText")
             {
-                if (e.data.text.indexOf(')') != -1)
+                if (e.text.indexOf(')') != -1)
                     $('#FunctionTip').hide();
-                if (/[^a-zA-Z0-9_\.\[$]/.exec(e.data.text))
+                if (/[^a-zA-Z0-9_\.\[$]/.exec(e.text))
                     $('#AutoComplete').hide();
             }
             var cur = self.methodEditor.getCursorPosition();
@@ -515,6 +521,8 @@ define(['./angular-app'], function(app)
         this.filterLine = function(line)
         {
             line = $.trim(line);
+            line = line.split(/[\,\(\)]/);
+            line = line[line.length-1];
             var filteredLine = "";
             for (var i = 0; i < line.length; i++)
             {
@@ -535,7 +543,7 @@ define(['./angular-app'], function(app)
                 lineinfo = {
                     filter: filter,
                     trigger: value ? line[value.length] : '.',
-                    value: value || "window"
+                    value: value 
                 }
             }
             else

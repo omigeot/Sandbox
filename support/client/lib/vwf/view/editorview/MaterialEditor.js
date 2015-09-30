@@ -27,21 +27,19 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		$scope.ambientLinked = true;     // determines whether the ambient color should be updated along with diffuse
 		var oldMaterialDef = null;       // makes sure setProperty isn't called when the selection changes
 		$scope.videoTextureSource = '';  // value buffer between the input box and materialDef.videosrc
-		$scope.suppressUndo = false;     // makes sure the sliders don't generate strings of undo frames
 		var lastUndo = null;             // a snapshot of materialDef before live preview setProperty's
-		
+
 
 		/*
 		 * Angular watches
 		 */
 
 		// check for upstream materialDef changes when this value updates
-		$scope.$watch('fields.selectedNode.properties.materialDef', refresh);
+		$scope.$watchGroup(['fields.selectedNode.id','fields.selectedNode.properties.materialDef'], refresh);
 
 		// repoint materialDef when it's an array and the active material changes
 		$scope.$watch('activeMaterial', function(newval){
-			if( $scope.materialArray && newval >= 0 && newval < $scope.materialArray.length )
-			{
+			if( $scope.materialArray && newval >= 0 && newval < $scope.materialArray.length ){
 				$scope.materialDef = $scope.materialArray[newval];
 			}
 		});
@@ -55,10 +53,22 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			}
 		});
 
+		$scope.$watch('materialDef.color.a', function(newval){
+			if(newval !== undefined){
+				$scope.materialDef.alpha = newval;
+			}
+		});
+		$scope.$watch('materialDef.specularColor.a', function(newval){
+			if(newval !== undefined){
+				$scope.materialDef.specularLevel = newval;
+			}
+		});
+
 		// recursively watch materialDef, and setProperty if changes were made by the material editor
+		var handle = null;
 		$scope.$watch('materialArray || materialDef', function(newval)
 		{
-			if(newval && newval === oldMaterialDef){
+			if(newval && (newval === oldMaterialDef || Array.isArray(oldMaterialDef) && oldMaterialDef.indexOf(newval) > -1)){
 				applyDef(newval);
 			}
 
@@ -67,14 +77,6 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 
 			oldMaterialDef = newval;
 		}, true);
-
-		// when undo events stop being suppressed, push an undo frame
-		$scope.$watch('suppressUndo', function(newval){
-			if(!newval){
-				applyDef($scope.materialArray || $scope.materialDef);
-			}
-		});
-
 
 		/*
 		 * Methods
@@ -113,8 +115,19 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		}
 
 		// validate and apply changes to the material definition
+		var applyHandle = null;
 		function applyDef(def)
 		{
+			if(applyHandle) clearTimeout(applyHandle);
+			applyHandle = setTimeout(function(){
+				applyDef_internal(def);
+				applyHandle = null;
+			}, 100);
+		}
+
+		function applyDef_internal(def)
+		{
+			console.log('applying material');
 			if( _UserManager.GetCurrentUserName() == null ){
 				_Notifier.notify('You must log in to participate');
 			}
@@ -134,10 +147,12 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 					}
 				}
 
-				if( !$scope.suppressUndo ){
+				if($scope.fields.selectedNodeIds.length === 1)
+					_UndoManager.pushEvent(undoEvent.list[0]);
+				else
 					_UndoManager.pushEvent(undoEvent);
-					lastUndo = angular.copy(def);
-				}
+
+				lastUndo = angular.copy(def);
 			}
 		}
 
@@ -145,9 +160,9 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		function refresh()
 		{
 			// try to get a materialDef from property, or failing that, from the driver
-			var mat = $scope.fields.selectedNode && ($scope.fields.selectedNode.properties.materialDef || vwf_view.kernel.getProperty($scope.fields.selectedNode.id));
+			var mat = $scope.fields.selectedNode && vwf.getProperty($scope.fields.selectedNode.id, 'materialDef');
 
-			if( mat && !$scope.suppressUndo && !angular.equals($scope.materialArray||$scope.materialDef, mat))
+			if( mat && !angular.equals($scope.materialArray||$scope.materialDef, mat))
 			{
 				lastUndo = angular.copy(mat);
 
@@ -173,6 +188,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				$scope.materialDef = null;
 				$scope.ambientLinked = true;
 				lastUndo = null;
+				$('#materialEditor html-palette').css('background', '#aaaaaa');
 				//_SidePanel.hideTab('materialEditor');
 			}
 		}
@@ -240,11 +256,12 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			template: [
 				'<div class="mantissa">',
 					'<div class="slider"></div>',
-					'<input type="number" min="{{min}}" max="{{max}}" step="{{step}}" ng-model="mantissa" ng-disabled="disabled"></input>',
+					'<input type="number" min="{{min}}" max="{{max}}" step="{{step}}" ng-model="value" ng-disabled="disabled || softLimit" ng-hide="range || softLimit" ng-change="change()"></input>',
+					'<input type="number" step="{{step}}" ng-model="value" ng-disabled="disabled || !softLimit" ng-hide="range || !softLimit" ng-change="change()"></input>',
 				'</div>',
 				'<div class="exponent" ng-show="useExponent">',
 					'Exponent: ',
-					'<input type="number" min="0" step="1" ng-model="exponent" ng-disabled="disabled"></input>',
+					'<input type="number" min="0" step="1" ng-model="exponent" ng-disabled="disabled" ng-change="change()"></input>',
 				'</div>',
 			].join(''),
 			scope: {
@@ -252,22 +269,40 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				min: '=',
 				max: '=',
 				step: '=',
+				range: '=?',
+				change: '&?',
 
 				useExponent: '=',  // determine if the final value should be represented in exponential notation
 				value: '=',        // two-way binding for the final value of the widget
+				upperValue: '=?',
 				disabled: '=',     // determines if the widget should accept input
 				sliding: '='       // true iff the user is dragging the slider
 			},
 			link: function($scope, elem, attrs)
 			{
-				// initialize the jquery ui slider
-				var slider = $('.slider', elem);
-				slider.slider({
+				var rangeMode = $scope.range === true;
+
+				$scope.softLimit = attrs.softlimit ? true : false;
+				$scope.mantissa = !isNaN($scope.value) ? $scope.value : $scope.min;
+				$scope.exponent = 0;
+				$scope.change = $scope.change || $.noop;
+				var opts = {
 					min: $scope.min,
 					max: $scope.max,
 					step: $scope.step,
-					value: $scope.value
-				});
+					range: rangeMode
+				};
+
+				if(rangeMode){
+					opts.values = [$scope.value || $scope.min, $scope.upperValue || $scope.max];
+				}
+				else{
+					opts.value = $scope.value;
+				}
+
+				// initialize the jquery ui slider
+				var slider = $('.slider', elem);
+				slider.slider(opts);
 
 				// clean up
 				$scope.$on('$destroy', function(){
@@ -277,7 +312,11 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 
 				// update the value when sliding
 				slider.on('slide', function(evt, ui){
-					$scope.mantissa = ui.value;
+					if(rangeMode){
+						$scope.value = ui.values[0];
+						$scope.upperValue = ui.values[1];
+					}
+					else $scope.mantissa = ui.value;
 					$scope.$apply();
 				});
 
@@ -293,39 +332,47 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 					$scope.$apply();
 				});
 
-				// break value into a mantissa and exponent if appropriate, such that value = mantissa * pow(10,exponent)
-				$scope.$watch('freezeExponent || value', function(newval)
-				{
-					if($scope.value !== undefined)
+				if(rangeMode){
+					$scope.$watch('upperValue + value', function(newval){
+						slider.slider('option', 'values', [$scope.value || $scope.min, $scope.upperValue || $scope.max]);
+					});
+				}
+				else{
+					// break value into a mantissa and exponent if appropriate, such that value = mantissa * pow(10,exponent)
+					$scope.$watch('freezeExponent || value', function(newval)
 					{
-						if( $scope.useExponent )
-						{
-							if( !$scope.freezeExponent ){
-								$scope.exponent = $scope.useExponent ? Math.max(Math.floor(Math.log10(Math.abs($scope.value))), 0) : 0;
+						if($scope.value !== undefined){
+							if( $scope.useExponent )
+							{
+								if( !$scope.freezeExponent ){
+									$scope.exponent = $scope.useExponent ? Math.max(Math.floor(Math.log10(Math.abs($scope.value))), 0) : 0;
+								}
+
+								$scope.mantissa = $scope.value / Math.pow(10,$scope.exponent);
+							}
+							else
+								$scope.mantissa = $scope.value;
+						}
+					});
+
+					// compute new output value when mantissa or exponent are updated
+					$scope.$watch('mantissa + exponent', function(newval){
+						if( !$scope.disabled ){
+							if( $scope.useExponent ) {
+								$scope.value = $scope.mantissa * Math.pow(10, $scope.exponent);
+								slider.slider('option', 'value', $scope.mantissa);
 							}
 
-							$scope.mantissa = $scope.value / Math.pow(10,$scope.exponent);
+							else {
+								$scope.value = $scope.mantissa;
+
+								//This keeps the slider in bounds...
+								var val = Math.min( Math.max( $scope.mantissa, $scope.min ), $scope.max );
+								slider.slider('option', 'value', val);
+							}
 						}
-						else
-							$scope.mantissa = $scope.value;
-					}
-					else {
-						$scope.mantissa = 0;
-						$scope.exponent = 0;
-					}
-				});
-
-				// compute new output value when mantissa or exponent are updated
-				$scope.$watch('mantissa + exponent', function(newval){
-					if( !$scope.disabled ){
-						if( $scope.useExponent )
-							$scope.value = $scope.mantissa * Math.pow(10, $scope.exponent);
-						else
-							$scope.value = $scope.mantissa;
-
-						slider.slider('option', 'value', $scope.mantissa);
-					}
-				});
+					});
+				}
 
 				// disable everything when true
 				$scope.$watch('disabled', function(newval){
@@ -340,6 +387,36 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		};
 	});
 
+	/*
+	 * Reusable angular wrapper around the image (map) picker
+	 */
+
+	 app.directive('vwfImagePicker', ['$compile', function($compile){
+		function linkFn(scope, elem, attr){
+			scope.change = scope.change || $.noop;
+
+			elem.button({label: scope.label});
+			elem.prepend($compile('<img src="{{value}}"/>')(scope));
+
+			scope.showPicker = function() {
+				_MapBrowser.setTexturePickedCallback(function(e) {
+					scope.value = e;
+					scope.$apply();
+
+					scope.change();
+				}.bind(elem.get(0)));
+
+				_MapBrowser.show();
+			}
+		}
+		return {
+			template: '<div ng-click="showPicker()" class="vwf-image-picker ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"></div>',
+			restrict: 'E',
+			link: linkFn,
+			replace: true,
+			scope: { value: '=', label: '=', change: '&?' }
+		};
+	 }]);
 
 	/*
 	 * Reusable angular wrapper around the color picker
@@ -351,18 +428,35 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			restrict: 'E',
 			template: '<div class="colorPickerIcon"></div>',
 			scope: {
+				colorArr: '=',
 				colorObj: '=',
 				disabled: '=',
 				sliding: '='
 			},
 			link: function($scope, elem, attrs)
 			{
-				// set color of icon when upstream color changes
-				$scope.$watch('colorObj.r + colorObj.b + colorObj.g', function(newval){
-					$('.colorPickerIcon', elem).css('background-color', '#'+color());
+				$scope.colorObj = $scope.colorObj || {r:0, g:0, b:0};
+
+				$scope.$watch('colorArr[0] + colorArr[1] + colorArr[2]', function(newVal){
+					 if(newVal){
+					 	$scope.colorObj.r = $scope.colorArr[0];
+					 	$scope.colorObj.g = $scope.colorArr[1];
+					 	$scope.colorObj.b = $scope.colorArr[2];
+					 }
 				});
 
-				
+				// set color of icon when upstream color changes
+				$scope.$watch('colorObj.r + colorObj.b + colorObj.g', function(newVal){
+					$('.colorPickerIcon', elem).css('background-color', '#'+color());
+
+					if($scope.colorArr){
+					 	$scope.colorArr[0] = $scope.colorObj.r;
+					 	$scope.colorArr[1] = $scope.colorObj.g;
+					 	$scope.colorArr[2] = $scope.colorObj.b;
+					}
+				});
+
+
 				function color(hexval)
 				{
 					// convert and set upstream color when arg is supplied
@@ -411,7 +505,9 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 						color(hex);
 
 						if(handle) $timeout.cancel(handle);
-						handle = $timeout(function(){ $scope.sliding = false; }, 500);
+
+						//500ms isn't enough time to determine whether or not sliding has actually "stopped"
+						handle = $timeout(function(){ $scope.sliding = false; }, 1500);
 					}
 				});
 
@@ -454,4 +550,3 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		};
 	});
 });
-

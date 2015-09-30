@@ -1,6 +1,8 @@
-define(['vwf/view/editorview/lib/angular'], function(angular)
+
+
+define(['vwf/view/editorview/lib/angular', './UndoManager', 'vwf/view/editorview/lib/html-palette.min'], function(angular, UndoManager)
 {
-	var app = angular.module('SandboxEditor', []);
+	var app = angular.module('SandboxEditor', ['html-palette']);
 	var playing = false;
 
 	app.run(['$timeout', '$rootScope', function($timeout, $rootScope)
@@ -9,18 +11,21 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		$rootScope.fields = {
 			selectedNode: null,
 			selectedNodeIds: [],
+			selectedNodeChildren: [],
 			worldIsReady: false,
 			nodes: {},
 			cameras: [],
 
-			materialUpdateFromModel: false
+			undoAction: '',
+			redoAction: ''
 		};
 
 		$(document).on('selectionChanged', function(e,node)
 		{
 			$rootScope.fields.selectedNode = node;
 			$rootScope.fields.selectedNodeIds = [];
-			
+			$rootScope.fields.selectedNodeChildren.length = 0;
+
 			for(var i=0; i<_Editor.getSelectionCount(); i++)
 				$rootScope.fields.selectedNodeIds.push(_Editor.GetSelectedVWFID(i));
 
@@ -28,6 +33,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				node.methods = node.methods || {};
 				node.events = node.events || {};
 				node.properties = node.properties || {};
+				getSelectedNodeChildren();
 			}
 
 			$timeout($rootScope.$apply.bind($rootScope));
@@ -45,7 +51,39 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 	app.apply = debounce(function(){
 		if(!playing) app.root.$apply();
 	},200);
-	
+
+	UndoManager = UndoManager.getSingleton();
+	UndoManager.modCb = function(undoFrame, redoFrame)
+	{
+		if(!undoFrame)
+			app.root.fields.undoAction = '';
+		else if(undoFrame instanceof UndoManager.CreateNodeEvent)
+			app.root.fields.undoAction = 'create '+undoFrame.proto.properties.DisplayName;
+		else if(undoFrame instanceof UndoManager.DeleteNodeEvent)
+			app.root.fields.undoAction = 'delete '+undoFrame.proto.properties.DisplayName;
+		else if(undoFrame instanceof UndoManager.SelectionEvent)
+			app.root.fields.undoAction = 'selection';
+		else if(undoFrame instanceof UndoManager.SetPropertyEvent)
+			app.root.fields.undoAction = 'change '+undoFrame.property;
+		else if(undoFrame instanceof UndoManager.CompoundEvent)
+			app.root.fields.undoAction = undoFrame.list.length+' changes';
+
+		if(!redoFrame)
+			app.root.fields.redoAction = '';
+		else if(redoFrame instanceof UndoManager.CreateNodeEvent)
+			app.root.fields.redoAction = 'create '+redoFrame.proto.properties.DisplayName;
+		else if(redoFrame instanceof UndoManager.DeleteNodeEvent)
+			app.root.fields.redoAction = 'delete '+redoFrame.proto.properties.DisplayName;
+		else if(redoFrame instanceof UndoManager.SelectionEvent)
+			app.root.fields.redoAction = 'selection';
+		else if(redoFrame instanceof UndoManager.SetPropertyEvent)
+			app.root.fields.redoAction = 'change '+redoFrame.property;
+		else if(redoFrame instanceof UndoManager.CompoundEvent)
+			app.root.fields.redoAction = redoFrame.list.length+' changes';
+
+		app.apply();
+	}
+
 	function sortChildren(nodeId)
 	{
 		var parent = app.root.fields.nodes[nodeId];
@@ -57,15 +95,49 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 				a = app.root.fields.nodes[a];
 				b = app.root.fields.nodes[b];
 
-				if( !b || !b.name && a.name || a.name.toLowerCase() < b.name.toLowerCase() )
+				if( !b || !b.name && a.name || a.name && a.name.toLowerCase() < b.name.toLowerCase() )
 					return -1;
-				else if( !a || !a.name && b.name || b.name.toLowerCase() < a.name.toLowerCase() )
+				else if( !a || !a.name && b.name || b.name && b.name.toLowerCase() < a.name.toLowerCase() )
 					return 1;
 				else
 					return 0;
 			});
 		}
 	}
+
+	function getSelectedNodeChildren(arr){
+		var fields = app.root.fields;
+		var nodes = fields.nodes;
+
+		if(!arr){
+			fields.selectedNodeChildren.length = 0;
+
+			var id = fields.selectedNode.id;
+			arr = fields.nodes[id].children;
+		}
+
+		for(var i = 0; i < arr.length; i++){
+			var node = nodes[arr[i]];
+
+			//Only add to array and descend if this node is a modifier or behavior
+			if( _hasPrototype(node.id, 'http-vwf-example-com-behavior-vwf') ||
+			    vwf.getProperty(node.id, 'isModifier') === true ) {
+
+				node.properties = vwf.getProperties(node.id);
+				fields.selectedNodeChildren.push(node);
+
+				if(nodes[arr[i]] && nodes[arr[i]].children)
+					getSelectedNodeChildren(nodes[arr[i]].children);
+			}
+		}
+	}
+
+	//Private function used exclusively by getSelectedNodeChildren
+	function _hasPrototype(id, prototype) {
+        if (!id) return false;
+        if (id == prototype) return true;
+        else return _hasPrototype(vwf.prototype(id), prototype);
+    }
 
 	app.createdMethod = function(id, name, params, body)
 	{
@@ -104,19 +176,39 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		}
 	}
 
-	
+
 	app.initializedProperty = app.createdProperty = app.satProperty = function(id, prop, val)
 	{
 		var apply = false;
+		var fields =  app.root.fields;
+		var selectedNode = fields.selectedNode;
 
 		if( id === 'index-vwf' && prop === 'playMode' ){
 			playing = val === 'play';
 			if( !playing ) apply = true;
 		}
 
-		if( app.root.fields.selectedNode && id === app.root.fields.selectedNode.id )
+		if( selectedNode && id === selectedNode.id )
 		{
-			app.root.fields.selectedNode.properties[prop] = val;
+			// See issue #267 on Github for why this change is necessary
+			var property = selectedNode.properties[prop];
+			if(Array.isArray(property) && Array.isArray(val) && val.length < 32){
+				for(var i = 0; i < val.length; i++){
+					if(property[i] !== val[i]){
+						property[i] = val[i];
+						apply = true;
+					}
+				}
+			}
+			else{
+				selectedNode.properties[prop] = val;
+				apply = true;
+			}
+		}
+
+		// if this node is a child of the selected node...
+		else if(fields.selectedNodeChildren.indexOf(fields.nodes[id]) > -1){
+			fields.nodes[id].properties[prop] = val;
 			apply = true;
 		}
 
@@ -145,6 +237,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 		var node = app.root.fields.nodes[newId] = {};
 		node.id = newId;
 		node.prototype = newExtends;
+		node.continues = vwf.getNode(newId).continues;
 		node.subtype = newType;
 		node.name = newId;
 		node.children = [];
@@ -157,6 +250,9 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 
 		if(newExtends === 'SandboxCamera-vwf')
 			app.root.fields.cameras.push(newId);
+
+		if(app.root.fields.selectedNode)
+			getSelectedNodeChildren();
 
 		this.apply()
 	}
@@ -173,6 +269,7 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 	app.deletedNode = function(nodeId)
 	{
 		var node = app.root.fields.nodes[nodeId];
+		if(!node) return;
 		var parent = app.root.fields.nodes[node.parent];
 
 		for(var i=0; i<parent.children.length; i++){
@@ -186,6 +283,9 @@ define(['vwf/view/editorview/lib/angular'], function(angular)
 
 		if( app.root.fields.cameras.indexOf(nodeId) > -1 )
 			app.root.fields.cameras.splice( app.root.fields.cameras.indexOf(nodeId), 1 );
+
+		if(app.root.fields.selectedNode)
+			getSelectedNodeChildren();
 
 		this.apply();
 	}

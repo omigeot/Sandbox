@@ -36,12 +36,14 @@ mixin menus_body
 		li
 			a#MenuEdit Edit
 			ul
-				li: a#MenuUndo(ng-click='lookUpHandler($event)')
-					.glyphicon.glyphicon-share-alt(style='transform: rotateY(180deg);')
-					| Undo (ctrl-z)
-				li: a#MenuRedo(ng-click='lookUpHandler($event)')
-					.glyphicon.glyphicon-share-alt
-					| Redo (ctrl-y)
+				li(ng-class='{disabled: !fields.undoAction}')
+					a#MenuUndo(ng-click='lookUpHandler($event)')
+						.glyphicon.glyphicon-share-alt(style='transform: rotateY(180deg);')
+						| Undo {{fields.undoAction}} (ctrl-z)
+				li(ng-class='{disabled: !fields.redoAction}')
+					a#MenuRedo(ng-click='lookUpHandler($event)')
+						.glyphicon.glyphicon-share-alt
+						| Redo {{fields.redoAction}} (ctrl-y)
 				li.divider
 
 				li(ng-class='{"disabled": !selection}')
@@ -277,6 +279,7 @@ mixin menus_body
 						li: a#MenuCreateGUICheck(title="Create a checkbox that is optionally added to a selected panel", ng-click='lookUpHandler($event)') Checkbox
 						li: a#MenuCreateGUIPanel(title="Create a panel that is optionally added to a selected panel", ng-click='lookUpHandler($event)') Panel
 						li: a#MenuCreateGUIImage(title="Create an image that is optionally added to a selected panel", ng-click='lookUpHandler($event)') Image
+						li: a#MenuCreateGUIHtml(title="Add a remotely-hosted HTML document to the selected panel", ng-click='lookUpHandler($event)') From URL
 
 		li
 			a#MenuAssets Assets
@@ -301,7 +304,7 @@ mixin menus_body
 						li: a#MenuAssetsSaveAsFile(title="Creates a new reusable asset via file upload", ng-click='lookUpHandler($event)')
 							.glyphicon.glyphicon-hdd
 							| From File
-				li(ng-class='{"disabled": !isEntityAsset || !isMaterialAsset}')
+				li(ng-class='{"disabled": !isEntityAsset && !isMaterialAsset}')
 					a#MenuAssetsSave
 						.glyphicon.glyphicon-floppy-save
 						| Refresh Asset
@@ -326,6 +329,10 @@ mixin menus_body
 				li: a#MenuCreateLoadMeshURL(title="Import a mesh hosted on a remote server", ng-click='lookUpHandler($event)')
 					.glyphicon.glyphicon-cloud-download
 					| Load Mesh By URL
+				li(ng-show='hasContinuesFlag')
+					a#MenuCreateContinuesNode(title="Create node from a JSON document", ng-click='lookUpHandler($event)')
+						.glyphicon.glyphicon-cloud-download
+						| Load Entity By URL
 				li
 					a#MenuAssets3DR 3DR
 					ul

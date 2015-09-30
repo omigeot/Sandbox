@@ -463,9 +463,18 @@ function MaterialCache() {
             if (window.isIE() && currentmat.side == 2) currentmat.side = 0;
             currentmat.opacity = value.alpha;
             //if the alpha value less than 1, and the blendmode is defined but not noblending
-            if (value.alpha < 1 || (value.blendMode !== undefined && value.blendMode !== THREE.NoBlending)) {
-                if (currentmat.transparent == false) currentmat.needsUpdate = true;
-                currentmat.transparent = true;
+            if (value.blendMode !== THREE.NoBlending) {
+
+                if (value.alpha < 1)
+                {
+                    if (currentmat.transparent == false) currentmat.needsUpdate = true;
+                    currentmat.transparent = true;
+                }
+                else
+                {
+                    if (currentmat.transparent == true) currentmat.needsUpdate = true;
+                    currentmat.transparent = false;
+                }
 
             } else {
 
