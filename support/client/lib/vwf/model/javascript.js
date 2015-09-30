@@ -1421,14 +1421,13 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             if (!node) return;
             var body = node.private.bodies && node.private.bodies[method];
 
-
+             var inContext = this.contextStack.length > 1;
 			if (body && vwf.isSimulating(node.id)) {
-                var inContext = this.contextStack.length > 1;
+               
                 if(!inContext)
                     this.enterNewContext();
                 this.tryExec(node,body,args);
-                if(!inContext)
-                    this.exitContext();
+                
             }
             if (node.children)
                 for (var i = 0; i < node.children.length; i++)

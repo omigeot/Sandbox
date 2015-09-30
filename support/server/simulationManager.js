@@ -93,6 +93,7 @@ var simulationManager = function(world)
             if (controllingClient !== this.getClientForNode(i).sandboxClient.id)
             {
                 this.getClientForNode(i).stopSimulatingNode(i);
+                
                 this.clients[controllingClient].startSimulatingNode(i)
                 console.log('moving ' + i + " to " + controllingClient);
             }
@@ -153,7 +154,11 @@ var simulationManager = function(world)
         
         for (var i in this.clientControlTable)
         {
-            delete this.clientControlTable[i][sandboxClient.id];
+            if(this.clientControlTable[i][sandboxClient.id])
+            {
+                console.log("remove " + sandboxClient.id +" from " + i)
+                delete this.clientControlTable[i][sandboxClient.id];
+            }
         }
         this.distribute(oldNodes);
     }

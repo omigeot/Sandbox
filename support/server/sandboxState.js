@@ -250,6 +250,7 @@ var sandboxState = function(id, metadata,world)
         if(!node) return;
 
         if (!parent) parent = node.parent;
+        if(!parent) return;
         if (parent.children)
         {
             for (var i in parent.children)

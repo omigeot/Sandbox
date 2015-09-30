@@ -1066,9 +1066,12 @@ this.startSimulating = function(nodeID)
     if(nodeID !== "index-vwf")
         nodes.push(nodeID);
     for (var i =0; i < nodes.length; i++)
-    if(this.nodesSimulating.indexOf(nodes[i]) == -1)
     {
-        this.nodesSimulating.push(nodes[i]);
+        if(this.nodesSimulating.indexOf(nodes[i]) == -1)
+        {
+            this.nodesSimulating.push(nodes[i]);
+        }
+        this.callMethod(this.application(),"startSimulatingNode",nodes[i])
     }
 }
 this.stopSimulating = function(nodeID)
@@ -1076,9 +1079,12 @@ this.stopSimulating = function(nodeID)
     var nodes = this.decendants(nodeID);
     nodes.push(nodeID);
     for (var i =0; i < nodes.length; i++)
-    if(this.nodesSimulating.indexOf(nodes[i]) != -1)
     {
-        this.nodesSimulating.splice(this.nodesSimulating.indexOf(nodes[i]),1);
+        if(this.nodesSimulating.indexOf(nodes[i]) != -1)
+        {
+            this.nodesSimulating.splice(this.nodesSimulating.indexOf(nodes[i]),1);
+        }
+        this.callMethod(this.application(),"stopSimulatingNode",nodes[i])
     }
 }
 this.isSimulating = function(nodeID)

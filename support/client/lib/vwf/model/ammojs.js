@@ -385,6 +385,7 @@ function setupPhyObject(node, id, world) {
     node.constantForce = null;
     node.constantTorque = null;
     node.transform = [];
+    node.massBackup = 0;
 }
 
 function phyObject(id, world) {
@@ -484,7 +485,24 @@ phyObject.prototype.setAngularFactor = function(vec) {
 		//this.body.getAngularFactor().setValue(vec[0], vec[1], vec[2]);
     }
 }
-phyObject.prototype.setMass = function(mass) {
+phyObject.prototype.startSimulating = function()
+{
+    this.setMass(this.massBackup,true);
+}
+phyObject.prototype.stopSimulating = function()
+{
+    this.massBackup = this.mass;
+    this.setMass(0,true);
+}
+phyObject.prototype.setMass = function(mass,force) {
+
+    if(!force)
+        this.massBackup = mass;
+    if(!vwf.isSimulating(this.id) && !force)
+    {    
+        mass = 0;
+    }
+
     if (this.mass == mass) return;
     this.mass = mass;
     if (this.initialized === true) {
@@ -1073,8 +1091,8 @@ function phyAsset(id, world) {
 }
 phyAsset.prototype = new phyObject();
 phyAsset.prototype.setMass = function(mass) {
-    if (!this.colType !== MESH) phyObject.prototype.setMass.call(this, mass);
-    else phyObject.prototype.setMass.call(this, 0);
+    if (!this.colType !== MESH) phyObject.prototype.setMass.call(this, mass,false);
+    else phyObject.prototype.setMass.call(this, 0,false);
 }
 //because a mesh may have geometry offset from the center, we must build a compound shape with an offset
 phyAsset.prototype.buildCollisionShape = function() {
@@ -1460,6 +1478,18 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                 node = null;
             }
         },
+        startSimulatingNode : function(nodeID)
+        {
+            var node = this.allNodes[nodeID];
+            if(node&&node.startSimulating)
+                node.startSimulating();
+        },
+        stopSimulatingNode : function(nodeID)
+        {
+            var node = this.allNodes[nodeID];
+            if(node&&node.stopSimulating)
+                node.stopSimulating();
+        },
         // -- creatingProperty ---------------------------------------------------------------------
         creatingProperty: function(nodeID, propertyName, propertyValue) {
             return this.initializingProperty(nodeID, propertyName, propertyValue);
@@ -1543,6 +1573,13 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
         },
         // TODO: deletingProperty
         callingMethod: function(nodeID, methodName, args) {
+            
+            
+            if(methodName == "startSimulatingNode")
+                this.startSimulatingNode(args);
+            if(methodName == "stopSimulatingNode")
+                this.stopSimulatingNode(args);
+
             //dont try to set the parent
             if (!this.allNodes[nodeID]) return;
             //don't allow reentry since this driver can both get and set transform
@@ -1642,7 +1679,7 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                     if (propertyValue === false) node.disable();
                 }
                 if (propertyName === '___physics_mass') {
-                    node.setMass(parseFloat(propertyValue));
+                    node.setMass(parseFloat(propertyValue),false);
                 }
                 if (propertyName === '___physics_restitution') {
                     node.setRestitution(parseFloat(propertyValue));
