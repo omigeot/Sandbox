@@ -487,6 +487,23 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 								else
 									cb(false)
 							})
+						},
+						function showDiff(cb) {
+							alertify.confirm("View Differences?", function(ok) {
+								if (ok)
+								{
+									$.getJSON($scope.assets.appPath + '/assets/' + $scope.selected.id , function(filedata) {
+											var file1 = fileData[$scope.selected.id];
+											file1 = JSON.parse(String.fromCharCode.apply(null, file1));
+											var file2 = filedata;
+											var diff = $.extend(true,objectDiff(file1,file2),objectDiff(file2,file1));
+											require("vwf/view/editorview/JSONPrompt").prompt(diff);
+									})
+									cb(false)
+								}
+								else
+									cb(false)
+							})
 						}
 					],
 					function doActualUploads(doit) {

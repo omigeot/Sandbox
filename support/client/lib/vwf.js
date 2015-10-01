@@ -5491,7 +5491,7 @@ var nodeCollectionPrototype = {
 /// 
 /// @name module:vwf~nodes
 
-function objectDiff (obj1, obj2,noRecurse,stringCompare) {
+window.objectDiff =function (obj1, obj2,noRecurse,stringCompare) {
    var delta = {};
 
     if( obj1 != obj2 && typeof obj1 == typeof obj2 && typeof obj1 == "number")
