@@ -1,0 +1,4 @@
+---
+extends: node.vwf
+properties:
+  DisplayName: "Ocean"
