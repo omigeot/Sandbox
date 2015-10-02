@@ -59,13 +59,14 @@ function executionContext(parentContext)
 {
     this.touchedProperties = {};
     this.parent = parentContext;
-    this.setProperty = function(id,name,val)
+}
+    executionContext.prototype.setProperty = function(id,name,val)
     {
         if(!this.touchedProperties[id+name])
             this.touchedProperties[id+name] = {id:id,name:name,val:null,originalVal:null}
         this.touchedProperties[id+name].val = val;
     }
-    this.getProperty = function(id,name)
+    executionContext.prototype.getProperty = function(id,name)
     {
         if(this.touchedProperties[id+name])
             return this.touchedProperties[id+name].val;
@@ -97,7 +98,7 @@ function executionContext(parentContext)
         }
 
     }
-    this.postUpdates = function()
+    executionContext.prototype.postUpdates = function()
     {
         //debugger;
         var parentRoot = !(this.parent instanceof executionContext)
@@ -115,16 +116,14 @@ function executionContext(parentContext)
             }
         }
     }
-    this.callMethod = function(id,methodname,params)
+    executionContext.prototype.callMethod = function(id,methodname,params)
     {
         return this.parent.callMethod(id,methodname,params);
     }
-    this.fireEvent = function(id,eventName,params)
+    executionContext.prototype.fireEvent = function(id,eventName,params)
     {
         this.parent.fireEvent(id,eventName,params);
     }
-}
-
 
 define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) {
 
@@ -168,12 +167,12 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
         {
             return this.contextStack[0];
         },
-        enterNewContext: function(log)
+        enterNewContext: function()
         {
             
             this.contextStack.unshift(new executionContext(this.contextStack[0]))
         },
-        exitContext:function(log)
+        exitContext:function()
         {
             
             var topContext = this.contextStack.shift();
@@ -367,17 +366,20 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                         var fromPos = jsDriverSelf.getTopContext().getProperty(thisid,'worldPosition');
                         for(var i in jsDriverSelf.nodes)
                         {
-                            var targetNode = jsDriverSelf.nodes[i];
-                            var targetPos = jsDriverSelf.getTopContext().getProperty(targetNode.id,'worldPosition');
-                            if(range  )
+                            if(jsDriverSelf.nodes[i].private.bodies[signal]) //don't bother with distance check if node cannot receive
                             {
-                                if(targetPos && fromPos && MATH.distanceVec3(fromPos,targetPos) < range)
+                                var targetNode = jsDriverSelf.nodes[i];
+                                var targetPos = jsDriverSelf.getTopContext().getProperty(targetNode.id,'worldPosition');
+                                if(range  )
                                 {
-                                    jsDriverSelf.callingMethod(targetNode.id,signal,[data],thisid);
+                                    if(targetPos && fromPos && MATH.distanceVec3(fromPos,targetPos) < range)
+                                    {
+                                        jsDriverSelf.callingMethod(targetNode.id,signal,[data],thisid);
+                                    }
+                                }else
+                                {
+                                        jsDriverSelf.callingMethod(targetNode.id,signal,[data],thisid);
                                 }
-                            }else
-                            {
-                                    jsDriverSelf.callingMethod(targetNode.id,signal,[data],thisid);
                             }
                         }
                     
@@ -1071,6 +1073,10 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             Object.defineProperty(node, methodName, { // "this" is node in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node
+                        if(this.private.methods[methodName] && this.private.methods[methodName].body) //if the script is implemented in the script engine, not some other part of the vwf
+                        {
+                            return jsDriverSelf.callingMethod(this.id,methodName,arguments);
+                        }else
                         return jsDriverSelf.kernel.callMethod(this.id, methodName, arguments);
                     };
                 },
@@ -1159,16 +1165,9 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 }
 
         },
-        callingMethod: function(nodeID, methodName, methodParameters) {
+        JavascriptEvalKeys:function(nodeID,methodName,methodParameters)
+        {
 
-
-            //this.callMethodTraverse(this.nodes['index-vwf'],'calledMethod',[nodeID, methodName, methodParameters]);
-
-            var node = this.nodes[nodeID];
-            if (!node) return undefined;
-
-            //used for the autocomplete - eval in the context of the node, and get the keys
-            if (methodName == 'JavascriptEvalKeys') {
                 var ret = (function() {
 
                     try {
@@ -1188,9 +1187,10 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
                 }).apply(node);
                 return ret;
-            }
-            //used by the autocomplete - eval in the context of the node and get the function params
-            if (methodName == 'JavascriptEvalFunction') {
+        },
+        JavascriptEvalFunction:function(nodeID,methodName,methodParameters)
+        {
+            
 
                 var ret = (function() {
 
@@ -1236,28 +1236,40 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     return null;
                 } else
                     return null;
+        },
+        callingMethod: function(nodeID, methodName, methodParameters) {
+
+
+            //this.callMethodTraverse(this.nodes['index-vwf'],'calledMethod',[nodeID, methodName, methodParameters]);
+
+            var node = this.nodes[nodeID];
+            if (!node) return undefined;
+
+            //used for the autocomplete - eval in the context of the node, and get the keys
+            if (methodName == 'JavascriptEvalKeys') {
+                return this.JavascriptEvalKeys(nodeID, methodName, methodParameters)
+            }
+            //used by the autocomplete - eval in the context of the node and get the function params
+            if (methodName == 'JavascriptEvalFunction') {
+                return this.JavascriptEvalFunction(nodeID, methodName, methodParameters)
             }
             var body = node.private.bodies && node.private.bodies[methodName];
 
             if (body) {
                 var inContext = this.contextStack.length > 1;
                 if(!inContext)
-                    this.enterNewContext(["enter" , nodeID, methodName]);
-                try {
+                    this.enterNewContext();
+                
                     var ret = this.tryExec(node,body,methodParameters);//body.apply(node, methodParameters);
                  
                     
-                        if(!inContext)
-                            this.exitContext(["exit",nodeID, methodName]);
-                        return ret;
+                    if(!inContext)
+                        this.exitContext();
+                    return ret;
                     
-                } catch (e) {
-                    console.error(e.toString() + " Node:'" + (node.properties.DisplayName || nodeID) + "' during: '" + methodName + "' with '" + JSON.stringify(methodParameters) + "'");
-                    //            this.logger.warn( "callingMethod", nodeID, methodName, methodParameters, // TODO: limit methodParameters for log
-                    //              "exception:", utility.exceptionMessage( e ) );
-                }
+              
                 if(!inContext)
-                    this.exitContext(["exit",nodeID, methodName]);
+                    this.exitContext();
             }
 
             //call the method on the child behaviors
@@ -1607,6 +1619,10 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     Object.defineProperty(proxy.methods, methodName, { // "this" is proxy.methods in get/set
                         get: function() {
                             return function( /* parameter1, parameter2, ... */ ) { // "this" is proxy.methods
+                                
+                                if(jsDriverSelf.nodes[this.node.id])
+
+
                                 return jsDriverSelf.kernel.callMethod(this.node.id, methodName, arguments);
                             };
                         },
@@ -1914,7 +1930,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
     function bodyScript(parameters, body) {
         var parameterString = (parameters.length ? " " + parameters.join(", ") + " " : "");
-        return accessorScript("( function(" + parameterString + ") {\n", body, "\n} )");
+        return accessorScript("( function(" + parameterString + ") {\n'use strict';\n ", body, "\n} )");
         // return accessorScript( "( function(" + ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  ) + ") {", body, "} )" );
     }
 

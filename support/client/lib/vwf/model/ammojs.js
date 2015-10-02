@@ -1416,10 +1416,10 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                         vwf.setProperty(node.id, 'transform', node.getTransform(tempmat));
                         //so, we were setting these here in order to inform the kernel that the property changed. Can we not do this, and 
                         //rely on the getter? that would be great....
-                        vwf.setProperty(node.id, '___physics_activation_state', node.getActivationState());
-                        vwf.setProperty(node.id, '___physics_velocity_angular', node.getAngularVelocity());
-                        vwf.setProperty(node.id, '___physics_velocity_linear', node.getLinearVelocity());
-                        vwf.setProperty(node.id, '___physics_deactivation_time', node.getDeactivationTime());
+                        vwf.setPropertyFast(node.id, '___physics_activation_state', node.getActivationState());
+                        vwf.setPropertyFast(node.id, '___physics_velocity_angular', node.getAngularVelocity());
+                        vwf.setPropertyFast(node.id, '___physics_velocity_linear', node.getLinearVelocity());
+                        vwf.setPropertyFast(node.id, '___physics_deactivation_time', node.getDeactivationTime());
                     }if(node.joint)
                     {
                          vwf.setProperty(node.id, 'transform', node.getTransform(tempmat));
