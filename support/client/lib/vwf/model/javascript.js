@@ -15,28 +15,25 @@
 var jsDriverSelf = this;
 
 
-
+var inTick = false;
 function defaultContext()
 {
     this.setProperty = function(id,name,val)
     {
-
-        
-       
-        
-        
-        
+        if(inTick)
+            vwf.setPropertyFast(id,name,val);
+        else
             vwf.setProperty(id,name,val);
-       
 
-     
     }
     this.getProperty = function(id, name)
     {
-        var val = vwf.getProperty(id, name);
-       
+        if(inTick)
+            return vwf.getPropertyFast(id, name);
+        else
+            return vwf.getProperty(id, name);
+
         
-        return val;
     }
     this.postUpdates = function()
     {
@@ -44,7 +41,7 @@ function defaultContext()
     }
     this.callMethod = function(id,methodname,params)
     {
-        //node that this forces sync!
+        //note that this forces sync!
         
             return vwf.callMethod(id,methodname,params);
        
@@ -74,18 +71,26 @@ function executionContext(parentContext)
             return this.touchedProperties[id+name].val;
         else
         {
-            if(this.parent && this.parent instanceof executionContext &&  this.parent.getProperty(id,name))
+            if(this.parent && this.parent instanceof executionContext )
             {
-                return this.parent.getProperty(id,name);
+                var val = this.parent.getProperty(id,name);
+                if(val)
+                    return val;
             }
 
-            var val = vwf.getProperty(id,name);
-            if(!(typeof(val) == "number" || typeof(val) == "boolean" || val == null || val == undefined))
-            {
+            if(inTick)
+            var val = vwf.getPropertyFast(id,name);
+            else
+                val = vwf.getProperty(id,name);
+            
+            
             this.touchedProperties[id+name] = {id:id,name:name,val:null,originalVal:null}
-            this.touchedProperties[id+name].originalVal = $.extend(true,{},this.touchedProperties[id+name].val);
+            if(!(typeof(val) == "number" || typeof(val) == "boolean" || val == null || val == undefined))
+                this.touchedProperties[id+name].originalVal = JSON.parse(JSON.stringify(this.touchedProperties[id+name].val));
+            else
+                this.touchedProperties[id+name].originalVal = val;
             this.touchedProperties[id+name].val = val;
-            }
+            
 
             
             return val;
@@ -95,10 +100,19 @@ function executionContext(parentContext)
     this.postUpdates = function()
     {
         //debugger;
+        var parentRoot = !(this.parent instanceof executionContext)
         for(var i in this.touchedProperties)
         {
+            if(parentRoot)
+            {
             if(!(Object.deepEquals(this.touchedProperties[i].val,this.touchedProperties[i].originalVal)))
                 this.parent.setProperty(this.touchedProperties[i].id,this.touchedProperties[i].name,this.touchedProperties[i].val);
+            }
+            else
+            {
+                
+                this.parent.touchedProperties[i] = this.touchedProperties[i];
+            }
         }
     }
     this.callMethod = function(id,methodname,params)
@@ -350,11 +364,11 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     {
                         var self = this;
                         var thisid = self.id;
-                        var fromPos = vwf.getProperty(thisid,'worldPosition');
+                        var fromPos = jsDriverSelf.getTopContext().getProperty(thisid,'worldPosition');
                         for(var i in jsDriverSelf.nodes)
                         {
                             var targetNode = jsDriverSelf.nodes[i];
-                            var targetPos = vwf.getProperty(targetNode.id,'worldPosition');
+                            var targetPos = jsDriverSelf.getTopContext().getProperty(targetNode.id,'worldPosition');
                             if(range  )
                             {
                                 if(targetPos && fromPos && MATH.distanceVec3(fromPos,targetPos) < range)
@@ -376,12 +390,12 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                     {
                         var self = this.node;
                         var thisid = self.id;
-                        var fromPos = vwf.getProperty(thisid,'worldPosition');
+                        var fromPos = jsDriverSelf.getTopContext().getProperty(thisid,'worldPosition');
                         var decendents = vwf.decendants(thisid);
                         for(var i in decendents)
                         {
                             var targetNode = jsDriverSelf.nodes[decendents[i]];
-                            var targetPos = vwf.getProperty(targetNode.id,'worldPosition');
+                            var targetPos = jsDriverSelf.getTopContext().getProperty(targetNode.id,'worldPosition');
                             if(range  )
                             {
                                 if(targetPos && fromPos && MATH.distanceVec3(fromPos,targetPos) < range)
@@ -597,7 +611,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             {
                 Object.defineProperty(node, "transformAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
-                        return vwf.getProperty(this.id,"___transformAPI");
+                        return vwf.models.javascript.gettingProperty(this.id,"___transformAPI");
                     },
                     enumerable: true,
                 });
@@ -606,7 +620,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             {
                 Object.defineProperty(node, "audioAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
-                        return vwf.getProperty(this.id,"___audioAPI");
+                        return vwf.models.javascript.gettingProperty(this.id,"___audioAPI");
                     },
                     enumerable: true,
                 });
@@ -615,7 +629,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             {
                 Object.defineProperty(node, "physicsAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
-                        return vwf.getProperty(this.id,"___physicsAPI")},
+                        return vwf.models.javascript.gettingProperty(this.id,"___physicsAPI")},
                     enumerable: true,
                 });
             }
@@ -623,7 +637,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             {
                 Object.defineProperty(node, "clientAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
-                        return vwf.getProperty(this.id,"___clientAPI")},
+                        return vwf.models.javascript.gettingProperty(this.id,"___clientAPI")},
                     enumerable: true,
                 });
             }
@@ -631,7 +645,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             {
                 Object.defineProperty(node, "commsAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
-                        return vwf.getProperty(this.id,"___commsAPI")},
+                        return vwf.models.javascript.gettingProperty(this.id,"___commsAPI")},
                     enumerable: true,
                 });
             }
@@ -639,7 +653,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             {
                 Object.defineProperty(node, "xAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
-                        return vwf.getProperty(this.id,"___xAPI")},
+                        return vwf.models.javascript.gettingProperty(this.id,"___xAPI")},
                     enumerable: true,
                 });
             }
@@ -647,7 +661,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
             {
                 Object.defineProperty(node, "traceAPI", { // TODO: only define on shared "node" prototype?
                     get: function() {
-                        return vwf.getProperty(this.id,"___traceAPI")},
+                        return vwf.models.object.gettingProperty(this.id,"___traceAPI")},
                     enumerable: true,
                 });
             }
@@ -1428,7 +1442,13 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 this.exitContext();
         },
         ticking: function() {
+            inTick = true;
+            var now = performance.now();
+            this.enterNewContext();
             this.callMethodTraverse(this.nodes['index-vwf'], 'tick', []);
+            this.exitContext();
+            console.log("Tick View: " + (performance.now() - now))
+            inTick = false;
         },
         isBehavior: function(node) {
             if (!node)
