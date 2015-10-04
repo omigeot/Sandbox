@@ -53,9 +53,18 @@
             {
                 this.uniforms[i] = THREE.UniformsLib.lights[i];
             }
+            this.buildMat();
+            this.geo = new THREE.PlaneGeometry(100, 100, 100, 100);
+            this.mesh = new THREE.Mesh(this.geo, this.mat);
+            this.mesh.InvisibleToCPUPick = true;
+            this.getRoot().add(this.mesh);
+            _dView.bind('prerender', this.prerender.bind(this));
+            window._dOcean = this;
+        }
+        this.buildMat =function()
+        {
             this.vertexShader = this.getSync(this.vertShaderURL)
             this.fragmentShader = this.getSync(this.fragShaderURL)
-            this.geo = new THREE.PlaneGeometry(100, 100, 100, 100);
             this.mat = new THREE.ShaderMaterial(
             {
                 uniforms: this.uniforms,
@@ -63,10 +72,8 @@
                 vertexShader: this.vertexShader,
                 fragmentShader: this.fragmentShader
             });
-            this.mesh = new THREE.Mesh(this.geo, this.mat);
-            this.mesh.InvisibleToCPUPick = true;
-            this.getRoot().add(this.mesh);
-            _dView.bind('prerender', this.prerender.bind(this));
+            if(this.mesh)
+                this.mesh.material = this.mat;
         }
         this.prerender = function()
         {
