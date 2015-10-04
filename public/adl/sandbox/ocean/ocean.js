@@ -13,7 +13,7 @@
 
         this.initialize = function() {
             this.geo = new THREE.PlaneGeometry(100,100,100,100);
-            thi.mat = new THREE.MeshPhongMaterial();
+            this.mat = new THREE.MeshPhongMaterial();
             this.mesh - new THREE.Mesh(this.geo,this.mat);
             this.getRoot().add(this.mesh);
         }
@@ -27,14 +27,15 @@
            return this.rootNode;
         }
         this.rootNode = new THREE.Object3D();
-        debugger;
+        
     }
+    debugger;
     //default factory code
     return function(childID, childSource, childName, childType, assetSource, asyncCallback) {
         //name of the node constructor
-        var ocean = new ocean(childID, childSource, childName, childType, assetSource, asyncCallback);
+        var ocean1 = new ocean(childID, childSource, childName, childType, assetSource, asyncCallback);
         
-        return ocean;
+        return ocean1;
     }
 })();
-//@ sourceURL=threejs.subdriver.avatar
+//@ sourceURL=threejs.subdriver.ocean

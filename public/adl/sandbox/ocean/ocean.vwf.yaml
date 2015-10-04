@@ -1,4 +1,4 @@
 ---
-extends: node.vwf
-properties:
-  DisplayName: "Ocean"
+extends: http://vwf.example.com/node3.vwf
+properties: 
+  DisplayName: Ocean
