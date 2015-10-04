@@ -1,5 +1,9 @@
 varying vec3 vNormal;
 varying vec3 vSundir;
+varying vec3 vCamDir;
+
+uniform vec3 oCamPos;
+
 vec3 sundir = vec3(.5, .5, 1);
 uniform float t;
 #define numWaves 9
@@ -66,15 +70,15 @@ void main() {
 
 
             //position
-            float Q = 2.0;
+            float Q = 2.0 ;
             float Qi = Q/(w*A[i]*float(numWaves)); // *numWaves?
             float xi = Qi * A[i] * D[i].x * cos( dot(w*D[i],xy) + q*t);
             float yi = Qi * A[i] * D[i].y * cos( dot(w*D[i],xy) + q*t);
             float hi = A[i] * sin( dot(w*D[i],xy) + q * t );
 
-            tPos.x += xi;
-            tPos.y += yi;
-            tPos.z += hi;
+            tPos.x += xi * gA;
+            tPos.y += yi * gA;
+            tPos.z += hi * gA;
 
             float WA = w * A[i];
             float S0 = sin(w * dot(D[i],tPos.xy) + q*t);
@@ -91,5 +95,6 @@ void main() {
       vec3 tNormal = normalize(vec3(-N.x, -N.y, max(.4,1.0-N.z)));
       vNormal = normalMatrix * normalize(tNormal);
       vSundir = normalMatrix * normalize(sundir);
+      vCamDir = normalMatrix * normalize(oCamPos - tPos);
       gl_Position = projectionMatrix * modelViewMatrix * vec4(tPos, 1);
 }

@@ -43,6 +43,11 @@
                 {
                     type: "v4",
                     value: new THREE.Vector4(0, 0, 0, 1)
+                },
+                oCamPos:
+                {
+                    type: "v3",
+                    value: new THREE.Vector3(0, 0, 0, 1)
                 }
             };
             for (var i in THREE.UniformsLib.fog)
@@ -85,6 +90,7 @@
             var now = performance.now();
             var deltaT = now - this.lastFrame;
             this.uniforms.t.value += (deltaT / 1000.0) || 0;
+            this.uniforms.oCamPos.value.set(vp[12],vp[13],[vp[14]-20]);
             this.lastFrame = now;
         }
         this.settingProperty = function(propertyName, propertyValue) {}
