@@ -1,6 +1,7 @@
 varying vec3 vNormal;
 varying vec3 vSundir;
 varying vec3 vCamDir;
+varying float vCamLength;
 
 uniform vec3 oCamPos;
 
@@ -95,6 +96,7 @@ void main() {
       vec3 tNormal = normalize(vec3(-N.x, -N.y, max(.4,1.0-N.z)));
       vNormal = normalMatrix * normalize(tNormal);
       vSundir = normalMatrix * normalize(sundir);
+      vCamLength = length(oCamPos - tPos); 
       vCamDir = normalMatrix * normalize(oCamPos - tPos);
       gl_Position = projectionMatrix * modelViewMatrix * vec4(tPos, 1);
 }
