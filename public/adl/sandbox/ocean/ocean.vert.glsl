@@ -19,7 +19,7 @@ void setup() {
       L[4] = 6.0;
       L[5] = 10.0;
       L[6] = 3.0;
-      L[7] = 1.0;
+      L[7] = 6.0;
       L[8] = 15.0;
       
      
@@ -44,20 +44,16 @@ void main() {
       float x = position.x;
       float y = position.y;
 
-      float h;
-      float n;
+      
+      vec3 N = vec3(0.0,0.0,0.0);
 
-      float dxH = 0.0;
-      float dyH = 0.0;
-
-      float x1 = x;
-      float y1 = y;
+      vec3 tPos = vec3(position);
 
       for (int i = 0; i < numWaves; i++)
       {
             float w =  2.0 * PI / L[i];
             A[i] = 0.5/(w * 2.718281828459045); //for ocean on Earth, A is ususally related to L
-            S[i] = PI/(w * 2.718281828459045);  //for ocean on Earth, S is ususally related to L
+            S[i] = 2.0*PI/(w * 2.718281828459045);  //for ocean on Earth, S is ususally related to L
             float q = S[i] * w;
            
             vec2 xy = vec2(x, y);
@@ -66,28 +62,33 @@ void main() {
             //float hi = A[i] * sin( dot(D[i], xy) * w + t * q);
             //h += hi * gA;
            
-            float dxHi = w * D[i].x * A[i] * cos(     dot(D[i],xy)*w + t * q );
-            float dyHi = w * D[i].y * A[i] * cos(     dot(D[i],xy)*w + t * q );
-
-            dxH += dxHi * gA;
-            dyH += dyHi * gA;
-            
             //Gerstner
 
+
+            //position
             float Q = 2.0;
             float Qi = Q/(w*A[i]*float(numWaves)); // *numWaves?
             float xi = Qi * A[i] * D[i].x * cos( dot(w*D[i],xy) + q*t);
             float yi = Qi * A[i] * D[i].y * cos( dot(w*D[i],xy) + q*t);
             float hi = A[i] * sin( dot(w*D[i],xy) + q * t );
 
-            x1 += xi;
-            y1 += yi;
-            h += hi;
+            tPos.x += xi;
+            tPos.y += yi;
+            tPos.z += hi;
+
+            float WA = w * A[i];
+            float S0 = sin(w * dot(D[i],tPos.xy) + q*t);
+            float C0 = cos(w * dot(D[i],tPos.xy) + q*t);
+
+
+            N.x +=  D[i].x * WA *C0;
+            N.y +=  D[i].y * WA *C0;
+            N.z +=  Qi * WA *S0;
 
 
       }
-      vec3 tPos = vec3(x1, y1, h);
-      vec3 tNormal = normalize(vec3(-dxH, -dyH, 1));
+      
+      vec3 tNormal = normalize(vec3(-N.x, -N.y, max(.4,1.0-N.z)));
       vNormal = normalMatrix * normalize(tNormal);
       vSundir = normalMatrix * normalize(sundir);
       gl_Position = projectionMatrix * modelViewMatrix * vec4(tPos, 1);
