@@ -29,10 +29,10 @@
         {
           
             this.uniforms = {
-                amplitude:
+                t:
                 {
                     type: "f",
-                    value: 1.0
+                    value: 0.0
                 },
                 texture:
                 {
@@ -82,6 +82,10 @@
             root.position.set(vp[12], vp[13], 20);
             root.updateMatrix();
             root.updateMatrixWorld();
+            var now = performance.now();
+            var deltaT = now - this.lastFrame;
+            this.uniforms.t.value += (deltaT / 1000.0) || 0;
+            this.lastFrame = now;
         }
         this.settingProperty = function(propertyName, propertyValue) {}
         this.getRoot = function()
