@@ -47,21 +47,22 @@ varying vec3 vWorldPosition;
 uniform vec3 wrapRGB;
 #endif
 
+uniform float uChop;
+uniform float uReflectPow;
+uniform float uFoam;
 varying vec3 vViewPosition;
 
 
 void main() {
 
-	vec3 mapNormal = texture2D(oNormal, texcoord0.xy / 20.0 + 0.02 * t).rgb + texture2D(oNormal, texcoord0.yx / 15.0 + 0.015 * t).rgb + texture2D(oNormal, texcoord0.xy / 5.0 + 0.05 * t).rgb;
+	vec3 mapNormal = texture2D(oNormal, texcoord0.xy / 20.0 + 0.02 * -t).rgb + texture2D(oNormal, texcoord0.yx / 15.0 + 0.015 * t).rgb + texture2D(oNormal, texcoord0.xy / 5.0 + 0.05 * t).rgb;
 
-	vec3 diffuseTex = texture2D(diffuse, texcoord0.xy / 20.0 + 0.02 * t).rgb + texture2D(diffuse, texcoord0.yx / 15.0 + 0.015 * t).rgb + texture2D(diffuse, texcoord0.xy / 25.0 + 0.05 * t).rgb;
-
-	diffuseTex /= 3.0;
+	vec3 diffuseTex = texture2D(diffuse, texcoord0.xy / 20.0 + 0.02 * -t).rgb + texture2D(diffuse, texcoord0.yx / 15.0 + 0.015 * t).rgb + texture2D(diffuse, texcoord0.xy / 25.0 + 0.05 * t).rgb;
 
 	mapNormal /= 3.0;
 	mapNormal = 2.0 * mapNormal.xyz - 1.0;
 
-
+	mapNormal.xy *= max(0.0,uChop/2.0);
 	vec3 texNormal =  normalize(TBN * mapNormal);
 	float ref = 0.0;
 	vec3 nI  = normalize(vCamDir);
@@ -71,10 +72,12 @@ void main() {
 	float sinT = sin(Ti) / nSnell;
 	float Tt = asin(sinT);
 
-	float ndotl = max(0.35, dot(directionalLightDirection[ 0], texNormal));
+	float ndotl = max(0.00, dot(directionalLightDirection[ 0], texNormal));
 	float spec = pow(clamp(dot(vCamDir, reflect(-directionalLightDirection[ 0], texNormal)), 0.0, 1.0), 16.0);
-	upwelling += ambientLightColor;
-	upwelling *= .2 + ndotl;
+		
+	float scatter =1.0-dot( vNormal,vCamDir);	
+	upwelling +=  ambientLightColor;
+	upwelling *= .4 + scatter;
 	
 //	if(Ti == 0.0)
 	//{
@@ -98,14 +101,22 @@ void main() {
 	//}
 	ref = min(1.0, ref);
 	float dist = 0.3;//exp(-vCamLength/200.0) * kD;
-	sky = 3.5 * textureCube(texture, reflect(-camdir, texNormal)).xyz;
+	vec3 ref_vec = reflect(-camdir, texNormal);
+	ref_vec = mix(-ref_vec, ref_vec,sign(ref_vec.z));
+	sky = uReflectPow * textureCube(texture, ref_vec).xyz;
 	vec3 upwellingC = (1.0 - ref) * upwelling;
-	vec4 water  =  vec4(dist * (ref * sky + upwellingC) + (1.0 - dist) * air, max(.5 + 3.0 * (1.0 - dist), ref));
+	vec4 water  =  vec4(dist * (ref * sky + upwellingC) + (1.0 - dist) * air, max(.5 + 3.0 * (1.0 - dist), 1.0));
 	water += vec4(directionalLightColor[ 0 ],1.0) * spec;
-	vec4 foam = vec4(diffuseTex, 1.0);
-	float foamMix = max(0.0, foam.g * abs(h) * 6.0);
-	gl_FragColor = mix(water, foam, foamMix);
+	
+	
+	
 
-	//gl_FragColor.xyz = vCamDir;
+	vec4 foam = vec4(1.0,1.0,1.0, 1.0) * ndotl + vec4(ambientLightColor,1.0);;
+	foam.a = 1.0;
+	water.a = 1.0;
+	float foamMix = max(0.0,(h)*diffuseTex.r) ;
+	gl_FragColor = mix(water, foam, clamp(foamMix * uFoam,0.0,1.0));
+	
+	
 
 }

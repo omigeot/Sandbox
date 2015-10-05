@@ -7,12 +7,13 @@ varying mat3 TBN;
 varying float h;
 uniform vec3 oCamPos;
 uniform vec3 wPosition;
+uniform float uChop;
 vec3 sundir = vec3(.5, .5, .1);
 uniform float t;
 #define numWaves 9
 #define PI 3.1415926535897932384626433832795
+uniform float uMag;
 
-float gA = .5;
 float L[numWaves];
 float A[numWaves];
 float S[numWaves];
@@ -50,20 +51,22 @@ void main() {
       setup();
       float x = position.x;
       float y = position.y;
-
-      texcoord0 = position;
+      float gA = uMag;
+      
       
       vec3 N = vec3(0.0,0.0,0.0);
       vec3 B = vec3(0.0,0.0,0.0);
 
       vec3 tPos = position + wPosition;
+      texcoord0 = tPos;
       tPos.z = 0.0;
       float camDist = length(oCamPos.xy - position.xy);
       for (int i = 0; i < numWaves; i++)
       {
+            L[i] *= uMag;
             float w =  2.0 * PI / L[i];
             A[i] = 0.5/(w * 2.718281828459045) * min(1.0,(30.0/camDist)); //for ocean on Earth, A is ususally related to L
-            S[i] = 2.0*PI/(w * 2.718281828459045);  //for ocean on Earth, S is ususally related to L
+            S[i] = 3.0 * PI/(w  * 2.718281828459045);  //for ocean on Earth, S is ususally related to L
             float q = S[i] * w;
            
             vec2 xy = vec2(x, y);
@@ -76,7 +79,7 @@ void main() {
 
 
             //position
-            float Q = 1.6 ;
+            float Q = uChop / uMag;
             float Qi = Q/(w*A[i]*float(numWaves)); // *numWaves?
             float xi = Qi * A[i] * D[i].x * cos( dot(w*D[i],xy) + q*t);
             float yi = Qi * A[i] * D[i].y * cos( dot(w*D[i],xy) + q*t);
@@ -86,7 +89,7 @@ void main() {
             tPos.y += yi * gA;
             tPos.z += hi * gA;
 
-            float WA = w * A[i];
+            float WA = w * A[i] *gA;
             float S0 = sin(w * dot(D[i],tPos.xy) + q*t);
             float C0 = cos(w * dot(D[i],tPos.xy) + q*t);
 
@@ -106,7 +109,7 @@ void main() {
       vec3 tNormal = normalize(vec3(-N.x, -N.y, 1.0-N.z));
       vec3 tBinormal = normalize(vec3(1.0-B.x, -B.y, N.z));
       vec3 tTangent = cross(tBinormal,tNormal);
-      tNormal.z = abs(tNormal.z);
+      
       TBN = mat3(tBinormal.x,tBinormal.y,tBinormal.z,
                       tTangent.x,tTangent.y,tTangent.z,
                       tNormal.x,tNormal.y,tNormal.z);
