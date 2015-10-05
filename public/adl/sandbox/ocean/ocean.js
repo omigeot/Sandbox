@@ -14,6 +14,11 @@
         this.inherits = ['vwf/model/threejs/visible.js', 'vwf/model/threejs/transformable.js']
         this.vertShaderURL = "./ocean/ocean.vert.glsl";
         this.fragShaderURL = "./ocean/ocean.frag.glsl";
+        this.direction = 90;
+        this.directionVariation = 180;
+        this.amplitude = 10;
+        this.amplitudeVariation = 15;
+        this.waveNum = 9;
         this.getSync = function(url)
         {
             return $.ajax(
@@ -27,9 +32,38 @@
         }
         this.generateWaves = function()
         {
+            var min = this.amplitude - this.amplitudeVariation;
+            var max = this.amplitude + this.amplitudeVariation;
+            var mean = this.amplitude;
+            var a = ((mean-min)/(max-mean))/5.0;
 
+            for(var i = 0; i < this.waveNum; i++)
+            {
+                var b = Math.random();
+                var amp = min + (a/(a+b))*(max-min);
+                if(amp<1)amp=1;
+                this.uniforms.waves.value[i].x = amp;
+            }
 
+            var min = this.direction - this.directionVariation;
+            var max = this.direction + this.directionVariation;
+            var mean = this.direction;
+            var a = ((mean-min)/(max-mean))/5.0;
 
+            for(var i = 0; i < this.waveNum; i++)
+            {
+                var b = Math.random();
+                var amp = min + (a/(a+b))*(max-min);
+                var dir = [1,0];
+
+                amp/= 57;
+                
+                var x1 = 1 * Math.cos(amp) - 0 * Math.sin(amp);
+                var y1 = 1 * Math.sin(amp) + 0 * Math.cos(amp);
+                this.uniforms.waves.value[i].y = x1;
+                this.uniforms.waves.value[i].z = y1;
+
+            }
         }
         this.initialize = function()
         {
@@ -42,7 +76,7 @@
                 uChop:
                 {
                     type: "f",
-                    value: 2.0
+                    value: 1.4
                 },
                 uReflectPow:
                 {
@@ -119,10 +153,39 @@
                 this.uniforms[i] = THREE.UniformsLib.lights[i];
             }
             this.buildMat();
-            this.geo = new THREE.PlaneGeometry(100, 100, 400, 400);
-            this.mesh = new THREE.Mesh(this.geo, this.mat);
-            this.mesh.InvisibleToCPUPick = true;
-            this.getRoot().add(this.mesh);
+            this.near = new THREE.PlaneGeometry(25, 25, 100, 100);
+            this.nearmesh = new THREE.Mesh(this.near, this.mat.clone());
+            
+            this.nearmesh.InvisibleToCPUPick = true;
+            this.getRoot().add(this.nearmesh);
+           
+            this.med = new THREE.PlaneGeometry(100, 100, 100, 100);
+            this.medmesh = new THREE.Mesh(this.med, this.mat.clone());
+            this.medmesh.InvisibleToCPUPick = true;
+            this.getRoot().add(this.medmesh);
+            this.medmesh.position.z -= .5;
+            
+            this.far = new THREE.PlaneGeometry(400, 400, 100, 100);
+            this.farmesh = new THREE.Mesh(this.far, this.mat.clone());
+            this.farmesh.position.z -= 1;
+            this.farmesh.InvisibleToCPUPick = true;
+            this.getRoot().add(this.farmesh);
+            
+            this.dist = new THREE.PlaneGeometry(1600, 1600, 100, 100);
+            this.distmesh = new THREE.Mesh(this.dist, this.mat.clone());
+            this.distmesh.position.z -= 1.5;
+            this.distmesh.InvisibleToCPUPick = true;
+            this.getRoot().add(this.distmesh);
+
+            this.nearmesh.material.uniforms = $.extend({},this.uniforms);
+            this.medmesh.material.uniforms = $.extend({},this.uniforms);
+            this.farmesh.material.uniforms = $.extend({},this.uniforms);
+            this.distmesh.material.uniforms = $.extend({},this.uniforms);
+
+            this.nearmesh.material.uniforms.edgeLen = {type:"f",value:.25}
+            this.medmesh.material.uniforms.edgeLen = {type:"f",value:1}
+            this.farmesh.material.uniforms.edgeLen = {type:"f",value:4}
+            this.distmesh.material.uniforms.edgeLen = {type:"f",value:8}
             _dView.bind('prerender', this.prerender.bind(this));
             window._dOcean = this;
         }
@@ -147,14 +210,14 @@
         {
             var vp = _dView.getCamera().matrixWorld.elements;
             var root = this.getRoot();
-            root.position.set(Math.floor(vp[12] / 15) * 15, Math.floor(vp[13] / 15) * 15, 20);
-            root.position.set(0, 0, 20);
+            root.position.set(vp[12] , vp[13] , 20);
+            //root.position.set(0, 0, 20);
             root.updateMatrix();
             root.updateMatrixWorld();
             var now = performance.now();
             var deltaT = now - this.lastFrame;
             this.uniforms.t.value += (deltaT / 1000.0) || 0;
-            this.uniforms.oCamPos.value.set(vp[12] - root.matrixWorld.elements[12], vp[13] - root.matrixWorld.elements[13], [vp[14] - 20]);
+            this.uniforms.oCamPos.value.set(vp[12] - root.matrixWorld.elements[12], vp[13] - root.matrixWorld.elements[13], vp[14] - root.matrixWorld.elements[14]);
             this.uniforms.wPosition.value.set(root.matrixWorld.elements[12], root.matrixWorld.elements[13], root.matrixWorld.elements[14]);
             this.lastFrame = now;
         }
@@ -192,4 +255,3 @@
         return ocean1;
     }
 })();
-//@ sourceURL=threejs.subdriver.ocean

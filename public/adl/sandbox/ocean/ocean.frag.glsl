@@ -11,6 +11,7 @@ vec3 upwelling = vec3(0.2, 0.4, 0.6);
 vec3 sky = vec3(0.69, 0.84, 1.0);
 vec3 air = vec3(0.1, 0.1, 0.1);
 uniform float t;
+uniform float edgeLen;
 float nSnell = 1.34;
 float kD = .91;
 uniform samplerCube texture;
@@ -51,13 +52,14 @@ uniform float uChop;
 uniform float uReflectPow;
 uniform float uFoam;
 varying vec3 vViewPosition;
-
+varying vec2 texcoord1;
 
 void main() {
 
-	vec3 mapNormal = texture2D(oNormal, texcoord0.xy / 5.0 + 0.02 * -t).rgb + texture2D(oNormal, texcoord0.yx / 3.0 + 0.015 * t).rgb + texture2D(oNormal, texcoord0.xy / 1.0 + 0.05 * t).rgb;
+	vec3 tc = texcoord0 / edgeLen;
+	vec3 mapNormal = texture2D(oNormal, tc.xy / 5.0 + 0.02 * -t).rgb + texture2D(oNormal, tc.yx / 3.0 + 0.015 * t).rgb + texture2D(oNormal, tc.xy / 1.0 + 0.05 * t).rgb;
 
-	vec3 diffuseTex = texture2D(diffuse, texcoord0.xy / 5.0 + 0.02 * -t).rgb + texture2D(diffuse, texcoord0.yx / 3.0 + 0.015 * t).rgb + texture2D(diffuse, texcoord0.xy / 5.0 + 0.05 * t).rgb;
+	vec3 diffuseTex = texture2D(diffuse, tc.xy / 5.0 + 0.02 * -t).rgb + texture2D(diffuse, tc.yx / 3.0 + 0.015 * t).rgb + texture2D(diffuse, tc.xy / 5.0 + 0.05 * t).rgb;
 
 	mapNormal /= 3.0;
 	mapNormal = 2.0 * mapNormal.xyz - 1.0;
@@ -113,10 +115,11 @@ void main() {
 
 	vec4 foam = vec4(1.0,1.0,1.0, 1.0) * ndotl + vec4(ambientLightColor,1.0);;
 	foam.a = 1.0;
-	water.a = 1.0;
+	//water.a = 1.0-(pow(vCamLength/40.0,15.0));
 	float foamMix = max(0.0,(h)*diffuseTex.r) ;
 	gl_FragColor = mix(water, foam, clamp(foamMix * uFoam,0.0,1.0));
 	
-	
+	float tcl = length(vec2(.5,.5) - texcoord1);
+		gl_FragColor.a = 1.0-smoothstep(.35,.50,tcl);
 
 }
