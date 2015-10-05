@@ -6,7 +6,7 @@ varying float vCamLength;
 varying mat3 TBN;
 varying float h;
 uniform vec3 oCamPos;
-
+uniform vec3 wPosition;
 vec3 sundir = vec3(.5, .5, .1);
 uniform float t;
 #define numWaves 9
@@ -56,7 +56,8 @@ void main() {
       vec3 N = vec3(0.0,0.0,0.0);
       vec3 B = vec3(0.0,0.0,0.0);
 
-      vec3 tPos = vec3(position);
+      vec3 tPos = position + wPosition;
+      tPos.z = 0.0;
       float camDist = length(oCamPos.xy - position.xy);
       for (int i = 0; i < numWaves; i++)
       {
@@ -111,9 +112,11 @@ void main() {
                       tNormal.x,tNormal.y,tNormal.z);
 
       
+      tPos.z += wPosition.z;
       vNormal = normalize(tNormal);
       vSundir = normalize(sundir);
-      vCamLength = length(oCamPos - tPos); 
-      vCamDir =  normalize(oCamPos - tPos);
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(tPos, 1);
+      vCamLength = length(oCamPos - (tPos -  wPosition)); 
+      vCamDir =  normalize(oCamPos - (tPos -  wPosition));
+      
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(tPos -  wPosition, 1);
 }

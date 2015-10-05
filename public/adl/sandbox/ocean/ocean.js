@@ -57,6 +57,11 @@
                         {
                             type: "v3",
                             value: new THREE.Vector3(0, 0, 0, 1)
+                        },
+                        wPosition:
+                        {
+                            type: "v3",
+                            value: new THREE.Vector3(0, 0, 0, 1)
                         }
                     };
                     var sky = vwf_view.kernel.kernel.callMethod(vwf.application(), 'getSkyMat')
@@ -110,6 +115,7 @@
                         var deltaT = now - this.lastFrame;
                         this.uniforms.t.value += (deltaT / 1000.0) || 0;
                         this.uniforms.oCamPos.value.set(vp[12]-root.matrixWorld.elements[12], vp[13]-root.matrixWorld.elements[13], [vp[14] - 20]);
+                        this.uniforms.wPosition.value.set(root.matrixWorld.elements[12],root.matrixWorld.elements[13],root.matrixWorld.elements[14]);
                         this.lastFrame = now;
                     }
                     this.settingProperty = function(propertyName, propertyValue) {}
