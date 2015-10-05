@@ -74,7 +74,7 @@
                             this.uniforms[i] = THREE.UniformsLib.lights[i];
                         }
                         this.buildMat();
-                        this.geo = new THREE.PlaneGeometry(100, 100, 100, 100);
+                        this.geo = new THREE.PlaneGeometry(400, 400, 400, 400);
                         this.mesh = new THREE.Mesh(this.geo, this.mat);
                         this.mesh.InvisibleToCPUPick = true;
                         this.getRoot().add(this.mesh);
@@ -101,13 +101,14 @@
                     {
                         var vp = _dView.getCamera().matrixWorld.elements;
                         var root = this.getRoot();
-                        root.position.set(vp[12], vp[13], 20);
+                        root.position.set(Math.floor(vp[12]/15)*15, Math.floor(vp[13]/15)*15, 20);
+                        root.position.set(0, 0, 20);
                         root.updateMatrix();
                         root.updateMatrixWorld();
                         var now = performance.now();
                         var deltaT = now - this.lastFrame;
                         this.uniforms.t.value += (deltaT / 1000.0) || 0;
-                        this.uniforms.oCamPos.value.set(0, 0, [vp[14] - 20]);
+                        this.uniforms.oCamPos.value.set(vp[12]-root.matrixWorld.elements[12], vp[13]-root.matrixWorld.elements[13], [vp[14] - 20]);
                         this.lastFrame = now;
                     }
                     this.settingProperty = function(propertyName, propertyValue) {}

@@ -21,13 +21,13 @@ void setup() {
 
       L[0] = 10.0;
       L[1] = 5.0;
-      L[2] = 3.0;
+      L[2] = 4.0;
       L[3] = 5.0;
-      L[4] = 6.0;
+      L[4] = 8.00;
       L[5] = 10.0;
-      L[6] = 3.0;
-      L[7] = 6.0;
-      L[8] = 15.0;
+      L[6] = 4.0;
+      L[7] = 8.00;
+      L[8] = 20.0;
       
      
 
@@ -57,11 +57,11 @@ void main() {
       vec3 B = vec3(0.0,0.0,0.0);
 
       vec3 tPos = vec3(position);
-
+      float camDist = length(oCamPos.xy - position.xy);
       for (int i = 0; i < numWaves; i++)
       {
             float w =  2.0 * PI / L[i];
-            A[i] = 0.5/(w * 2.718281828459045); //for ocean on Earth, A is ususally related to L
+            A[i] = 0.5/(w * 2.718281828459045) * min(1.0,(30.0/camDist)); //for ocean on Earth, A is ususally related to L
             S[i] = 2.0*PI/(w * 2.718281828459045);  //for ocean on Earth, S is ususally related to L
             float q = S[i] * w;
            

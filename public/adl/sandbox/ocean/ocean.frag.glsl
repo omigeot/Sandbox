@@ -7,7 +7,7 @@ varying vec3 texcoord0;
 varying mat3 TBN;
 varying float vCamLength;
 varying float h;
-vec3 upwelling = vec3(0.0,0.2,0.3);
+vec3 upwelling = vec3(0.2,0.4,0.6);
 vec3 sky = vec3(0.69,0.84,1.0);
 vec3 air = vec3(0.1,0.1,0.1);
 uniform float t;
@@ -61,8 +61,8 @@ void main() {
 	//	upwelling =  0.8 * textureCube(texture,refract(camdir,texNormal,.9)).xyz;
 	//}
 	ref = min(1.0,ref);
-	float dist = exp(-vCamLength/100.0) * kD;
-	sky = 2.0*textureCube(texture,reflect(-camdir,texNormal)).xyz;
+	float dist = 0.3;//exp(-vCamLength/200.0) * kD;
+	sky = 3.5*textureCube(texture,reflect(-camdir,texNormal)).xyz;
 	vec3 upwellingC = (1.0-ref)*upwelling;
 	vec4 water  =  vec4(dist * (ref * sky + upwellingC)+(1.0-dist)*air,max(.5 + 3.0*(1.0-dist),ref));
 	water += vec4(1.0,1.0,1.0,1.0) * spec;
