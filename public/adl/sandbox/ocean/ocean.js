@@ -38,6 +38,16 @@
                             type: "t",
                             value: _SceneManager.getTexture("./checker.jpg")
                         },
+                        oNormal:
+                        {
+                            type: "t",
+                            value: _SceneManager.getTexture("./ocean/oNormal.jpeg")
+                        },
+                        diffuse:
+                        {
+                            type: "t",
+                            value: _SceneManager.getTexture("./ocean/diffuse.jpg")
+                        },
                         endColor:
                         {
                             type: "v4",

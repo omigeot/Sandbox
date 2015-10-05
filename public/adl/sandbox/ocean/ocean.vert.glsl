@@ -1,11 +1,13 @@
 varying vec3 vNormal;
 varying vec3 vSundir;
 varying vec3 vCamDir;
+varying vec3 texcoord0;
 varying float vCamLength;
-
+varying mat3 TBN;
+varying float h;
 uniform vec3 oCamPos;
 
-vec3 sundir = vec3(.5, .5, 1);
+vec3 sundir = vec3(.5, .5, .1);
 uniform float t;
 #define numWaves 9
 #define PI 3.1415926535897932384626433832795
@@ -49,8 +51,10 @@ void main() {
       float x = position.x;
       float y = position.y;
 
+      texcoord0 = position;
       
       vec3 N = vec3(0.0,0.0,0.0);
+      vec3 B = vec3(0.0,0.0,0.0);
 
       vec3 tPos = vec3(position);
 
@@ -71,11 +75,11 @@ void main() {
 
 
             //position
-            float Q = 2.0 ;
+            float Q = 1.6 ;
             float Qi = Q/(w*A[i]*float(numWaves)); // *numWaves?
             float xi = Qi * A[i] * D[i].x * cos( dot(w*D[i],xy) + q*t);
             float yi = Qi * A[i] * D[i].y * cos( dot(w*D[i],xy) + q*t);
-            float hi = A[i] * sin( dot(w*D[i],xy) + q * t );
+            float hi =  A[i] * sin( dot(w*D[i],xy) + q * t );
 
             tPos.x += xi * gA;
             tPos.y += yi * gA;
@@ -90,13 +94,26 @@ void main() {
             N.y +=  D[i].y * WA *C0;
             N.z +=  Qi * WA *S0;
 
+            B.x += Qi * (D[i].x*D[i].x) * WA * S0;
+            B.y += Qi * D[i].y * D[i].y *WA * S0;
+            B.z += D[i].x * WA * C0;
+
 
       }
       
-      vec3 tNormal = normalize(vec3(-N.x, -N.y, max(.4,1.0-N.z)));
-      vNormal = normalMatrix * normalize(tNormal);
-      vSundir = normalMatrix * normalize(sundir);
+      h = tPos.z;
+      vec3 tNormal = normalize(vec3(-N.x, -N.y, 1.0-N.z));
+      vec3 tBinormal = normalize(vec3(1.0-B.x, -B.y, N.z));
+      vec3 tTangent = cross(tBinormal,tNormal);
+      tNormal.z = abs(tNormal.z);
+      TBN = mat3(tBinormal.x,tBinormal.y,tBinormal.z,
+                      tTangent.x,tTangent.y,tTangent.z,
+                      tNormal.x,tNormal.y,tNormal.z);
+
+      
+      vNormal = normalize(tNormal);
+      vSundir = normalize(sundir);
       vCamLength = length(oCamPos - tPos); 
-      vCamDir = normalMatrix * normalize(oCamPos - tPos);
+      vCamDir =  normalize(oCamPos - tPos);
       gl_Position = projectionMatrix * modelViewMatrix * vec4(tPos, 1);
 }
