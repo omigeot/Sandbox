@@ -93,6 +93,7 @@
                             fragmentShader: this.fragmentShader
                         });
                         this.mat.transparent = true;
+                        this.mat.lights = true;
                         this.mat.side = 0;
                         if (this.mesh)
                             this.mesh.material = this.mat;
