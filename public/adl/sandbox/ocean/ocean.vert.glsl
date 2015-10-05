@@ -14,36 +14,19 @@ uniform float t;
 #define PI 3.1415926535897932384626433832795
 uniform float uMag;
 
+uniform vec3 waves[9];
+
 float L[numWaves];
 float A[numWaves];
 float S[numWaves];
 vec2 D[numWaves];
 void setup() {
 
-      L[0] = 10.0;
-      L[1] = 5.0;
-      L[2] = 4.0;
-      L[3] = 5.0;
-      L[4] = 8.00;
-      L[5] = 10.0;
-      L[6] = 4.0;
-      L[7] = 8.00;
-      L[8] = 20.0;
-      
-     
-
-      D[0] = normalize(vec2(1.0, 1.0));
-      D[1] = normalize(vec2(-1.0, 1.0));
-      D[2] = normalize(vec2(1.0, -1.0));
-
-      D[3] = normalize(vec2(1.6, 1.4));
-      D[4] = normalize(vec2(-0.3, 1.0));
-      D[5] = normalize(vec2(6.0, -1.0));
-
-
-      D[6] = normalize(vec2(6.0, -1.0));
-      D[7] = normalize(vec2(-1.0, 61.0));
-      D[8] = normalize(vec2(-1.6, 1.0));
+      for(int i =0; i < numWaves; i++)
+      {
+            L[i] = waves[i].x;
+            D[i] = normalize(vec2(waves[i].y, waves[i].z));
+      }
 
 }
 void main() {
@@ -63,7 +46,7 @@ void main() {
       float camDist = length(oCamPos.xy - position.xy);
       for (int i = 0; i < numWaves; i++)
       {
-            L[i] *= uMag;
+            L[i] *= uMag/2.0;
             float w =  2.0 * PI / L[i];
             A[i] = 0.5/(w * 2.718281828459045) * min(1.0,(30.0/camDist)); //for ocean on Earth, A is ususally related to L
             S[i] = 3.0 * PI/(w  * 2.718281828459045);  //for ocean on Earth, S is ususally related to L

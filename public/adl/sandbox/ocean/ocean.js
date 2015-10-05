@@ -25,6 +25,12 @@
                 dataType: "text"
             }).responseText;
         }
+        this.generateWaves = function()
+        {
+
+
+
+        }
         this.initialize = function()
         {
             this.uniforms = {
@@ -43,6 +49,20 @@
                     type: "f",
                     value: 3.5
                 },
+                waves:{
+                    type: "v3v",
+                    value:[
+                    (new THREE.Vector3(10,1.0, 1.0)),
+                    (new THREE.Vector3(3.5,-1.0, 1.0)),
+                    (new THREE.Vector3(6,1.0, -1.0)),
+                    (new THREE.Vector3(5,1.6, 1.4)),
+                    (new THREE.Vector3(8,-0.3, 1.0)),
+                    (new THREE.Vector3(30,6.0, -1.0)),
+                    (new THREE.Vector3(4,6.0, -1.0)),
+                    (new THREE.Vector3(8,-1.0, 61.0)),
+                    (new THREE.Vector3(20,-1.6, 1.0))
+                    ]
+                },
                 uFoam:
                 {
                     type: "f",
@@ -51,7 +71,7 @@
                 uMag:
                 {
                     type: "f",
-                    value: 1
+                    value: .5
                 },
                 texture:
                 {
@@ -99,7 +119,7 @@
                 this.uniforms[i] = THREE.UniformsLib.lights[i];
             }
             this.buildMat();
-            this.geo = new THREE.PlaneGeometry(400, 400, 400, 400);
+            this.geo = new THREE.PlaneGeometry(100, 100, 400, 400);
             this.mesh = new THREE.Mesh(this.geo, this.mat);
             this.mesh.InvisibleToCPUPick = true;
             this.getRoot().add(this.mesh);

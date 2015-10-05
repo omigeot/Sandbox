@@ -55,9 +55,9 @@ varying vec3 vViewPosition;
 
 void main() {
 
-	vec3 mapNormal = texture2D(oNormal, texcoord0.xy / 20.0 + 0.02 * -t).rgb + texture2D(oNormal, texcoord0.yx / 15.0 + 0.015 * t).rgb + texture2D(oNormal, texcoord0.xy / 5.0 + 0.05 * t).rgb;
+	vec3 mapNormal = texture2D(oNormal, texcoord0.xy / 5.0 + 0.02 * -t).rgb + texture2D(oNormal, texcoord0.yx / 3.0 + 0.015 * t).rgb + texture2D(oNormal, texcoord0.xy / 1.0 + 0.05 * t).rgb;
 
-	vec3 diffuseTex = texture2D(diffuse, texcoord0.xy / 20.0 + 0.02 * -t).rgb + texture2D(diffuse, texcoord0.yx / 15.0 + 0.015 * t).rgb + texture2D(diffuse, texcoord0.xy / 25.0 + 0.05 * t).rgb;
+	vec3 diffuseTex = texture2D(diffuse, texcoord0.xy / 5.0 + 0.02 * -t).rgb + texture2D(diffuse, texcoord0.yx / 3.0 + 0.015 * t).rgb + texture2D(diffuse, texcoord0.xy / 5.0 + 0.05 * t).rgb;
 
 	mapNormal /= 3.0;
 	mapNormal = 2.0 * mapNormal.xyz - 1.0;
