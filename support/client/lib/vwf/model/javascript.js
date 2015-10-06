@@ -946,11 +946,11 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                     var self = this;
                     var thisid = self.id;
                     var fromPos = jsDriverSelf.getTopContext().getProperty(thisid, 'worldPosition');
-                    for (var i in jsDriverSelf.nodes)
+                    if(!jsDriverSelf.methodIndex[signal]) return;
+                    for (var i =0; i < jsDriverSelf.methodIndex[signal].length; i++)
                     {
-                        if (jsDriverSelf.nodes[i].private.bodies[signal]) //don't bother with distance check if node cannot receive
+                        var targetNode = jsDriverSelf.nodes[jsDriverSelf.methodIndex[signal][i]];
                         {
-                            var targetNode = jsDriverSelf.nodes[i];
                             var targetPos = jsDriverSelf.getTopContext().getProperty(targetNode.id, 'worldPosition');
                             if (range)
                             {
@@ -1256,6 +1256,29 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 node.traceAPI = new APIModules.traceAPI(node.id);
             }
         },
+        methodIndex:{},
+        indexMethods:function(child)
+        {
+            for(var i in child.methods)
+            {
+                if(!this.methodIndex[i])
+                    this.methodIndex[i] = [];
+                if(this.methodIndex[i].indexOf(child.id) == -1)
+                    this.methodIndex[i].push(child.id);
+            }
+        },
+        deindexMethods:function(child)
+        {
+            for(var i in child.methods)
+            {
+                if (this.methodIndex[i])
+                {
+                   var idx = this.methodIndex[i].indexOf(child.id);
+                   if(idx !== -1)
+                       this.methodIndex[i].splice(idx,1)
+                }
+            }
+        },
         // -- initializingNode ---------------------------------------------------------------------
         // Invoke an initialize() function if one exists.
         initializingNode: function(nodeID, childID)
@@ -1266,6 +1289,8 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 this.hookupBehavior(child, nodeID);
             }
             this.hookUpAPIs(child);
+            child.private.initialized = true;
+            this.indexMethods(child);
             var scriptText = "this.initialize && this.initialize()";
             try
             {
@@ -1279,12 +1304,14 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 console.error("initializingNode", childID,
                     "exception in initialize:", utility.exceptionMessage(e));
             }
+           
             return undefined;
         },
         // -- deletingNode -------------------------------------------------------------------------
         deletingNode: function(nodeID)
         {
             var child = this.nodes[nodeID];
+            this.deindexMethods(child);
             //this.callMethodTraverse(this.nodes['index-vwf'],'deletingNode',[nodeID]);
             var node = child.parent;
             if (child.parent && child.parent.__children_by_name)
@@ -1671,6 +1698,13 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 }
             }
             node.private.change++; // invalidate the "future" cache
+            if(node.private.initialized)
+            {
+                if(!this.methodIndex[methodName])
+                     this.methodIndex[methodName] = [];
+                if(this.methodIndex[methodName].indexOf(node.id) == -1)
+                     this.methodIndex[methodName].push(node.id)
+            }
         },
         deletingMethod: function(nodeID, methodName)
         {
@@ -1701,6 +1735,16 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                     this.dehookupBehaviorMethod(node.children[i], nodeID, methodName);
                 }
             }
+            if (node.private.initialized)
+            {
+                if (this.methodIndex[methodName])
+                {
+                   var idx = this.methodIndex[methodName].indexOf(nodeID);
+                   if(idx !== -1)
+                       this.methodIndex[methodName].splice(idx,1)
+                }
+            }
+        
             return undefined;
         },
         // -- callingMethod ------------------------------------------------------------------------
