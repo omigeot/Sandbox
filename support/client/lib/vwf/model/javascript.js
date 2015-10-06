@@ -391,16 +391,17 @@ var APIModules={
         }
         this.rotateAroundAxis = function(angle, axis, coordinateSystem) {
             axis = Vec3.normalize(axis, []);
+            var transform = jsDriverSelf.getTopContext().getProperty(this.id, "transform");
             if (!coordinateSystem)
                 coordinateSystem = 'parent';
             if (coordinateSystem == 'local') {
-                var axis = Mat4.multVec3NoTranslate(self.transform, axis, []);
+                var axis = Mat4.multVec3NoTranslate(transform, axis, []);
             }
             angle /= 57.2957795;
             var rotmat = Mat4.makeRotate([], angle, axis[0], axis[1], axis[2]);
             var position = this.getPosition();
             var scale = this.getScale();
-            var transform = jsDriverSelf.getTopContext().getProperty(this.id, "transform");
+           
             transform[12] = 0;
             transform[13] = 0;
             transform[14] = 0;
@@ -408,7 +409,7 @@ var APIModules={
             transform[12] = position[0];
             transform[13] = position[1];
             transform[14] = position[2];
-            transform = jsDriverSelf.getTopContext().getProperty(this.id, "transform")
+            
             this.scaleMatrix(scale, transform);
             jsDriverSelf.getTopContext().setProperty(this.id, "transform", transform);
         }
@@ -467,7 +468,7 @@ var APIModules={
             mat[13] = pos[1];
             mat[14] = pos[2];
             mat = this.scaleMatrix(scale, mat);
-            self.transform = mat;
+            jsDriverSelf.getTopContext().setProperty(this.id, "transform", mat);
         }
         this.getScale = function() {
             var mat = jsDriverSelf.getTopContext().getProperty(this.id, "transform");
@@ -1666,7 +1667,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 }
 
         },
-        JavascriptEvalKeys:function(nodeID,methodName,methodParameters)
+        JavascriptEvalKeys:function(node,methodName,methodParameters)
         {
 
                 var ret = (function() {
@@ -1689,7 +1690,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
                 }).apply(node);
                 return ret;
         },
-        JavascriptEvalFunction:function(nodeID,methodName,methodParameters)
+        JavascriptEvalFunction:function(node,methodName,methodParameters)
         {
             
 
@@ -1748,11 +1749,11 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility) 
 
             //used for the autocomplete - eval in the context of the node, and get the keys
             if (methodName == 'JavascriptEvalKeys') {
-                return this.JavascriptEvalKeys(nodeID, methodName, methodParameters)
+                return this.JavascriptEvalKeys(node, methodName, methodParameters)
             }
             //used by the autocomplete - eval in the context of the node and get the function params
             if (methodName == 'JavascriptEvalFunction') {
-                return this.JavascriptEvalFunction(nodeID, methodName, methodParameters)
+                return this.JavascriptEvalFunction(node, methodName, methodParameters)
             }
             var body = node.private.bodies && node.private.bodies[methodName];
 
