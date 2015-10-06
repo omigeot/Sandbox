@@ -158,7 +158,7 @@
                 this.uniforms[i] = THREE.UniformsLib.lights[i];
             }
             this.buildMat();
-            this.near = new THREE.PlaneGeometry(1, 1, 200, 200);
+            this.near = new THREE.PlaneGeometry(2, 2, 200, 200);
             this.nearmesh = new THREE.Mesh(this.near, this.mat);
             
             this.nearmesh.InvisibleToCPUPick = true;

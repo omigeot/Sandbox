@@ -37,8 +37,7 @@ void setup() {
 void main() {
 
       setup();
-      float x = position.x;
-      float y = position.y;
+     
       float gA = uMag;
 
 
@@ -50,33 +49,31 @@ void main() {
       vec4 tpos1 = mProj * vec4(tPos.xy,-1.0,1.0);
       vec4 tpos2 = mProj * vec4(tPos.xy,1.0,1.0);
       
-      
+      float p_x = tpos1.x;
+      float p_dx = tpos2.x - p_x;
+      float p_y = tpos1.y;
+      float p_dy = tpos2.y - p_y;
+      float p_z = tpos1.z;
+      float p_dz = tpos2.z - p_z;
       float p_w = tpos1.w;
       float p_dw = tpos2.w - p_w;
+      float p_h = 5.0;
+      float i_t = (p_w*p_h-p_z)/(p_dz - p_dw * p_h);
 
-      float p_x = tpos1.x*p_w;
-      float p_dx = tpos2.x*p_w - p_x;
-      float p_y = tpos1.y*p_w;
-      float p_dy = tpos2.y*p_w - p_y;
-      float p_z = tpos1.z*p_w;
-      float p_dz = tpos2.z*p_w - p_z;
-      
-      float p_h = 0.0;
-      vec3 l = normalize(tpos1.xyz - tpos2.xyz);
-      float i_t = dot(vec3(0,0,0) - tpos1.xyz,vec3(0,0,1)) / dot(l,vec3(0,0,1));
       float tw = p_w + p_dw*i_t;
-      tPos.x = (p_x + p_dx*i_t);
-      tPos.y = (p_y + p_dy*i_t);
-      tPos.z = (p_z + p_dz*i_t);
+      tPos.x = (p_x + p_dx*i_t)/tw;
+      tPos.y = (p_y + p_dy*i_t)/tw;
+      tPos.z = (p_z + p_dz*i_t)/tw;
       
-
+      float x = tPos.x;
+      float y = tPos.y;
       //tPos.xyz = tpos1.xyz;
      // tPos.xy += wPosition.xy;
       texcoord0 = tPos;
       texcoord1 = uv;
   //    tPos.z = 0.0;
-      float camDist = length(oCamPos.xy - position.xy);
-      for (int i = 0; i < 0; i++)
+      float camDist = length(oCamPos.xyz - tPos.xyz);
+      for (int i = 0; i < numWaves; i++)
       {
             if (waves[i].x > edgeLen*2.0)
             {
@@ -85,7 +82,8 @@ void main() {
                   L[i] *= uMag / 2.0;
                   float w =  2.0 * PI / L[i];
                   A[i] = 0.5 / (w * 2.718281828459045); //for ocean on Earth, A is ususally related to L
-                  A[i] *= clamp(0.0, 1.0, 10.0 / camDist);
+                  A[i] *= max(.000,smoothstep(1.0, 0.01, (camDist*camDist)/(1000.0*L[i])));
+                  if(A[i] == 0.0) continue;
                   S[i] = 3.0 * PI / (w  * 2.718281828459045); //for ocean on Earth, S is ususally related to L
                   float q = S[i] * w;
 
@@ -126,7 +124,7 @@ void main() {
 
       }
 
-      h = tPos.z; 
+      h = tPos.z - 5.0; 
    //   tPos.xy -= wPosition.xy;
       vec3 tNormal = normalize(vec3(-N.x, -N.y, 1.0 - N.z));
       vec3 tBinormal = normalize(vec3(1.0 - B.x, -B.y, N.z));
@@ -140,8 +138,11 @@ void main() {
       
       vNormal = normalize(tNormal);
       vSundir = normalize(sundir);
-      vCamLength = length(oCamPos - (tPos ));
-      vCamDir =  normalize(oCamPos - (tPos ));
+
+      
 
       gl_Position = projectionMatrix * modelViewMatrix * vec4(tPos , 1);
+      
+      vCamLength = length(oCamPos - (tPos ));
+      vCamDir =  normalize(oCamPos - (tPos ));
 }
