@@ -158,12 +158,16 @@
                 this.uniforms[i] = THREE.UniformsLib.lights[i];
             }
             this.buildMat();
-            this.near = new THREE.PlaneGeometry(2, 2, 200, 200);
+            this.near = new THREE.PlaneGeometry(1, 1, 200, 200);
+            var t = new THREE.Matrix4();
+            
             this.nearmesh = new THREE.Mesh(this.near, this.mat);
             
             this.nearmesh.InvisibleToCPUPick = true;
             this.getRoot().add(this.nearmesh);
-           
+            this.tracker = new THREE.Mesh(new THREE.SphereGeometry(1,1,10,10))
+            _dScene.add(this.tracker);
+
             this.nearmesh.material.uniforms.edgeLen = {type:"f",value:1}
          
             _dView.bind('prerender', this.prerender.bind(this));
@@ -186,26 +190,139 @@
             if (this.nearmesh)
                 this.nearmesh.material = this.mat;
         }
+        this.up = new THREE.Vector3(0,0,1);
         this.prerender = function()
         {
+            if(this.disable) return;
             var vp = _dView.getCamera().matrixWorld.elements;
             var root = this.getRoot();
-            root.position.set(vp[12] , vp[13] , 20);
             root.position.set(0, 0, 0);
             root.updateMatrix();
             root.updateMatrixWorld();
             var now = performance.now();
             var deltaT = now - this.lastFrame;
 
-            var _viewProjectionMatrix = new THREE.Matrix4();
-             _viewProjectionMatrix.multiplyMatrices(_dView.getCamera().projectionMatrix, _dView.getCamera().matrixWorldInverse);
 
+
+            var _viewProjectionMatrix = new THREE.Matrix4();
+
+            var target = new THREE.Vector3(0,0,-10);
+            target.applyMatrix4(_dView.getCamera().matrixWorld);
+            target.z = 5.0;
+            var eye = new THREE.Vector3(vp[12],vp[13],vp[14]+10)
+            var lookat = (new THREE.Matrix4()).lookAt(eye,target,this.up,2);
+            lookat.setPosition(eye);
+            var xMax = -Infinity;
+            var xMin = Infinity;
+
+            var yMax = -Infinity;
+            var yMin = Infinity;
+
+            var campos = [vp[12],vp[13],vp[14]];
+            var ivp = MATH.inverseMat4(this.getViewProjection());
+            var cornerPoints = [];
+            cornerPoints.push(this.GetWorldPickRay([1,1,1,1],ivp,campos));
+            cornerPoints.push(this.GetWorldPickRay([1,-1,1,1],ivp,campos));
+            cornerPoints.push(this.GetWorldPickRay([-1,1,1,1],ivp,campos));
+            cornerPoints.push(this.GetWorldPickRay([-1,-1,1,1],ivp,campos));
+            cornerPoints.push(this.GetWorldPickRay([1,1,0,1],ivp,campos));
+            cornerPoints.push(this.GetWorldPickRay([1,-1,0,1],ivp,campos));
+            cornerPoints.push(this.GetWorldPickRay([-1,1,0,1],ivp,campos));
+            cornerPoints.push(this.GetWorldPickRay([-1,-1,0,1],ivp,campos));
+
+
+            var intersections = [];
+            var hit = this.intersectLinePlane(cornerPoints[0],cornerPoints[4]);
+            if(hit) intersections.push(hit);
+           
+            hit = this.intersectLinePlane(cornerPoints[1],cornerPoints[5]);
+            if(hit) intersections.push(hit);
+            hit = this.intersectLinePlane(cornerPoints[2],cornerPoints[6]);
+            if(hit) intersections.push(hit);
+            hit = this.intersectLinePlane(cornerPoints[3],cornerPoints[7]);
+            if(hit) intersections.push(hit);
+             this.tracker.position.set(hit[0],hit[1],hit[2]);
+
+            this.tracker.position.fromArray(intersections[0]) 
+            this.tracker.updateMatrix();
+            this.tracker.updateMatrixWorld(true);
+
+            var lookatI = (new THREE.Matrix4()).getInverse(lookat);
+            _viewProjectionMatrix.multiplyMatrices(_dView.getCamera().projectionMatrix, lookatI);
             this.uniforms.mProj.value.getInverse(_viewProjectionMatrix);
+
+            var projSpacePoints = []
+            for(var i =0; i < intersections.length; i++)
+            {
+                intersections[i][2] = 0;
+                var pv = new THREE.Vector3(intersections[i][0],intersections[i][1],intersections[i][2]);
+                pv.applyMatrix4(_viewProjectionMatrix)
+                projSpacePoints.push(pv);
+            }
+
+            for(var i =0 ;i < projSpacePoints.length; i++)
+            {
+                if(projSpacePoints[i].x < xMin)
+                    xMin = projSpacePoints[i].x;
+                if(projSpacePoints[i].y < yMin)
+                    yMin = projSpacePoints[i].y;
+
+                if(projSpacePoints[i].x > xMax)
+                    xMax = projSpacePoints[i].x;
+                if(projSpacePoints[i].y > yMax)
+                    yMax = projSpacePoints[i].y;
+            }
+
+            var mRange = [
+            2,    0,  0,    0,
+            0,    2,  0,    0,
+            0,    0,            1,    0,
+            0,    0,      0,    1
+            ]
+            var mRangeM = (new THREE.Matrix4()).fromArray(mRange);
+            var posfd = [this.uniforms.mProj.value.elements[3],this.uniforms.mProj.value.elements[7],this.uniforms.mProj.value.elements[14]];
+            this.uniforms.mProj.value.multiplyMatrices(mRangeM,this.uniforms.mProj.value.clone());
+
+         
+            
             this.uniforms.t.value += (deltaT / 1000.0) || 0;
             this.uniforms.oCamPos.value.set(vp[12] - root.matrixWorld.elements[12], vp[13] - root.matrixWorld.elements[13], vp[14] - root.matrixWorld.elements[14]);
-            this.uniforms.wPosition.value.set(root.matrixWorld.elements[12]%1000, root.matrixWorld.elements[13]%1000, root.matrixWorld.elements[14]%1000);
+            this.uniforms.wPosition.value.set(0,0,0);
             this.lastFrame = now;
         }
+        this.intersectLinePlane = function(raypoint0, raypoint ) {
+            var planepoint = [0,0,5];
+            var planenormal = [0,0,1];
+            var ray = MATH.subVec3(raypoint,raypoint0);
+            var len = MATH.lengthVec3(ray)
+            var ray = MATH.toUnitVec3(ray);
+            var n = MATH.dotVec3(MATH.subVec3(planepoint, raypoint), planenormal);
+            var d = MATH.dotVec3(ray, planenormal);
+            if (d == 0) return raypoint0;
+            if(d < 0) return raypoint0;
+            if(Math.abs(d) > len) return null;
+            var dist = n / d;
+            var alongray = MATH.scaleVec3(ray,dist);
+            var intersect = MATH.addVec3(alongray,    raypoint);
+            return intersect;
+        }.bind(this);
+        this.getViewProjection = function() {
+          
+            var cam = _dView.getCamera();
+            cam.matrixWorldInverse.getInverse(cam.matrixWorld);
+            var _viewProjectionMatrix = new THREE.Matrix4();
+            _viewProjectionMatrix.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse);
+            return MATH.transposeMat4(_viewProjectionMatrix.toArray([]));
+        }
+        this.GetWorldPickRay = function(vec,ivp,campos) {
+            var worldmousepos = MATH.mulMat4Vec4(ivp,vec);//@ sourceURL=threejs.subdriver.ocean()), screenmousepos);
+            worldmousepos[0] /= worldmousepos[3];
+            worldmousepos[1] /= worldmousepos[3];
+            worldmousepos[2] /= worldmousepos[3];
+           
+            
+            return worldmousepos;
+        }.bind(this);
         this.settingProperty = function(propertyName, propertyValue) {
 
             if(propertyName == "uMag")
@@ -239,4 +356,6 @@
         var ocean1 = new ocean(childID, childSource, childName, childType, assetSource, asyncCallback);
         return ocean1;
     }
+
 })();
+//@ sourceURL=threejs.subdriver.ocean
