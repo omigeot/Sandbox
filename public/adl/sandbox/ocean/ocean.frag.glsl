@@ -119,7 +119,6 @@ void main() {
 	float foamMix = max(0.0,(h)*diffuseTex.r) ;
 	gl_FragColor = mix(water, foam, clamp(foamMix * uFoam,0.0,1.0));
 	
-	float tcl = length(vec2(.5,.5) - texcoord1);
-		gl_FragColor.a = 1.0-smoothstep(.35,.50,tcl);
+	
 
 }

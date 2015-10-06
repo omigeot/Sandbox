@@ -127,6 +127,11 @@
                     type: "v4",
                     value: new THREE.Vector4(0, 0, 0, 1)
                 },
+                mProj:
+                {
+                    type: "m4",
+                    value: new THREE.Matrix4()
+                },
                 oCamPos:
                 {
                     type: "v3",
@@ -153,39 +158,14 @@
                 this.uniforms[i] = THREE.UniformsLib.lights[i];
             }
             this.buildMat();
-            this.near = new THREE.PlaneGeometry(25, 25, 100, 100);
-            this.nearmesh = new THREE.Mesh(this.near, this.mat.clone());
+            this.near = new THREE.PlaneGeometry(1, 1, 200, 200);
+            this.nearmesh = new THREE.Mesh(this.near, this.mat);
             
             this.nearmesh.InvisibleToCPUPick = true;
             this.getRoot().add(this.nearmesh);
            
-            this.med = new THREE.PlaneGeometry(100, 100, 100, 100);
-            this.medmesh = new THREE.Mesh(this.med, this.mat.clone());
-            this.medmesh.InvisibleToCPUPick = true;
-            this.getRoot().add(this.medmesh);
-            this.medmesh.position.z -= .5;
-            
-            this.far = new THREE.PlaneGeometry(400, 400, 100, 100);
-            this.farmesh = new THREE.Mesh(this.far, this.mat.clone());
-            this.farmesh.position.z -= 1;
-            this.farmesh.InvisibleToCPUPick = true;
-            this.getRoot().add(this.farmesh);
-            
-            this.dist = new THREE.PlaneGeometry(1600, 1600, 100, 100);
-            this.distmesh = new THREE.Mesh(this.dist, this.mat.clone());
-            this.distmesh.position.z -= 1.5;
-            this.distmesh.InvisibleToCPUPick = true;
-            this.getRoot().add(this.distmesh);
-
-            this.nearmesh.material.uniforms = $.extend({},this.uniforms);
-            this.medmesh.material.uniforms = $.extend({},this.uniforms);
-            this.farmesh.material.uniforms = $.extend({},this.uniforms);
-            this.distmesh.material.uniforms = $.extend({},this.uniforms);
-
-            this.nearmesh.material.uniforms.edgeLen = {type:"f",value:.25}
-            this.medmesh.material.uniforms.edgeLen = {type:"f",value:1}
-            this.farmesh.material.uniforms.edgeLen = {type:"f",value:4}
-            this.distmesh.material.uniforms.edgeLen = {type:"f",value:8}
+            this.nearmesh.material.uniforms.edgeLen = {type:"f",value:1}
+         
             _dView.bind('prerender', this.prerender.bind(this));
             window._dOcean = this;
         }
@@ -203,22 +183,27 @@
             this.mat.transparent = true;
             this.mat.lights = true;
             this.mat.side = 0;
-            if (this.mesh)
-                this.mesh.material = this.mat;
+            if (this.nearmesh)
+                this.nearmesh.material = this.mat;
         }
         this.prerender = function()
         {
             var vp = _dView.getCamera().matrixWorld.elements;
             var root = this.getRoot();
             root.position.set(vp[12] , vp[13] , 20);
-            //root.position.set(0, 0, 20);
+            root.position.set(0, 0, 0);
             root.updateMatrix();
             root.updateMatrixWorld();
             var now = performance.now();
             var deltaT = now - this.lastFrame;
+
+            var _viewProjectionMatrix = new THREE.Matrix4();
+             _viewProjectionMatrix.multiplyMatrices(_dView.getCamera().projectionMatrix, _dView.getCamera().matrixWorldInverse);
+
+            this.uniforms.mProj.value.getInverse(_viewProjectionMatrix);
             this.uniforms.t.value += (deltaT / 1000.0) || 0;
             this.uniforms.oCamPos.value.set(vp[12] - root.matrixWorld.elements[12], vp[13] - root.matrixWorld.elements[13], vp[14] - root.matrixWorld.elements[14]);
-            this.uniforms.wPosition.value.set(root.matrixWorld.elements[12], root.matrixWorld.elements[13], root.matrixWorld.elements[14]);
+            this.uniforms.wPosition.value.set(root.matrixWorld.elements[12]%1000, root.matrixWorld.elements[13]%1000, root.matrixWorld.elements[14]%1000);
             this.lastFrame = now;
         }
         this.settingProperty = function(propertyName, propertyValue) {
