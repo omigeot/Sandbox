@@ -165,21 +165,8 @@
             
             this.nearmesh.InvisibleToCPUPick = true;
             this.getRoot().add(this.nearmesh);
-            this.tracker1 = new THREE.Mesh(new THREE.SphereGeometry(1,1,10,10))
-            _dScene.add(this.tracker1);
+            
 
-             this.tracker2 = new THREE.Mesh(new THREE.SphereGeometry(1,1,10,10))
-            _dScene.add(this.tracker2);
-
-             this.tracker3 = new THREE.Mesh(new THREE.SphereGeometry(1,1,10,10))
-            _dScene.add(this.tracker3);
-
-             this.tracker4 = new THREE.Mesh(new THREE.SphereGeometry(1,1,10,10))
-            _dScene.add(this.tracker4);
-
-         //   _dScene.add(this.projCam);
-         //   this.cameraHelper = new THREE.CameraHelper(this.projCam);
-         //   this.projCam.add(this.cameraHelper);
             this.nearmesh.material.uniforms.edgeLen = {type:"f",value:1}
             this.nearmesh.frustumCulled  = false;
             _dView.bind('prerender', this.prerender.bind(this));
@@ -262,21 +249,11 @@
                 var hit = this.intersectLinePlane(cornerPoints[3],cornerPoints[2]);
                 if(hit) intersections.push(hit);
             }
-            for(var i =1; i < 5; i++)
-            {
-                if(intersections[i-1])
-                this['tracker' + i].position.set(intersections[i-1][0],intersections[i-1][1],intersections[i-1][2]);
-             this['tracker' + i].updateMatrix();
-            this['tracker' + i].updateMatrixWorld(true);
-            } 
-
            
-
             var lookatI = (new THREE.Matrix4()).getInverse(lookat);
             _viewProjectionMatrix.multiplyMatrices(_dView.getCamera().projectionMatrix,lookatI);
             
             this.uniforms.mProj.value.getInverse(_viewProjectionMatrix);
-
             
             var projSpacePoints = []
             for(var i =0; i < intersections.length; i++)
@@ -290,8 +267,6 @@
 
                 projSpacePoints.push(pv);
             }
-
-            
 
             var xMax = -Infinity;
             var xMin = Infinity;
@@ -321,19 +296,17 @@
             var posfd = [this.uniforms.mProj.value.elements[3],this.uniforms.mProj.value.elements[7],this.uniforms.mProj.value.elements[14]];
             this.uniforms.mProj.value.multiplyMatrices(this.uniforms.mProj.value.clone(),mRangeM);
            
-         
-            
             this.uniforms.t.value += (deltaT / 1000.0) || 0;
             this.uniforms.oCamPos.value.set(vp[12] - root.matrixWorld.elements[12], vp[13] - root.matrixWorld.elements[13], vp[14] - root.matrixWorld.elements[14]);
             this.uniforms.wPosition.value.set(0,0,0);
             this.lastFrame = now;
         }
-          this.mRange = [
-            1,    0,  0,    0,
-            0,    1,  0,    0,
-            0,    0,            1,    0,
-            0,    0,      0,    1
-            ]
+        this.mRange = [
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        ]
         this.intersectLinePlane = function(raypoint0, raypoint ) {
             var planepoint = [0,0,0];
             var planenormal = [0,0,1];
@@ -368,7 +341,8 @@
             
             return worldmousepos;
         }.bind(this);
-        this.settingProperty = function(propertyName, propertyValue) {
+        this.settingProperty = function(propertyName, propertyValue) 
+        {
 
             if(propertyName == "uMag")
             {

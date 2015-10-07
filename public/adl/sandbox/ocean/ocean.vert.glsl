@@ -17,6 +17,7 @@ varying float edl;
 #define PI 3.1415926535897932384626433832795
 uniform float uMag;
 
+varying vec3 vPos;
 uniform vec3 waves[9];
 
 float L[numWaves];
@@ -64,8 +65,9 @@ void main() {
       float tw = p_w + p_dw*i_t;
       tPos.x = (p_x + p_dx*i_t)/tw;
       tPos.y = (p_y + p_dy*i_t)/tw;
-      tPos.z = (p_z + p_dz*i_t)/tw;
-      tPos.z -= 0.0;
+      tPos.z = 0.0;//(p_z + p_dz*i_t)/tw;
+      
+     
       float x = tPos.x;
       float y = tPos.y;
       //tPos.xyz = tpos1.xyz;
@@ -76,14 +78,15 @@ void main() {
       float camDist = length(oCamPos.xyz - tPos.xyz);
       for (int i = 0; i < numWaves; i++)
       {
-            //if (waves[i].x > edgeLen2*10000.0)
+            L[i] *= uMag / 2.0;
+            //if (L[i] > edgeLen2*4.0)
             {
 
 
-                  L[i] *= uMag / 2.0;
+                  
                   float w =  2.0 * PI / L[i];
                   A[i] = 0.5 / (w * 2.718281828459045); //for ocean on Earth, A is ususally related to L
-                  A[i] *= smoothstep(1.0, 0.01, (camDist*camDist)/(1000.0*L[i]));
+                  A[i] *= smoothstep(1.0, 0.0, pow(camDist,1.3)/(100.0*L[i]));
                   if(A[i] == 0.0) continue;
                   S[i] = 3.0 * PI / (w  * 2.718281828459045); //for ocean on Earth, S is ususally related to L
                   float q = S[i] * w;
@@ -144,6 +147,8 @@ void main() {
 
       gl_Position = projectionMatrix * modelViewMatrix * vec4(tPos , 1);
       
-      vCamLength = length(oCamPos - (tPos ));
+      vCamLength = distance(oCamPos , tPos );
       vCamDir =  normalize(oCamPos - (tPos ));
+
+      vPos = tPos;
 }
