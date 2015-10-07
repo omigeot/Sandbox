@@ -3531,6 +3531,12 @@ this.getPropertyFast = function(nodeID, propertyName)
         }
 
     }
+    if(answer == undefined)
+    {
+        var proto = vwf.prototype(nodeID);
+        if(proto)
+            answer = vwf.getPropertyFast(proto,propertyName);
+    }
     return answer;
 }
 this.setPropertyFastEntrants = [];

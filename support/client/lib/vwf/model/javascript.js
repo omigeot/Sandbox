@@ -84,7 +84,7 @@ executionContext.prototype.getProperty = function(id, name)
             val: null,
             originalVal: null
         }
-        if (!(typeof(val) == "number" || typeof(val) == "boolean" || val == null || val == undefined))
+        if (!(typeof(val) == "string" ||  typeof(val) == "number" || typeof(val) == "boolean" || val == null || val == undefined))
             this.touchedProperties[id + name].originalVal = JSON.parse(JSON.stringify(this.touchedProperties[id + name].val));
         else
             this.touchedProperties[id + name].originalVal = val;
