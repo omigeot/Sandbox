@@ -158,7 +158,7 @@
                 this.uniforms[i] = THREE.UniformsLib.lights[i];
             }
             this.buildMat();
-            this.near = new THREE.PlaneGeometry(2, 2, 200, 200);
+            this.near = new THREE.PlaneGeometry(1, 1, 200, 200);
             var t = new THREE.Matrix4();
             
             this.nearmesh = new THREE.Mesh(this.near, this.mat);
@@ -199,13 +199,13 @@
             this.mat.transparent = true;
             this.mat.lights = true;
             this.mat.side = 0;
-            this.mat.wireframe = false
+            this.mat.wireframe = false;
             if (this.nearmesh)
                 this.nearmesh.material = this.mat;
         }
         this.up = new THREE.Vector3(0,0,1);
-        this.projCam = new THREE.PerspectiveCamera();
-        this.projCam.up.copy(this.up);
+        this.f = 10;
+        this.h = 1;
         this.prerender = function()
         {
             if(this.disable) return;
@@ -221,27 +221,12 @@
 
             var _viewProjectionMatrix = new THREE.Matrix4();
 
-            var target = new THREE.Vector3(0,0,-10);
+            var target = new THREE.Vector3(0,0,-Math.abs(this.f));
             target.applyMatrix4(_dView.getCamera().matrixWorld);
-            this.tracker1.position.copy(target);
-            this.tracker1.updateMatrix();
-            this.tracker1.updateMatrixWorld(true);
-            var eye = new THREE.Vector3(vp[12],vp[13],vp[14]+10);
-            this.projCam.near = _dView.getCamera().near;
-            this.projCam.far = _dView.getCamera().far;
-            this.projCam.fov = _dView.getCamera().fov;
-            this.projCam.aspect = _dView.getCamera().aspect;
-
-            
-            this.projCam.matrixAutoUpdate = false;
-            
-            this.projCam.lookAt(target);
-            this.projCam.position.copy(eye);
-            this.projCam.updateMatrix();
-            this.projCam.updateMatrixWorld(true);
-        
-            var lookat = this.projCam.matrixWorld.clone();
-            //lookat = _dView.getCamera().matrixWorld.clone();
+            target.z = 0.0;
+            var eye = new THREE.Vector3(vp[12],vp[13],vp[14] +Math.abs(this.h))
+            var lookat = (new THREE.Matrix4()).lookAt(eye,target,this.up,2);
+            lookat.setPosition(eye);
             
 
             var campos = [vp[12],vp[13],vp[14]];
@@ -297,8 +282,12 @@
             for(var i =0; i < intersections.length; i++)
             {
                 intersections[i][2] = 0;
-                var pv = new THREE.Vector3(intersections[i][0],intersections[i][1],intersections[i][2]);
+                var pv = new THREE.Vector4(intersections[i][0],intersections[i][1],intersections[i][2]);
                 pv.applyMatrix4( _viewProjectionMatrix)
+                pv.x /= pv.w;
+                pv.y /= pv.w;
+                pv.z /= pv.w;
+
                 projSpacePoints.push(pv);
             }
 
@@ -322,17 +311,16 @@
                 if(projSpacePoints[i].y > yMax)
                     yMax = projSpacePoints[i].y;
             }
-
-            
-           
-           
-            var mRangeM = (new THREE.Matrix4()).fromArray(this.mRange);
-            var posfd = [this.uniforms.mProj.value.elements[3],this.uniforms.mProj.value.elements[7],this.uniforms.mProj.value.elements[14]];
-          //  this.uniforms.mProj.value.multiplyMatrices(this.uniforms.mProj.value.clone(),mRangeM);
+            yMin -= 1.0;
             this.mRange[0] = xMax-xMin;
             this.mRange[5] = yMax-yMin;
             this.mRange[12] = xMin + (xMax-xMin)/2
-            this.mRange[13] = yMin + (yMax-yMin)/2
+            this.mRange[13] = yMin + (yMax-yMin)/2;
+
+            var mRangeM = (new THREE.Matrix4()).fromArray(this.mRange);
+            var posfd = [this.uniforms.mProj.value.elements[3],this.uniforms.mProj.value.elements[7],this.uniforms.mProj.value.elements[14]];
+            this.uniforms.mProj.value.multiplyMatrices(this.uniforms.mProj.value.clone(),mRangeM);
+           
          
             
             this.uniforms.t.value += (deltaT / 1000.0) || 0;
@@ -347,7 +335,7 @@
             0,    0,      0,    1
             ]
         this.intersectLinePlane = function(raypoint0, raypoint ) {
-            var planepoint = [0,0,1];
+            var planepoint = [0,0,0];
             var planenormal = [0,0,1];
             var ray = MATH.subVec3(raypoint,raypoint0);
             var len = MATH.lengthVec3(ray)

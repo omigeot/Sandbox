@@ -12,7 +12,7 @@ uniform float uChop;
 uniform mat4 mProj;
 vec3 sundir = vec3(.5, .5, .1);
 uniform float t;
-uniform float edgeLen;
+varying float edl;
 #define numWaves 9
 #define PI 3.1415926535897932384626433832795
 uniform float uMag;
@@ -49,6 +49,7 @@ void main() {
       vec4 tpos1 = mProj * vec4(tPos.xy,-1.0,1.0);
       vec4 tpos2 = mProj * vec4(tPos.xy,1.0,1.0);
       
+
       float p_x = tpos1.x;
       float p_dx = tpos2.x - p_x;
       float p_y = tpos1.y;
@@ -64,7 +65,7 @@ void main() {
       tPos.x = (p_x + p_dx*i_t)/tw;
       tPos.y = (p_y + p_dy*i_t)/tw;
       tPos.z = (p_z + p_dz*i_t)/tw;
-      
+      tPos.z -= 0.0;
       float x = tPos.x;
       float y = tPos.y;
       //tPos.xyz = tpos1.xyz;
@@ -75,14 +76,14 @@ void main() {
       float camDist = length(oCamPos.xyz - tPos.xyz);
       for (int i = 0; i < numWaves; i++)
       {
-            if (waves[i].x > edgeLen*2.0)
+            //if (waves[i].x > edgeLen2*10000.0)
             {
 
 
                   L[i] *= uMag / 2.0;
                   float w =  2.0 * PI / L[i];
                   A[i] = 0.5 / (w * 2.718281828459045); //for ocean on Earth, A is ususally related to L
-                  A[i] *= max(.000,smoothstep(1.0, 0.01, (camDist*camDist)/(1000.0*L[i])));
+                  A[i] *= smoothstep(1.0, 0.01, (camDist*camDist)/(1000.0*L[i]));
                   if(A[i] == 0.0) continue;
                   S[i] = 3.0 * PI / (w  * 2.718281828459045); //for ocean on Earth, S is ususally related to L
                   float q = S[i] * w;

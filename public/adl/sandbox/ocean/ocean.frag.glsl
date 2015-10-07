@@ -48,6 +48,9 @@ varying vec3 vWorldPosition;
 uniform vec3 wrapRGB;
 #endif
 
+
+varying float edl;
+
 uniform float uChop;
 uniform float uReflectPow;
 uniform float uFoam;
@@ -118,7 +121,7 @@ void main() {
 	//water.a = 1.0-(pow(vCamLength/40.0,15.0));
 	float foamMix = max(0.0,(h)*diffuseTex.r) ;
 	gl_FragColor = mix(water, foam, clamp(foamMix * uFoam,0.0,1.0));
-	
-	
+	 
+	//gl_FragColor.rgb = vec3(1.0);
 
 }
