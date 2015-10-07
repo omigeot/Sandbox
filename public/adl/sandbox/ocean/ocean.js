@@ -177,6 +177,9 @@
              this.tracker4 = new THREE.Mesh(new THREE.SphereGeometry(1,1,10,10))
             _dScene.add(this.tracker4);
 
+         //   _dScene.add(this.projCam);
+         //   this.cameraHelper = new THREE.CameraHelper(this.projCam);
+         //   this.projCam.add(this.cameraHelper);
             this.nearmesh.material.uniforms.edgeLen = {type:"f",value:1}
             this.nearmesh.frustumCulled  = false;
             _dView.bind('prerender', this.prerender.bind(this));
@@ -201,6 +204,8 @@
                 this.nearmesh.material = this.mat;
         }
         this.up = new THREE.Vector3(0,0,1);
+        this.projCam = new THREE.PerspectiveCamera();
+        this.projCam.up.copy(this.up);
         this.prerender = function()
         {
             if(this.disable) return;
@@ -218,10 +223,25 @@
 
             var target = new THREE.Vector3(0,0,-10);
             target.applyMatrix4(_dView.getCamera().matrixWorld);
-            target.z = 1.0;
-            var eye = new THREE.Vector3(vp[12],vp[13],vp[14])
-            var lookat = (new THREE.Matrix4()).lookAt(eye,target,this.up,2);
-            lookat.setPosition(eye);
+            this.tracker1.position.copy(target);
+            this.tracker1.updateMatrix();
+            this.tracker1.updateMatrixWorld(true);
+            var eye = new THREE.Vector3(vp[12],vp[13],vp[14]+10);
+            this.projCam.near = _dView.getCamera().near;
+            this.projCam.far = _dView.getCamera().far;
+            this.projCam.fov = _dView.getCamera().fov;
+            this.projCam.aspect = _dView.getCamera().aspect;
+
+            
+            this.projCam.matrixAutoUpdate = false;
+            
+            this.projCam.lookAt(target);
+            this.projCam.position.copy(eye);
+            this.projCam.updateMatrix();
+            this.projCam.updateMatrixWorld(true);
+        
+            var lookat = this.projCam.matrixWorld.clone();
+            //lookat = _dView.getCamera().matrixWorld.clone();
             
 
             var campos = [vp[12],vp[13],vp[14]];
@@ -236,7 +256,7 @@
             cornerPoints.push(this.GetWorldPickRay([-1,1,0,1],ivp,campos));
             cornerPoints.push(this.GetWorldPickRay([-1,-1,0,1],ivp,campos));
 
-
+ 
             var intersections = [];
            
 
@@ -272,6 +292,7 @@
             
             this.uniforms.mProj.value.getInverse(_viewProjectionMatrix);
 
+            
             var projSpacePoints = []
             for(var i =0; i < intersections.length; i++)
             {
@@ -302,14 +323,16 @@
                     yMax = projSpacePoints[i].y;
             }
 
-          
+            
+           
+           
             var mRangeM = (new THREE.Matrix4()).fromArray(this.mRange);
             var posfd = [this.uniforms.mProj.value.elements[3],this.uniforms.mProj.value.elements[7],this.uniforms.mProj.value.elements[14]];
-            this.uniforms.mProj.value.multiplyMatrices(mRangeM,this.uniforms.mProj.value.clone());
-          //  this.mRange[0] = xMax-xMin;
-          //  this.mRange[5] = yMax-yMin;
-          //  this.mRange[12] = xMin + (xMax-xMin)/2
-          //  this.mRange[13] = yMin + (yMax-yMin)/2
+          //  this.uniforms.mProj.value.multiplyMatrices(this.uniforms.mProj.value.clone(),mRangeM);
+            this.mRange[0] = xMax-xMin;
+            this.mRange[5] = yMax-yMin;
+            this.mRange[12] = xMin + (xMax-xMin)/2
+            this.mRange[13] = yMin + (yMax-yMin)/2
          
             
             this.uniforms.t.value += (deltaT / 1000.0) || 0;
