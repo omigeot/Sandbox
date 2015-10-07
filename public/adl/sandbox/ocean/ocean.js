@@ -158,18 +158,27 @@
                 this.uniforms[i] = THREE.UniformsLib.lights[i];
             }
             this.buildMat();
-            this.near = new THREE.PlaneGeometry(1, 1, 200, 200);
+            this.near = new THREE.PlaneGeometry(2, 2, 200, 200);
             var t = new THREE.Matrix4();
             
             this.nearmesh = new THREE.Mesh(this.near, this.mat);
             
             this.nearmesh.InvisibleToCPUPick = true;
             this.getRoot().add(this.nearmesh);
-            this.tracker = new THREE.Mesh(new THREE.SphereGeometry(1,1,10,10))
-            _dScene.add(this.tracker);
+            this.tracker1 = new THREE.Mesh(new THREE.SphereGeometry(1,1,10,10))
+            _dScene.add(this.tracker1);
+
+             this.tracker2 = new THREE.Mesh(new THREE.SphereGeometry(1,1,10,10))
+            _dScene.add(this.tracker2);
+
+             this.tracker3 = new THREE.Mesh(new THREE.SphereGeometry(1,1,10,10))
+            _dScene.add(this.tracker3);
+
+             this.tracker4 = new THREE.Mesh(new THREE.SphereGeometry(1,1,10,10))
+            _dScene.add(this.tracker4);
 
             this.nearmesh.material.uniforms.edgeLen = {type:"f",value:1}
-         
+            this.nearmesh.frustumCulled  = false;
             _dView.bind('prerender', this.prerender.bind(this));
             window._dOcean = this;
         }
@@ -187,6 +196,7 @@
             this.mat.transparent = true;
             this.mat.lights = true;
             this.mat.side = 0;
+            this.mat.wireframe = false
             if (this.nearmesh)
                 this.nearmesh.material = this.mat;
         }
@@ -208,15 +218,11 @@
 
             var target = new THREE.Vector3(0,0,-10);
             target.applyMatrix4(_dView.getCamera().matrixWorld);
-            target.z = 5.0;
-            var eye = new THREE.Vector3(vp[12],vp[13],vp[14]+10)
+            target.z = 1.0;
+            var eye = new THREE.Vector3(vp[12],vp[13],vp[14])
             var lookat = (new THREE.Matrix4()).lookAt(eye,target,this.up,2);
             lookat.setPosition(eye);
-            var xMax = -Infinity;
-            var xMin = Infinity;
-
-            var yMax = -Infinity;
-            var yMin = Infinity;
+            
 
             var campos = [vp[12],vp[13],vp[14]];
             var ivp = MATH.inverseMat4(this.getViewProjection());
@@ -232,6 +238,8 @@
 
 
             var intersections = [];
+           
+
             var hit = this.intersectLinePlane(cornerPoints[0],cornerPoints[4]);
             if(hit) intersections.push(hit);
            
@@ -241,14 +249,27 @@
             if(hit) intersections.push(hit);
             hit = this.intersectLinePlane(cornerPoints[3],cornerPoints[7]);
             if(hit) intersections.push(hit);
-             this.tracker.position.set(hit[0],hit[1],hit[2]);
+            if(intersections.length < 4)
+            {
+                 var hit = this.intersectLinePlane(cornerPoints[1],cornerPoints[0]);
+                if(hit) intersections.push(hit);
 
-            this.tracker.position.fromArray(intersections[0]) 
-            this.tracker.updateMatrix();
-            this.tracker.updateMatrixWorld(true);
+                var hit = this.intersectLinePlane(cornerPoints[3],cornerPoints[2]);
+                if(hit) intersections.push(hit);
+            }
+            for(var i =1; i < 5; i++)
+            {
+                if(intersections[i-1])
+                this['tracker' + i].position.set(intersections[i-1][0],intersections[i-1][1],intersections[i-1][2]);
+             this['tracker' + i].updateMatrix();
+            this['tracker' + i].updateMatrixWorld(true);
+            } 
+
+           
 
             var lookatI = (new THREE.Matrix4()).getInverse(lookat);
-            _viewProjectionMatrix.multiplyMatrices(_dView.getCamera().projectionMatrix, lookatI);
+            _viewProjectionMatrix.multiplyMatrices(_dView.getCamera().projectionMatrix,lookatI);
+            
             this.uniforms.mProj.value.getInverse(_viewProjectionMatrix);
 
             var projSpacePoints = []
@@ -256,9 +277,17 @@
             {
                 intersections[i][2] = 0;
                 var pv = new THREE.Vector3(intersections[i][0],intersections[i][1],intersections[i][2]);
-                pv.applyMatrix4(_viewProjectionMatrix)
+                pv.applyMatrix4( _viewProjectionMatrix)
                 projSpacePoints.push(pv);
             }
+
+            
+
+            var xMax = -Infinity;
+            var xMin = Infinity;
+
+            var yMax = -Infinity;
+            var yMin = Infinity;
 
             for(var i =0 ;i < projSpacePoints.length; i++)
             {
@@ -273,16 +302,14 @@
                     yMax = projSpacePoints[i].y;
             }
 
-            var mRange = [
-            2,    0,  0,    0,
-            0,    2,  0,    0,
-            0,    0,            1,    0,
-            0,    0,      0,    1
-            ]
-            var mRangeM = (new THREE.Matrix4()).fromArray(mRange);
+          
+            var mRangeM = (new THREE.Matrix4()).fromArray(this.mRange);
             var posfd = [this.uniforms.mProj.value.elements[3],this.uniforms.mProj.value.elements[7],this.uniforms.mProj.value.elements[14]];
             this.uniforms.mProj.value.multiplyMatrices(mRangeM,this.uniforms.mProj.value.clone());
-
+          //  this.mRange[0] = xMax-xMin;
+          //  this.mRange[5] = yMax-yMin;
+          //  this.mRange[12] = xMin + (xMax-xMin)/2
+          //  this.mRange[13] = yMin + (yMax-yMin)/2
          
             
             this.uniforms.t.value += (deltaT / 1000.0) || 0;
@@ -290,16 +317,23 @@
             this.uniforms.wPosition.value.set(0,0,0);
             this.lastFrame = now;
         }
+          this.mRange = [
+            1,    0,  0,    0,
+            0,    1,  0,    0,
+            0,    0,            1,    0,
+            0,    0,      0,    1
+            ]
         this.intersectLinePlane = function(raypoint0, raypoint ) {
-            var planepoint = [0,0,5];
+            var planepoint = [0,0,1];
             var planenormal = [0,0,1];
             var ray = MATH.subVec3(raypoint,raypoint0);
             var len = MATH.lengthVec3(ray)
             var ray = MATH.toUnitVec3(ray);
             var n = MATH.dotVec3(MATH.subVec3(planepoint, raypoint), planenormal);
             var d = MATH.dotVec3(ray, planenormal);
-            if (d == 0) return raypoint0;
-            if(d < 0) return raypoint0;
+            if (d == 0) return null;
+            if(d < 0) return null;
+            if(d > len) return null;
             if(Math.abs(d) > len) return null;
             var dist = n / d;
             var alongray = MATH.scaleVec3(ray,dist);

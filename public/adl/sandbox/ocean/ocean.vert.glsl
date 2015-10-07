@@ -57,7 +57,7 @@ void main() {
       float p_dz = tpos2.z - p_z;
       float p_w = tpos1.w;
       float p_dw = tpos2.w - p_w;
-      float p_h = 5.0;
+      float p_h = 0.0;
       float i_t = (p_w*p_h-p_z)/(p_dz - p_dw * p_h);
 
       float tw = p_w + p_dw*i_t;
@@ -124,7 +124,7 @@ void main() {
 
       }
 
-      h = tPos.z - 5.0; 
+      h = tPos.z; 
    //   tPos.xy -= wPosition.xy;
       vec3 tNormal = normalize(vec3(-N.x, -N.y, 1.0 - N.z));
       vec3 tBinormal = normalize(vec3(1.0 - B.x, -B.y, N.z));
