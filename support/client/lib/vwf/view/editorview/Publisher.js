@@ -125,7 +125,7 @@ define([], function() {
 
         this.stateBackup = null;
         this.backupState = function() {
-            var s = _Editor.getNode(vwf.application());
+            var s = _Editor.getNode(vwf.application(),true);
 
             function walk(node) {
                 if(!node)return;
@@ -214,7 +214,7 @@ define([], function() {
             if (!s) return;
             vwf.private.queue.suspend();
             vwf.models.kernel.disable();
-            var currentState = _Editor.getNode(vwf.application());
+            var currentState = _Editor.getNode(vwf.application(),true);
 
             //find a node from one state in another
             var find = function(node, id) {
@@ -234,7 +234,7 @@ define([], function() {
                 }
                 async.eachSeries(Object.keys(node.children), function(i, eachSeriesCallback) {
 
-                    console.log(node.id,i)
+                   // console.log(node.id,i)
                     //does the node exist?
                     var exists = false;
                     try {
@@ -279,7 +279,7 @@ define([], function() {
                 //set all the properties on the root scene
                 for (var j in s.properties) {
                     var currentprop = vwf.getProperty(s.id, j);
-                    //dont set props that have not changed, as this can be a lot of work for nothign
+                    //dont set props that have not changed, as this can be a lot of work for nothing
                     if (JSON.stringify(currentprop) !== JSON.stringify(s.properties[j]) && j !== 'clients')
                         vwf.setProperty(s.id, j, s.properties[j]);
                 }

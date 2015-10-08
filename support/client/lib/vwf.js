@@ -1911,7 +1911,7 @@ this.activeResync = function() {
         count: nodes.length
     }
 }
-this.getNode = function( nodeID, full, normalize ) {  // TODO: options to include/exclude children, prototypes
+this.getNode = function( nodeID, full, normalize,includeContinueBase ) {  // TODO: options to include/exclude children, prototypes
 
     if(!nodeID) return undefined;
     this.logger.debuggx( "getNode", nodeID, full );
@@ -2064,7 +2064,7 @@ this.getNode = function( nodeID, full, normalize ) {  // TODO: options to includ
     nodeComponent.children = {};
 
     this.children( nodeID ).forEach( function( childID ) {
-        nodeComponent.children[ this.name( childID ) ] = this.getNode( childID, full );
+        nodeComponent.children[ this.name( childID ) ] = this.getNode( childID, full , normalize, includeContinueBase);
     }, this );
 
     for ( var childName in nodeComponent.children ) {  // TODO: distinguish add, change, remove
@@ -2095,7 +2095,7 @@ this.getNode = function( nodeID, full, normalize ) {  // TODO: options to includ
     // Return the descriptor created, unless it was arranged as a patch and there were no
     // changes. Otherwise, return the URI if this is the root of a URI component.
 
-    if(nodeComponent.continues)
+    if(nodeComponent.continues && !includeContinueBase)
         nodeComponent = objectDiff(nodeComponent,continuesDefs[nodeComponent.continues + nodeID],false,false);
 
     if ( full || ! node.patchable || patched ) {
