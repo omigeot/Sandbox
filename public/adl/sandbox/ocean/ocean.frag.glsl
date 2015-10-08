@@ -120,13 +120,15 @@ void main() {
 	pNormal.xy *= max(0.0, uChop / 2.0);
 	pNormal = normalize(pNormal);
 
-	vec3 texNormal =  normalize(TBN * mapNormal);
+	vec3 texNormal =  normalize(TBN * vec3(0.0,0.0,1.0));
 	vec3 texNormal1 =  pNormal;
 
 	texNormal = mix(texNormal, texNormal1, clamp(0.0, 1.0, vCamLength / uHalfGrid));
-	texNormal = normalize(texNormal);
+	texNormal = normalize(texNormal); 
 
 	texNormal.y*=-1.0;
+
+	
 	float ref = 0.0;
 	vec3 nI  = normalize(vCamDir);
 	vec3 nN = normalize(texNormal);
@@ -135,8 +137,9 @@ void main() {
 	float sinT = sin(Ti) / nSnell;
 	float Tt = asin(sinT);
 
+
 	float ndotl = max(0.00, dot(directionalLightDirection[ 0], texNormal));
-	float spec = pow(clamp(dot(vCamDir, reflect(-directionalLightDirection[ 0], texNormal)), 0.0, 1.0), 16.0);
+	float spec = pow(clamp(dot(vCamDir, normalize(reflect(-directionalLightDirection[ 0], vec3(texNormal.x,texNormal.y,1.4-directionalLightDirection[0].z)))), 0.0, 1.0), 64.0);
 
 	float scatter = 1.0 - dot( vNormal, vCamDir);
 	upwelling +=  ambientLightColor;
@@ -163,5 +166,6 @@ void main() {
 
 	float foamMix = max(0.0, h * diffuseTex.r) ;
 	gl_FragColor = mix(water, foam, clamp(foamMix * uFoam, 0.0, 1.0));
+	gl_FragColor.xyz = vec3(spec);
 
 }
