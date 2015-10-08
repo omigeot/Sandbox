@@ -1,55 +1,57 @@
+
+
+#define PI 3.1415926535897932384626433832795
+
 varying vec3 vNormal;
 varying vec3 vSundir;
 varying vec3 vCamDir;
-varying vec2 texcoord1;
 varying vec3 texcoord0;
 varying float vCamLength;
 varying mat3 TBN;
 varying float h;
+
+
+
 uniform vec3 oCamPos;
 uniform vec3 wPosition;
 uniform float uChop;
 uniform mat4 mProj;
-vec3 sundir = vec3(.5, .5, .1);
 uniform float t;
-varying float edl;
-#define numWaves 9
-#define PI 3.1415926535897932384626433832795
 uniform float uMag;
+uniform float uHalfGrid;
+uniform float uWaterHeight;
 
-varying vec3 vPos;
 uniform vec3 waves[9];
 
+
+
+vec3 sundir = vec3(.5, .5, .1);
 float L[numWaves];
 float A[numWaves];
 float S[numWaves];
 vec2 D[numWaves];
-void setup() {
 
+void setup() {
       for (int i = 0; i < numWaves; i++)
       {
-
             L[i] = waves[i].x;
-
             D[i] = normalize(vec2(waves[i].y, waves[i].z));
       }
-
 }
+
 void main() {
 
       setup();
-     
-      float gA = uMag;
 
+      float gA = uMag;
 
       vec3 N = vec3(0.0, 0.0, 0.0);
       vec3 B = vec3(0.0, 0.0, 0.0);
 
       vec3 tPos = position;
-      
-      vec4 tpos1 = mProj * vec4(tPos.xy,-1.0,1.0);
-      vec4 tpos2 = mProj * vec4(tPos.xy,1.0,1.0);
-      
+
+      vec4 tpos1 = mProj * vec4(tPos.xy, -1.0, 1.0);
+      vec4 tpos2 = mProj * vec4(tPos.xy, 1.0, 1.0);
 
       float p_x = tpos1.x;
       float p_dx = tpos2.x - p_x;
@@ -59,22 +61,19 @@ void main() {
       float p_dz = tpos2.z - p_z;
       float p_w = tpos1.w;
       float p_dw = tpos2.w - p_w;
-      float p_h = 0.0;
-      float i_t = (p_w*p_h-p_z)/(p_dz - p_dw * p_h);
+      float p_h = uWaterHeight;
+      float i_t = (p_w * p_h - p_z) / (p_dz - p_dw * p_h);
 
-      float tw = p_w + p_dw*i_t;
-      tPos.x = (p_x + p_dx*i_t)/tw;
-      tPos.y = (p_y + p_dy*i_t)/tw;
-      tPos.z = 0.0;//(p_z + p_dz*i_t)/tw;
-      
-     
+      float tw = p_w + p_dw * i_t;
+      tPos.x = (p_x + p_dx * i_t) / tw;
+      tPos.y = (p_y + p_dy * i_t) / tw;
+      tPos.z = uWaterHeight;//(p_z + p_dz*i_t)/tw;
+
       float x = tPos.x;
       float y = tPos.y;
-      //tPos.xyz = tpos1.xyz;
-     // tPos.xy += wPosition.xy;
+
       texcoord0 = tPos;
-      texcoord1 = uv;
-  //    tPos.z = 0.0;
+    
       float camDist = length(oCamPos.xyz - tPos.xyz);
       for (int i = 0; i < numWaves; i++)
       {
@@ -82,25 +81,14 @@ void main() {
             //if (L[i] > edgeLen2*4.0)
             {
 
-
-                  
                   float w =  2.0 * PI / L[i];
                   A[i] = 0.5 / (w * 2.718281828459045); //for ocean on Earth, A is ususally related to L
-                  A[i] *= smoothstep(1.0, 0.0, pow(camDist,1.3)/(100.0*L[i]));
-                  if(A[i] == 0.0) continue;
+                  A[i] *= smoothstep(1.0, 0.0, pow(camDist, 1.3) / (uHalfGrid * L[i]));
+                  if (A[i] == 0.0) continue;
                   S[i] = 3.0 * PI / (w  * 2.718281828459045); //for ocean on Earth, S is ususally related to L
                   float q = S[i] * w;
 
                   vec2 xy = vec2(x, y);
-
-                  // simple sum-of-sines
-                  //float hi = A[i] * sin( dot(D[i], xy) * w + t * q);
-                  //h += hi * gA;
-
-                  //Gerstner
-
-
-                  //position
                   float Q = uChop / uMag;
                   float Qi = Q / (w * A[i] * float(numWaves)); // *numWaves?
                   float xi = Qi * A[i] * D[i].x * cos( dot(w * D[i], xy) + q * t);
@@ -124,31 +112,25 @@ void main() {
                   B.y += Qi * D[i].y * D[i].y * WA * S0;
                   B.z += D[i].x * WA * C0;
             }
-
-
       }
 
-      h = tPos.z; 
-   //   tPos.xy -= wPosition.xy;
+      
+
       vec3 tNormal = normalize(vec3(-N.x, -N.y, 1.0 - N.z));
       vec3 tBinormal = normalize(vec3(1.0 - B.x, -B.y, N.z));
       vec3 tTangent = cross(tBinormal, tNormal);
 
+      h = tPos.z - uWaterHeight;
       TBN = mat3(tBinormal.x, tBinormal.y, tBinormal.z,
                  tTangent.x, tTangent.y, tTangent.z,
                  tNormal.x, tNormal.y, tNormal.z);
 
-
-      
       vNormal = normalize(tNormal);
       vSundir = normalize(sundir);
 
-      
-
       gl_Position = projectionMatrix * modelViewMatrix * vec4(tPos , 1);
-      
+
       vCamLength = distance(oCamPos , tPos );
       vCamDir =  normalize(oCamPos - (tPos ));
 
-      vPos = tPos;
 }

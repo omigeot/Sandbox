@@ -19,6 +19,8 @@
         this.amplitude = 10;
         this.amplitudeVariation = 15;
         this.waveNum = 9;
+        this.resolution = 50;
+        this.waterHeight = 0;
         this.getSync = function(url)
         {
             return $.ajax(
@@ -30,6 +32,12 @@
                 dataType: "text"
             }).responseText;
         }
+        this.setNumWaves = function(num)
+        {
+             this.waveNum = num;
+             this.generateWaves();
+             this.buildMat();
+        }
         this.generateWaves = function()
         {
             var min = this.amplitude - this.amplitudeVariation;
@@ -37,6 +45,11 @@
             var mean = this.amplitude;
             var a = ((mean-min)/(max-mean))/5.0;
 
+            this.uniforms.waves.value = [];
+            for(var i = 0; i < this.waveNum; i++)
+            {
+                this.uniforms.waves.value.push(new THREE.Vector3())
+            }
             for(var i = 0; i < this.waveNum; i++)
             {
                 var b = Math.random();
@@ -64,6 +77,12 @@
                 this.uniforms.waves.value[i].z = y1;
 
             }
+            this.uniforms.waves.value.sort(function(a,b)
+            {
+                if(a.x < b.x) return 1;
+                else
+                    return -1;
+            })
         }
         this.initialize = function()
         {
@@ -82,6 +101,11 @@
                 {
                     type: "f",
                     value: 3.5
+                },
+                uHalfGrid:
+                {
+                    type: "f",
+                    value: this.resolution/2
                 },
                 waves:{
                     type: "v3v",
@@ -106,6 +130,11 @@
                 {
                     type: "f",
                     value: .5
+                },
+                uWaterHeight:
+                {
+                    type: "f",
+                    value: this.waterHeight
                 },
                 texture:
                 {
@@ -158,24 +187,42 @@
                 this.uniforms[i] = THREE.UniformsLib.lights[i];
             }
             this.buildMat();
-            this.near = new THREE.PlaneGeometry(1, 1, 200, 200);
-            var t = new THREE.Matrix4();
+            this.near = new THREE.PlaneGeometry(1, 1, this.resolution  , this.resolution);
+            
             
             this.nearmesh = new THREE.Mesh(this.near, this.mat);
             
             this.nearmesh.InvisibleToCPUPick = true;
             this.getRoot().add(this.nearmesh);
             
-
-            this.nearmesh.material.uniforms.edgeLen = {type:"f",value:1}
             this.nearmesh.frustumCulled  = false;
             _dView.bind('prerender', this.prerender.bind(this));
             window._dOcean = this;
         }
+        this.setResolution = function(res)
+        {
+
+            this.resolution = res;
+            
+            this.nearmesh.parent.remove(this.nearmesh);
+            this.near.dispose();
+
+            this.near = new THREE.PlaneGeometry(1, 1, this.resolution  , this.resolution);
+            
+            this.nearmesh = new THREE.Mesh(this.near, this.mat);
+            
+            this.nearmesh.InvisibleToCPUPick = true;
+            this.getRoot().add(this.nearmesh);
+            
+            this.nearmesh.frustumCulled  = false;
+            this.uniforms.uHalfGrid.value = this.resolution/2;
+
+
+        }
         this.buildMat = function()
         {
-            this.vertexShader = this.getSync(this.vertShaderURL)
-            this.fragmentShader = this.getSync(this.fragShaderURL)
+            this.vertexShader = "#define numWaves " + this.waveNum + "\n"+ this.getSync(this.vertShaderURL);
+            this.fragmentShader = "#define numWaves " + this.waveNum + "\n"+ this.getSync(this.fragShaderURL);
             this.mat = new THREE.ShaderMaterial(
             {
                 uniforms: this.uniforms,
@@ -204,8 +251,6 @@
             var now = performance.now();
             var deltaT = now - this.lastFrame;
 
-
-
             var _viewProjectionMatrix = new THREE.Matrix4();
 
             var target = new THREE.Vector3(0,0,-Math.abs(this.f));
@@ -215,7 +260,6 @@
             var lookat = (new THREE.Matrix4()).lookAt(eye,target,this.up,2);
             lookat.setPosition(eye);
             
-
             var campos = [vp[12],vp[13],vp[14]];
             var ivp = MATH.inverseMat4(this.getViewProjection());
             var cornerPoints = [];
@@ -234,13 +278,13 @@
 
             var hit = this.intersectLinePlane(cornerPoints[0],cornerPoints[4]);
             if(hit) intersections.push(hit);
-           
             hit = this.intersectLinePlane(cornerPoints[1],cornerPoints[5]);
             if(hit) intersections.push(hit);
             hit = this.intersectLinePlane(cornerPoints[2],cornerPoints[6]);
             if(hit) intersections.push(hit);
             hit = this.intersectLinePlane(cornerPoints[3],cornerPoints[7]);
             if(hit) intersections.push(hit);
+
             if(intersections.length < 4)
             {
                  var hit = this.intersectLinePlane(cornerPoints[1],cornerPoints[0]);
@@ -258,7 +302,7 @@
             var projSpacePoints = []
             for(var i =0; i < intersections.length; i++)
             {
-                intersections[i][2] = 0;
+                intersections[i][2] = this.waterHeight;
                 var pv = new THREE.Vector4(intersections[i][0],intersections[i][1],intersections[i][2]);
                 pv.applyMatrix4( _viewProjectionMatrix)
                 pv.x /= pv.w;
@@ -300,6 +344,7 @@
             this.uniforms.oCamPos.value.set(vp[12] - root.matrixWorld.elements[12], vp[13] - root.matrixWorld.elements[13], vp[14] - root.matrixWorld.elements[14]);
             this.uniforms.wPosition.value.set(0,0,0);
             this.lastFrame = now;
+            this.uniforms.uWaterHeight.value = this.waterHeight;
         }
         this.mRange = [
             1, 0, 0, 0,
@@ -308,7 +353,7 @@
             0, 0, 0, 1
         ]
         this.intersectLinePlane = function(raypoint0, raypoint ) {
-            var planepoint = [0,0,0];
+            var planepoint = [0,0,this.waterHeight];
             var planenormal = [0,0,1];
             var ray = MATH.subVec3(raypoint,raypoint0);
             var len = MATH.lengthVec3(ray)
