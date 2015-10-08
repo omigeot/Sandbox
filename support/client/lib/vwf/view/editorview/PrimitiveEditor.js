@@ -160,12 +160,11 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                     var angles = rotationMatrix_2_XYZ(mat);
                     var pos = [mat[12],mat[13],mat[14]];
 
-                    var scl = [MATH.lengthVec3([mat[0],mat[4],mat[8]]),MATH.lengthVec3([mat[1],mat[5],mat[9]]),MATH.lengthVec3([mat[2],mat[6],mat[10]])]
-
                     for(var i = 0; i < 3; i++){
                         //since there is ambiguity in the matrix, we need to keep these values aroud. otherwise , the typeins don't really do what you would think
+                        var scl = i * 4;
                         var newRot = Math.round(angles[i] * 57.2957795);
-                        var newScale = Math.floor(MATH.lengthVec3([mat[0],mat[1],mat[2]]) * 1000) / 1000;
+                        var newScale = Math.floor(MATH.lengthVec3([mat[scl],mat[scl+1],mat[scl+2]]) * 1000) / 1000;
                         var newPos = Math.floor(pos[i] * 1000) / 1000;
 
                         //If newX == oldX, then this is the tailend of the Angular-VWF roundtrip initiated by the Sandbox

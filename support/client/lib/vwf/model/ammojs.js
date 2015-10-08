@@ -468,7 +468,7 @@ phyObject.prototype.setLinearFactor = function(vec) {
     if (vec.length !== 3) return;
     this.linearFactor = vec;
     if (this.initialized === true) {
-		//this.body.getLinearFactor().setValue(vec[0], vec[1], vec[2]);
+		this.body.getLinearFactor().setValue(vec[0], vec[1], vec[2]);
     }
 }
 phyObject.prototype.getLinearFactor = function(vec) {
