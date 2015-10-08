@@ -29,13 +29,26 @@ vec3 sundir = vec3(.5, .5, .1);
 float L[numWaves];
 float A[numWaves];
 float S[numWaves];
+float W[numWaves];
+float Q[numWaves];
 vec2 D[numWaves];
 
 void setup() {
+      float Qa = uChop / uMag;
       for (int i = 0; i < numWaves; i++)
       {
             L[i] = waves[i].x;
+            L[i] *= uMag / 2.0;
             D[i] = normalize(vec2(waves[i].y, waves[i].z));
+
+            float w =  2.0 * PI / L[i];
+            A[i] = 0.5 / (w * 2.718281828459045); //for ocean on Earth, A is ususally related to L
+            
+         
+            S[i] = sqrt(.98 * (2.0*PI/w));
+            W[i] = w;
+            Q[i] = Qa / (w * A[i] * float(numWaves));
+            
       }
 }
 
@@ -73,24 +86,23 @@ void main() {
       float y = tPos.y;
 
       texcoord0 = tPos;
-    
+
+      
+
       float camDist = length(oCamPos.xyz - tPos.xyz);
       for (int i = 0; i < numWaves; i++)
       {
-            L[i] *= uMag / 2.0;
+           
             //if (L[i] > edgeLen2*4.0)
             {
 
-                  float w =  2.0 * PI / L[i];
-                  A[i] = 0.5 / (w * 2.718281828459045); //for ocean on Earth, A is ususally related to L
-                  A[i] *= smoothstep(1.0, 0.0, pow(camDist, 1.3) / (uHalfGrid * L[i]));
-                  if (A[i] == 0.0) continue;
-                  S[i] = 3.0 * PI / (w  * 2.718281828459045); //for ocean on Earth, S is ususally related to L
+                  float w = W[i];
                   float q = S[i] * w;
-
+                  A[i] *= smoothstep(1.0, 0.0, pow(camDist, 1.3) / (uHalfGrid * L[i]));
+                  if(A[i] < .001) continue;
                   vec2 xy = vec2(x, y);
-                  float Q = uChop / uMag;
-                  float Qi = Q / (w * A[i] * float(numWaves)); // *numWaves?
+                  
+                  float Qi = Q[i]; // *numWaves?
                   float xi = Qi * A[i] * D[i].x * cos( dot(w * D[i], xy) + q * t);
                   float yi = Qi * A[i] * D[i].y * cos( dot(w * D[i], xy) + q * t);
                   float hi =  A[i] * sin( dot(w * D[i], xy) + q * t );
