@@ -1683,7 +1683,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             };
             try
             {
-                node.private.bodies[methodName] = eval(bodyScript(methodParameters || [], methodBody || ""));
+                node.private.bodies[methodName] = eval(bodyScript(methodParameters || [], methodBody || "",methodName,node.id));
             }
             catch (e)
             {
@@ -2015,7 +2015,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                         handler: null,
                         context: node
                     }
-                    handler.handler = eval(bodyScript(eventParameters || [], eventBody || ""));
+                    handler.handler = eval(bodyScript(eventParameters || [], eventBody || "",eventName,node.id));
                     node.private.listeners[eventName].push(handler);
                     node.private.events[eventName].push(
                     {
@@ -2575,10 +2575,10 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
         return accessorScript("( function( value ) {", body, "} )");
     }
     // -- bodyScript -------------------------------------------------------------------------------
-    function bodyScript(parameters, body)
+    function bodyScript(parameters, body,name,id)
     {
         var parameterString = (parameters.length ? " " + parameters.join(", ") + " " : "");
-        return accessorScript("( function(" + parameterString + ") {\n'use strict';\n ", body, "\n} )");
+        return accessorScript("( function(" + parameterString + ") {\n'use strict';\n ", body, "\n} )"  + " \n //@ sourceURL="+id+'.'+name);
         // return accessorScript( "( function(" + ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  ) + ") {", body, "} )" );
     }
     // -- accessorScript ---------------------------------------------------------------------------
