@@ -20,7 +20,7 @@
         this.amplitudeVariation = 15;
         this.waveNum = 9;
         this.resolution = 50;
-        this.waterHeight = 0;
+        this.waterHeight = 20;
         this.getSync = function(url)
         {
             return $.ajax(

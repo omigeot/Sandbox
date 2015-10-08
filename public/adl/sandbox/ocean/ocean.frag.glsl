@@ -125,6 +125,8 @@ void main() {
 
 	texNormal = mix(texNormal, texNormal1, clamp(0.0, 1.0, vCamLength / uHalfGrid));
 	texNormal = normalize(texNormal);
+
+	texNormal.y*=-1.0;
 	float ref = 0.0;
 	vec3 nI  = normalize(vCamDir);
 	vec3 nN = normalize(texNormal);
