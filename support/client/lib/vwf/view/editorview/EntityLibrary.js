@@ -555,9 +555,9 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			$.getJSON(data.url, function(proto) {
 				_UndoManager.startCompoundEvent();
 				for (var i in proto.properties)
-					_PrimitiveEditor.setProperty(vwf.application(), i, proto.properties[i]);
+					_PrimitiveEditor.setProperty(Engine.application(), i, proto.properties[i]);
 				for (var i in proto.children)
-					_Editor.createChild(vwf.application(), GUID(), proto.children[i]);
+					_Editor.createChild(Engine.application(), GUID(), proto.children[i]);
 				_UndoManager.stopCompoundEvent();
 			});
 		}

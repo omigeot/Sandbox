@@ -49,7 +49,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             if(newVal == oldVal) return;
 
             for(var i = 0; i < newVal.length; i++){
-                var current = vwf.getProperty($scope.node.id, flagProps[i]);
+                var current = Engine.getProperty($scope.node.id, flagProps[i]);
 
                 if(newVal[i] !== oldVal[i] && newVal[i] !== current){
                     if(newVal[i] || typeof newVal[i] === "boolean"){
@@ -125,7 +125,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
         function setupAnimation(){
             var node = $scope.node;
-            var animationLength = vwf.getProperty(node.id, 'animationLength');
+            var animationLength = Engine.getProperty(node.id, 'animationLength');
 
             if(animationLength > 0){
                 //This should be moved into a yaml file and implemented by all objects that support animations
@@ -154,9 +154,9 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             var node = $scope.node;
             try {
                 //dont update the spinners when the user is typing in them, but when they drag the gizmo do.
-                if (node && (vwf.client() !== vwf.moniker()) || $("#index-vwf:focus").length ==1) {
+                if (node && (Engine.client() !== Engine.moniker()) || $("#index-vwf:focus").length ==1) {
 
-                    var mat = vwf.getProperty(node.id, 'transform');
+                    var mat = Engine.getProperty(node.id, 'transform');
                     var angles = rotationMatrix_2_XYZ(mat);
                     var pos = [mat[12],mat[13],mat[14]];
 
@@ -247,7 +247,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
         function setFlags(){
             for(var i = 0; i < flagProps.length; i++){
                 if($scope.node.properties[flagProps[i]] === undefined){
-                    var temp = vwf.getProperty($scope.node.id, flagProps[i]);
+                    var temp = Engine.getProperty($scope.node.id, flagProps[i]);
                     if(temp !== undefined){
                         $scope.node.properties[flagProps[i]] = temp;
                     }
@@ -278,7 +278,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 var props = node.properties;
                 var obj = {
                     name: props.DisplayName || node.id,
-                    type: props.type || vwf.getProperty(node.id, 'type'),
+                    type: props.type || Engine.getProperty(node.id, 'type'),
                     node: scopeNode,
                     editorProps: outEditorData
                 };
@@ -314,25 +314,25 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
         }
 
         function setDefaultValue(dest, key, type){
-            var value = vwf.getProperty(dest.id, key);
+            var value = Engine.getProperty(dest.id, key);
 
             if(value !== undefined){
                 dest.properties[key] = value;
-                //vwf.setProperty(dest.id, key, value);
+                //Engine.setProperty(dest.id, key, value);
             }
             else if(type === "color" || type === "vector"){
 
                 var arr = [0, 0, 0];
                 dest.properties[key] = arr;
-                //vwf.setProperty(dest.id, key, arr);
+                //Engine.setProperty(dest.id, key, arr);
             }
         }
 
         function recursevlyAddPrototypes(node, existingProps, scopeNode, scopeEditorData, ignoreBase){
             if(node){
-                var protoId = vwf.prototype(node.id);
+                var protoId = Engine.prototype(node.id);
 
-                buildEditorData(node, vwf.getProperty(node.id, "EditorData"), existingProps, scopeNode, scopeEditorData);
+                buildEditorData(node, Engine.getProperty(node.id, "EditorData"), existingProps, scopeNode, scopeEditorData);
                 if(protoId && !ignoreBase) recursevlyAddPrototypes(_Editor.getNode(protoId), existingProps, scopeNode, scopeEditorData);
             }
         }
@@ -419,7 +419,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
                     value = node.properties[prop];
 
-                    if(value !== vwf.getProperty(node.id, prop)){
+                    if(value !== Engine.getProperty(node.id, prop)){
                         pushUndoEvent(node, prop, value);
                         setProperty(node, prop, value);
                     }

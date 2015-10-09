@@ -19,16 +19,16 @@ function defaultContext()
     this.setProperty = function(id, name, val)
     {
         if (inTick)
-            vwf.setPropertyFast(id, name, val);
+            Engine.setPropertyFast(id, name, val);
         else
-            vwf.setProperty(id, name, val);
+            Engine.setProperty(id, name, val);
     }
     this.getProperty = function(id, name)
     {
         if (inTick)
-            return vwf.getPropertyFast(id, name);
+            return Engine.getPropertyFast(id, name);
         else
-            return vwf.getProperty(id, name);
+            return Engine.getProperty(id, name);
     }
     this.postUpdates = function()
     {
@@ -37,7 +37,7 @@ function defaultContext()
     this.callMethod = function(id, methodname, params)
     {
         //note that this forces sync!
-        return vwf.callMethod(id, methodname, params);
+        return Engine.callMethod(id, methodname, params);
     }
     this.fireEvent = function(id, eventName, params)
         {
@@ -45,7 +45,7 @@ function defaultContext()
         }
         //this is also where we should be notifiying the refelector of new methods, events, properties and nodes
 }
-//when a function is called, a context is created to observe changes. When the funtion return, we post changes to VWF.
+//when a function is called, a context is created to observe changes. When the funtion return, we post changes to Engine.
 function executionContext(parentContext)
 {
     this.touchedProperties = {};
@@ -75,9 +75,9 @@ executionContext.prototype.getProperty = function(id, name)
                 return val;
         }
         if (inTick)
-            var val = vwf.getPropertyFast(id, name);
+            var val = Engine.getPropertyFast(id, name);
         else
-            val = vwf.getProperty(id, name);
+            val = Engine.getProperty(id, name);
         this.touchedProperties[id + name] = {
             id: id,
             name: name,
@@ -121,7 +121,7 @@ var APIModules = {
     physicsAPI: function(id)
     {
         this.id = id;
-        var AMMOJS_MODEL = vwf.models[1];
+        var AMMOJS_MODEL = Engine.models[1];
         this.addForceAtCenter = function(x, y, z, coords)
         {
             if (!coords)
@@ -245,7 +245,7 @@ var APIModules = {
         }
         this.___getJSNode = function(o)
         {
-            return vwf.models.javascript.nodes[o];
+            return Engine.models.javascript.nodes[o];
         }
         this.___filterResults = function(results)
         {
@@ -750,7 +750,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
         {
             jsDriverSelf = this;
             this.nodes = {}; // maps id => new type()
-            this.creatingNode(undefined, 0); // global root  // TODO: to allow vwf.children( 0 ), vwf.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
+            this.creatingNode(undefined, 0); // global root  // TODO: to allow Engine.children( 0 ), Engine.getNode( 0 ); is this the best way, or should the kernel createNode( global-root-id /* 0 */ )?
         },
         // == Model API ============================================================================
         // -- creatingNode -------------------------------------------------------------------------
@@ -976,7 +976,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                     var self = this.node;
                     var thisid = self.id;
                     var fromPos = jsDriverSelf.getTopContext().getProperty(thisid, 'worldPosition');
-                    var decendents = vwf.decendants(thisid);
+                    var decendents = Engine.decendants(thisid);
                     for (var i in decendents)
                     {
                         var targetNode = jsDriverSelf.nodes[decendents[i]];
@@ -1049,7 +1049,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             { // TODO: only define on shared "node" prototype?
                 value: function()
                 {
-                    return vwf.random(this.id);
+                    return Engine.random(this.id);
                 },
                 enumerable: true,
             });
@@ -1209,7 +1209,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 { // TODO: only define on shared "node" prototype?
                     get: function()
                     {
-                        return vwf.models.javascript.gettingProperty(this.id, "___audioAPI");
+                        return Engine.models.javascript.gettingProperty(this.id, "___audioAPI");
                     },
                     enumerable: true,
                 });
@@ -1224,7 +1224,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 { // TODO: only define on shared "node" prototype?
                     get: function()
                     {
-                        return vwf.models.javascript.gettingProperty(this.id, "___clientAPI")
+                        return Engine.models.javascript.gettingProperty(this.id, "___clientAPI")
                     },
                     enumerable: true,
                 });
@@ -1235,7 +1235,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 { // TODO: only define on shared "node" prototype?
                     get: function()
                     {
-                        return vwf.models.javascript.gettingProperty(this.id, "___commsAPI")
+                        return Engine.models.javascript.gettingProperty(this.id, "___commsAPI")
                     },
                     enumerable: true,
                 });
@@ -1246,7 +1246,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 { // TODO: only define on shared "node" prototype?
                     get: function()
                     {
-                        return vwf.models.javascript.gettingProperty(this.id, "___xAPI")
+                        return Engine.models.javascript.gettingProperty(this.id, "___xAPI")
                     },
                     enumerable: true,
                 });
@@ -1316,7 +1316,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             var node = child.parent;
             if (child.parent && child.parent.__children_by_name)
             {
-                var oldname = vwf.getProperty(nodeID, 'DisplayName');
+                var oldname = Engine.getProperty(nodeID, 'DisplayName');
                 delete child.parent.__children_by_name[oldname];
             }
             if (node)
@@ -1471,11 +1471,11 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             { // "this" is node.properties in get/set
                 get: function()
                 {
-                    return vwf.getProperty(this.id, propertyName)
+                    return Engine.getProperty(this.id, propertyName)
                 },
                 set: function(value)
                 {
-                    return vwf.setProperty(this.id, propertyName, value)
+                    return Engine.setProperty(this.id, propertyName, value)
                 },
                 enumerable: true
             });
@@ -1523,7 +1523,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             if (!node) return; // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
             if (propertyName == 'DisplayName' && this.nodes[node.parentId])
             {
-                var oldname = vwf.getProperty(nodeID, 'DisplayName');
+                var oldname = Engine.getProperty(nodeID, 'DisplayName');
                 delete this.nodes[node.parentId].__children_by_name[oldname];
                 this.nodes[node.parentId].__children_by_name[propertyValue] = node;
             }
@@ -2603,8 +2603,8 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
         {
             if (node.childExtendsID == type)
                 return true;
-            if (vwf.prototype(node.id))
-                node = jsDriverSelf.nodes[vwf.prototype(node.id)];
+            if (Engine.prototype(node.id))
+                node = jsDriverSelf.nodes[Engine.prototype(node.id)];
             else
                 node = null;
         }
