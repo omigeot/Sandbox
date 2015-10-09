@@ -800,11 +800,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             node.parent = undefined;
             node.source = childSource;
             node.type = childType;
-            Object.defineProperty(node, "logger",
-            {
-                value: this.logger.for(childName),
-                enumerable: true,
-            });
+           
             node.properties = Object.create(prototype.properties || Object.prototype,
             {
                 node:
@@ -1106,7 +1102,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             // Define a "future" proxy so that for any this.property, this.method, or this.event, we
             // can reference this.future( when, callback ).property/method/event and have the
             // expression evaluated at the future time.
-            Object.defineProperty(node, "in",
+       /*     Object.defineProperty(node, "in",
             { // TODO: only define on shared "node" prototype?
                 value: function(when, callback)
                 { // "this" is node
@@ -1133,6 +1129,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             node.private.future = Object.create(prototype.private ?
                 prototype.private.future : Object.prototype
             );
+
             Object.defineProperty(node.private.future, "private",
             {
                 value:
@@ -1142,6 +1139,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                     change: 0,
                 }
             });
+            */
             node.private.change = 1; // incremented whenever "future"-related changes occur
             if (nodeID)
                 this.addingChild(nodeID, childID, childName);
