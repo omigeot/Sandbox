@@ -1236,9 +1236,11 @@ this.tick = function() {
 
     // Call ticking() on each model.
 
+    
     this.models.forEach( function( model ) {
         model.ticking && model.ticking( this.now ); // TODO: maintain a list of tickable models and only call those
     }, this );
+    
     
 
     // Call tick() on each tickable node.
@@ -1248,10 +1250,11 @@ this.tick = function() {
     //    }, this );
 
     // Call ticked() on each view.
-
+   
     this.views.forEach( function( view ) {
         view.ticked && view.ticked( this.now ); // TODO: maintain a list of tickable views and only call those
     }, this );
+   
 
 
 
@@ -1908,7 +1911,7 @@ this.activeResync = function() {
         count: nodes.length
     }
 }
-this.getNode = function( nodeID, full, normalize ) {  // TODO: options to include/exclude children, prototypes
+this.getNode = function( nodeID, full, normalize,includeContinueBase ) {  // TODO: options to include/exclude children, prototypes
 
     if(!nodeID) return undefined;
     this.logger.debuggx( "getNode", nodeID, full );
@@ -2061,7 +2064,7 @@ this.getNode = function( nodeID, full, normalize ) {  // TODO: options to includ
     nodeComponent.children = {};
 
     this.children( nodeID ).forEach( function( childID ) {
-        nodeComponent.children[ this.name( childID ) ] = this.getNode( childID, full );
+        nodeComponent.children[ this.name( childID ) ] = this.getNode( childID, full , normalize, includeContinueBase);
     }, this );
 
     for ( var childName in nodeComponent.children ) {  // TODO: distinguish add, change, remove
@@ -2092,7 +2095,7 @@ this.getNode = function( nodeID, full, normalize ) {  // TODO: options to includ
     // Return the descriptor created, unless it was arranged as a patch and there were no
     // changes. Otherwise, return the URI if this is the root of a URI component.
 
-    if(nodeComponent.continues)
+    if(nodeComponent.continues && !includeContinueBase)
         nodeComponent = objectDiff(nodeComponent,continuesDefs[nodeComponent.continues + nodeID],false,false);
 
     if ( full || ! node.patchable || patched ) {
@@ -3515,6 +3518,55 @@ this.setProperty.entrants = {}; // maps ( nodeID + '-' + propertyName ) => { ind
 /// 
 /// @see {@link module:vwf/api/kernel.getProperty}
 
+this.getPropertyFast = function(nodeID, propertyName)
+{
+    var answer = undefined;
+    for(var i =0; i < this.models.length; i++)
+    {
+        if(this.models[i].gettingProperty)
+        {
+            var ret = this.models[i].gettingProperty(nodeID,propertyName)
+            if(ret !== undefined)
+                return ret;
+        }
+
+    }
+    if(answer == undefined)
+    {
+        var proto = vwf.prototype(nodeID);
+        if(proto)
+            answer = vwf.getPropertyFast(proto,propertyName);
+    }
+    return answer;
+}
+this.setPropertyFastEntrants = [];
+this.setPropertyFast = function(nodeID, propertyName,propertyValue)
+{
+    var answer = undefined;
+    for(var i =0; i < this.models.length; i++)
+    {
+      //  if(!this.setPropertyFastEntrants[nodeID + propertyName + i])
+        if(this.models[i].settingProperty)
+        {
+        //    this.setPropertyFastEntrants[nodeID + propertyName + i] = true;
+            
+            var ret = this.models[i].settingProperty(nodeID,propertyName,propertyValue)
+          //  delete this.setPropertyFastEntrants[nodeID + propertyName + i];    
+            
+            
+            if(ret !== undefined)
+                answer = ret;
+        }
+    }
+    for(var i =0; i < this.views.length; i++)
+    {
+        if(this.views[i].satProperty)
+        {
+            this.views[i].satProperty(nodeID,propertyName,answer)
+        }
+    }
+    return answer;
+},
 this.getProperty = function( nodeID, propertyName, ignorePrototype, testDelegation) {
 
     this.logger.debuggx( "getProperty", nodeID, propertyName );

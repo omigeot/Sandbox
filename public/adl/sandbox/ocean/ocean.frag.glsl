@@ -87,9 +87,13 @@ void main() {
 		L[i] *= uMag / 2.0;
 		{
 			float w =  2.0 * PI / L[i];
-			S[i] = 3.0 * PI / (w  * 2.718281828459045);
+			S[i] = sqrt(.98 * (2.0*PI/w));
+			float wavesInTexture = 10.0;
 			A[i] = 0.5 / (w * 2.718281828459045);
-			pNormal +=  A[i] * texture2D(oNormal, (2.0 * tc.xy / L[i] / 10.0) + D[i] * S[i] * t / 30.0).xyz;
+			vec2 texToWorld = tc.xy/wavesInTexture;
+			vec2 texToWaveLen =  texToWorld / L[i];
+			vec2 directionAndSpeed = D[i] * S[i]/( wavesInTexture*10.0 );
+			pNormal +=  A[i]*  texture2D(oNormal, texToWaveLen  + directionAndSpeed * t ).xyz;
 			powerSum += A[i];
 		}
 	}
@@ -114,13 +118,15 @@ void main() {
 	mapNormal.xy *= max(0.0, uChop / 2.0);
 
 	pNormal.xy *= max(0.0, uChop / 2.0);
-
+	pNormal = normalize(pNormal);
 
 	vec3 texNormal =  normalize(TBN * mapNormal);
 	vec3 texNormal1 =  pNormal;
 
 	texNormal = mix(texNormal, texNormal1, clamp(0.0, 1.0, vCamLength / uHalfGrid));
 	texNormal = normalize(texNormal);
+
+	texNormal.y*=-1.0;
 	float ref = 0.0;
 	vec3 nI  = normalize(vCamDir);
 	vec3 nN = normalize(texNormal);
