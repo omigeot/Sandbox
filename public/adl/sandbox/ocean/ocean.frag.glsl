@@ -62,7 +62,7 @@ uniform sampler2D diffuse;
 uniform float uChop;
 uniform float uReflectPow;
 uniform float uFoam;
-uniform vec3 waves[9];
+uniform vec4 waves[9];
 uniform float uHalfGrid;
 
 void setup() {
@@ -105,9 +105,9 @@ void main() {
 	float t2 = 0.015 * t;
 	float t3 = 0.05 * t;
 
-	vec2 uv1 = (tc.xy / 20.0) + t1;
-	vec2 uv2 = (tc.xy / 10.0) + t2;
-	vec2 uv3 = (tc.xy / 5.0) + t3;
+	vec2 uv1 = (tc.xy / waves[0].x) + t1;
+	vec2 uv2 = (tc.xy / (waves[0].x*2.0)) + t2;
+	vec2 uv3 = (tc.xy / waves[0].x) + t3;
 	
 
 	vec3 mapNormal = texture2D(oNormal, uv1).rgb + texture2D(oNormal, uv2).rgb;//+ texture2D(oNormal, uv3).rgb;
@@ -136,9 +136,9 @@ void main() {
 	float Tt = asin(sinT);
 
 	float ndotl = max(0.00, dot(directionalLightDirection[ 0], texNormal));
-	vec3 sunReflectVec = reflect(-directionalLightDirection[ 0], vec3(texNormal.x,texNormal.y,1.0-directionalLightDirection[0].z));
+	vec3 sunReflectVec = reflect(-directionalLightDirection[ 0], vec3(texNormal.x,texNormal.y,texNormal.z));
 	sunReflectVec = normalize(sunReflectVec);
-	float spec = pow(max(0.0,dot(vCamDir, sunReflectVec)), 64.0);
+	float spec = pow(max(0.0,dot(vCamDir, sunReflectVec)), 32.0);
 
 	
 	float fresnel = max(0.0,min(1.0,.02 + 0.97 * pow(1.0 + dot(-vCamDir,texNormal),5.0)));
@@ -156,8 +156,8 @@ void main() {
 
 	float dist = 0.3;
 	vec3 ref_vec = reflect(-camdir, texNormal);
-	//ref_vec = mix(-ref_vec, ref_vec, sign(ref_vec.z));
-	sky = 1.0 * textureCube(texture, ref_vec).xyz;
+	ref_vec = mix(-ref_vec, ref_vec, sign(ref_vec.z));
+	sky = uReflectPow * textureCube(texture, ref_vec).xyz;
 	vec3 upwellingC =  upwelling/2.0;
 	vec4 water  =  vec4(mix(upwellingC,sky,ref),1.0);
 	water += vec4(directionalLightColor[ 0 ], 1.0) * spec;
@@ -167,5 +167,5 @@ void main() {
 
 	float foamMix = max(0.0, h * diffuseTex.r) ;
 	gl_FragColor = mix(water, foam, clamp(foamMix * uFoam, 0.0, 1.0));
-	//gl_FragColor.xyz = vec3(water).xyz ;
+	//gl_FragColor.xyz = vec3(spec).xyz ;
 }

@@ -21,7 +21,7 @@ uniform float uMag;
 uniform float uHalfGrid;
 uniform float uWaterHeight;
 
-uniform vec3 waves[9];
+uniform vec4 waves[9];
 
 
 
@@ -53,13 +53,13 @@ void setup() {
       for (int i = 0; i < numWaves; i++)
       {
             L[i] = waves[i].x;
-            L[i] *= uMag / 2.0;
+            //L[i] *= uMag / 2.0;
             D[i] = normalize(vec2(waves[i].y, waves[i].z));
 
             float w =  2.0 * PI / L[i];
             A[i] = 0.5 / (w * 2.718281828459045); //for ocean on Earth, A is ususally related to L
             
-         
+            //S[i] =     1.0 * uMag; //for ocean on Earth, S is ususally related to L
             S[i] = sqrt(.98 * (2.0*PI/w));
             W[i] = w;
             Q[i] = Qa / (w * A[i] * float(numWaves));
@@ -71,7 +71,7 @@ void main() {
 
       setup();
 
-      float gA = uMag;
+      float gA = .5;
 
       vec3 N = vec3(0.0, 0.0, 0.0);
       vec3 B = vec3(0.0, 0.0, 0.0);
@@ -97,8 +97,7 @@ void main() {
       tPos.y = (p_y + p_dy * i_t) / tw;
       tPos.z = uWaterHeight;//(p_z + p_dz*i_t)/tw;
 
-      float x = tPos.x;
-      float y = tPos.y;
+      
 
       texcoord0 = tPos;
 
@@ -108,6 +107,8 @@ void main() {
       for (int i = 0; i < numWaves; i++)
       {
            
+           float x = tPos.x + D[i].x * waves[i].w;
+      float y = tPos.y + D[i].y * waves[i].w;
             //if (L[i] > edgeLen2*4.0)
             {
                   float st = t;
@@ -116,7 +117,7 @@ void main() {
                   float q = S[i] * w;
                   A[i] *= smoothstep(1.0, 0.0, pow(camDist, 1.3) / (uHalfGrid * L[i]));
                   if(A[i] < .001) continue;
-                  vec2 xy = vec2(x, y);
+                  vec2 xy = vec2(x , y);
                   
                   float Qi = Q[i]; // *numWaves?
                   float xi = Qi * A[i] * D[i].x * cos( dot(w * D[i], xy) + q * st);
