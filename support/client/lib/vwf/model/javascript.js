@@ -2576,7 +2576,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
     function bodyScript(parameters, body,name,id)
     {
         var parameterString = (parameters.length ? " " + parameters.join(", ") + " " : "");
-        return accessorScript("( function(" + parameterString + ") {\n'use strict';\n ", body, "\n} )"  + " \n //@ sourceURL="+id+'.'+name);
+        return accessorScript("( function(" + parameterString + ") {\n'use strict';\n ", body, "\n} )" );
         // return accessorScript( "( function(" + ( parameters.length ? " " + parameters.join( ", " ) + " " : ""  ) + ") {", body, "} )" );
     }
     // -- accessorScript ---------------------------------------------------------------------------
