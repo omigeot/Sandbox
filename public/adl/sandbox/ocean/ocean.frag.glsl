@@ -93,7 +93,7 @@ void main() {
 			vec2 texToWorld = tc.xy/wavesInTexture;
 			vec2 texToWaveLen =  texToWorld / L[i];
 			vec2 directionAndSpeed = D[i] * S[i]/( wavesInTexture*10.0 );
-			pNormal +=  A[i]*  texture2D(oNormal, texToWaveLen  + directionAndSpeed * t ).xyz;
+			pNormal +=  A[i]*  texture2D(oNormal, texToWaveLen  + directionAndSpeed  * t ).xyz;
 			powerSum += A[i];
 		}
 	}
@@ -105,10 +105,10 @@ void main() {
 	float t2 = 0.015 * t;
 	float t3 = 0.05 * t;
 
-	vec2 uv1 = (tc.xy / 5.0) + t1;
-	vec2 uv2 = (tc.xy / 3.0) + t2;
+	vec2 uv1 = (tc.xy / 20.0) + t1;
+	vec2 uv2 = (tc.xy / 10.0) + t2;
 	vec2 uv3 = (tc.xy / 5.0) + t3;
-	vec2 uv4 = (tc.xy / 1.0) + t3;
+	
 
 	vec3 mapNormal = texture2D(oNormal, uv1).rgb + texture2D(oNormal, uv2).rgb;//+ texture2D(oNormal, uv3).rgb;
 	vec3 diffuseTex = texture2D(diffuse, uv1).rgb + texture2D(diffuse, uv2).rgb;// + texture2D(diffuse, uv4).rgb;
@@ -117,7 +117,7 @@ void main() {
 	mapNormal = 2.0 * mapNormal.xyz - 1.0;
 	mapNormal.xy *= max(0.0, uChop / 2.0);
 
-	pNormal.xy *= max(0.0, uChop / 2.0);
+	pNormal.xy *= max(0.0, uChop / 4.0);
 	pNormal = normalize(pNormal);
 
 	vec3 texNormal =  normalize(TBN * mapNormal);
@@ -126,7 +126,7 @@ void main() {
 	texNormal = mix(texNormal, texNormal1, clamp(0.0, 1.0, vCamLength / uHalfGrid));
 	texNormal = normalize(texNormal);
 
-	texNormal.y*=-1.0;
+	
 	float ref = 0.0;
 	vec3 nI  = normalize(vCamDir);
 	vec3 nN = normalize(texNormal);
@@ -136,26 +136,30 @@ void main() {
 	float Tt = asin(sinT);
 
 	float ndotl = max(0.00, dot(directionalLightDirection[ 0], texNormal));
-	float spec = pow(clamp(dot(vCamDir, reflect(-directionalLightDirection[ 0], texNormal)), 0.0, 1.0), 16.0);
+	vec3 sunReflectVec = reflect(-directionalLightDirection[ 0], vec3(texNormal.x,texNormal.y,1.0-directionalLightDirection[0].z));
+	sunReflectVec = normalize(sunReflectVec);
+	float spec = pow(max(0.0,dot(vCamDir, sunReflectVec)), 64.0);
 
-	float scatter = 1.0 - dot( vNormal, vCamDir);
-	upwelling +=  ambientLightColor;
-	upwelling *= .4 + scatter;
+	
+	float fresnel = max(0.0,min(1.0,.02 + 0.97 * pow(1.0 + dot(-vCamDir,texNormal),5.0)));
+	
 
-	float fs = sin(Tt - Ti) / sin(Tt + Ti);
-	float ts = tan(Tt - Ti) / tan(Tt + Ti);
-	ref = .5 * (fs * fs + ts * ts);
+	float scatter = 1.0 - dot( texNormal, vCamDir);
+	//upwelling +=  ambientLightColor/1.0;
+	upwelling *=   scatter;
 
+	
+	ref = fresnel;
 	vec3 camdir = vCamDir;
 
-	ref = min(1.0, ref);
+	//ref = min(1.0, ref);
 
 	float dist = 0.3;
 	vec3 ref_vec = reflect(-camdir, texNormal);
-	ref_vec = mix(-ref_vec, ref_vec, sign(ref_vec.z));
-	sky = uReflectPow * textureCube(texture, ref_vec).xyz;
-	vec3 upwellingC = (1.0 - ref) * upwelling;
-	vec4 water  =  vec4(dist * (ref * sky + upwellingC) + (1.0 - dist) * air, max(.5 + 3.0 * (1.0 - dist), 1.0));
+	//ref_vec = mix(-ref_vec, ref_vec, sign(ref_vec.z));
+	sky = 1.0 * textureCube(texture, ref_vec).xyz;
+	vec3 upwellingC =  upwelling/2.0;
+	vec4 water  =  vec4(mix(upwellingC,sky,ref),1.0);
 	water += vec4(directionalLightColor[ 0 ], 1.0) * spec;
 
 	vec4 foam = vec4(1.0, 1.0, 1.0, 1.0) * ndotl + vec4(ambientLightColor, 1.0);;
@@ -163,5 +167,5 @@ void main() {
 
 	float foamMix = max(0.0, h * diffuseTex.r) ;
 	gl_FragColor = mix(water, foam, clamp(foamMix * uFoam, 0.0, 1.0));
-
+	//gl_FragColor.xyz = vec3(water).xyz ;
 }

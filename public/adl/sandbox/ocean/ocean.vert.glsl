@@ -110,7 +110,8 @@ void main() {
            
             //if (L[i] > edgeLen2*4.0)
             {
-
+                  float st = t;
+                  
                   float w = W[i];
                   float q = S[i] * w;
                   A[i] *= smoothstep(1.0, 0.0, pow(camDist, 1.3) / (uHalfGrid * L[i]));
@@ -118,17 +119,17 @@ void main() {
                   vec2 xy = vec2(x, y);
                   
                   float Qi = Q[i]; // *numWaves?
-                  float xi = Qi * A[i] * D[i].x * cos( dot(w * D[i], xy) + q * t);
-                  float yi = Qi * A[i] * D[i].y * cos( dot(w * D[i], xy) + q * t);
-                  float hi =  A[i] * sin( dot(w * D[i], xy) + q * t );
+                  float xi = Qi * A[i] * D[i].x * cos( dot(w * D[i], xy) + q * st);
+                  float yi = Qi * A[i] * D[i].y * cos( dot(w * D[i], xy) + q * st);
+                  float hi =  A[i] * sin( dot(w * D[i], xy) + q * st );
 
                   tPos.x += xi * gA;
                   tPos.y += yi * gA;
                   tPos.z += hi * gA;
 
                   float WA = w * A[i] * gA;
-                  float S0 = sin(w * dot(D[i], tPos.xy) + q * t);
-                  float C0 = cos(w * dot(D[i], tPos.xy) + q * t);
+                  float S0 = sin(w * dot(D[i], tPos.xy) + q * st);
+                  float C0 = cos(w * dot(D[i], tPos.xy) + q * st);
 
 
                   N.x +=  D[i].x * WA * C0;
