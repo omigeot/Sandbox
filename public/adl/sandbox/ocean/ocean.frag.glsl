@@ -115,7 +115,7 @@ void main() {
 
 	mapNormal /= 2.0;
 	mapNormal = 2.0 * mapNormal.xyz - 1.0;
-	mapNormal.xy *= max(0.0, uChop / 2.0);
+	mapNormal.xy *= max(0.0, uChop/30.0 *  waves[0].x);
 
 	pNormal.xy *= max(0.0, uChop / 4.0);
 	pNormal = normalize(pNormal);

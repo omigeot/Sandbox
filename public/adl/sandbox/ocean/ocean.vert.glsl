@@ -116,7 +116,7 @@ void main() {
                   float w = W[i];
                   float q = S[i] * w;
                   A[i] *= smoothstep(1.0, 0.0, pow(camDist, 1.3) / (uHalfGrid * L[i]));
-                  if(A[i] < .001) continue;
+                 if(A[i] < .001) continue;
                   vec2 xy = vec2(x , y);
                   
                   float Qi = Q[i]; // *numWaves?

@@ -4,7 +4,7 @@
 
     // n = 6 gives a good enough approximation
 function rnd2() {
-    return Math.random();
+    return Math.random()*2 - 1;
     return ((Math.random() + Math.random() + Math.random() + Math.random() + Math.random() + Math.random()) - 3) / 3;
 }
 
@@ -24,7 +24,7 @@ function rnd2() {
         this.direction = 90;
         this.directionVariation = 1.3;
         this.amplitude = 5;
-        this.amplitudeVariation = 5;
+        this.amplitudeVariation = 3;
         this.waveNum = 9;
         this.resolution = 50;
         this.waterHeight = 20;
