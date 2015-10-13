@@ -113,8 +113,9 @@
                     //if it's a prim, this.build will be true. Prims must be able to reset the material, and won't pass this check
                     if(!this.initialized && propname == 'materialDef')
                     {
-                        this.tempmaterialdef = propval
-                        return;
+
+                        this.tempmaterialdef = JSON.parse(JSON.stringify(propval));
+                       // return;
                     }
 
                     if (propname == 'materialDef' && propval)
