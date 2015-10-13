@@ -61,7 +61,8 @@ block content
 			input(type='checkbox', ng-model='vwfNode.properties[vwfProp.property]', ng-change='onChange()')
 		
 	#vwf-template-button(ng-non-bindable, style='display: none;')
-		button(ng-click='callMethod(vwfNode, vwfProp)') {{vwfProp.label || vwfProp.method || 'Call Method'}}
+		.method-container
+			button(ng-click='callMethod(vwfNode, vwfProp)') {{vwfProp.label || vwfProp.method || 'Call Method'}}
 		
 	#vwf-template-rangeslider(ng-non-bindable, style='display: none;')
 		label.vMargin {{displayname}}: 

@@ -466,7 +466,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 				}
 
 				if($scope.guiState.inheritPrototype)
-					curNode = _Editor.getNode(vwf.prototype(curNode.id), true);
+					curNode = _Editor.getNode(Engine.prototype(curNode.id), true);
 				else
 					break;
 			}

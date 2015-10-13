@@ -603,7 +603,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 		else if (node == ancestor)
 			return true;
 		else
-			return nodeInherits(vwf.prototype(node), ancestor);
+			return nodeInherits(Engine.prototype(node), ancestor);
 	}
 	return {
 		initialize: function() {
@@ -616,7 +616,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 		},
 		uploadSelectedEntity: function(overwrite) {
 			var nodeId = _Editor.GetSelectedVWFID();
-			var node = vwf.getNode(nodeId);
+			var node = Engine.getNode(nodeId);
 			if (node) {
 				uploadVWFObject(
 					node.properties.DisplayName,
@@ -634,7 +634,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 		},
 		uploadSelectedMaterial: function(overwrite) {
 			var nodeId = _Editor.GetSelectedVWFID();
-			var node = vwf.getNode(nodeId);
+			var node = Engine.getNode(nodeId);
 			if (node && node.properties.materialDef) {
 				uploadVWFObject(
 					node.properties.DisplayName + ' material',
@@ -651,7 +651,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 		},
 		uploadSelectedBehavior: function(overwrite) {
 			var nodeId = _Editor.GetSelectedVWFID();
-			var node = vwf.getNode(nodeId);
+			var node = Engine.getNode(nodeId);
 			if (nodeId && nodeInherits(nodeId, 'http-vwf-example-com-behavior-vwf')) {
 				uploadVWFObject(
 					node.properties.DisplayName,

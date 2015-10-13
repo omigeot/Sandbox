@@ -10,7 +10,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			else if(node == ancestor)
 				return true;
 			else
-				return nodeInherits( vwf.prototype(node), ancestor );
+				return nodeInherits( Engine.prototype(node), ancestor );
 		}
 
 		$scope.$watchGroup([
@@ -650,7 +650,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 					_dView.setCameraDefault();
 
 					$('#MenuCamera3RDPersonicon').addClass('iconselected');
-					require("vwf/view/threejs/editorCameraController").getController('Orbit').followObject(vwf.models[0].model.nodes[_UserManager.GetCurrentUserID()]);
+					require("vwf/view/threejs/editorCameraController").getController('Orbit').followObject(Engine.models[0].model.nodes[_UserManager.GetCurrentUserID()]);
 					require("vwf/view/threejs/editorCameraController").setCameraMode('3RDPerson');
 				} else {
 					_Notifier.alert('First person mode is not available when you are not logged in.');
@@ -750,7 +750,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			MenuCreateContinuesNode: function(e){
 				alertify.prompt('Input a URL to an entity JSON body.', function(ok, val){
 					if(ok && val){
-						vwf.createChild('index-vwf', GUID(), {continues: val});
+						Engine.createChild('index-vwf', GUID(), {continues: val});
 					}
 				});
 			},
@@ -796,7 +796,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 			ToolsShowID: function(e) {
 				if (_Editor.GetSelectedVWFID())
-					alertify.prompt(vwf.getProperty(_Editor.GetSelectedVWFID(), "DisplayName") || "No DisplayName", function() {}, _Editor.GetSelectedVWFID());
+					alertify.prompt(Engine.getProperty(_Editor.GetSelectedVWFID(), "DisplayName") || "No DisplayName", function() {}, _Editor.GetSelectedVWFID());
 				else
 					alertify.alert('No Selection');
 			},
@@ -903,7 +903,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 				//lets try to grab a screenshot if it's not set already
 
-				if (vwf.getProperty('index-vwf', 'owner') != _UserManager.GetCurrentUserName()) {
+				if (Engine.getProperty('index-vwf', 'owner') != _UserManager.GetCurrentUserName()) {
 					//don't bother if this is not the owner
 					return;
 				}
@@ -929,7 +929,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 				if(!window._dRenderer)
 					return;
-				if (vwf.getProperty('index-vwf', 'owner') != _UserManager.GetCurrentUserName()) {
+				if (Engine.getProperty('index-vwf', 'owner') != _UserManager.GetCurrentUserName()) {
 					alertify.alert('Sorry, only the world owner can set the thumbnail');
 					return;
 				}

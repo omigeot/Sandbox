@@ -1,6 +1,13 @@
 "use strict";
 (function()
 {
+
+    // n = 6 gives a good enough approximation
+function rnd2() {
+    return Math.random()*2 - 1;
+    return ((Math.random() + Math.random() + Math.random() + Math.random() + Math.random() + Math.random()) - 3) / 3;
+}
+
     //enum to keep track of assets that fail to load
     function ocean(childID, childSource, childName, childType, assetSource, asyncCallback)
     {
@@ -15,12 +22,13 @@
         this.vertShaderURL = "./ocean/ocean.vert.glsl";
         this.fragShaderURL = "./ocean/ocean.frag.glsl";
         this.direction = 90;
-        this.directionVariation = 180;
-        this.amplitude = 10;
-        this.amplitudeVariation = 15;
+        this.directionVariation = 1.3;
+        this.amplitude = 5;
+        this.amplitudeVariation = 3;
         this.waveNum = 9;
         this.resolution = 50;
         this.waterHeight = 20;
+        this.timers = [];
         this.getSync = function(url)
         {
             return $.ajax(
@@ -37,45 +45,48 @@
              this.waveNum = num;
              this.generateWaves();
              this.buildMat();
+             for(var i =0; i < this.waveNum; i++)
+             {
+                this.timers[i]= (Math.random());
+             }
         }
         this.generateWaves = function()
         {
-            var min = this.amplitude - this.amplitudeVariation;
-            var max = this.amplitude + this.amplitudeVariation;
-            var mean = this.amplitude;
-            var a = ((mean-min)/(max-mean))/5.0;
-
-            this.uniforms.waves.value = [];
+            
+ for(var i =0; i < this.waveNum; i++)
+             {
+                this.timers[i]= (Math.random());
+             }
+            this.uniforms.waves.value.length = 0;
             for(var i = 0; i < this.waveNum; i++)
             {
-                this.uniforms.waves.value.push(new THREE.Vector3())
+                this.uniforms.waves.value.push(new THREE.Vector4())
             }
             for(var i = 0; i < this.waveNum; i++)
             {
                 var b = Math.random();
-                var amp = min + (a/(a+b))*(max-min);
-                if(amp<1)amp=1;
+                var amp = rnd2() * this.amplitudeVariation + this.amplitude;
                 this.uniforms.waves.value[i].x = amp;
+                this.uniforms.waves.value[i].ox = amp;
+                this.uniforms.waves.value[i].w = b;
+                console.log(amp);
             }
 
-            var min = this.direction - this.directionVariation;
-            var max = this.direction + this.directionVariation;
-            var mean = this.direction;
-            var a = ((mean-min)/(max-mean))/5.0;
+           
 
             for(var i = 0; i < this.waveNum; i++)
             {
                 var b = Math.random();
-                var amp = min + (a/(a+b))*(max-min);
+                var amp = rnd2() * this.directionVariation + this.direction;
                 var dir = [1,0];
 
-                amp/= 57;
-                
+                //amp/= 57;
+                console.log(amp);
                 var x1 = 1 * Math.cos(amp) - 0 * Math.sin(amp);
-                var y1 = 1 * Math.sin(amp) + 0 * Math.cos(amp);
+                var y1 = 0 * Math.cos(amp) + 1 * Math.sin(amp);
                 this.uniforms.waves.value[i].y = x1;
                 this.uniforms.waves.value[i].z = y1;
-
+                console.log(x1,y1);
             }
             this.uniforms.waves.value.sort(function(a,b)
             {
@@ -108,17 +119,17 @@
                     value: this.resolution/2
                 },
                 waves:{
-                    type: "v3v",
+                    type: "v4v",
                     value:[
-                    (new THREE.Vector3(10,1.0, 1.0)),
-                    (new THREE.Vector3(3.5,-1.0, 1.0)),
-                    (new THREE.Vector3(6,1.0, -1.0)),
-                    (new THREE.Vector3(5,1.6, 1.4)),
-                    (new THREE.Vector3(8,-0.3, 1.0)),
-                    (new THREE.Vector3(30,6.0, -1.0)),
-                    (new THREE.Vector3(4,6.0, -1.0)),
-                    (new THREE.Vector3(8,-1.0, 61.0)),
-                    (new THREE.Vector3(20,-1.6, 1.0))
+                    (new THREE.Vector4(9,1.0, 1.0,.5)),
+                    (new THREE.Vector4(3.5,-1.0, 1.0,.5)),
+                    (new THREE.Vector4(6,1.0, -1.0,.5)),
+                    (new THREE.Vector4(5,1.6, 1.4,.5)),
+                    (new THREE.Vector4(8,-0.3, 1.0,.5)),
+                    (new THREE.Vector4(3,6.0, -1.0,.5)),
+                    (new THREE.Vector4(4,6.0, -1.0,.5)),
+                    (new THREE.Vector4(8,-1.0, 61.0,.5)),
+                    (new THREE.Vector4(8,-1.6, 1.0,.5))
                     ]
                 },
                 uFoam:
@@ -198,6 +209,8 @@
             this.nearmesh.frustumCulled  = false;
             _dView.bind('prerender', this.prerender.bind(this));
             window._dOcean = this;
+            this.waves = this.uniforms.waves.value;
+            this.generateWaves();
         }
         this.setResolution = function(res)
         {
@@ -243,13 +256,34 @@
         this.prerender = function()
         {
             if(this.disable) return;
+
+
             var vp = _dView.getCamera().matrixWorld.elements;
             var root = this.getRoot();
             root.position.set(0, 0, 0);
             root.updateMatrix();
             root.updateMatrixWorld();
             var now = performance.now();
-            var deltaT = now - this.lastFrame;
+            var deltaT = now - this.lastFrame || 0;
+
+           
+            /*for(var i =0; i < this.waveNum; i++)
+            {
+                this.timers[i] += deltaT;
+                this.waves[i].x = this.waves[i].ox * ((Math.sin(this.timers[i]/100)+1.0)/2.0);
+                if(this.waves[i].x < .001)
+                {
+                    var amp = rnd2() * this.amplitudeVariation + this.amplitude;
+                    this.waves.x = amp;
+                    this.waves.ox = amp;
+                    var amp = rnd2() * this.directionVariation + this.direction;
+                    var dir = [1,0];
+                    var x1 = 1 * Math.cos(amp) - 0 * Math.sin(amp);
+                    var y1 = 0 * Math.cos(amp) + 1 * Math.sin(amp);
+                    this.uniforms.waves.value[i].y = x1;
+                    this.uniforms.waves.value[i].z = y1;
+                }
+            }*/
 
             var _viewProjectionMatrix = new THREE.Matrix4();
 
