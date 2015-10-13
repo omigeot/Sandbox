@@ -93,6 +93,16 @@
                     propval.skinning = !!(list[i] instanceof THREE.SkinnedMesh);
                     propval.shadows = !!list[i].receiveShadow;
                     
+                    if (propval instanceof Array)
+                    {
+                        for(var k =0; k < propval.length; k++)
+                        {
+                            propval[k].morphTargets = propval.morphTargets;
+                            propval[k].skinning = propval.skinning;
+                            propval[k].shadows = propval.shadows;
+                        }
+                    }
+
                     if (!(propval instanceof Array))
                         _MaterialCache.setMaterial(list[i], propval);
                     else if (list.length == 1)

@@ -143,6 +143,7 @@ define(["module", "vwf/view", "vwf/view/SAVE/api", "vwf/view/SAVE/bundle"], func
 		},
 		initialize: function()
 		{
+          
 			window._dSAVE = this;
 			this.nodes = {};
 			var self = this;

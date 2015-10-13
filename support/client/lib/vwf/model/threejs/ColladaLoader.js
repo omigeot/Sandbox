@@ -664,7 +664,7 @@ THREE.ColladaLoader = function() {
         var bones = [];
         setupSkeleton(skeleton, bones, -1);
         setupSkinningMatrices(bones, skinController.skin);
-        v = new THREE.Vector3();
+        var v = new THREE.Vector3();
         var skinned = [];
 
         for (var i = 0; i < geometry.vertices.length; i++) {
@@ -672,18 +672,18 @@ THREE.ColladaLoader = function() {
             skinned.push(new THREE.Vector3());
         }
 
-        for (i = 0; i < bones.length; i++) {
+        for (var i = 0; i < bones.length; i++) {
 
             if (bones[i].type != 'JOINT') continue;
 
-            for (j = 0; j < bones[i].weights.length; j++) {
+            for (var j = 0; j < bones[i].weights.length; j++) {
 
-                w = bones[i].weights[j];
-                vidx = w.index;
-                weight = w.weight;
+                var w = bones[i].weights[j];
+                var vidx = w.index;
+                var weight = w.weight;
 
-                o = geometry.vertices[vidx];
-                s = skinned[vidx];
+                var o = geometry.vertices[vidx];
+                var s = skinned[vidx];
 
 
                 v.x = o.x;
@@ -779,7 +779,7 @@ THREE.ColladaLoader = function() {
 
 
 
-        for (i = 0; i < geometry.vertices.length; i++) {
+        for (var i = 0; i < geometry.vertices.length; i++) {
             geometry.vertices[i].applyMatrix4(skinController.skin.bindShapeMatrix);
         }
 
@@ -875,7 +875,7 @@ THREE.ColladaLoader = function() {
 
 
 
-        for (frame = 0; frame < animationBounds.frames; frame++) {
+        for (var frame = 0; frame < animationBounds.frames; frame++) {
 
             var bones = [];
             var skinned = [];
@@ -922,17 +922,17 @@ THREE.ColladaLoader = function() {
             else {
 
                 console.warn('Too many bones on mesh', sortedbones.length, geometry);
-                for (i = 0; i < geometry.vertices.length; i++) {
+                for (var i = 0; i < geometry.vertices.length; i++) {
 
                     skinned.push(new THREE.Vector3());
 
                 }
 
-                for (i = 0; i < bones.length; i++) {
+                for (var i = 0; i < bones.length; i++) {
 
                     if (bones[i].type != 'JOINT') continue;
 
-                    for (j = 0; j < bones[i].weights.length; j++) {
+                    for (var j = 0; j < bones[i].weights.length; j++) {
 
                         w = bones[i].weights[j];
                         vidx = w.index;
@@ -975,7 +975,7 @@ THREE.ColladaLoader = function() {
 
         // FIXME: controllers
 
-        for (i = 0; i < node.controllers.length; i++) {
+        for (var i = 0; i < node.controllers.length; i++) {
 
             var controller = controllers[node.controllers[i].url];
 
@@ -1045,7 +1045,7 @@ THREE.ColladaLoader = function() {
 
         var double_sided_materials = {};
 
-        for (i = 0; i < node.geometries.length; i++) {
+        for (var i = 0; i < node.geometries.length; i++) {
 
             var instance_geometry = node.geometries[i];
             var instance_materials = instance_geometry.instance_material;
@@ -1070,7 +1070,7 @@ THREE.ColladaLoader = function() {
 
                 if (instance_materials) {
 
-                    for (j = 0; j < instance_materials.length; j++) {
+                    for (var j = 0; j < instance_materials.length; j++) {
 
                         var instance_material = instance_materials[j];
                         var mat = materials[instance_material.target];
@@ -1115,7 +1115,7 @@ THREE.ColladaLoader = function() {
 
                     material = new THREE.MeshFaceMaterial(used_materials_array);
 
-                    for (j = 0; j < geom.faces.length; j++) {
+                    for (var j = 0; j < geom.faces.length; j++) {
 
                         var face = geom.faces[j];
                         face.materialIndex = used_materials[face.daeMaterial]
@@ -1186,7 +1186,7 @@ THREE.ColladaLoader = function() {
 
         }
 
-        for (i = 0; i < node.cameras.length; i++) {
+        for (var i = 0; i < node.cameras.length; i++) {
 
             var instance_camera = node.cameras[i];
             var cparams = cameras[instance_camera.url];
@@ -1196,7 +1196,7 @@ THREE.ColladaLoader = function() {
 
         }
 
-        for (i = 0; i < node.lights.length; i++) {
+        for (var i = 0; i < node.lights.length; i++) {
 
             var instance_light = node.lights[i];
             var lparams = lights[instance_light.url];
