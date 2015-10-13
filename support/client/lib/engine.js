@@ -313,6 +313,8 @@
                 { library: "vwf/kernel/view", active: true },
                 { library: "vwf/view/document", active: true },
                 { library: "vwf/view/editor", active: false },
+                { library: "vwf/view/SAVE/SAVE", active: true },
+                { library: "vwf/model/SAVE/SAVE", active: true },
           
                 { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
                 { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
@@ -347,6 +349,7 @@
                     { library: "vwf/model/wires", active: true },
                     { library: "vwf/model/jqueryui", active: true },
                     { library: "vwf/model/audio", active: true },
+                    { library: "vwf/model/SAVE/SAVE", active: true },
                 ],
                 view: [
                     { library: "vwf/view/glge", parameters: {"application-root":"#vwf-root"}, active: false },
@@ -361,6 +364,7 @@
                     { library: "vwf/view/WebRTC", active: true },
                     { library: "vwf/view/xapi", active: true },
                     { library: "vwf/view/jqueryui", active: true },
+                    { library: "vwf/view/SAVE/SAVE", active: true },
 
 
 
@@ -483,6 +487,7 @@
                         "vwf/model/jqueryui",
                         "vwf/model/audio",
                         "vwf/model/object",
+                        "vwf/model/SAVE/SAVE",
                     ];
 
                         // These are the view configurations. They use the same format as the model
@@ -497,6 +502,7 @@
                             
                             "vwf/view/xapi",
                             "vwf/view/jqueryui",
+                            "vwf/view/SAVE/SAVE",
                         ];
 
                         Engine.initialize(application, models, views, callback);
