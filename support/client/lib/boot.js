@@ -25,8 +25,12 @@ require.config({
         },
         'vwf/model/threejs/helvetiker_regular.typeface.js': {
             deps: ["vwf/model/threejs"]
+        },
+        'vwf/view/editorview/lib/html-palette.min':
+        {
+            deps: ['vwf/view/editorview/lib/angular'],
+            exports:"HtmlPalette"
         }
-
     },
     waitSeconds: 15
 });
@@ -39,9 +43,9 @@ define([
     // simulation to a WebGL scene manager.
     "vwf/kernel/model",
     "vwf/model/javascript",
-    "vwf/model/jiglib",
+    
     "vwf/model/threejs",
-    "vwf/model/scenejs",
+   
     "vwf/model/wires",
     "vwf/model/object",
     "vwf/model/stage/log",
@@ -50,10 +54,10 @@ define([
     'vwf/view/editorview/lib/angular',
     "vwf/view/EditorView",
     "vwf/view/threejs",
-    "vwf/view/googleEarth",
+   
     "vwf/utility",
     "vwf/view/WebRTC",
-    "vwf/view/audio",
+    "vwf/model/audio",
     "messageCompress",
     "vwf/view/xapi",
     "assetLoader",
@@ -80,10 +84,6 @@ define([
         // With the scripts loaded, we must initialize the framework. vwf.initialize()
         // accepts three parameters: a world specification, model configuration parameters,
         // and view configuration parameters.
-        $(document.body).append('<div id="glyphOverlay" style="display:none"/>');
-        
-        
-
         assetLoader.loadList(stateData, function() {
             vwf.loadConfiguration(null, {
                 model: [],

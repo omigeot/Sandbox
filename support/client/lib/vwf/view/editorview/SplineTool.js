@@ -1,7 +1,7 @@
 function SplineTool() {
 
     var self = this;
-    $('#sidepanel').append("<div id='SplineToolGUI' class='ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
+    $('#sidepanel .main').append("<div id='SplineToolGUI' class='ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
 
     $('#SplineToolGUI').append("<div id='SplineToolGUItitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Spline Tools</span></div>");
     $('#SplineToolGUI').append("<div id='SplineToolGUIEditPoints' style='width:100%'></div>");
@@ -36,8 +36,6 @@ function SplineTool() {
 
     $('#SplineToolGUItitle').append('<a id="SplineToolclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
     $('#SplineToolGUItitle').prepend('<img class="headericon" src="../vwf/view/editorview/images/icons/inventory.png" />');
-    $('#SplineToolGUI').css('border-bottom', '5px solid #444444')
-    $('#SplineToolGUI').css('border-left', '2px solid #444444')
     $('#SplineToolclose').click(function() {
         _SplineTool.hide()
     });
@@ -77,7 +75,7 @@ function SplineTool() {
             return;
         }
 
-        if (!node || !(vwf.getProperty(node.id, 'type') == 'Line' || vwf.getProperty(node.id, 'type') == 'Spline')) {
+        if (!node || !(Engine.getProperty(node.id, 'type') == 'Line' || Engine.getProperty(node.id, 'type') == 'Spline')) {
             _Notifier.alert('The Spline tools can only be used on a line object. The object selected cannot be edited with this tool.');
             self.deactivate();
             return;
@@ -94,11 +92,11 @@ function SplineTool() {
                     _Editor.addTool('Spline', self);
                     _Editor.setActiveTool('Spline');
 
-                    var parent = vwf.parent(node.id);
+                    var parent = Engine.parent(node.id);
                     var name = node.name
                     var proto = _DataManager.getCleanNodePrototype(node);
                     proto.properties.owner = _UserManager.GetCurrentUserName();
-                    proto.properties.points = vwf.callMethod(_Editor.GetSelectedVWFID(), 'getPoints');
+                    proto.properties.points = Engine.callMethod(_Editor.GetSelectedVWFID(), 'getPoints');
                     proto.extends = 'line2.vwf';
                     proto.source = "vwf/model/threejs/line.js"
                     _Editor.DeleteSelection();
@@ -135,8 +133,8 @@ function SplineTool() {
         _Editor.getTranslationCallback = self.getTranslation;
         _Editor.getScaleCallback = self.getScale;
         self.selectedID = _Editor.GetSelectedVWFID();
-        self.points = vwf.getProperty(self.selectedID, 'points');
-        self.transform = vwf.getProperty(self.selectedID, 'transform');
+        self.points = Engine.getProperty(self.selectedID, 'points');
+        self.transform = Engine.getProperty(self.selectedID, 'transform');
         _Editor.SetSelectMode('None');
         _Editor.updateGizmoLocation();
         self.active = true;
@@ -534,7 +532,8 @@ function SplineTool() {
         });
 
 
-        showSidePanel();
+
+        _SidePanel.showPanel();
         _SplineTool.open = true;
 
     }
@@ -545,8 +544,8 @@ function SplineTool() {
 
             if ($('#sidepanel').data('jsp'))
                 $('#sidepanel').data('jsp').reinitialise();
-            if (!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible'))
-                hideSidePanel();
+            //if (!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible'))
+                //hideSidePanel();
         });
 
         var checked = ($('#SplineToolGUIActivteTool').next().attr('aria-pressed'));

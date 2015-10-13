@@ -447,7 +447,17 @@ function prettyDate(time) {
 exports.world = function(req, res, next) {
 
     sessions.GetSessionData(req, function(sessionData) {
-        DAL.getInstance("/adl/sandbox".replace(/\//g, "_") + "_" + req.params.page + "_", function(doc) {
+
+        //account for either supplying only the 16 digit code, or the full database key
+        //also account for appPath if full key provided
+        var worldID = req.params.page;
+        if(worldID.indexOf(global.configuration.appPath.replace(/\//g,"_")) == -1)
+        {
+            worldID = "_adl_sandbox_"+ worldID + "_";
+        }
+        worldID = worldID.replace(global.configuration.appPath.replace(/\//g,"_"),"_adl_sandbox")
+        console.log(worldID);
+        DAL.getInstance(worldID, function(doc) {
             if (!doc) {
                 res.locals = {
                     sessionData: sessionData,
@@ -725,7 +735,7 @@ var self = exports;
 var cachedVWFCore = null;
 exports.getVWFCore = function() {
     if (!cachedVWFCore) {
-        cachedVWFCore = fs.readFileSync('./support/client/lib/vwf.js', 'utf8');
+        cachedVWFCore = fs.readFileSync('./support/client/lib/engine.js', 'utf8');
         if (global.configuration.host && global.configuration.loadBalancer) //if the config contains an address for a load balancer, have the client
         //look up what host to use
         {

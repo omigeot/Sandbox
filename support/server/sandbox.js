@@ -6,7 +6,8 @@ var libpath = require('path'),
     fs = require('fs-extra'),
     url = require("url"),
     mime = require('mime'),
-    YAML = require('js-yaml');
+    YAML = require('js-yaml'),
+	sass = require('node-sass');
 var logger = require('./logger');
 
 
@@ -122,7 +123,8 @@ function startVWF() {
                     logger.info('Configuration read.')
                 } catch (e) {
                     configSettings = {};
-                    logger.error('Could not read config file. Loading defaults.')
+                    logger.error(e.message);
+                    logger.error('Could not read config file. Loading defaults.');
                 }
                 //save configuration into global scope so other modules can use.
                 global.configuration = configSettings;
@@ -231,6 +233,11 @@ function startVWF() {
 
 			function registerAssetServer(cb)
 			{
+				if(global.configuration.hostAssets === undefined)
+					global.configuration.hostAssets = true;
+
+				global.configuration.assetAppPath = '/sas';
+
 				if( global.configuration.hostAssets || !global.configuration.remoteAssetServerURL )
 				{
 					global.configuration.assetDataDir = global.configuration.assetDataDir || 'assets';
@@ -238,8 +245,6 @@ function startVWF() {
 
 					fs.mkdirs(datadir, function()
 					{
-						global.configuration.assetAppPath = '/sas';
-
 						var assetServer = require('sandbox-asset-server');
 						app.use(global.configuration.assetAppPath, assetServer({
 							dataDir: datadir,
@@ -251,6 +256,10 @@ function startVWF() {
 					});
 				}
 				else {
+					app.all(global.configuration.assetAppPath+'/*', function(req,res){
+						var actualPath = req.path.slice(global.configuration.assetAppPath.length);
+						res.redirect(global.configuration.remoteAssetServerURL+actualPath);
+					});
 					logger.info('Hosting assets remotely at', global.configuration.remoteAssetServerURL);
 				}
 				cb();
@@ -289,7 +298,7 @@ function startVWF() {
                 cb();
             },
             function registerWithLB(cb) {
-                //do this before trying to compile, otherwise the vwfbuild.js file will be created with the call to the load balancer, which may not be online
+                //do this before trying to compile, otherwise the enginebuild.js file will be created with the call to the load balancer, which may not be online
                 //NOTE: If this fails, then the build will have the loadbalancer address hardcoded in. Make sure that the balancer info is right if using loadbalancer and
                 // - compile together
                 if (global.configuration.loadBalancer && global.configuration.host && global.configuration.loadBalancerKey)
@@ -319,9 +328,25 @@ function startVWF() {
                         var path2 = libpath.normalize('../../support/client/lib/index.css'); //trick the filecache
                         path2 = libpath.resolve(__dirname, path2);
 
-                        FileCache.insertFile([path, path2], contents, fs.statSync(buildname), "utf8", cb);
-
-
+						sass.render({
+							file: libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/Editorview.scss'),
+							includePaths: [libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/')],
+							outputStyle: 'compressed',
+							functions: {
+								'getImgPath()': function(){
+									return new sass.types.String('vwf/view/editorview');
+								}
+							}
+						}, function(err,result){
+							if(err){
+								logger.error('Error compiling sass:', err);
+	                        	FileCache.insertFile([path, path2], contents, fs.statSync(buildname), "utf8", cb);
+							}
+							else {
+								var scss = result.css.toString('utf8');
+	                        	FileCache.insertFile([path, path2], contents+scss, fs.statSync(buildname), "utf8", cb);
+							}
+						});
                     }
                     //first, check if the build file already exists. if so, skip this step
                     if (fs.existsSync(libpath.resolve(libpath.join(__dirname, '..', '..', 'build', 'index.css')))) {
@@ -359,7 +384,7 @@ function startVWF() {
                 }
                 if (compile) {
 
-                    fs.writeFileSync('./support/client/lib/vwfbuild.js', Landing.getVWFCore());
+                    fs.writeFileSync('./support/client/lib/enginebuild.js', Landing.getVWFCore());
 
                     function loadIntoCache() {
                         var path = libpath.normalize('../../build/support/client/lib/load.js'); //trick the filecache
@@ -752,7 +777,7 @@ function startVWF() {
                 app.get("/adl/sandbox" + '/createNew/:page([0-9/]+)', Landing.createNew);
                 app.get("/adl/sandbox" + '/createNew2/:template([_a-zA-Z0-9/]+)', Landing.createNew2);
 
-                app.get("/adl/sandbox" + '/vwf.js', Landing.serveVWFcore);
+                app.get("/adl/sandbox" + '/engine.js', Landing.serveVWFcore);
 
                 app.post("/adl/sandbox" + '/admin/:page([a-zA-Z]+)', Landing.handlePostRequest);
                 app.post("/adl/sandbox" + '/data/:action([a-zA-Z_]+)', Landing.handlePostRequest);

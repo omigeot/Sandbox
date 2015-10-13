@@ -33,16 +33,14 @@ if (false) {
         "alea.js",
         "mash.js",
         "jquery-encoder-0.1.0.js",
-        "./vwfbuild.js", 
+        "./enginebuild.js", 
         "centerinclient.js",
         "vwf/model/ammo.js/ammo",
         "vwf/model/ammojs",
-        "./vwf/view/editorview/lib/ace/src-min-noconflict/ace.js",
+        "./vwf/view/editorview/lib/ace/ace.js",
         "boot"
     ]);
 }
-
-
 
 //if window.jQuery is defined, than the Require Optimizer has run, and appended it to the top of this file. Thus, we don't need to worry about loading all the dependancy libraries
 if (!window.jQuery) {
@@ -54,7 +52,7 @@ if (!window.jQuery) {
 
             require(["../vwf/view/editorview/lib/jquery-ui-1.10.3.custom.min.js", "md5.js", "closure/deps.js", "../vwf/view/editorview/lib/jquery.transit.min.js", "../vwf/view/editorview/lib/jquery-mousewheel.js", "../vwf/view/editorview/lib/jquery-scrollpane.min.js", "../vwf/model/threejs/three.js", "closure/vec/float32array.js", "closure/vec/float64array.js"],
                 function() {
-                    require(["../vwf/model/threejs/DDSLoader.js" ,"../URI.js", "../vwf/model/threejs/ColladaLoader.js", "../vwf/model/threejs/UTF8JSONLoader.js", "../vwf/view/localization/i18next-1.7.2.min.js", "../vwf/view/localization/cookies.js", "compatibility.js", "closure/vec/vec.js", "../vwf.js","Class.create.js"],
+                    require(["../vwf/model/threejs/DDSLoader.js" ,"../URI.js", "../vwf/model/threejs/ColladaLoader.js", "../vwf/model/threejs/UTF8JSONLoader.js", "../vwf/view/localization/i18next-1.7.2.min.js", "../vwf/view/localization/cookies.js", "compatibility.js", "closure/vec/vec.js", "../engine.js","Class.create.js"],
                         function() {
                             require(["closure/vec/vec3.js", "closure/vec/vec4.js"],
                                 function() {

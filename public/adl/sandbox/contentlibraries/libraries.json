@@ -1,35 +1,26 @@
-{
-	"My Entities": {
-		"url": "./vwfdatamanager.svc/library/my-entities"
-	},
-	"My Models": {
-		"url": "./vwfdatamanager.svc/library/my-models"
-	},
-	"My Materials": {
-		"url": "./vwfdatamanager.svc/library/my-materials"
-	},
-	"My Behaviors": {
-		"url": "./vwfdatamanager.svc/library/my-behaviors"
-	},
-	"My Textures": {
-		"url": "./vwfdatamanager.svc/library/my-textures"
-	},
-    "Demo Entities": {
+[
+	{
+		"name": "Demo Entities",
         "url": "./contentlibraries/entities.json"
     },
-    "Materials": {
+	{
+		"name": "Materials",
         "url": "./contentlibraries/materials.json"
     },
-    "Environments": {
+	{
+		"name": "Environments",
         "url": "./contentlibraries/environments.json"
     },
-    "Behaviors": {
+	{
+		"name": "Behaviors",
         "url": "./contentlibraries/behaviors.json"
     },
-    "Primitives": {
+	{
+		"name": "Primitives",
         "url": "./contentlibraries/primitives.json"
     },
-    "Cameras": {
-        "url": "./contentlibraries/cameras.json"
+	{
+		"name": "Utilities",
+        "url": "./contentlibraries/utils.json"
     }
-}
+]
