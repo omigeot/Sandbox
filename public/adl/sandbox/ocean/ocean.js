@@ -407,6 +407,7 @@
             }
 
         }
+        
         this.getRoot = function()
         {
             return this.rootNode;

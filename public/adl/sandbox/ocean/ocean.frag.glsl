@@ -120,7 +120,7 @@ void main() {
 	pNormal.xy *= max(0.0, uChop / 2.0);
 	pNormal = normalize(pNormal);
 
-	vec3 texNormal =  normalize(TBN * vec3(0.0,0.0,1.0));
+	vec3 texNormal =  normalize(TBN * mapNormal);
 	vec3 texNormal1 =  pNormal;
 
 	texNormal = mix(texNormal, texNormal1, clamp(0.0, 1.0, vCamLength / uHalfGrid));
@@ -128,7 +128,7 @@ void main() {
 
 	texNormal.y*=-1.0;
 
-	
+
 	float ref = 0.0;
 	vec3 nI  = normalize(vCamDir);
 	vec3 nN = normalize(texNormal);
@@ -166,6 +166,6 @@ void main() {
 
 	float foamMix = max(0.0, h * diffuseTex.r) ;
 	gl_FragColor = mix(water, foam, clamp(foamMix * uFoam, 0.0, 1.0));
-	gl_FragColor.xyz = vec3(spec);
+	//gl_FragColor.xyz = vec3(ref);
 
 }
