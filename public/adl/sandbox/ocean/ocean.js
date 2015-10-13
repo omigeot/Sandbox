@@ -142,6 +142,21 @@ function rnd2() {
                     type: "f",
                     value: .5
                 },
+                uSunPower:
+                {
+                    type: "f",
+                    value: 500
+                },
+                uAmbientPower:
+                {
+                    type: "f",
+                    value: 500
+                },
+                uOceanDepth:
+                {
+                    type: "f",
+                    value: 500
+                },
                 uWaterHeight:
                 {
                     type: "f",
@@ -439,6 +454,19 @@ function rnd2() {
             {
                 this.uniforms.uFoam.value = propertyValue;
             }
+            if(propertyName == "uOceanDepth")
+            {
+                this.uniforms.uOceanDepth.value = propertyValue;
+            }
+            if(propertyName == "uSunPower")
+            {
+                this.uniforms.uSunPower.value = propertyValue;
+            }
+            if(propertyName == "uAmbientPower")
+            {
+                this.uniforms.uAmbientPower.value = propertyValue;
+            }
+
 
         }
         this.getRoot = function()

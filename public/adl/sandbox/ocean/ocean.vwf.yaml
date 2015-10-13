@@ -35,3 +35,24 @@ properties:
       step: .001
       displayname: "Foam Amount"
       property: "uFoam"         
+    uOceanDepth:
+      type: slider
+      min: 0.0
+      max: 10.0
+      step: .001
+      displayname: "uOceanDepth"
+      property: "uOceanDepth"  
+    uSunPower:
+      type: slider
+      min: 0.0
+      max: 1000.0
+      step: .001
+      displayname: "uSunPower"
+      property: "uSunPower"
+    uAmbientPower:
+      type: slider
+      min: 0.0
+      max: 1000.0
+      step: .001
+      displayname: "uAmbientPower"
+      property: "uAmbientPower"               

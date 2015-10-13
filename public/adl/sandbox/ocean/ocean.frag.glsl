@@ -64,6 +64,9 @@ uniform float uReflectPow;
 uniform float uFoam;
 uniform vec4 waves[9];
 uniform float uHalfGrid;
+uniform float uAmbientPower;
+uniform float uSunPower;
+uniform float uOceanDepth;
 
 void setup() {
 
@@ -160,15 +163,18 @@ void main() {
 	//float ndotl = max(0.00, dot(directionalLightDirection[ 0], texNormal));
 
 
-	float cosT  = -dot(normalize(-vNormal),refract(normalize(vCamDir),normalize(vNormal),.66));
+	float cosT  = -dot(vNormal,refract(normalize(vCamDir),normalize(vNormal),.66));
+	float cosT2  = -dot(vNormal,refract(normalize(vCamDir),normalize(vNormal),1.03));
+	//cosT = max(.001,cosT);
+	cosT = -cosT;
 	vec3 ocean_bottom_color = vec3(.5,.5,.5);
 	vec3 LZTP = ocean_bottom_color;
 
-	float Z = 20.35;//depth
+	float Z = uOceanDepth * (1.0 + cosT2);//depth
 	float R = -Z*cosT;
 
 	float Kd_r =  36.0; //645nm
-	float Kd_g =  2.7;  //510nm
+	float Kd_g =  3.4;  //510nm
 	float Kd_b =  1.9;      //440nm
 
 	vec3 Ldf0_sum = vec3(0.0,0.0,0.0);
@@ -194,7 +200,8 @@ void main() {
 	float c510 = a510 + b510;
 	float c440 = a440 + b440;
 
-	vec3 ed0 = vec3(ndotl) * directionalLightColor[0] + ambientLightColor; //sun plus sky lighting on water surface
+	vec3 ed0 =  vec3(ndotl) * directionalLightColor[0]*uSunPower + (ambientLightColor)*uAmbientPower; //sun plus sky lighting on water surface
+	
 	Ldf0.r = ((0.33*bb645)/a645) * (ed0.r/PI);
 	Ldf0.g = ((0.33*bb510)/a510) * (ed0.g/PI);
 	Ldf0.b = ((0.33*bb440)/a440) * (ed0.b/PI);
@@ -210,7 +217,7 @@ void main() {
 	LZTP_sum.g = LZTP.g * exp(-c510*R); 
 	LZTP_sum.b = LZTP.b * exp(-c440*R); 
 
-	vec3 L0TP = LZTP_sum +   Ldf0_sum*1000.0; 
+	vec3 L0TP = LZTP_sum +   Ldf0_sum; 
 
 
 	vec4 water  =  vec4(mix(L0TP,sky,ref),1.0);
@@ -224,5 +231,5 @@ void main() {
 	
 
 	//gl_FragColor = vec4(L0TP.r,L0TP.g,L0TP.b,1.0);
-	//gl_FragColor.xyz = vec3(-cosT).xyz ;
+	//gl_FragColor.xyz = vec3(cosT2).xyz ;
 }
