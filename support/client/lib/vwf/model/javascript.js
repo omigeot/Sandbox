@@ -2095,7 +2095,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             this.enterNewContext();
             this.callMethodTraverse(this.nodes['index-vwf'], 'tick', []);
             this.exitContext();
-            console.log("Tick View: " + (performance.now() - now))
+            //console.log("Tick View: " + (performance.now() - now))
             inTick = false;
         },
         isBehavior: function(node)
