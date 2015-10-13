@@ -128,12 +128,7 @@ void main() {
 
 	
 	float ref = 0.0;
-	vec3 nI  = normalize(vCamDir);
-	vec3 nN = normalize(texNormal);
-	float cosT = (dot(nI, nN));
-	float Ti = acos(cosT);
-	float sinT = sin(Ti) / nSnell;
-	float Tt = asin(sinT);
+	
 
 	float ndotl = max(0.00, dot(directionalLightDirection[ 0], texNormal));
 	vec3 sunReflectVec = reflect(-directionalLightDirection[ 0], vec3(texNormal.x,texNormal.y,texNormal.z));
@@ -145,8 +140,7 @@ void main() {
 	
 
 	float scatter = 1.0 - dot( texNormal, vCamDir);
-	//upwelling +=  ambientLightColor/1.0;
-	upwelling *=   scatter;
+	
 
 	
 	ref = fresnel;
@@ -158,8 +152,68 @@ void main() {
 	vec3 ref_vec = reflect(-camdir, texNormal);
 	ref_vec = mix(-ref_vec, ref_vec, sign(ref_vec.z));
 	sky = uReflectPow * textureCube(texture, ref_vec).xyz;
-	vec3 upwellingC =  upwelling/2.0;
-	vec4 water  =  vec4(mix(upwellingC,sky,ref),1.0);
+	
+	
+
+
+
+	//float ndotl = max(0.00, dot(directionalLightDirection[ 0], texNormal));
+
+
+	float cosT  = -dot(normalize(-vNormal),refract(normalize(vCamDir),normalize(vNormal),.66));
+	vec3 ocean_bottom_color = vec3(.5,.5,.5);
+	vec3 LZTP = ocean_bottom_color;
+
+	float Z = 20.35;//depth
+	float R = -Z*cosT;
+
+	float Kd_r =  36.0; //645nm
+	float Kd_g =  2.7;  //510nm
+	float Kd_b =  1.9;      //440nm
+
+	vec3 Ldf0_sum = vec3(0.0,0.0,0.0);
+	vec3 Ldf0 = vec3(0.0,0.0,0.0);
+	float b0 = 0.037;
+
+	float wl0 = 514.0;
+	float m = -0.00113;
+	float i = -1.62517;
+	float b645 = b0+((645.0*m+i)/(wl0*m+i));
+	float b510 = b0+((510.0*m+i)/(wl0*m+i));
+	float b440 = b0+((440.0*m+i)/(wl0*m+i));
+
+	float bb645 = 0.01829*b645 + 0.00006;
+	float bb510 = 0.01829*b510 + 0.00006;
+	float bb440 = 0.01829*b440 + 0.00006;
+
+	float a645 = Kd_r;
+	float a510 = Kd_g;
+	float a440 = Kd_b;
+
+	float c645 = a645 + b645;
+	float c510 = a510 + b510;
+	float c440 = a440 + b440;
+
+	vec3 ed0 = vec3(ndotl) * directionalLightColor[0] + ambientLightColor; //sun plus sky lighting on water surface
+	Ldf0.r = ((0.33*bb645)/a645) * (ed0.r/PI);
+	Ldf0.g = ((0.33*bb510)/a510) * (ed0.g/PI);
+	Ldf0.b = ((0.33*bb440)/a440) * (ed0.b/PI);
+
+
+	Ldf0_sum.r = Ldf0.r*(1.0-exp((-c645+Kd_r*cosT)*R));
+	Ldf0_sum.g = Ldf0.g*(1.0-exp((-c510+Kd_g*cosT)*R));
+	Ldf0_sum.b = Ldf0.b*(1.0-exp((-c440+Kd_b*cosT)*R));
+
+	vec3 LZTP_sum = vec3(0.0,0.0,0.0);
+
+	LZTP_sum.r = LZTP.r * exp(-c645*R); 
+	LZTP_sum.g = LZTP.g * exp(-c510*R); 
+	LZTP_sum.b = LZTP.b * exp(-c440*R); 
+
+	vec3 L0TP = LZTP_sum +   Ldf0_sum*1000.0; 
+
+
+	vec4 water  =  vec4(mix(L0TP,sky,ref),1.0);
 	water += vec4(directionalLightColor[ 0 ], 1.0) * spec;
 
 	vec4 foam = vec4(1.0, 1.0, 1.0, 1.0) * ndotl + vec4(ambientLightColor, 1.0);;
@@ -167,5 +221,8 @@ void main() {
 
 	float foamMix = max(0.0, h * diffuseTex.r) ;
 	gl_FragColor = mix(water, foam, clamp(foamMix * uFoam, 0.0, 1.0));
-	//gl_FragColor.xyz = vec3(spec).xyz ;
+	
+
+	//gl_FragColor = vec4(L0TP.r,L0TP.g,L0TP.b,1.0);
+	//gl_FragColor.xyz = vec3(-cosT).xyz ;
 }
