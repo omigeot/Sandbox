@@ -327,7 +327,7 @@ var APIModules = {
             if (coordinateSystem == 'local')
             {
                 var position = this.getPosition();
-                var offset = Mat4.multVec3NoTranslate(self.transform, [x, y, z], []);
+                var offset = Mat4.multVec3NoTranslate(jsDriverSelf.getTopContext().getProperty(this.id, "transform"), [x, y, z], []);
                 position = Vec3.add(position, offset, []);
                 this.setPosition(position);
             }
@@ -2095,7 +2095,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             this.enterNewContext();
             this.callMethodTraverse(this.nodes['index-vwf'], 'tick', []);
             this.exitContext();
-            console.log("Tick View: " + (performance.now() - now))
+            
             inTick = false;
         },
         isBehavior: function(node)
