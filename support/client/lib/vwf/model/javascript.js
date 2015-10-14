@@ -327,7 +327,7 @@ var APIModules = {
             if (coordinateSystem == 'local')
             {
                 var position = this.getPosition();
-                var offset = Mat4.multVec3NoTranslate(self.transform, [x, y, z], []);
+                var offset = Mat4.multVec3NoTranslate(jsDriverSelf.getTopContext().getProperty(this.id, "transform"), [x, y, z], []);
                 position = Vec3.add(position, offset, []);
                 this.setPosition(position);
             }
