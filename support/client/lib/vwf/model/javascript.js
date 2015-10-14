@@ -1469,11 +1469,11 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             { // "this" is node.properties in get/set
                 get: function()
                 {
-                    return Engine.getProperty(this.id, propertyName)
+                    return Engine.getProperty(this.node.id, propertyName)
                 },
                 set: function(value)
                 {
-                    return Engine.setProperty(this.id, propertyName, value)
+                    return Engine.setProperty(this.node.id, propertyName, value)
                 },
                 enumerable: true
             });
@@ -1638,13 +1638,13 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 {
                     return function( /* parameter1, parameter2, ... */ )
                     { // "this" is node.methods
-                        return jsDriverSelf.kernel.callMethod(this.id, methodName, arguments);
+                        return jsDriverSelf.kernel.callMethod(this.node.id, methodName, arguments);
                     };
                 },
                 set: function(value)
                 {
                     this.node.methods.hasOwnProperty(methodName) ||
-                        jsDriverSelf.kernel.createMethod(this.id, methodName);
+                        jsDriverSelf.kernel.createMethod(this.node.id, methodName);
                     this.node.private.bodies[methodName] = value;
                 },
                 enumerable: true,
