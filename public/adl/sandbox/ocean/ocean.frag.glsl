@@ -49,10 +49,10 @@ vec3 upwelling = vec3(0.2, 0.4, 0.6);
 vec3 sky = vec3(0.69, 0.84, 1.0);
 vec3 air = vec3(0.1, 0.1, 0.1);
 
-float L[numWaves];
-float A[numWaves];
-float S[numWaves];
-vec2 D[numWaves];
+uniform float L[numWaves];
+uniform float A[numWaves];
+uniform float S[numWaves];
+uniform vec2 D[numWaves];
 
 uniform float uMag;
 uniform float t;
@@ -73,31 +73,21 @@ uniform vec3 c;
 uniform vec3 bb;
 uniform vec3 a;
 uniform vec3 Kd;
-void setup() {
 
-	for (int i = 0; i < numWaves; i++)
-	{
-		L[i] = waves[i].x;
-		D[i] = normalize(vec2(waves[i].y, waves[i].z));
-	}
-}
+uniform float waveEffectDepth;
 
 
 
 void main() {
 
-	setup();
 	vec3 tc = texcoord0;
 	vec3 pNormal;
+	vec3 nnvCamDir = normalize(-vCamDir);
 	float powerSum = 0.0;
 	for (int i = 0; i < 2; i++)
 	{
-		L[i] *= uMag / 2.0;
 		{
-			float w =  2.0 * PI / L[i];
-			S[i] = sqrt(.98 * (2.0*PI/w));
 			float wavesInTexture = 10.0;
-			A[i] = 0.5 / (w * 2.718281828459045);
 			vec2 texToWorld = tc.xy/wavesInTexture;
 			vec2 texToWaveLen =  texToWorld / L[i];
 			vec2 directionAndSpeed = D[i] * S[i]/( wavesInTexture*10.0 );
@@ -141,13 +131,13 @@ void main() {
 	float ndotl = max(0.00, dot(directionalLightDirection[ 0], texNormal));
 	vec3 sunReflectVec = reflect(-directionalLightDirection[ 0], vec3(texNormal.x,texNormal.y,texNormal.z));
 	sunReflectVec = normalize(sunReflectVec);
-	float spec = pow(max(0.0,dot(vCamDir, sunReflectVec)), 32.0);
+	float spec = pow(max(0.0,dot(nnvCamDir, sunReflectVec)), 32.0);
 
 	
-	float fresnel = max(0.0,min(1.0,.02 + 0.97 * pow(1.0 + dot(-vCamDir,texNormal),5.0)));
+	float fresnel = max(0.0,min(1.0,.02 + 0.97 * pow(1.0-dot(texNormal,nnvCamDir),5.0)));
 	
 
-	float scatter = 1.0 - dot( texNormal, vCamDir);
+	float scatter = 1.0 - dot( texNormal, nnvCamDir);
 	
 
 	
@@ -168,14 +158,14 @@ void main() {
 	//float ndotl = max(0.00, dot(directionalLightDirection[ 0], texNormal));
 
 
-	float cosT  = -dot(vNormal,refract(normalize(vCamDir),normalize(vNormal),.66));
-	float cosT2  = -dot(vNormal,refract(normalize(vCamDir),normalize(vNormal),1.03));
+	float cosT  = -dot(vNormal,refract(nnvCamDir,normalize(vNormal),.66));
+	float cosT2  = -dot(vNormal,refract(nnvCamDir,normalize(vNormal),1.03));
 	//cosT = max(.001,cosT);
 	cosT = -cosT;
 	vec3 ocean_bottom_color = vec3(.5,.5,.5);
 	vec3 LZTP = ocean_bottom_color;
 
-	float Z = max(0.04,uOceanDepth * (1.0 + cosT2) - h);//depth
+	float Z = max(0.04,uOceanDepth * (1.0 + cosT2) - h*waveEffectDepth);//depth
 	float R = -Z*cosT;
 
 	
@@ -238,6 +228,9 @@ void main() {
 	gl_FragColor = mix(water, foam, clamp(foamMix * uFoam, 0.0, 1.0));
 	
 
+//	vec3 vsNormal = (viewMatrix * vec4(vNormal , 0.0)).xyz;
 	//gl_FragColor = vec4(L0TP.r,L0TP.g,L0TP.b,1.0);
-	//gl_FragColor.xyz = vec3(cosT2).xyz ;
+	float eyedot = dot(vNormal,nnvCamDir);
+	eyedot =  clamp(0.0,1.0,eyedot);
+	//gl_FragColor.xyz = vec3(ref).xyz ; 
 }

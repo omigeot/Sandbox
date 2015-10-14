@@ -24,7 +24,7 @@
         this.directionVariation = 1.3;
         this.amplitude = 5;
         this.amplitudeVariation = 3;
-        this.waveNum = 9;
+        this.waveNum = 20;
         this.resolution = 50;
         this.waterHeight = 20;
         this.timers = [];
@@ -88,41 +88,68 @@
                 else
                     return -1;
             })
+            this.setupGertsnerShadeConstants();
+        }
+        this.forceA = function(a)
+        {
+            var A = this.uniforms.A.value;
+            for (var i = 0; i < this.waveNum; i++)
+            {
+                this.uniforms.A.value[i] = a
+            }
+        }
+        this.setupGertsnerShadeConstants = function()
+        {
+            var Qa = this.uniforms.uChop.value / this.uniforms.uMag.value;
+            var L = this.uniforms.L.value;
+            var D = this.uniforms.D.value;
+            var A = this.uniforms.A.value;
+            var S = this.uniforms.S.value;
+            var W = this.uniforms.W.value;
+            var Q = this.uniforms.Q.value;
+            var waves = this.uniforms.waves.value;
+            var PI = Math.PI;
+
+            for (var i = 0; i < this.waveNum; i++)
+            {
+                L[i] = waves[i].x;
+                //L[i] *= uMag / 2.0;
+                D[i] = new THREE.Vector2(waves[i].y, waves[i].z);
+                D[i].normalize();
+                var w = 2.0 * PI / L[i];
+                A[i] = 0.5 / (w * 2.718281828459045); //for ocean on Earth, A is ususally related to L
+                
+                //S[i] =     1.0 * uMag; //for ocean on Earth, S is ususally related to L
+                S[i] = (waves[i].w + 0.5) * Math.sqrt(.98 * (2.0 * PI / w));
+                W[i] = w;
+                Q[i] = Qa / (w * A[i] * this.waveNum);
+            }
         }
         this.setupPhysicalShadeConstants = function()
         {
-
-
             var b0 = 0.037;
-
-            var Kd_r =  36.0; //645nm
-            var Kd_g =  3.4;  //510nm
-            var Kd_b =  1.9;      //440nm
-
+            var Kd_r = 36.0; //645nm
+            var Kd_g = 3.4; //510nm
+            var Kd_b = 1.9; //440nm
             var wl0 = 514.0;
             var m = -0.00113;
             var i = -1.62517;
-            var b645 = b0+((645.0*m+i)/(wl0*m+i));
-            var b510 = b0+((510.0*m+i)/(wl0*m+i));
-            var b440 = b0+((440.0*m+i)/(wl0*m+i));
-
-            var bb645 = 0.01829*b645 + 0.00006;
-            var bb510 = 0.01829*b510 + 0.00006;
-            var bb440 = 0.01829*b440 + 0.00006;
-
+            var b645 = b0 + ((645.0 * m + i) / (wl0 * m + i));
+            var b510 = b0 + ((510.0 * m + i) / (wl0 * m + i));
+            var b440 = b0 + ((440.0 * m + i) / (wl0 * m + i));
+            var bb645 = 0.01829 * b645 + 0.00006;
+            var bb510 = 0.01829 * b510 + 0.00006;
+            var bb440 = 0.01829 * b440 + 0.00006;
             var a645 = Kd_r;
             var a510 = Kd_g;
             var a440 = Kd_b;
-
             var c645 = a645 + b645;
             var c510 = a510 + b510;
             var c440 = a440 + b440;
-
-            this.uniforms.Kd.value.set(Kd_r,Kd_g,Kd_b);
-            this.uniforms.c.value.set(c645,c510,c440);
-            this.uniforms.a.value.set(a645,a510,a440);
-            this.uniforms.bb.value.set(bb645,bb510,bb440);
-
+            this.uniforms.Kd.value.set(Kd_r, Kd_g, Kd_b);
+            this.uniforms.c.value.set(c645, c510, c440);
+            this.uniforms.a.value.set(a645, a510, a440);
+            this.uniforms.bb.value.set(bb645, bb510, bb440);
         }
         this.initialize = function()
         {
@@ -142,6 +169,16 @@
                     type: "f",
                     value: 3.5
                 },
+                waveEffectDepth: {
+                    type: "f",
+                    value: 1
+                },
+                L:{type: "fv1",value: []},
+                D:{type: "v2v",value: []},
+                A:{type: "fv1",value: []},
+                S:{type: "fv1",value: []},
+                W:{type: "fv1",value: []},
+                Q:{type: "fv1",value: []},
                 uHalfGrid:
                 {
                     type: "f",
@@ -265,6 +302,7 @@
             this.waves = this.uniforms.waves.value;
             this.generateWaves();
             this.setupPhysicalShadeConstants();
+
         }
         this.setResolution = function(res)
         {
@@ -448,7 +486,34 @@
             if (propertyName == "uMag")
             {
                 this.uniforms.uMag.value = propertyValue;
+                this.setupGertsnerShadeConstants()
             }
+            if (propertyName == "amplitude")
+            {
+                this.amplitude = propertyValue;
+                this.generateWaves();
+            }
+            if (propertyName == "amplitudeVariation")
+            {
+                this.amplitudeVariation = propertyValue;
+                this.generateWaves();
+            }
+            if (propertyName == "direction")
+            {
+                this.direction = propertyValue;
+                this.generateWaves();
+            }
+            if (propertyName == "directionVariation")
+            {
+                this.directionVariation = propertyValue;
+                this.generateWaves();
+            }
+            if (propertyName == "waveEffectDepth")
+            {
+                this.waveEffectDepth = propertyValue;
+                this.uniforms.waveEffectDepth.value = propertyValue;
+            }
+
             if (propertyName == "uReflectPow")
             {
                 this.uniforms.uReflectPow.value = propertyValue;
@@ -456,6 +521,7 @@
             if (propertyName == "uChop")
             {
                 this.uniforms.uChop.value = propertyValue;
+                this.setupGertsnerShadeConstants()
             }
             if (propertyName == "uFoam")
             {
