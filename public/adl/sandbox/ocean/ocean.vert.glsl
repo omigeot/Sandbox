@@ -60,7 +60,7 @@ void setup() {
             A[i] = 0.5 / (w * 2.718281828459045); //for ocean on Earth, A is ususally related to L
             
             //S[i] =     1.0 * uMag; //for ocean on Earth, S is ususally related to L
-            S[i] = sqrt(.98 * (2.0*PI/w));
+            S[i] = (waves[i].w+0.5) * sqrt(.98 * (2.0*PI/w));
             W[i] = w;
             Q[i] = Qa / (w * A[i] * float(numWaves));
             

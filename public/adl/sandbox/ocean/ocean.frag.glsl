@@ -68,6 +68,11 @@ uniform float uAmbientPower;
 uniform float uSunPower;
 uniform float uOceanDepth;
 
+//physical params
+uniform vec3 c;
+uniform vec3 bb;
+uniform vec3 a;
+uniform vec3 Kd;
 void setup() {
 
 	for (int i = 0; i < numWaves; i++)
@@ -170,16 +175,19 @@ void main() {
 	vec3 ocean_bottom_color = vec3(.5,.5,.5);
 	vec3 LZTP = ocean_bottom_color;
 
-	float Z = uOceanDepth * (1.0 + cosT2);//depth
+	float Z = max(0.04,uOceanDepth * (1.0 + cosT2) - h);//depth
 	float R = -Z*cosT;
+
+	
+
+	vec3 Ldf0_sum = vec3(0.0,0.0,0.0);
+	vec3 Ldf0 = vec3(0.0,0.0,0.0);
+	
+	/*float b0 = 0.037;
 
 	float Kd_r =  36.0; //645nm
 	float Kd_g =  3.4;  //510nm
 	float Kd_b =  1.9;      //440nm
-
-	vec3 Ldf0_sum = vec3(0.0,0.0,0.0);
-	vec3 Ldf0 = vec3(0.0,0.0,0.0);
-	float b0 = 0.037;
 
 	float wl0 = 514.0;
 	float m = -0.00113;
@@ -198,24 +206,24 @@ void main() {
 
 	float c645 = a645 + b645;
 	float c510 = a510 + b510;
-	float c440 = a440 + b440;
+	float c440 = a440 + b440;*/
 
 	vec3 ed0 =  vec3(ndotl) * directionalLightColor[0]*uSunPower + (ambientLightColor)*uAmbientPower; //sun plus sky lighting on water surface
 	
-	Ldf0.r = ((0.33*bb645)/a645) * (ed0.r/PI);
-	Ldf0.g = ((0.33*bb510)/a510) * (ed0.g/PI);
-	Ldf0.b = ((0.33*bb440)/a440) * (ed0.b/PI);
+	Ldf0.r = ((0.33*bb[0])/a[0]) * (ed0.r/PI);
+	Ldf0.g = ((0.33*bb[1])/a[1]) * (ed0.g/PI);
+	Ldf0.b = ((0.33*bb[2])/a[2]) * (ed0.b/PI);
 
 
-	Ldf0_sum.r = Ldf0.r*(1.0-exp((-c645+Kd_r*cosT)*R));
-	Ldf0_sum.g = Ldf0.g*(1.0-exp((-c510+Kd_g*cosT)*R));
-	Ldf0_sum.b = Ldf0.b*(1.0-exp((-c440+Kd_b*cosT)*R));
+	Ldf0_sum.r = Ldf0.r*(1.0-exp((-c[0]+Kd[0]*cosT)*R));
+	Ldf0_sum.g = Ldf0.g*(1.0-exp((-c[1]+Kd[1]*cosT)*R));
+	Ldf0_sum.b = Ldf0.b*(1.0-exp((-c[2]+Kd[2]*cosT)*R));
 
 	vec3 LZTP_sum = vec3(0.0,0.0,0.0);
 
-	LZTP_sum.r = LZTP.r * exp(-c645*R); 
-	LZTP_sum.g = LZTP.g * exp(-c510*R); 
-	LZTP_sum.b = LZTP.b * exp(-c440*R); 
+	LZTP_sum.r = LZTP.r * exp(-c[0]*R); 
+	LZTP_sum.g = LZTP.g * exp(-c[1]*R); 
+	LZTP_sum.b = LZTP.b * exp(-c[2]*R); 
 
 	vec3 L0TP = LZTP_sum +   Ldf0_sum; 
 
