@@ -1253,6 +1253,31 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             {
                 node.traceAPI = new APIModules.traceAPI(node.id);
             }
+            if(node.id == Engine.application())
+            {
+                node.findNode = function(displayName,node)
+                {
+            
+                  if(displayName) displayName = displayName;
+                  if(!node)
+                  node = this;
+                  
+                  if(node && node.properties && node.properties.DisplayName == displayName)
+                    return node;
+                  var ret = null;  
+                  for(var i =0; i <  node.children.length; i++)
+                  {
+                      ret = this.findNode(displayName,node.children[i]);
+                      if(ret) return ret;
+                  }
+                  return ret;
+                }
+                node.findNodeByID = function(id)
+                {
+                  if(!id) return null;
+                  return jsDriverSelf.nodes[id];
+                }
+            }
         },
         methodIndex:{},
         indexMethods:function(child)
