@@ -611,10 +611,13 @@ define(["module", "vwf/view"], function(module, view)
                 {
                     $(node.div).css('background-color', toCSSColor(propertyValue));
                 }
+				else if (propertyName == 'border_style' && !(node.style && node.style['border-style']))
+				{
+					$(node.div).css('border-style', propertyValue);
+				}
                 else if (propertyName == 'border_width' && !(node.style && node.style['border-width']))
                 {
                     $(node.div).css('border-width', propertyValue);
-                    $(node.div).css('border-style', 'solid');
                 }
                 else if (propertyName == 'border_radius' && !(node.style && node.style['border-radius']))
                 {
