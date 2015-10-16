@@ -80,6 +80,9 @@ void main() {
       vec4 tpos2 = mProj * vec4(tPos.xy, 1.0, 1.0);
 
       
+
+      
+
       float p_x = tpos1.x;
       float p_dx = tpos2.x - p_x;
       float p_y = tpos1.y;
@@ -102,10 +105,13 @@ void main() {
       tPos.y = (p_y + p_dy * i_t) / tw;
       tPos.z = uWaterHeight;//(p_z + p_dz*i_t)/tw;
 
-      
-
+      tPos.x += oCamPos.x;
+      tPos.y += oCamPos.y;
+  
+     
+     
       texcoord0 = tPos;
-
+    
       
 
       float camDist = length(oCamPos.xyz - tPos.xyz);
@@ -163,17 +169,21 @@ void main() {
       vNormal = normalize(tNormal);
       vSundir = normalize(sundir);
 
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(tPos , 1);
+     
 
       vec3 w_eye_pos = -transpose(mat3(modelViewMatrix)) * vec3(modelViewMatrix[2]);
 
       vCamLength = distance(oCamPos , tPos );
       vCamDir = (viewMatrix  * vec4(tPos,1.0)).xyz;
       vCamDir = normalize(vCamDir);
-     // vCamDir[2] = 0.0;
+     
       vCamDir = normalize( vec4(vCamDir,0.0) * viewMatrix ).xyz;
       
+       tPos.x -= oCamPos.x;
+      tPos.y -= oCamPos.y;
+    
 
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(tPos , 1);
 
 
      

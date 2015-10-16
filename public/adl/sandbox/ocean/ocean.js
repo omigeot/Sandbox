@@ -458,7 +458,15 @@
             this.mRange[13] = yMin + (yMax - yMin) / 2;
             var mRangeM = (new THREE.Matrix4()).fromArray(this.mRange);
             var posfd = [this.uniforms.mProj.value.elements[3], this.uniforms.mProj.value.elements[7], this.uniforms.mProj.value.elements[14]];
+            
+            var temp = new THREE.Matrix4();
+            this.nearmesh.matrixWorld.elements[12] = vp[12];
+            this.nearmesh.matrixWorld.elements[13] = vp[13];
+            temp.getInverse(this.nearmesh.matrixWorld)
+
+
             this.uniforms.mProj.value.multiplyMatrices(this.uniforms.mProj.value.clone(), mRangeM);
+            this.uniforms.mProj.value.multiplyMatrices(temp, this.uniforms.mProj.value.clone());
             this.uniforms.t.value += (deltaT / 1000.0) || 0;
             this.uniforms.oCamPos.value.set(vp[12] - root.matrixWorld.elements[12], vp[13] - root.matrixWorld.elements[13], vp[14] - root.matrixWorld.elements[14]);
             this.uniforms.wPosition.value.set(0, 0, 0);
