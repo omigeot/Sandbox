@@ -10,7 +10,7 @@ varying float vCamLength;
 varying mat3 TBN;
 varying float h;
 varying float behind;
-
+varying vec2 sspos;
 
 uniform vec3 oCamPos;
 uniform vec3 wPosition;
@@ -173,7 +173,7 @@ void main() {
 
       vec3 w_eye_pos = -transpose(mat3(modelViewMatrix)) * vec3(modelViewMatrix[2]);
 
-      vCamLength = distance(oCamPos , tPos );
+      
       vCamDir = (viewMatrix  * vec4(tPos,1.0)).xyz;
       vCamDir = normalize(vCamDir);
      
@@ -181,10 +181,12 @@ void main() {
       
        tPos.x -= oCamPos.x;
       tPos.y -= oCamPos.y;
+      vCamLength = distance(oCamPos , tPos );
     
 
       gl_Position = projectionMatrix * modelViewMatrix * vec4(tPos , 1);
-
+      sspos = gl_Position.xy / gl_Position.w;
+      sspos = sspos *.5 +0.5 ;
 
      
 }

@@ -319,6 +319,7 @@
             {
                 this.uniforms[i] = THREE.UniformsLib.lights[i];
             }
+            this.setupRenderTargets();
             this.buildMat();
             this.near = new THREE.PlaneGeometry(1, 1, this.resolution, this.resolution);
             this.nearmesh = new THREE.Mesh(this.near, this.mat);
@@ -326,6 +327,7 @@
             this.getRoot().add(this.nearmesh);
             this.nearmesh.frustumCulled = false;
             _dView.bind('prerender', this.prerender.bind(this));
+            _dView.bind('postprerender', this.renderRefractions.bind(this));
             window._dOcean = this;
             this.waves = this.uniforms.waves.value;
             this.generateWaves();
@@ -369,6 +371,10 @@
         this.prerender = function()
         {
             if (this.disable) return;
+
+
+           
+
             var vp = _dView.getCamera().matrixWorld.elements;
             var root = this.getRoot();
             root.position.set(0, 0, 0);
@@ -531,6 +537,60 @@
             worldmousepos[2] /= worldmousepos[3];
             return worldmousepos;
         }.bind(this);
+        this.depthOverride = new THREE.MeshDepthMaterial();
+        this.setupRenderTargets = function()
+        {
+            var rtt = new THREE.WebGLRenderTarget(256, 256, {
+                format: THREE.RGBAFormat,
+                minFilter: THREE.LinearFilter,
+                magFilter: THREE.LinearFilter
+            });
+            
+            this.refractionColorRtt = rtt;
+
+            rtt = new THREE.WebGLRenderTarget(256, 256, {
+                format: THREE.RGBAFormat,
+                minFilter: THREE.LinearFilter,
+                magFilter: THREE.LinearFilter
+            });
+            
+            this.refractionDepthRtt = rtt;
+            
+            this.uniforms.refractionColorRtt = {
+                type:'t',
+                value:this.refractionColorRtt
+            }
+
+            this.uniforms.refractionDepthRtt = {
+                type:'t',
+                value:this.refractionDepthRtt
+            }
+        }
+        this.renderRefractions = function()
+        {
+            var rttcam = _dView.getCamera();
+            var rtt = this.refractionColorRtt;
+
+            _dRenderer.setRenderTarget(rtt);
+            _dRenderer.clear(_dScene, rttcam, rtt);
+            _dRenderer.setRenderTarget();
+            this.nearmesh.visible = false;
+            _dRenderer.render(_dScene, rttcam, rtt);
+           
+            var _far = _dView.getCamera().far;
+                _dView.getCamera().far = 100.0;
+            rtt = this.refractionDepthRtt;
+            _dRenderer.setRenderTarget(rtt);
+            _dRenderer.clear(_dScene, rttcam, rtt);
+            _dRenderer.setRenderTarget();
+            _dScene.overrideMaterial = this.depthOverride;
+            _dRenderer.render(_dScene, rttcam, rtt);
+            _dScene.overrideMaterial = null;
+            _dScene.null = this.depthOverride;
+            this.nearmesh.visible = true;
+                _dView.getCamera().far = _far;
+
+        }
         this.settingProperty = function(propertyName, propertyValue)
         {
             if (propertyName == "uMag")

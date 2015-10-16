@@ -43,6 +43,8 @@ varying float vCamLength;
 varying float h;
 varying vec3 vViewPosition;
 varying float behind;
+varying vec2 sspos;
+
 float nSnell = 1.34;
 float kD = .91;
 vec3 upwelling = vec3(0.2, 0.4, 0.6);
@@ -59,6 +61,9 @@ uniform float t;
 uniform samplerCube texture;
 uniform sampler2D oNormal;
 uniform sampler2D diffuse;
+uniform sampler2D refractionColorRtt;
+
+uniform sampler2D refractionDepthRtt;
 uniform float uChop;
 uniform float uReflectPow;
 uniform float uFoam;
@@ -173,10 +178,16 @@ void main() {
 	float cosT2  = -dot(vNormal,refract(nnvCamDir,normalize(vNormal),1.03));
 	//cosT = max(.001,cosT);
 	cosT = -cosT;
-	vec3 ocean_bottom_color = vec3(.5,.5,.5);
+
+	 
+
+	vec3 ocean_bottom_color = texture2D(refractionColorRtt ,sspos.xy+ texNormal.xy/40.0).xyz;
 	vec3 LZTP = ocean_bottom_color;
 
-	float Z = max(0.04,uOceanDepth * (1.0 + cosT2) - h*waveEffectDepth);//depth
+	float depth = 1.0 - texture2D(refractionDepthRtt ,sspos.xy+ texNormal.xy/40.0).x;
+	
+	
+	float Z = max(0.04,(vCamLength/100.0 - depth)*uOceanDepth/100.0 * (1.0 + cosT2) - h*waveEffectDepth);//);//depth
 	float R = -Z*cosT;
 
 	
@@ -244,4 +255,8 @@ void main() {
 	float eyedot = dot(vNormal,nnvCamDir);
 	eyedot =  clamp(0.0,1.0,eyedot);
 	//gl_FragColor.xyz = vec3(ref).xyz ; 
+	
+	//if(vCamLength > depth*100.0)
+	//	depth = 100.0;
+	//gl_FragColor.xyz = vec3(depth);
 }
