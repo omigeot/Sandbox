@@ -113,4 +113,18 @@ properties:
       max: 2.0
       step: .001
       displayname: "gA"
-      property: "gA"             
+      property: "gA"
+    waterType:
+      type: slider
+      min: 0.0
+      max: 7.0
+      step: 1
+      displayname: "waterType"
+      property: "waterType"
+    seed:
+      type: slider
+      min: 0.0
+      max: 12312312317.0
+      step: 1
+      displayname: "seed"
+      property: "seed"  
