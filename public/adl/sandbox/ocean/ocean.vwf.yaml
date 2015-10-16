@@ -13,6 +13,8 @@ properties:
   directionVariation: 2
   amplitude: 5
   amplitudeVariation: 4
+  uNormalPower: .5
+  gA: .5
   EditorData:
     uChop:
       type: slider
@@ -97,4 +99,18 @@ properties:
       max: 3.0
       step: .01
       displayname: "waveEffectDepth"
-      property: "waveEffectDepth"      
+      property: "waveEffectDepth"
+    uNormalPower:
+      type: slider
+      min: 0.0
+      max: 2.0
+      step: .001
+      displayname: "uNormalPower"
+      property: "uNormalPower"
+    gA:
+      type: slider
+      min: 0.0
+      max: 2.0
+      step: .001
+      displayname: "gA"
+      property: "gA"             

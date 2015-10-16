@@ -42,7 +42,7 @@ varying mat3 TBN;
 varying float vCamLength;
 varying float h;
 varying vec3 vViewPosition;
-
+varying float behind;
 float nSnell = 1.34;
 float kD = .91;
 vec3 upwelling = vec3(0.2, 0.4, 0.6);
@@ -67,7 +67,7 @@ uniform float uHalfGrid;
 uniform float uAmbientPower;
 uniform float uSunPower;
 uniform float uOceanDepth;
-
+uniform float uNormalPower;
 //physical params
 uniform vec3 c;
 uniform vec3 bb;
@@ -80,6 +80,11 @@ uniform float waveEffectDepth;
 
 void main() {
 
+	if(behind > 0.0)
+	{
+		discard;
+		return;
+	}
 	vec3 tc = texcoord0;
 	vec3 pNormal;
 	vec3 nnvCamDir = normalize(-vCamDir);
@@ -90,14 +95,16 @@ void main() {
 			float wavesInTexture = 10.0;
 			vec2 texToWorld = tc.xy/wavesInTexture;
 			vec2 texToWaveLen =  texToWorld / L[i];
-			vec2 directionAndSpeed = D[i] * S[i]/( wavesInTexture*10.0 );
+			vec2 directionAndSpeed = D[i] * S[i]/( wavesInTexture*15.0);
 			pNormal +=  A[i]*  texture2D(oNormal, texToWaveLen  + directionAndSpeed * t ).xyz;
 			powerSum += A[i];
 		}
 	}
 
-	pNormal /= powerSum;
+	pNormal /= powerSum ;
 	pNormal = 2.0 * pNormal.xyz - 1.0;
+	pNormal.xy *= uNormalPower;
+	pNormal = normalize(pNormal);
 
 	float t1 = 0.02 * -t;
 	float t2 = 0.015 * t;
@@ -113,13 +120,14 @@ void main() {
 
 	mapNormal /= 2.0;
 	mapNormal = 2.0 * mapNormal.xyz - 1.0;
-	mapNormal.xy *= max(0.0, uChop/30.0 *  waves[0].x);
-
-	pNormal.xy *= max(0.0, uChop / 4.0);
-	pNormal = normalize(pNormal);
+	mapNormal.xy *= max(0.0, (uChop/30.0 *  waves[0].x));
+	mapNormal.xy *= uNormalPower;
+	mapNormal = normalize(mapNormal);
+	//pNormal.xy *= max(0.0, uChop / 4.0);
+	
 
 	vec3 texNormal =  normalize(TBN * mapNormal);
-	vec3 texNormal1 =  pNormal;
+	vec3 texNormal1 =  normalize(TBN * pNormal);;
 
 	texNormal = mix(texNormal, texNormal1, clamp(0.0, 1.0, vCamLength / uHalfGrid));
 	texNormal = normalize(texNormal); 

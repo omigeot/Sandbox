@@ -231,6 +231,16 @@
                     type: "t",
                     value: _SceneManager.getTexture("./ocean/oNormal.jpeg")
                 },
+                uNormalPower:
+                {
+                    type: "f",
+                    value: 1
+                },
+                gA:
+                {
+                    type: "f",
+                    value: .5
+                },
                 diffuse:
                 {
                     type: "t",
@@ -337,6 +347,7 @@
         this.up = new THREE.Vector3(0, 0, 1);
         this.f = 10;
         this.h = 1;
+        this.b = .05;
         this.prerender = function()
         {
             if (this.disable) return;
@@ -368,7 +379,12 @@
             var target = new THREE.Vector3(0, 0, -Math.abs(this.f));
             target.applyMatrix4(_dView.getCamera().matrixWorld);
             target.z = 0.0;
-            var eye = new THREE.Vector3(vp[12], vp[13], vp[14] + Math.abs(this.h))
+            
+            var eye = new THREE.Vector3(0,0,this.amplitude + this.amplitudeVariation);
+            eye.applyMatrix4(_dView.getCamera().matrixWorld);
+            eye.z += Math.abs(this.h);
+
+
             var lookat = (new THREE.Matrix4()).lookAt(eye, target, this.up, 2);
             lookat.setPosition(eye);
             var campos = [vp[12], vp[13], vp[14]];
@@ -391,8 +407,10 @@
             if (hit) intersections.push(hit);
             hit = this.intersectLinePlane(cornerPoints[3], cornerPoints[7]);
             if (hit) intersections.push(hit);
+            var hitFar = false;
             if (intersections.length < 4)
             {
+                hitFar = true;
                 var hit = this.intersectLinePlane(cornerPoints[1], cornerPoints[0]);
                 if (hit) intersections.push(hit);
                 var hit = this.intersectLinePlane(cornerPoints[3], cornerPoints[2]);
@@ -427,7 +445,13 @@
                 if (projSpacePoints[i].y > yMax)
                     yMax = projSpacePoints[i].y;
             }
-            yMin -= 1.0;
+           // xMin -= this.b;
+           // xMax += this.b;
+            yMin -= this.b;
+            console.log(yMax);
+
+            if (!hitFar)
+            yMax += this.b;
             this.mRange[0] = xMax - xMin;
             this.mRange[5] = yMax - yMin;
             this.mRange[12] = xMin + (xMax - xMin) / 2
@@ -513,7 +537,14 @@
                 this.waveEffectDepth = propertyValue;
                 this.uniforms.waveEffectDepth.value = propertyValue;
             }
-
+            if (propertyName == "uNormalPower")
+            {
+                this.uniforms.uNormalPower.value = propertyValue;
+            }
+            if (propertyName == "gA")
+            {
+                this.uniforms.gA.value = propertyValue;
+            }
             if (propertyName == "uReflectPow")
             {
                 this.uniforms.uReflectPow.value = propertyValue;

@@ -9,7 +9,7 @@ varying vec3 texcoord0;
 varying float vCamLength;
 varying mat3 TBN;
 varying float h;
-
+varying float behind;
 
 
 uniform vec3 oCamPos;
@@ -19,6 +19,7 @@ uniform mat4 mProj;
 uniform float t;
 uniform float uMag;
 uniform float uHalfGrid;
+
 uniform float uWaterHeight;
 
 uniform vec4 waves[9];
@@ -32,6 +33,7 @@ uniform float S[numWaves];
 uniform float W[numWaves];
 uniform float Q[numWaves];
 uniform vec2 D[numWaves];
+uniform float gA;
 
 highp mat3 transpose(in highp mat3 inMatrix) {
       highp vec3 i0 = inMatrix[0];
@@ -67,16 +69,17 @@ highp mat4 transpose(in highp mat4 inMatrix) {
 void main() {
 
   
-      float gA = .5;
+      
 
       vec3 N = vec3(0.0, 0.0, 0.0);
       vec3 B = vec3(0.0, 0.0, 0.0);
 
       vec3 tPos = position;
 
-      vec4 tpos1 = mProj * vec4(tPos.xy, -1.0, 1.0);
+      vec4 tpos1 = mProj * vec4(tPos.xy, -0.0, 1.0);
       vec4 tpos2 = mProj * vec4(tPos.xy, 1.0, 1.0);
 
+      
       float p_x = tpos1.x;
       float p_dx = tpos2.x - p_x;
       float p_y = tpos1.y;
@@ -87,6 +90,12 @@ void main() {
       float p_dw = tpos2.w - p_w;
       float p_h = uWaterHeight;
       float i_t = (p_w * p_h - p_z) / (p_dz - p_dw * p_h);
+
+      if(i_t > 1.0000)
+      {
+            behind = 1.0;
+            return;
+      }
 
       float tw = p_w + p_dw * i_t;
       tPos.x = (p_x + p_dx * i_t) / tw;
@@ -158,7 +167,7 @@ void main() {
 
       vec3 w_eye_pos = -transpose(mat3(modelViewMatrix)) * vec3(modelViewMatrix[2]);
 
-      vCamLength = distance(w_eye_pos , tPos );
+      vCamLength = distance(oCamPos , tPos );
       vCamDir = (viewMatrix  * vec4(tPos,1.0)).xyz;
       vCamDir = normalize(vCamDir);
      // vCamDir[2] = 0.0;
