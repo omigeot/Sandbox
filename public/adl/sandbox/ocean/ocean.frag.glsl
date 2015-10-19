@@ -210,7 +210,7 @@ void main() {
 	//float Z0 = .01/(gl_FragCoord.z * -2.0 + 1.0 - 10000.0);
 	//float Z1 = .01/(unpackDepth(rawDepth) * -2.0 + 1.0 - 10000.0);
 
-	rawDepth = texture2D(refractionDepthRtt , sspos.xy);
+	
 
 
 	float D0 = unpackDepth(rawDepth);
