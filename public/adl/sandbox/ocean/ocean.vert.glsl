@@ -58,18 +58,19 @@ highp mat4 transpose(in highp mat4 inMatrix) {
 
 
       highp mat4 outMatrix = mat4(
-                                   vec4(i0.x, i1.x, i2.x,i3.x),
-                                   vec4(i0.y, i1.y, i2.y,i3.y),
-                                   vec4(i0.z, i1.z, i2.z,i3.z),
-                                   vec4(i0.w, i1.w, i2.w,i3.w)
+                                   vec4(i0.x, i1.x, i2.x, i3.x),
+                                   vec4(i0.y, i1.y, i2.y, i3.y),
+                                   vec4(i0.z, i1.z, i2.z, i3.z),
+                                   vec4(i0.w, i1.w, i2.w, i3.w)
                              );
       return outMatrix;
 }
 
+
 void main() {
 
-  
-      
+
+
 
       vec3 N = vec3(0.0, 0.0, 0.0);
       vec3 B = vec3(0.0, 0.0, 0.0);
@@ -79,9 +80,9 @@ void main() {
       vec4 tpos1 = mProj * vec4(tPos.xy, -0.0, 1.0);
       vec4 tpos2 = mProj * vec4(tPos.xy, 1.0, 1.0);
 
-      
 
-      
+
+
 
       float p_x = tpos1.x;
       float p_dx = tpos2.x - p_x;
@@ -94,7 +95,7 @@ void main() {
       float p_h = uWaterHeight;
       float i_t = (p_w * p_h - p_z) / (p_dz - p_dw * p_h);
 
-      if(i_t > 1.0000)
+      if (i_t > 1.0000)
       {
             behind = 1.0;
             return;
@@ -107,30 +108,30 @@ void main() {
 
       tPos.x += oCamPos.x;
       tPos.y += oCamPos.y;
-  
-     
-     
+
+
+
       texcoord0 = tPos;
-    
-      
+
+
 
       float camDist = length(oCamPos.xyz - tPos.xyz);
       for (int i = 0; i < numWaves; i++)
       {
-           
+
             float x = tPos.x + D[i].x * waves[i].w;
             float y = tPos.y + D[i].y * waves[i].w;
             //if (L[i] > edgeLen2*4.0)
             {
                   float st = t;
-                  
+
                   float w = W[i];
                   float q = S[i] * w;
                   float Ai = A[i] * smoothstep(1.0, 0.0, pow(camDist, 1.3) / (uHalfGrid * L[i]));
-                 
-                 if(Ai < .001) continue;
+
+                  if (Ai < .001) continue;
                   vec2 xy = vec2(x , y);
-                  
+
                   float Qi = Q[i]; // *numWaves?
                   float xi = Qi * Ai * D[i].x * cos( dot(w * D[i], xy) + q * st);
                   float yi = Qi * Ai * D[i].y * cos( dot(w * D[i], xy) + q * st);
@@ -155,7 +156,7 @@ void main() {
             }
       }
 
-      
+
 
       vec3 tNormal = normalize(vec3(-N.x, -N.y, 1.0 - N.z));
       vec3 tBinormal = normalize(vec3(1.0 - B.x, -B.y, N.z));
@@ -169,24 +170,24 @@ void main() {
       vNormal = normalize(tNormal);
       vSundir = normalize(sundir);
 
-     
+
 
       vec3 w_eye_pos = -transpose(mat3(modelViewMatrix)) * vec3(modelViewMatrix[2]);
 
-      
-      vCamDir = (viewMatrix  * vec4(tPos,1.0)).xyz;
+
+      vCamDir = (viewMatrix  * vec4(tPos, 1.0)).xyz;
       vCamDir = normalize(vCamDir);
-     
-      vCamDir = normalize( vec4(vCamDir,0.0) * viewMatrix ).xyz;
-      
-       tPos.x -= oCamPos.x;
-      tPos.y -= oCamPos.y;
+
+      vCamDir = normalize( vec4(vCamDir, 0.0) * viewMatrix ).xyz;
       vCamLength = distance(oCamPos , tPos );
-    
+      tPos.x -= oCamPos.x;
+      tPos.y -= oCamPos.y;
+
+
 
       gl_Position = projectionMatrix * modelViewMatrix * vec4(tPos , 1);
       sspos = gl_Position.xy / gl_Position.w;
-      sspos = sspos *.5 +0.5 ;
+      sspos = sspos * .5 + 0.5 ;
 
-     
+
 }

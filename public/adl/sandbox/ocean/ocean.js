@@ -537,9 +537,16 @@
             worldmousepos[2] /= worldmousepos[3];
             return worldmousepos;
         }.bind(this);
-        this.depthOverride = new THREE.MeshDepthMaterial();
+        this.depthOverride;
         this.setupRenderTargets = function()
         {
+
+            var depthShader = THREE.ShaderLib[ "depthRGBA" ];
+            var depthUniforms = THREE.UniformsUtils.clone( depthShader.uniforms );
+
+            this.depthOverride = new THREE.ShaderMaterial( { fragmentShader: depthShader.fragmentShader, vertexShader: depthShader.vertexShader, uniforms: depthUniforms } );
+            this.depthOverride.blending = 9;
+
             var rtt = new THREE.WebGLRenderTarget(256, 256, {
                 format: THREE.RGBAFormat,
                 minFilter: THREE.LinearFilter,
@@ -578,17 +585,20 @@
             _dRenderer.render(_dScene, rttcam, rtt);
            
             var _far = _dView.getCamera().far;
-                _dView.getCamera().far = 100.0;
+          //      _dView.getCamera().far = 100.0;
+          _dRenderer.setBlending(THREE.CustomBlending,THREE.AddEquation,THREE.OneFactor,THREE.ZeroFactor)
             rtt = this.refractionDepthRtt;
             _dRenderer.setRenderTarget(rtt);
+            _dRenderer.setClearColor(new THREE.Color(1,1,1),1);
             _dRenderer.clear(_dScene, rttcam, rtt);
             _dRenderer.setRenderTarget();
             _dScene.overrideMaterial = this.depthOverride;
+
             _dRenderer.render(_dScene, rttcam, rtt);
             _dScene.overrideMaterial = null;
-            _dScene.null = this.depthOverride;
+            
             this.nearmesh.visible = true;
-                _dView.getCamera().far = _far;
+         //       _dView.getCamera().far = _far;
 
         }
         this.settingProperty = function(propertyName, propertyValue)
