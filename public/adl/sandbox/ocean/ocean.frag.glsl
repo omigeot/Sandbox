@@ -63,6 +63,9 @@ uniform sampler2D oNormal;
 uniform sampler2D diffuse;
 uniform sampler2D refractionColorRtt;
 
+uniform mat4 projectionMatrix;
+
+
 uniform sampler2D refractionDepthRtt;
 uniform float uChop;
 uniform float uReflectPow;
@@ -103,8 +106,11 @@ vec4 pack_depth( const in float depth ) {
 
 float LinearizeDepth(float depth)
 {
-	float near = 0.01;
-	float far = 10000.0;
+	float m22  = projectionMatrix[2][2];
+	float m32  = projectionMatrix[3][2];
+
+	float near = (2.0*m32)/(2.0*m22-2.0);
+	float far = ((m22-1.0)*near)/(m22+1.0);
 	float z = depth * 2.0 - 1.0; // Back to NDC
 	return (2.0 * near * far) / (far + near - z * (far - near));
 }
@@ -225,11 +231,18 @@ void main() {
 		
 	D1 = LinearizeDepth(D1);
 
+	vec3 ocean_bottom_color = texture2D(refractionColorRtt , sspos.xy + texNormal.xy / 20.0).xyz;
+
 	float depth = D1 - D0;
+	if(depth > -0.001)
+	{
+		depth =  -1000.0;
+		ocean_bottom_color = vec3(0.0,0.0,0.0);
+	}
 //if(length(rawDepth) < .2)
 //		depth =  -1000.0 ;
 
-	vec3 ocean_bottom_color = texture2D(refractionColorRtt , sspos.xy + texNormal.xy / 20.0).xyz;
+	
 	vec3 LZTP = ocean_bottom_color;
 
 
@@ -312,5 +325,8 @@ void main() {
 
 	//if(vCamLength > depth*100.0)
 	//	depth = 100.0;
+
+	
+
 
 }
