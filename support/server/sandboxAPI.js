@@ -137,9 +137,8 @@ function InstanceLogout(response, URL)
 {
 	if (!URL.loginData)
 	{
-		respond("Client Not Logged In", 401, response);
+		respond(response, 401, "Client Not Logged In");
 		return;
-		
 	}
 	var instance = URL.query.S;
 	var cid = URL.query.CID;
@@ -859,7 +858,7 @@ function Publish(URL, SID, publishdata, response)
 			return;
 		}
 		var publishSettings = null;
-		//The settings  for the published state. 
+		//The settings  for the published state.
 		//have to handle these in the client side code, with some enforcement at the server
 		logger.debug(publishdata, 2);
 		if (publishdata)
@@ -887,7 +886,7 @@ function Publish(URL, SID, publishdata, response)
 			{
 				xapi.sendStatement(URL.loginData.UID, xapi.verbs.modified, newId);
 			}
-			
+
 			//get the db entry for the published state
 			DAL.getInstance(newId, function(statedata)
 			{
@@ -1244,7 +1243,7 @@ function setState(URL, data, response)
 	var sid = URL.query.SID;
 	var statedata = {};
 	sid = sid.replace(/\//g, '_');
-	
+
 	DAL.getInstance(sid, function(state)
 	{
 		if (!state)
@@ -1828,7 +1827,7 @@ function serve(request, response)
 			{
 				fs.writeFileSync('./tempupload', JSON.stringify(body));
 			}
-			//Have to do this here! throw does not work quite as you would think 
+			//Have to do this here! throw does not work quite as you would think
 			//with all the async stuff. Do error checking first.
 			if (command != 'thumbnail' && command != '3drupload') //excpetion for the base64 encoded thumbnails
 			{
@@ -1868,7 +1867,7 @@ function serve(request, response)
 					{
 						setState(URL, body, response);
 					}
-					break;	
+					break;
 				case "globalasset":
 					{
 						addGlobalInventoryItem(URL, body, response);

@@ -1,16 +1,54 @@
-Results from Testing SandboxAPI Endpoints on 2015-10-07 20:38:13
+Results from Testing SandboxAPI Endpoints on 2015-10-20 17:06:52
 Session Cookie: 
 {"name":"","method":"GET","url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/","jar":true}
 404 404 Not Found
 
 
-{"name":"copyinstance","method":"GET","qs":{},"url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/copyinstance","jar":true}
-500 TypeError: Cannot read property &#39;length&#39; of undefined<br> &nbsp; &nbsp;at CopyInstance (c:\Users\creighta\workspace\sandbox\support\server\sandboxAPI.js:664:10)<br> &nbsp; &nbsp;at c:\Users\creighta\workspace\sandbox\support\server\sandboxAPI.js:1645:7<br> &nbsp; &nbsp;at Object.exports.GetSessionData (c:\Users\creighta\workspace\sandbox\support\server\sessions.js:24:9)<br> &nbsp; &nbsp;at Object.serve (c:\Users\creighta\workspace\sandbox\support\server\sandboxAPI.js:1490:11)<br> &nbsp; &nbsp;at routeToAPI (c:\Users\creighta\workspace\sandbox\support\server\appserver.js:333:20)<br> &nbsp; &nbsp;at Layer.handle [as handle_request] (c:\Users\creighta\workspace\sandbox\node_modules\express\lib\router\layer.js:82:5)<br> &nbsp; &nbsp;at trim_prefix (c:\Users\creighta\workspace\sandbox\node_modules\express\lib\router\index.js:302:13)<br> &nbsp; &nbsp;at c:\Users\creighta\workspace\sandbox\node_modules\express\lib\router\index.js:270:7<br> &nbsp; &nbsp;at Function.proto.process_params (c:\Users\creighta\workspace\sandbox\node_modules\express\lib\router\index.js:321:12)<br> &nbsp; &nbsp;at next (c:\Users\creighta\workspace\sandbox\node_modules\express\lib\router\index.js:261:10)
+{"name":"cameras","method":"GET","qs":{"SID":"_adl_sandbox_E8acu9xeKsoaARn7_"},"url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/cameras","jar":true}
+200 [{"name":"Camera1","id":"SandboxCamera-vwf-N32196c51"}]
 
+{"name":"createstate","method":"POST","url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/createstate","jar":true}
+200 _adl_sandbox_kBKgYXjO0tS1naZm_
+
+
+{"name":"getassets","method":"GET","qs":{"SID":"_adl_sandbox_L8BnGGj85ZHAmsy1_"},"url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/getassets","jar":true}
+200 [{"type":"texture","url":"./avatars/Male_Tshirt_Normal.jpg"},{"type":"subDriver/threejs","url":"vwf/model/threejs/cylinder.js","name":"cylinder1"},{"type":"texture","url":"checker.jpg"},{"type":"subDriver/threejs","url":"vwf/model/threejs/box.js","name":"box1"}]
+
+{"name":"globalassetassetdata","method":"GET","qs":{"AID":"88f3a909-df90-4bdf-a3dc-fc305f381f8e"},"url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/globalassetassetdata","jar":true}
+200 {}
+
+{"name":"globalassetmetadata","method":"GET","qs":{"AID":"88f3a909-df90-4bdf-a3dc-fc305f381f8e"},"url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/globalassetmetadata","jar":true}
+200 {"uploader":"Postman","title":"chair","uploaded":"2015-09-14T19:36:58.020Z","description":"","type":"wooden"}
 
 {"name":"logindata","method":"GET","url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/logindata","jar":true}
 200 {"user_uid":"joe","username":"joe","admin":false,"instances":[],"clients":[]}
 
 
+{"name":"logout","method":"GET","qs":{"S":"_adl_sandbox_L8BnGGj85ZHAmsy1_","CID":"joe"},"url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/logout","jar":true}
+200 Client was not Logged into _adl_sandbox_L8BnGGj85ZHAmsy1_
 
-Curiouser and curiouser
+
+{"name":"publish","method":"POST","qs":{"SID":"_adl_sandbox_NOGEv5q7kmL6VSN4_"},"form":{"say":"something","allowAnonymous":true,"SinglePlayer":true,"camera":null,"createAvatar":true,"allowTools":true,"persistence":true},"url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/publish","jar":true}
+500 You must be the owner of a world you publish
+
+
+{"name":"salt","method":"GET","qs":{"UID":"joe","SID":"_adl_sandbox_L8BnGGj85ZHAmsy1_"},"url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/salt","jar":true}
+200 e099584b-b004-d202-f948-6b6eac9da36
+
+
+{"name":"sitelogin","method":"GET","qs":{"UID":"joe","P":"1164a4a2a16700439c1863872b3cf2176a41c38f49005c0183bf58e6f4d61c48"},"url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/sitelogin","jar":true}
+401 Already Logged in
+
+
+{"name":"sitelogout","method":"GET","qs":{"UID":"joe","SID":"_adl_sandbox_L8BnGGj85ZHAmsy1_"},"url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/sitelogout","jar":true}
+200 
+
+{"name":"statedata","method":"GET","qs":{"SID":"_adl_sandbox_L8BnGGj85ZHAmsy1_"},"url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/statedata","jar":true}
+200 {"title":"","description":"","isExample":true,"publishSettings":{"allowAnonymous":true,"persistence":false,"allowTools":true,"createAvatar":true,"singlePlayer":true}}
+
+{"name":"stateslist","method":"GET","qs":{"UID":"joe","SID":"_adl_sandbox_i3wJoCHDUJ4ibIEX_"},"url":"http://localhost:3000/sandbox/adl/vwfdatamanager.svc/stateslist","jar":true}
+200 [{"file":"state","time":"2015-09-14T17:42:53.000Z"},{"file":"thumbnail.png","time":"2015-09-14T18:15:43.000Z"},{"file":"statebackup20ff4fcf-d788-4005-a557-7d580446822f","time":"2015-09-14T17:42:18.000Z"}]
+
+
+
+NaN

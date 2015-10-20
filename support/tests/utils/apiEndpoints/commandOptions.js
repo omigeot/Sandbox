@@ -6,8 +6,9 @@ module.exports.vwf = 'vwfdatamanager.svc/';
 module.exports.auth = 'auth/local/';
 
 //Options help
-module.exports.UID = 'Postman';
-module.exports.SID = 'nTnwFDCAq5zOKh0M';
+module.exports.UID = 'joe';
+module.exports.pword = 'Abc123456';
+module.exports.SID = '_adl_sandbox_L8BnGGj85ZHAmsy1_';
 
 //A base64 encoded picture
 module.exports.thumbnail = "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";
@@ -139,6 +140,7 @@ module.exports.copyinstance = {
     qs : {
         'UID' : module.exports.UID,
         'SID' : module.exports.SID,
+        // 'SID' : '_adl_sandbox_jzfyZYS4Vwt9iXh3_',
     },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'copyinstance',
 };
@@ -211,7 +213,10 @@ module.exports.error = {
         'UID' : module.exports.UID,
         'SID' : module.exports.SID,
     },
-    form : {},
+    form : {
+        // msg : 'Does this show up in Error??',
+        msg : '',
+    },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'error',
 };
 module.exports.forgotpassword = {
@@ -249,6 +254,7 @@ module.exports.getassets = {
     qs : {
         // 'UID' : module.exports.UID,
         'SID' : module.exports.SID,
+        // 'SID' : 'nope',
     },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'getassets',
 };
@@ -277,7 +283,9 @@ module.exports.globalassetP = {
         title : 'chair',
         type : 'wooden',
     },
-    form : {},
+    form : {
+        foo : 'Nothing here really',
+    },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'globalasset',
 };
 module.exports.globalassetD = {
@@ -308,6 +316,10 @@ module.exports.globalassetassetdata = {
     qs : {
         // 'UID' : module.exports.UID,
         // 'SID' : module.exports.SID,
+        // 'AID' : 'c2d07f9e-4e4c-4fed-8c19-61a077e59b50'
+        // 'AID' : '88f3a909-df90-4bdf-a3dc-fc305f381f8e'
+        // 'AID' : '0189f50e-1c4a-40d7-8532-1cc29b8c83f6'
+        // 'AID' : '8fe41520-e46a-47c6-9834-23674a5063fc'
         'AID' : '88f3a909-df90-4bdf-a3dc-fc305f381f8e'
     },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'globalassetassetdata',
@@ -321,6 +333,8 @@ module.exports.globalassetmetadata = {
     qs : {
         // 'UID' : module.exports.UID,
         // 'SID' : module.exports.SID,
+        // 'AID' : '88f3a909-df90-4bdf-a3dc-fc305f381f8e'
+        // 'AID' : '8fe41520-e46a-47c6-9834-23674a5063fc'
         'AID' : '88f3a909-df90-4bdf-a3dc-fc305f381f8e'
     },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'globalassetmetadata',
@@ -343,6 +357,7 @@ module.exports.inventory = {
     qs : {
         // 'UID' : module.exports.UID,
         // 'SID' : module.exports.SID,
+        // 'SID' : '_adl_sandbox_jzfyZYS4Vwt9iXh3_',
     },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'inventory',
 };
@@ -373,6 +388,7 @@ module.exports.inventoryitemD = {
         'SID' : module.exports.SID,
         //let's try this - should only work once
         'AID' : '9ab2d1de-20c3-4c2e-8548-f4e9dfd6960f',
+        'AID' : '8ce7fb6b-5758-4574-8dee-10a7509b5899',
     },
     form : {},
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'inventoryitem',
@@ -385,7 +401,8 @@ module.exports.inventoryitemassetdata = {
     qs : {
         // 'UID' : module.exports.UID,
         // 'SID' : module.exports.SID,
-        'AID' : '56b634e6-d22d-4510-8809-d5e12fc9abdd'
+        'AID' : '56b634e6-d22d-4510-8809-d5e12fc9abdd',
+        'AID' : 'c259bccb-e016-481d-a870-f0d78f6712d4'
     },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'inventoryitemassetdata',
 };
@@ -397,7 +414,8 @@ module.exports.inventoryitemmetadataG = {
     qs : {
         // 'UID' : module.exports.UID,
         // 'SID' : module.exports.SID,
-        'AID' : '56b634e6-d22d-4510-8809-d5e12fc9abdd'
+        'AID' : '56b634e6-d22d-4510-8809-d5e12fc9abdd',
+        'AID' : '05ee3e67-660c-4cd8-9abc-05bcf7b93ce0',
     },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'inventoryitemmetadata',
 };
@@ -410,7 +428,8 @@ module.exports.inventoryitemmetadataP = {
     qs : {
         // 'UID' : module.exports.UID,
         // 'SID' : module.exports.SID,
-        'AID' : '56b634e6-d22d-4510-8809-d5e12fc9abdd'
+        'AID' : '56b634e6-d22d-4510-8809-d5e12fc9abdd',
+        'AID' : '05ee3e67-660c-4cd8-9abc-05bcf7b93ce0',
     },
     form : {
         description : "Mary had a little lamb."
@@ -446,10 +465,10 @@ module.exports.logindata = {
     //keep this active as a test againt good session
     name : 'logindata',
     method : 'GET',
-    qs : {
-        'UID' : module.exports.UID,
-        'SID' : module.exports.SID,
-    },
+    // qs : {
+    //     'UID' : module.exports.UID,
+    //     'SID' : module.exports.SID,
+    // },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'logindata',
 };
 module.exports.logout = {
@@ -471,8 +490,8 @@ module.exports.profileG = {
     name : 'profile',
     method : 'GET',
     qs : {
-        'UID' : module.exports.UID,
-        'SID' : module.exports.SID,
+        // 'UID' : module.exports.UID,
+        // 'SID' : module.exports.SID,
     },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'profile',
 };
@@ -493,16 +512,6 @@ module.exports.profileP = {
     },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'profile',
 };
-module.exports.profileG = {
-    //200 {Object...}
-    name : 'profile',
-    method : 'GET',
-    qs : {
-        'UID' : 'UID',
-        'SID' : module.exports.SID,
-    },
-    url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'profile',
-};
 module.exports.profileD = {
     //200 {Object...}
     //doesn't delete anything
@@ -516,24 +525,14 @@ module.exports.profileD = {
     form : {},
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'profile',
 };
-module.exports.profileG = {
-    //200 {Object...}
-    name : 'profile',
-    method : 'GET',
-    qs : {
-        'UID' : module.exports.UID,
-        'SID' : module.exports.SID,
-    },
-    url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'profile',
-};
 module.exports.profiles = {
     //200 [Array of profile names]
     name : 'profiles',
     method : 'GET',
-    qs : {
-        'UID' : module.exports.UID,
-        'SID' : module.exports.SID,
-    },
+    // qs : {
+    //     'UID' : module.exports.UID,
+    //     'SID' : module.exports.SID,
+    // },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'profiles',
 };
 module.exports.publish = {
@@ -543,7 +542,7 @@ module.exports.publish = {
     name : 'publish',
     method : 'POST',
     qs : {
-        'UID' : module.exports.UID,
+        // 'UID' : module.exports.UID,
         // 'SID' : module.exports.SID,
         'SID' : "_adl_sandbox_NOGEv5q7kmL6VSN4_",
     },
@@ -627,8 +626,9 @@ module.exports.stateG = {
     name : 'state',
     method : 'GET',
     qs : {
-        'UID' : module.exports.UID,
+        // 'UID' : module.exports.UID,
         'SID' : module.exports.SID,
+        // 'SID' : '_adl_sandbox_xReWilVZ1l0wfL2U_',
     },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'state',
 };
@@ -676,7 +676,21 @@ module.exports.statedataP = {
         'SID' : '_adl_sandbox_AN91bJqZY29N7Cbz_',	//works
         // 'SID' : 'AN91bJqZY29N7Cbz',	//401 State not found.
     },
-    form : {},
+    form : {
+        "objects":1,
+        "owner":"joe",
+        "lastUpdate":"2015-44-14T19:59:26.043Z",
+        "created":"2015-09-14T19:59:26.044Z",
+        "publishSettings":{
+            "allowAnonymous":false,
+            "SinglePlayer":false,
+            "camera":null,
+            "createAvatar":true,
+            "allowTools":true,
+            "persistence":true
+        },
+        foo:'nonsense',
+    },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'statedata',
 };
 module.exports.statehistory = {
@@ -688,7 +702,9 @@ module.exports.statehistory = {
     qs : {
         'UID' : module.exports.UID,
         'SID' : module.exports.SID,
-    },
+        // 'SID' : '_adl_sandbox_r8oyUpB6DiAi2VWx_', //SID,
+        // 'SID' : undefined,
+    },//aoWX23JPeUj7YMTb, r8oyUpB6DiAi2VWx, 3IkxhPjXTgunIOuG
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'statehistory',
 };
 module.exports.states = {
@@ -710,6 +726,7 @@ module.exports.stateslist = {
     qs : {
         'UID' : module.exports.UID,
         'SID' : module.exports.SID,
+        'SID' : "_adl_sandbox_i3wJoCHDUJ4ibIEX_",
     },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'stateslist',
 };
@@ -720,6 +737,7 @@ module.exports.texture = {
     method : 'GET',
     qs : {
         'UID' : module.exports.UID,
+        // 'UID' : 'george.jpeg',
         'SID' : module.exports.SID,
     },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'texture',
@@ -756,8 +774,8 @@ module.exports.thumbnailG = {
     name : 'thumbnail',
     method : 'GET',
     qs : {
-        'UID' : module.exports.UID,
-        'SID' : module.exports.SID,
+        // 'UID' : module.exports.UID,
+        // 'SID' : module.exports.SID,
     },
     url : module.exports.root + module.exports.sandbox + module.exports.vwf + 'thumbnail',
 };

@@ -8,17 +8,18 @@ Utility has subsequently been found in running various commands while not logged
 //loading modules
 var request = require('request');
 var fs = require('fs');
+var of = require('./commandOptions');
 
 //URI help
-var root = 'http://localhost:3000/';
-var sandbox = 'sandbox/adl/';
-var vwf = 'vwfdatamanager.svc/';
-var auth = 'auth/local/';
+var root = of.root; //'http://localhost:3000/';
+var sandbox = of.sandbox; //'sandbox/adl/';
+var vwf = of.vwf; //'vwfdatamanager.svc/';
+var auth = of.auth; //'auth/local/';
 //Command help
 var sid = '?SID=_adl_sandbox_L8BnGGj85ZHAmsy1_';
-var UID = 'Postman';
-var pword = 'Postman123';
-var SID = '_adl_sandbox_L8BnGGj85ZHAmsy1_';
+var UID = of.UID; //'Postman';
+var pword = of.pword; //'Postman123';
+var SID = of.SID; //'_adl_sandbox_L8BnGGj85ZHAmsy1_';
 var salt = "";
 var cookie = "";
 var AID;
@@ -40,48 +41,50 @@ var badData = [
 	"Steven 'the Steve' Vergenz",	//single quotes	12
 ]
 
-var command = {
-    // 500 user Postman already exists
-    // do I have to be logged out to do this
-    //see also createprofile.txt
-    //must have a nonempty UID in qs
-    name : 'createprofile',
-    method : 'POST',
-    qs : {
-		'UID' : 'Fred',
-        // 'SID' : SID,
-	},
-    form : {
-        // Username : 'Remy',
-        Username : 'Frodo',
-        Email : 'remy@mail.com',
-        Password : 'beware333Squirrels',
-        Password2 : 'beware333Squirrels',
-        dateofbirth : '01022015',
-        sex : 'male',
-        relationshipstatus: 'none',
-        fullname : "Frodo Tikki Tavi",
-        location : 'Orlando FL',
-        homepage : 'remy.com',
-        employer : 'no need',
-		badField : 'bad data',
-    },
-    url : root + sandbox + vwf + 'createprofile',
-
-//Testing commands without logging in - go ahead and delete and uncomment the above to restore to original working condition
-// name : 'restorebackup',
-// method : 'GET',
-// // qs : {
-// // 	'UID' : UID,
-// // 	// 'SID' : SID,	//500 State ID is incorrect
-// // 	'SID' : "_adl_sandbox_i3wJoCHDUJ4ibIEX_",	//500 State ID is incorrect
-// 	// 'SID' : "_adl_sandbox_E8acu9xeKsoaARn7_",	//crash!!!!!!
-// // 	statename : "statebackup20ff4fcf-d788-4005-a557-7d580446822f",
-// // 	backup : 'state',
-// // },
-// url : root + sandbox + vwf + 'restorebackup',
-
-},
+// var command = {
+//     // 500 user Postman already exists
+//     // do I have to be logged out to do this
+//     //see also createprofile.txt
+//     //must have a nonempty UID in qs
+//     name : 'createprofile',
+//     method : 'POST',
+//     qs : {
+// 		'UID' : 'Fred',
+//         // 'SID' : SID,
+// 	},
+//     form : {
+//         // Username : 'Remy',
+//         Username : 'Frodo',
+//         Email : 'remy@mail.com',
+//         Password : 'beware333Squirrels',
+//         Password2 : 'beware333Squirrels',
+//         dateofbirth : '01022015',
+//         sex : 'male',
+//         relationshipstatus: 'none',
+//         fullname : "Frodo Tikki Tavi",
+//         location : 'Orlando FL',
+//         homepage : 'remy.com',
+//         employer : 'no need',
+// 		badField : 'bad data',
+//     },
+//     url : root + sandbox + vwf + 'createprofile',
+//
+// //Testing commands without logging in - go ahead and delete and uncomment the above to restore to original working condition
+// // name : 'restorebackup',
+// // method : 'GET',
+// // // qs : {
+// // // 	'UID' : UID,
+// // // 	// 'SID' : SID,	//500 State ID is incorrect
+// // // 	'SID' : "_adl_sandbox_i3wJoCHDUJ4ibIEX_",	//500 State ID is incorrect
+// // 	// 'SID' : "_adl_sandbox_E8acu9xeKsoaARn7_",	//crash!!!!!!
+// // // 	statename : "statebackup20ff4fcf-d788-4005-a557-7d580446822f",
+// // // 	backup : 'state',
+// // // },
+// // url : root + sandbox + vwf + 'restorebackup',
+//
+// },
+//now you can insert the name of the command from commandOptions.js right here
+var command = of.logout,
 
     profiles = {
         name : 'profiles',

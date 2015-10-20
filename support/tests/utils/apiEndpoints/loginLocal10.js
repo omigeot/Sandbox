@@ -4,6 +4,7 @@ console.log('Howdy!');//intro - we're working
 //loading modules
 var request = require('request');
 var fs = require('fs');
+var of = require('./commandOptions.js');
 // require("request-debug")(request);
 
 //https://sandbox.adlnet.gov/100/adl/sandbox/login - returns 200 login screen
@@ -37,13 +38,14 @@ var EncryptPassword = function (password, username, salt)
 }
 
 //uri help
-var root = 'http://localhost:3000/';
-var sandbox = 'sandbox/adl/';
-var vwf = 'vwfdatamanager.svc/';
-var localAuth = 'auth/local/';
+var root = of.root; //'http://localhost:3000/';
+var sandbox = of.sandbox; //'sandbox/adl/';
+var vwf = of.vwf; //'vwfdatamanager.svc/';
+var localAuth = of.auth; //'auth/local/';
 var sid = '?SID=_adl_sandbox_L8BnGGj85ZHAmsy1_';
-var UID = 'joe';
-var pword = 'Abc123456';
+var UID = of.UID//'joe';
+// var pword = 'Abc123456';
+var pword = of.pword; //'Abc123456';
 // var UID = 'joeseph';
 // var pword = 'Abc1273456';
 // var UID = 'Postman';
