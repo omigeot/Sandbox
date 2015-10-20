@@ -183,7 +183,7 @@ define(function ()
 		this.getSaveNodePrototype = function (id)
 		{
 			if (typeof id === "string") return this.DeleteIDs(this.fixExtendsAndArrays(this.GetNode(id)),true);
-			else return this.DeleteIDs(this.fixExtendsAndArrays(JSON.parse(JSON.stringify(id)))),true);
+			else return this.DeleteIDs(this.fixExtendsAndArrays(JSON.parse(JSON.stringify(id))),true);
 		}
 		this.getSaveStateData = function()
 		{
