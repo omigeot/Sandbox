@@ -989,6 +989,11 @@ function GetThumbnail(request, SID, response)
 
 function GetCameras(SID, response, URL)
 	{
+		if (!SID)
+		{
+			respond(response, 404, 'No state with given SID found');
+			return;
+		}
 		function helper(node)
 		{
 			if (!node)
