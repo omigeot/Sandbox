@@ -168,7 +168,7 @@ var APIModules = {
         {
             var clients = this.getClients();
             if (!clients || !clients[id]) return null;
-            return vwf.callMethod(vwf.application(), "findNodeByID", [this.clients[id].cameraID]);
+            return vwf.callMethod(vwf.application(), "findNodeByID", [clients[id].cameraID]);
         }
         this.getClientForCamera = function(id)
         {
