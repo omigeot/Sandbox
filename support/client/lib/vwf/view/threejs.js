@@ -820,7 +820,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
             this.cameraID = camID  || defaultCameraID;
 
             //allow the default 
-            if(camID == null && publishSettings.allowTools)
+            if(!camID && publishSettings.allowTools)
                 this.cameraID = null;
 
             var cam = this.editorCamera;
