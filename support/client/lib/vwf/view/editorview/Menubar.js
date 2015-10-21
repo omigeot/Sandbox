@@ -342,7 +342,12 @@ define(['vwf/view/editorview/manageAssets'], function(manageAssets)
     
             $('#MenuLogOut').click(function(e) {
                 if ($('#MenuLogOut').attr('disabled') == 'disabled') return;
-                window.location = window.location.pathname.replace('/sandbox/', '/sandbox/world/');
+                
+
+                var r = /\/(.{0,16})\/$/g;
+                var a = r.exec(window.location.pathname);
+                window.location = window.location.pathname.replace(a[0], '/world'+ a[0] );
+
             });
             $('#MenuSelectPick').click(function(e) {
                 _Editor.SetSelectMode('Pick');
