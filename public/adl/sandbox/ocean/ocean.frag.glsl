@@ -126,16 +126,20 @@ void main() {
 	vec3 pNormal;
 	vec3 nnvCamDir = normalize(-vCamDir);
 	float powerSum = 0.0;
-	for (int i = 0; i < 2; i++)
+	//for (int i = 0; i < 2; i++)
 	{
-		{
+		
 			float wavesInTexture = 10.0;
 			vec2 texToWorld = tc.xy / wavesInTexture;
-			vec2 texToWaveLen =  texToWorld / L[i];
-			vec2 directionAndSpeed = D[i] * S[i] / ( wavesInTexture * 15.0);
-			pNormal +=  A[i] *  texture2D(oNormal, texToWaveLen  + directionAndSpeed * t ).xyz;
-			powerSum += A[i];
-		}
+			vec2 texToWaveLen =  texToWorld / L[0];
+			vec2 directionAndSpeed = D[0] * S[0] / ( wavesInTexture * 15.0);
+			pNormal +=  A[0] *  texture2D(oNormal, texToWaveLen  + directionAndSpeed * t ).xyz;
+			powerSum += A[0];
+		
+			texToWaveLen =  texToWorld / L[1];
+			directionAndSpeed = D[1] * S[1] / ( wavesInTexture * 15.0);
+			pNormal +=  A[1] *  texture2D(oNormal, texToWaveLen  + directionAndSpeed * t ).xyz;
+			powerSum += A[1];
 	}
 
 	pNormal /= powerSum ;
@@ -160,16 +164,16 @@ void main() {
 	mapNormal.xy *= max(0.0, (uChop / 30.0 *  waves[0].x));
 	mapNormal.xy *= uNormalPower;
 	mapNormal = normalize(mapNormal);
-	//pNormal.xy *= max(0.0, uChop / 4.0);
+	pNormal.xy *= max(0.0, uChop / 4.0);
 
 
 	vec3 texNormal =  normalize(TBN * mapNormal);
 	vec3 texNormal1 =  normalize(TBN * pNormal);;
 
-	texNormal = mix(texNormal, texNormal1, clamp(0.0, 1.0, vCamLength / uHalfGrid));
+	float falloffmix = clamp(vCamLength / uHalfGrid,0.0, 1.0);
+	texNormal = mix(texNormal, texNormal1, falloffmix+.00000001);
 	texNormal = normalize(texNormal);
-
-
+	//texNormal = pNormal;
 
 
 	float ref = 0.0;
@@ -320,8 +324,8 @@ void main() {
 	// D0 = (D0 /gl_FragCoord.w);
 	// D1 = D1/gl_FragCoord.w;
 	
-	
-		//gl_FragColor.xyz = rawDepth.xyz;
+	//gl_FragColor = vec4(0.0,0.0,0.0,1.0);
+		//gl_FragColor.xyz = texNormal.xyz;
 
 	//if(vCamLength > depth*100.0)
 	//	depth = 100.0;
