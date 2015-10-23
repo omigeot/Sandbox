@@ -758,6 +758,14 @@ phyObject.prototype.setActivationState = function(state) {
         this.activationState = state
     } else this.activationState = state;
 }
+phyObject.prototype.wake = function() {
+    if (this.initialized === true) {
+        this.body.setActivationState(1);
+        this.body.forceActivationState(1);
+        this.activationState = 1;
+        this.body.setDeactivationTime(-1);
+    } else this.activationState = 1;
+}
 phyObject.prototype.getDeactivationTime = function() {
     if (this.initialized === true) {
         this.deactivationTime = this.body.getDeactivationTime();
