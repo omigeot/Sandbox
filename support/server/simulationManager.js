@@ -71,6 +71,7 @@ var simulationManager = function(world)
     //once a second look for client that most needs to simulate a node, and change owners
     this.postLearnedMappings = function()
     {
+        return;
         for (var i in this.clientControlTable)
         {
             if (!this.getClientForNode(i))
@@ -102,10 +103,12 @@ var simulationManager = function(world)
     setInterval(this.postLearnedMappings, 1000);
     this.addClient = function(sandboxClient)
     {
+        console.log("simulationManager.addClient " + sandboxClient.id )
         var newClient = new simClient(sandboxClient, this);
         if(sandboxClient.isAnonymous() && !this.world.state.metadata.publishSettings.allowAnonymous)
         {
             this.observers[sandboxClient.id] = newClient;
+            console.log(sandboxClient.id + " is isAnonymous. Not distributing")
             return;
         }
         //must add to list to get proper average load, then remove so we don't keep distributing
@@ -115,7 +118,9 @@ var simulationManager = function(world)
         var average = this.clientAverageLoad();
         delete this.clients[sandboxClient.id];
         var counter = 0;
-        var errorTimeout = this.world.state.nodes.length;
+        var errorTimeout = 100;
+        if(this.world.state.nodes["index-vwf"])
+            errorTimeout =  Object.keys(this.world.state.nodes["index-vwf"].children).length;
         //divide up work distribute until new client shares load
         while (newClient.nodesSimulating.length < average -1 && errorTimeout)
         {

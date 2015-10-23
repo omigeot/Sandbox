@@ -37,7 +37,7 @@ function messageCompress()
                     if(message.length > 5 && message.length < 200 && message.indexOf('\n') == -1)
                        {
                              this.learnedMappings[message] = '';
-                             console.log('learning mapping for ' + message);
+                         //    console.log('learning mapping for ' + message);
                        }
                     return message;
                 } 
@@ -157,11 +157,11 @@ function messageCompress()
                 mapping[i] = this.addMapping(i);
                 if(this.learnedMappingsTotal[i])
                 {
-                    console.log('*** compression table duplicate ***')
-                    console.log(i)
+                 //   console.log('*** compression table duplicate ***')
+                  //  console.log(i)
                 }
                 this.learnedMappingsTotal[i] = mapping[i];
-                console.log("mapping " + mapping[i] + " to " + i)
+               // console.log("mapping " + mapping[i] + " to " + i)
             }
             for(var i in this.world.clients)
             {
@@ -171,7 +171,7 @@ function messageCompress()
         },
         sendFullLearnedTable:function(client)
         {
-            console.log(this.learnedMappingsTotal);
+          //  console.log(this.learnedMappingsTotal);
             client.emit('compress',this.learnedMappingsTotal);
         },
         initialized: false,
