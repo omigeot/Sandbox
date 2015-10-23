@@ -187,11 +187,19 @@ define(function ()
 		}
 		this.getSaveStateData = function()
 		{
-			var scene = _Editor.getNode(vwf.application());
+			var scene;
+			if(vwf.getProperty(vwf.application(),'playMode') == 'stop')
+				scene = _Editor.getNode(Engine.application());
+			else
+				scene = Engine.getProperty(Engine.application(),'playBackup');
+			if(!scene)
+			{
+				scene = _Editor.getNode(Engine.application());
+			}
 			var nodes = [];
 			for (var i in scene.children)
 			{
-				var node = this.getSaveNodePrototype(scene.children[i].id);
+				var node = this.getSaveNodePrototype(scene.children[i]);
 				if (node.extends != "character.vwf" && node.extends != 'http://vwf.example.com/camera.vwf') nodes.push(node);
 				
 			}
@@ -228,11 +236,11 @@ define(function ()
 			
 
 			//if the editor is playing the scene, save the backup from before play was hit
-			if(vwf.getProperty(vwf.application(),'playMode') == 'play')
-			{
-				console.log('Skipping save because scene is playing.');
-				return;
-			}
+		//	if(vwf.getProperty(vwf.application(),'playMode') != 'stop')
+		//	{
+		//		console.log('Skipping save because scene is playing.');
+		//		return;
+		//	}
 			
 			
 			var data = JSON.stringify(this.getSaveStateData());
