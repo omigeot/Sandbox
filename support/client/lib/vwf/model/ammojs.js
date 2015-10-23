@@ -386,6 +386,8 @@ function setupPhyObject(node, id, world) {
     node.constantTorque = null;
     node.transform = [];
     node.massBackup = 0;
+    node.setMass(1);
+    node.simulating = false;
 }
 
 function phyObject(id, world) {
@@ -486,11 +488,16 @@ phyObject.prototype.setAngularFactor = function(vec) {
     }
 }
 phyObject.prototype.startSimulating = function()
-{
+{   
+    if(this.simulating == true) return;
+    this.simulating = true;
     this.setMass(this.massBackup,true);
 }
 phyObject.prototype.stopSimulating = function()
 {
+
+    if(this.simulating == false) return;
+    this.simulating = false;
     this.massBackup = this.mass;
     this.setMass(0,true);
 }

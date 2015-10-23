@@ -310,7 +310,7 @@ var sandboxState = function(id, metadata,world)
         var node = this.findNode(nodeID);
         if (!node)
         {
-            console.log('server has no record of ' + nodeID, 1);
+            console.log('server has no record of ' + nodeID + ' ' + type, 1);
             return true;
         }
         if (this.metadata.publishSettings.allowAnonymous || checkOwner(node, client.loginData.UID))

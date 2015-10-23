@@ -686,7 +686,8 @@ function sandboxWorld(id, metadata)
             }
             var compressedMessage = this.messageCompress.pack(message);
             //distribute message to all clients on given instance
-            var concernedClients = this.simulationManager.getClientsForMessage(message, sendingclient)
+            //for now, we need better filtering of messages. 
+            //var concernedClients = this.simulationManager.getClientsForMessage(message, sendingclient)
             for (var i in this.clients)
             {
                 var client = this.clients[i];
@@ -716,7 +717,7 @@ function sandboxWorld(id, metadata)
                 }
                 else
                 {
-                    if (concernedClients.indexOf(client) != -1)
+                    //if (concernedClients.indexOf(client) != -1)
                         this.messageClient(client, compressedMessage, false, false);
                 }
             }
