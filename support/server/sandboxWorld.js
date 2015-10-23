@@ -226,7 +226,8 @@ function sandboxWorld(id, metadata)
         for (var i in this.clients)
             this.clients[i].disconnect();
         clearInterval(this.timerID);
-        logger.warn('Shutting down ' + this.id)
+        logger.warn('Shutting down ' + this.id);
+        this.simulationManager.shutdown();
         this.trigger('shutdown');
     }
     this.Log = function(message, level)

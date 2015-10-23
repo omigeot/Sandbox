@@ -69,9 +69,11 @@ var simulationManager = function(world)
     this.observers = {};
     this.clientControlTable = {}; //learn which clients need to simulate locally most
     //once a second look for client that most needs to simulate a node, and change owners
+    var self = this;
+   
     this.postLearnedMappings = function()
     {
-        return;
+        
         for (var i in this.clientControlTable)
         {
             if (!this.getClientForNode(i))
@@ -93,14 +95,15 @@ var simulationManager = function(world)
             }
             if (controllingClient !== this.getClientForNode(i).sandboxClient.id)
             {
-                this.getClientForNode(i).stopSimulatingNode(i);
+                if(this.getClientForNode(i))
+                    this.getClientForNode(i).stopSimulatingNode(i);
                 
                 this.clients[controllingClient].startSimulatingNode(i)
                 console.log('moving ' + i + " to " + controllingClient);
             }
         }
     }.bind(this);
-    setInterval(this.postLearnedMappings, 1000);
+    this.postLearnedMappingsHandle = setInterval(this.postLearnedMappings, 1000);
     this.addClient = function(sandboxClient)
     {
         console.log("simulationManager.addClient " + sandboxClient.id )
@@ -277,6 +280,10 @@ var simulationManager = function(world)
             }
         }
         return clients;
+    }
+    this.shutdown = function()
+    {
+        clearInterval(this.postLearnedMappingsHandle);
     }
 }
 exports.simulationManager = simulationManager;
