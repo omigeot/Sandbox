@@ -236,7 +236,7 @@
 
                 }
 
-                vwf.setProperty(this.ID, 'animationFrame', nextframe);
+                Engine.setProperty(this.ID, 'animationFrame', nextframe);
             }
 
         }

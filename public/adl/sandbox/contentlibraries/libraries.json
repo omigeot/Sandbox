@@ -22,5 +22,9 @@
 	{
 		"name": "Cameras",
         "url": "./contentlibraries/cameras.json"
+	},
+	{
+		"name": "Utilities",
+        "url": "./contentlibraries/utils.json"
     }
 ]

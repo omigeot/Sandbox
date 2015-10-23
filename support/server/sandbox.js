@@ -243,16 +243,23 @@ function startVWF() {
 					global.configuration.assetDataDir = global.configuration.assetDataDir || 'assets';
 					var datadir = libpath.resolve(__dirname, '..','..', global.configuration.assetDataDir);
 
-					fs.mkdirs(datadir, function()
-					{
-						var assetServer = require('sandbox-asset-server');
-						app.use(global.configuration.assetAppPath, assetServer({
-							dataDir: datadir,
-							sessionCookieName: 'session',
-							sessionHeader: global.configuration.assetSessionHeader || 'X-Session-Header',
-							sessionSecret: global.configuration.sessionSecret || 'unsecure cookie secret'
-						}));
-						logger.info('Hosting assets locally at', global.configuration.assetAppPath);
+					fs.mkdirs(datadir, function(){
+						try {
+							var assetServer = require('sandbox-asset-server');
+							app.use(global.configuration.assetAppPath, assetServer({
+								dataDir: datadir,
+								sessionCookieName: 'session',
+								sessionHeader: global.configuration.assetSessionHeader || 'X-Session-Header',
+								sessionSecret: global.configuration.sessionSecret || 'unsecure cookie secret'
+							}));
+							logger.info('Hosting assets locally at', global.configuration.assetAppPath);
+						}
+						catch(e){
+							logger.error('Failed to start the asset server! Did it install correctly?');
+							app.all(global.configuration.assetAppPath+'/*', function(req,res){
+								res.status(500).send('Asset server not available');
+							});
+						}
 					});
 				}
 				else {
@@ -298,7 +305,7 @@ function startVWF() {
                 cb();
             },
             function registerWithLB(cb) {
-                //do this before trying to compile, otherwise the vwfbuild.js file will be created with the call to the load balancer, which may not be online
+                //do this before trying to compile, otherwise the enginebuild.js file will be created with the call to the load balancer, which may not be online
                 //NOTE: If this fails, then the build will have the loadbalancer address hardcoded in. Make sure that the balancer info is right if using loadbalancer and
                 // - compile together
                 if (global.configuration.loadBalancer && global.configuration.host && global.configuration.loadBalancerKey)
@@ -384,7 +391,7 @@ function startVWF() {
                 }
                 if (compile) {
 
-                    fs.writeFileSync('./support/client/lib/vwfbuild.js', Landing.getVWFCore());
+                    fs.writeFileSync('./support/client/lib/enginebuild.js', Landing.getVWFCore());
 
                     function loadIntoCache() {
                         var path = libpath.normalize('../../build/support/client/lib/load.js'); //trick the filecache
@@ -777,7 +784,7 @@ function startVWF() {
                 app.get("/adl/sandbox" + '/createNew/:page([0-9/]+)', Landing.createNew);
                 app.get("/adl/sandbox" + '/createNew2/:template([_a-zA-Z0-9/]+)', Landing.createNew2);
 
-                app.get("/adl/sandbox" + '/vwf.js', Landing.serveVWFcore);
+                app.get("/adl/sandbox" + '/engine.js', Landing.serveVWFcore);
 
                 app.post("/adl/sandbox" + '/admin/:page([a-zA-Z]+)', Landing.handlePostRequest);
                 app.post("/adl/sandbox" + '/data/:action([a-zA-Z_]+)', Landing.handlePostRequest);

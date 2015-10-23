@@ -160,7 +160,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		function refresh()
 		{
 			// try to get a materialDef from property, or failing that, from the driver
-			var mat = $scope.fields.selectedNode && vwf.getProperty($scope.fields.selectedNode.id, 'materialDef');
+			var mat = $scope.fields.selectedNode && Engine.getProperty($scope.fields.selectedNode.id, 'materialDef');
 
 			if( mat && !angular.equals($scope.materialArray||$scope.materialDef, mat))
 			{
@@ -256,8 +256,8 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			template: [
 				'<div class="mantissa">',
 					'<div class="slider"></div>',
-					'<input type="number" min="{{min}}" max="{{max}}" step="{{step}}" ng-model="value" ng-disabled="disabled || softLimit" ng-hide="range || softLimit" ng-change="change()"></input>',
-					'<input type="number" step="{{step}}" ng-model="value" ng-disabled="disabled || !softLimit" ng-hide="range || !softLimit" ng-change="change()"></input>',
+					'<input type="number" min="{{min}}" max="{{max}}" step="{{step}}" ng-model="value" ng-disabled="disabled || softLimit" ng-hide="range || softLimit" ng-change="change()" ng-model-options="{updateOn: \'blur click change\'}" />',
+					'<input type="number" step="{{step}}" ng-model="value" ng-disabled="disabled || !softLimit" ng-hide="range || !softLimit" ng-change="change()" ng-model-options="{updateOn: \'blur click change\'}" />',
 				'</div>',
 				'<div class="exponent" ng-show="useExponent">',
 					'Exponent: ',

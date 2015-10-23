@@ -1,18 +1,18 @@
 "use strict";
 // Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
 // Secretary of Defense (Personnel & Readiness).
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License. You may obtain a copy of the License at
-// 
+//
 //   http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software distributed under the License
 // is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
 /// vwf/model/object.js is a backstop property store.
-/// 
+///
 /// @module vwf/model/object
 /// @requires vwf/model
 /// @requires vwf/configuration
@@ -36,7 +36,7 @@ function collectChildCollisions(node, list) {
         var col = node.buildCollisionShape();
         if (col) {
             list.push({
-                matrix: vwf.getProperty(node.id, 'orthoWorldTransform'), //don't use normal world transform. In non uniform spaces, the rotations are senseless. 
+                matrix: Engine.getProperty(node.id, 'orthoWorldTransform'), //don't use normal world transform. In non uniform spaces, the rotations are senseless.
                 collision: col,
                 mass: node.mass,
                 localScale: node.localScale,
@@ -106,26 +106,26 @@ phyJoint.prototype.deinitialize = function() {
 }
 phyJoint.prototype.getTransform = function(temp)
 {
-    //this is important and tricky!!! 
+    //this is important and tricky!!!
     //since the joint orientation is relative to the bodies, and the bodies are moving,
     //recreating the joint without updating it's position will result in very different results
-    //it's probably  good pratice to make the joint object a  child of the bodyA, so that the 
-    //joint location never changes relative to body a. However, we can also make this work by 
+    //it's probably  good pratice to make the joint object a  child of the bodyA, so that the
+    //joint location never changes relative to body a. However, we can also make this work by
     //updating the stored location of each joint to be relative to the body A position after each tick
 
     //NOTE:: the this.transform value should be storing the location RELATIVE to BODYA in the reference frame of the joint parent!!!
-    //NOTE:: updates from the physics tick should not actually change and rebind these joints, this information is useful only to 
+    //NOTE:: updates from the physics tick should not actually change and rebind these joints, this information is useful only to
     //late joiners and DB saves
-    
+
     if(this.bodyA)
     {
         if(!temp) temp = [];
-        
+
         if(!this.transRelBodyA) throw new Error('Body not initialized before tick');
-        var bodyWorldTx = vwf.getProperty(this.aID, 'worldtransform');
+        var bodyWorldTx = Engine.getProperty(this.aID, 'worldtransform');
         var bodyRelMat = Mat4.multMat(bodyWorldTx,this.transRelBodyA, temp);
 
-        
+
         return bodyRelMat;
     }
     else
@@ -161,7 +161,7 @@ phyJoint.prototype.setBodyBID = function(nodeID) {
 phyJoint.prototype.setBodyA = function(body) {
     this.bodyA = body;
 
-    var bodyWorldTx = vwf.getProperty(this.aID, 'worldtransform');
+    var bodyWorldTx = Engine.getProperty(this.aID, 'worldtransform');
     this.transRelBodyA = this.getMatrixRelBody(this.aID,this.transform);
 }
 phyJoint.prototype.setBodyB = function(body) {
@@ -194,21 +194,21 @@ phyJoint.prototype.initialize = function() {
     }
 }
 phyJoint.prototype.getPointRelBody = function(bodyID, worldpoint) {
-    var bodyWorldTx = vwf.getProperty(bodyID, 'worldtransform');
+    var bodyWorldTx = Engine.getProperty(bodyID, 'worldtransform');
     var bodyWorldTxI = [];
     Mat4.invert(bodyWorldTx, bodyWorldTxI);
     var bodyRelPos = Mat4.multVec3(bodyWorldTxI, worldpoint, []);
     return bodyRelPos;
 }
 phyJoint.prototype.getAxisRelBody = function(bodyID, worldAxis) {
-    var bodyWorldTx = vwf.getProperty(bodyID, 'worldtransform');
+    var bodyWorldTx = Engine.getProperty(bodyID, 'worldtransform');
     var bodyWorldTxI = [];
     Mat4.invert(bodyWorldTx, bodyWorldTxI);
     var bodyRelAxis = Mat4.multVec3NoTranslate(bodyWorldTxI, worldAxis, []);
     return bodyRelAxis;
 }
 phyJoint.prototype.getMatrixRelBody = function(bodyID, worldMatrix) {
-    var bodyWorldTx = vwf.getProperty(bodyID, 'worldtransform');
+    var bodyWorldTx = Engine.getProperty(bodyID, 'worldtransform');
     if(!bodyWorldTx) return null;
     var bodyWorldTxI = [];
     Mat4.invert(bodyWorldTx, bodyWorldTxI);
@@ -223,7 +223,7 @@ function phyPointToPointJoint(id, world, driver) {
 }
 phyPointToPointJoint.prototype = new phyJoint();
 phyPointToPointJoint.prototype.buildJoint = function() {
-    var worldTx = vwf.getProperty(this.id, 'worldtransform');
+    var worldTx = Engine.getProperty(this.id, 'worldtransform');
     var worldTrans = [worldTx[12], worldTx[13], worldTx[14]];
     this.pointA = this.getPointRelBody(this.aID, worldTrans);
     this.pointB = this.getPointRelBody(this.bID, worldTrans);
@@ -241,7 +241,7 @@ function phyHingeJoint(id, world, driver) {
 }
 phyHingeJoint.prototype = new phyJoint();
 phyHingeJoint.prototype.buildJoint = function() {
-    var worldTx = vwf.getProperty(this.id, 'worldtransform');
+    var worldTx = Engine.getProperty(this.id, 'worldtransform');
     var worldTrans = [worldTx[12], worldTx[13], worldTx[14]];
     this.pointA = this.getPointRelBody(this.aID, worldTrans);
     this.pointB = this.getPointRelBody(this.bID, worldTrans);
@@ -258,7 +258,7 @@ phyHingeJoint.prototype.buildJoint = function() {
 }
 //NOTE: todo: limits need to be transformed from joint space to bodyA space
 //makes more sense GUI side to display in joint space, but bullet used bodyA reference frame
-//I think - make y axis vec. rotate around joint space x by limit. move this vec into bodya space. use arctan2 to find new rotation around joint x 
+//I think - make y axis vec. rotate around joint space x by limit. move this vec into bodya space. use arctan2 to find new rotation around joint x
 phyHingeJoint.prototype.setLowerAngLimit = function(limit)
 {
     this.lowerAngLimit = limit;
@@ -317,16 +317,16 @@ phySliderJoint.prototype.setUpperLinLimit = function(limit)
 phySliderJoint.prototype.getLowerLinLimit = function()
 {
    return this.lowerLinLimit ;
-    
+
 }
 phySliderJoint.prototype.getUpperLinLimit = function()
 {
     return this.upperLinLimit ;
-    
+
 }
 phySliderJoint.prototype.buildJoint = function() {
-    
-    var worldTx = vwf.getProperty(this.id, 'worldtransform');
+
+    var worldTx = Engine.getProperty(this.id, 'worldtransform');
     this.pointA = this.getMatrixRelBody(this.aID, worldTx);
     this.pointB = this.getMatrixRelBody(this.bID, worldTx);
     var pa = btTransformFromMat(this.pointA);
@@ -346,7 +346,7 @@ phyFixedJoint.prototype = new phyJoint();
 
 
 phyFixedJoint.prototype.buildJoint = function() {
-    var worldTx = vwf.getProperty(this.id, 'worldtransform');
+    var worldTx = Engine.getProperty(this.id, 'worldtransform');
     this.pointA = this.getMatrixRelBody(this.aID, worldTx);
     this.pointB = this.getMatrixRelBody(this.bID, worldTx);
     var pa = btTransformFromMat(this.pointA);
@@ -356,7 +356,7 @@ phyFixedJoint.prototype.buildJoint = function() {
     joint.setLinearUpperLimit(new Ammo.btVector3(0,0,0));
     joint.setAngularLowerLimit(new Ammo.btVector3(0,0,0));
     joint.setAngularUpperLimit(new Ammo.btVector3(0,0,0));
-    return joint;  
+    return joint;
 }
 function setupPhyObject(node, id, world) {
     node.body = null;
@@ -417,7 +417,7 @@ phyObject.prototype.addForce = function(vec, offset) {
 		Ammo.destroy(f);
 	}
 }
-//this is a global space force that is applied at every tick. Sort of a motor. Could be 
+//this is a global space force that is applied at every tick. Sort of a motor. Could be
 //used to do custom per object gravity.
 phyObject.prototype.setConstantForce = function(vec) {
     if(this.constantForce) Ammo.destroy(this.constantForce);
@@ -469,7 +469,7 @@ phyObject.prototype.setLinearFactor = function(vec) {
     if (vec.length !== 3) return;
     this.linearFactor = vec;
     if (this.initialized === true) {
-		//this.body.getLinearFactor().setValue(vec[0], vec[1], vec[2]);
+		this.body.getLinearFactor().setValue(vec[0], vec[1], vec[2]);
     }
 }
 phyObject.prototype.getLinearFactor = function(vec) {
@@ -517,8 +517,8 @@ phyObject.prototype.setMass = function(mass,force) {
 phyObject.prototype.initialize = function() {
     this.ready = true;
     //currently, only objects which are children of the world can be bodies
-    if (this.enabled && this.parent.id == vwf.application() && this.initialized === false) {
-        var mat = vwf.getProperty(this.id, 'transform');
+    if (this.enabled && this.parent.id == Engine.application() && this.initialized === false) {
+        var mat = Engine.getProperty(this.id, 'transform');
         if (mat) this.setTransform(mat);
         this.initialized = true;
         console.log('init', this.id);
@@ -570,7 +570,7 @@ phyObject.prototype.initialize = function() {
                 quat = Quaternion.normalize(quat, []);
                 var q = new Ammo.btQuaternion(quat[0], quat[1], quat[2], quat[3]);
                 startTransform.setRotation(q);
-                //careful not to set the childcollision scale when the child is actually this - otherwise we'd be setting it twice, once on the 
+                //careful not to set the childcollision scale when the child is actually this - otherwise we'd be setting it twice, once on the
                 //collision body and once on the compound body
                 //if(childCollisions[i].node !== this)
                 //    childCollisions[i].collision.setLocalScaling(new Ammo.btVector3(childCollisions[i].localScale[0], childCollisions[i].localScale[1], childCollisions[i].localScale[2]));
@@ -612,7 +612,7 @@ phyObject.prototype.initialize = function() {
 
         this.body.forceActivationState(this.activationState);
         this.body.setDeactivationTime(this.deactivationTime);
-        var mat = vwf.getProperty(this.id, 'transform');
+        var mat = Engine.getProperty(this.id, 'transform');
         if (mat) this.setTransform(mat);
         //we must return through the kernel here so it knows that this is revelant to all instances of this node
         //not just the proto
@@ -621,17 +621,17 @@ phyObject.prototype.initialize = function() {
         //so....... is this not handled by the cache and then set of properties that come in before initialize?
         var av = this.activationState;
         this.activationState = -1;
-        vwf.setProperty(this.id, '___physics_activation_state', av);
+        Engine.setProperty(this.id, '___physics_activation_state', av);
         var dvt = this.deactivationTime;
         this.deactivationTime = -1;
-        vwf.setProperty(this.id, '___physics_deactivation_time', dvt);
+        Engine.setProperty(this.id, '___physics_deactivation_time', dvt);
         var lin = this.linearVelocity;
         this.linearVelocity = null;
-        vwf.setProperty(this.id, '___physics_linear_velocity', lin);
+        Engine.setProperty(this.id, '___physics_linear_velocity', lin);
         this.linearVelocity = lin;
         var ang = this.angularVelocity;
         this.angularVelocity = null;
-        vwf.setProperty(this.id, '___physics_angular_velocity', ang);
+        Engine.setProperty(this.id, '___physics_angular_velocity', ang);
         this.angularVelocity = ang;
     }
 }
@@ -689,7 +689,7 @@ phyObject.prototype.getTorque = function() {
     }
 }
 //this is probably not what you're looking for. Torque is an instantanious value, it
-//only has meaning within a tick cycle. This is only for replication. Use either addTorque 
+//only has meaning within a tick cycle. This is only for replication. Use either addTorque
 //or setConstantTorque
 phyObject.prototype.setTorque = function(torque) {
     if (this.initialized === true) {
@@ -725,7 +725,7 @@ phyObject.prototype.setFriction = function(friction) {
 phyObject.prototype.enable = function() {
     if (this.enabled == true) return;
     this.enabled = true;
-    if (this.parent.id !== vwf.application()) {
+    if (this.parent.id !== Engine.application()) {
         this.markRootBodyCollisionDirty();
     }
     //must do this on next tick. Does that mean initialized is stateful and needs to be in a VWF property?
@@ -734,7 +734,7 @@ phyObject.prototype.enable = function() {
     }
 }
 //must be very careful with data the the physics engine changes during the sim
-//can't return cached values if body is enabled because we'll refelct the data 
+//can't return cached values if body is enabled because we'll refelct the data
 //from the JS engine and not the changed state of the physics
 phyObject.prototype.getActivationState = function() {
     if (this.initialized === true) {
@@ -766,11 +766,11 @@ phyObject.prototype.setDeactivationTime = function(time) {
 phyObject.prototype.disable = function() {
     if (this.enabled == false) return;
     this.enabled = false;
-    if (this.parent.id !== vwf.application()) {
+    if (this.parent.id !== Engine.application()) {
         this.markRootBodyCollisionDirty();
     }
     //can't do this! causes the kernel to sense ___physics_enabled as a delegated property
-    //vwf.setProperty(this.id, 'transform', this.getTransform());
+    //Engine.setProperty(this.id, 'transform', this.getTransform());
     if (this.initialized === true) {
         this.deinitialize();
     }
@@ -824,7 +824,7 @@ phyObject.prototype.getTransform = function(outmat) {
     mat[13] = pos[1] - worldoffset[1] / this.localScale[1];
     mat[14] = pos[2] - worldoffset[2] / this.localScale[2];
     //since the value is orthonormal, scaling is easy.
-    if (this.parent.id == vwf.application()) this.transform = vecset(this.transform, mat);
+    if (this.parent.id == Engine.application()) this.transform = vecset(this.transform, mat);
     outmat = vecset(outmat, mat);
     return outmat;
 }
@@ -855,14 +855,14 @@ phyObject.prototype.setTransform = function(matrix) {
     //if(this.initialized === true && matComp(matrix,this.transform || [])) return;
     //todo: the compound collision of the parent does not need to be rebuild, just transforms updated
     //need new flag for this instead of full rebuild
-    if (this.parent.id !== vwf.application() && this.enabled === true && !matComp(this.transform, matrix)) //if I'm part of a compound collsion
+    if (this.parent.id !== Engine.application() && this.enabled === true && !matComp(this.transform, matrix)) //if I'm part of a compound collsion
         this.markRootBodyCollisionDirty();
     else if (this.enabled === true && MATH.distanceVec3(this.localScale, oldScale) > .0001) //if I'm not part of a compound collision but my scale has changedd
     {
         this.markRootBodyCollisionDirty();
     } else if (this.initialized === true) { //if I'm not part of a compound collision but I've moved but not scaled
         this.transform = vecset(this.transform, matrix);
-        if (this.parent.id !== vwf.application()) this.markRootBodyCollisionDirty();
+        if (this.parent.id !== Engine.application()) this.markRootBodyCollisionDirty();
         this.lastTickRotation = null;
         this.thisTickRotation = null;
         var startTransform = new Ammo.btTransform();
@@ -1282,7 +1282,7 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
             }
         },
         testConstraint: function(id, id1, id2) {
-            this.allNodes[id] = new phyPointToPointJoint(id, this.allNodes[vwf.application()].world, this);
+            this.allNodes[id] = new phyPointToPointJoint(id, this.allNodes[Engine.application()].world, this);
             this.allNodes[id].setBodyAID(id1);
             this.allNodes[id].setBodyBID(id2);
         },
@@ -1299,11 +1299,11 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                 for (var j in this.jointBodyMap[i])
                     if (this.jointBodyMap[i][j] == nodeID)
                         return true;
-            return false;        
+            return false;
         },
         creatingNode: function(nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName, callback /* ( ready ) */ ) {
-            if (childID === vwf.application()) {
-                this.nodes[vwf.application()] = {
+            if (childID === Engine.application()) {
+                this.nodes[Engine.application()] = {
                     world: null,
                     type: SCENE,
                     initialized: false,
@@ -1314,41 +1314,41 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                     ground: null,
                     localScale: [1, 1, 1]
                 }
-                this.allNodes[vwf.application()] = this.nodes[vwf.application()];
+                this.allNodes[Engine.application()] = this.nodes[Engine.application()];
                 this.resetWorld();
             }
-            //node ID 
+            //node ID
             //the parent does not exist, so.....
             if (!this.allNodes[nodeID]) return;
             if (nodeID && hasPrototype(childID, 'sphere2-vwf')) {
-                this.allNodes[nodeID].children[childID] = new phySphere(childID, this.allNodes[vwf.application()].world);
+                this.allNodes[nodeID].children[childID] = new phySphere(childID, this.allNodes[Engine.application()].world);
             }
             if (nodeID && hasPrototype(childID, 'box2-vwf')) {
-                this.allNodes[nodeID].children[childID] = new phyBox(childID, this.allNodes[vwf.application()].world);
+                this.allNodes[nodeID].children[childID] = new phyBox(childID, this.allNodes[Engine.application()].world);
             }
             if (nodeID && hasPrototype(childID, 'cylinder2-vwf')) {
-                this.allNodes[nodeID].children[childID] = new phyCylinder(childID, this.allNodes[vwf.application()].world);
+                this.allNodes[nodeID].children[childID] = new phyCylinder(childID, this.allNodes[Engine.application()].world);
             }
             if (nodeID && hasPrototype(childID, 'cone2-vwf')) {
-                this.allNodes[nodeID].children[childID] = new phyCone(childID, this.allNodes[vwf.application()].world);
+                this.allNodes[nodeID].children[childID] = new phyCone(childID, this.allNodes[Engine.application()].world);
             }
             if (nodeID && hasPrototype(childID, 'plane2-vwf')) {
-                this.allNodes[nodeID].children[childID] = new phyPlane(childID, this.allNodes[vwf.application()].world);
+                this.allNodes[nodeID].children[childID] = new phyPlane(childID, this.allNodes[Engine.application()].world);
             }
             if (nodeID && hasPrototype(childID, 'pointConstraint-vwf')) {
-                this.allNodes[nodeID].children[childID] = new phyPointToPointJoint(childID, this.allNodes[vwf.application()].world, this);
+                this.allNodes[nodeID].children[childID] = new phyPointToPointJoint(childID, this.allNodes[Engine.application()].world, this);
             }
             if (nodeID && hasPrototype(childID, 'hingeConstraint-vwf')) {
-                this.allNodes[nodeID].children[childID] = new phyHingeJoint(childID, this.allNodes[vwf.application()].world, this);
+                this.allNodes[nodeID].children[childID] = new phyHingeJoint(childID, this.allNodes[Engine.application()].world, this);
             }
             if (nodeID && hasPrototype(childID, 'sliderConstraint-vwf')) {
-                this.allNodes[nodeID].children[childID] = new phySliderJoint(childID, this.allNodes[vwf.application()].world, this);
+                this.allNodes[nodeID].children[childID] = new phySliderJoint(childID, this.allNodes[Engine.application()].world, this);
             }
             if (nodeID && hasPrototype(childID, 'fixedConstraint-vwf')) {
-                this.allNodes[nodeID].children[childID] = new phyFixedJoint(childID, this.allNodes[vwf.application()].world, this);
+                this.allNodes[nodeID].children[childID] = new phyFixedJoint(childID, this.allNodes[Engine.application()].world, this);
             }
             if (nodeID && (hasPrototype(childID, 'asset-vwf') || hasPrototype(childID, 'sandboxGroup-vwf'))) {
-                this.allNodes[nodeID].children[childID] = new phyAsset(childID, this.allNodes[vwf.application()].world);
+                this.allNodes[nodeID].children[childID] = new phyAsset(childID, this.allNodes[Engine.application()].world);
             }
             //child was created
             if (this.allNodes[nodeID] && this.allNodes[nodeID].children[childID]) {
@@ -1356,17 +1356,17 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                 this.allNodes[childID].parent = this.allNodes[nodeID];
                 //mark some initial properties
                 if (this.allNodes[nodeID].children[childID] instanceof phyObject) {
-                    vwf.setProperty(childID, '___physics_activation_state', 1);
-                    vwf.setProperty(childID, '___physics_deactivation_time', 0);
-                    vwf.setProperty(childID, '___physics_velocity_linear', [0, 0, 0]);
-                    vwf.setProperty(childID, '___physics_velocity_angular', [0, 0, 0]);
+                    Engine.setProperty(childID, '___physics_activation_state', 1);
+                    Engine.setProperty(childID, '___physics_deactivation_time', 0);
+                    Engine.setProperty(childID, '___physics_velocity_linear', [0, 0, 0]);
+                    Engine.setProperty(childID, '___physics_velocity_angular', [0, 0, 0]);
                 }
             }
         },
         oldCollisions: {},
         triggerCollisions: function() {
             var i, offset,
-                dp = this.nodes[vwf.application()].world.getDispatcher(),
+                dp = this.nodes[Engine.application()].world.getDispatcher(),
                 num = dp.getNumManifolds(),
                 manifold, num_contacts, j, pt,
                 _collided = false;
@@ -1408,7 +1408,7 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
         },
         ticking: function() {
             delete this.pendingReset;
-            if (this.nodes[vwf.application()] && this.nodes[vwf.application()].active === true) {
+            if (this.nodes[Engine.application()] && this.nodes[Engine.application()].active === true) {
                 var nodekeys = Object.keys(this.allNodes).sort();
                 for (var g =0; g < nodekeys.length; g++) {
                     var node = this.allNodes[nodekeys[g]];
@@ -1424,7 +1424,7 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                 }
                 //step 50ms per tick.
                 //this is dictated by the input from the reflector
-                this.nodes[vwf.application()].world.stepSimulation(1 / 20, 1, 1 / 20);
+                this.nodes[Engine.application()].world.stepSimulation(1 / 20, 1, 1 / 20);
                 this.reEntry = true;
                 var tempmat = [];
                 var nodekeys = Object.keys(this.allNodes).sort();
@@ -1433,17 +1433,16 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                    // if(vwf.isSimulating(node.id))
                     {    
                         if (node.body && node.initialized === true && node.mass > 0 && node.getActivationState() != 2) {
-                            vwf.setProperty(node.id, 'transform', node.getTransform([]));
+                        Engine.setProperty(node.id, 'transform', node.getTransform(tempmat));
                             //so, we were setting these here in order to inform the kernel that the property changed. Can we not do this, and 
                             //rely on the getter? that would be great....
-                            vwf.setProperty(node.id, '___physics_activation_state', node.getActivationState());
-                            vwf.setProperty(node.id, '___physics_velocity_angular', node.getAngularVelocity());
-                            vwf.setProperty(node.id, '___physics_velocity_linear', node.getLinearVelocity());
-                            vwf.setProperty(node.id, '___physics_deactivation_time', node.getDeactivationTime());
+                        Engine.setPropertyFast(node.id, '___physics_activation_state', node.getActivationState());
+                        Engine.setPropertyFast(node.id, '___physics_velocity_angular', node.getAngularVelocity());
+                        Engine.setPropertyFast(node.id, '___physics_velocity_linear', node.getLinearVelocity());
+                        Engine.setPropertyFast(node.id, '___physics_deactivation_time', node.getDeactivationTime());
                         }if(node.joint)
                         {
-                             vwf.setProperty(node.id, 'transform', node.getTransform(tempmat));
-                        }
+                         Engine.setProperty(node.id, 'transform', node.getTransform(tempmat));
                     }
 
                 }
@@ -1457,7 +1456,7 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
             var node = this.allNodes[nodeID].children[childID];
             if (node) node.ready = true;
             if (node && node.initialized === false) {
-                node.initialize(this.nodes[vwf.application()].world);
+                node.initialize(this.nodes[Engine.application()].world);
                 for (var i in node.delayedProperties) {
                     this.settingProperty(node.id, i, node.delayedProperties[i]);
                 }
@@ -1499,12 +1498,12 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
             return this.settingProperty(nodeID, propertyName, propertyValue);
         },
         resetWorld: function() {
-            
+
             this.pendingReset = true;
-            //here, we must reset the world whenever a new client joins. This is because the new client must be aligned. They will be 
+            //here, we must reset the world whenever a new client joins. This is because the new client must be aligned. They will be
             //initializing the world in a given state. There is stateful information internal to the physics engine that can only be reset on the other clients
             //by rebuilding the whole sim on each.
-            var world = this.allNodes[vwf.application()].world;
+            var world = this.allNodes[Engine.application()].world;
             var IDs_to_enable = [];
             if (world) {
 
@@ -1512,7 +1511,7 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                 for (var i in nodekeys) {
 
                     var node = this.allNodes[nodekeys[i]];
-                    if (vwf.getProperty(nodekeys[i], "___physics_enabled")) {
+                    if (Engine.getProperty(nodekeys[i], "___physics_enabled")) {
                         //call the getters, because they will cache the values to survive the reset
                         //var backupTrans = node.getTransform();
                         //node.backupTrans = backupTrans;
@@ -1520,13 +1519,13 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                         IDs_to_enable.push(nodekeys[i]);
                     }
                 }
-                world.removeRigidBody(this.allNodes[vwf.application()].ground);
+                world.removeRigidBody(this.allNodes[Engine.application()].ground);
                 for (var i in nodekeys) {
                     var node = this.allNodes[nodekeys[i]];
                     if (node.deinitialize) node.deinitialize();
                     node.world = null;
                 }
-                delete this.allNodes[vwf.application()].world;
+                delete this.allNodes[Engine.application()].world;
                 Ammo.destroy(world);
             }
             var collisionConfiguration = new Ammo.btDefaultCollisionConfiguration(); // every single |new| currently leaks...
@@ -1535,7 +1534,7 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
             var solver = new Ammo.btSequentialImpulseConstraintSolver();
             var dynamicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
             dynamicsWorld.setGravity(new Ammo.btVector3(0, 0, -9.8));
-            this.allNodes[vwf.application()].world = dynamicsWorld;
+            this.allNodes[Engine.application()].world = dynamicsWorld;
             world = dynamicsWorld;
             var groundShape = new Ammo.btBoxShape(new Ammo.btVector3(500, 500, .1));
             var groundTransform = new Ammo.btTransform();
@@ -1550,8 +1549,8 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
             body.setDamping(1, 1);
             body.setFriction(.7);
             body.setRestitution(.4);
-            this.allNodes[vwf.application()].ground = body;
-            world.addRigidBody(this.allNodes[vwf.application()].ground);
+            this.allNodes[Engine.application()].ground = body;
+            world.addRigidBody(this.allNodes[Engine.application()].ground);
             //we need to see if adding the node back to the world is enough, or if we really have to kill and rebuild
             //research seems to indicate that you could just recreate the world but not all the bodies
             //but that did not work here, it needs to delay to next tick.
@@ -1559,17 +1558,17 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                 var i = IDs_to_enable[j];
                 var node = this.allNodes[i];
                 node.world = world;
-                if (node.world && i != vwf.application()) {
+                if (node.world && i != Engine.application()) {
                     node.world = world;
                     node.initialized = false;
                     node.ready = true;
-                    vwf.setProperty(i, "___physics_enabled", true);
+                    Engine.setProperty(i, "___physics_enabled", true);
                 }
             }
             //this.reinit();
         },
         firingEvent: function(nodeID, eventName, params) {
-            if (nodeID == vwf.application() && eventName == 'clientConnected') {}
+            if (nodeID == Engine.application() && eventName == 'clientConnected') {}
         },
         // TODO: deletingProperty
         callingMethod: function(nodeID, methodName, args) {
@@ -1608,10 +1607,10 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
             if (methodName == '___physics_world_reset') {
                 //if a client joins (who is not myself), I need to reset.
                 //note that the timing of this call has been carefully examined. There can be no model changes (especially in the physics)
-                //between the GetState being sent to the load client, and this event occuring. 
-                // if(vwf.moniker() != args[0])
+                //between the GetState being sent to the load client, and this event occuring.
+                // if(Engine.moniker() != args[0])
                 {
-                    console.log('reset world to sync late joining cleent at', vwf.getProperty(vwf.application(),'simTime'));
+                    console.log('reset world to sync late joining client at', Engine.getProperty(Engine.application(),'simTime'));
                     if (!this.pendingReset) this.resetWorld();
                 }
             }
@@ -1627,15 +1626,15 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                 node.delayedProperties[propertyName] = propertyValue;
             } else {
                 if (node.body) delete this.bodiesToID[node.body.ptr];
-                if (propertyName === '___physics_gravity' && node.id === vwf.application()) {
+                if (propertyName === '___physics_gravity' && node.id === Engine.application()) {
                     var g = new Ammo.btVector3(propertyValue[0], propertyValue[1], propertyValue[2]);
                     node.world.setGravity(g);
                     Ammo.destroy(g);
                 }
-                if (propertyName === '___physics_active' && node.id === vwf.application()) {
+                if (propertyName === '___physics_active' && node.id === Engine.application()) {
                     node.active = propertyValue;
                 }
-                if (propertyName === '___physics_accuracy' && node.id === vwf.application()) {
+                if (propertyName === '___physics_accuracy' && node.id === Engine.application()) {
                     node.simulationSteps = propertyValue;
                 }
                 if (propertyName == "transform") {
@@ -1761,7 +1760,7 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                     node.setUpperAngLimit(propertyValue);
                 }
 
-                
+
                 //this is a hack
                 //find a better way. Maybe delete the old key from the map above
                 if (node.body) this.bodiesToID[node.body.ptr] = nodeID;
@@ -1798,6 +1797,6 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
     function hasPrototype(nodeID, prototype) {
         if (!nodeID) return false;
         if (nodeID == prototype) return true;
-        else return hasPrototype(vwf.prototype(nodeID), prototype);
+        else return hasPrototype(Engine.prototype(nodeID), prototype);
     }
 });
