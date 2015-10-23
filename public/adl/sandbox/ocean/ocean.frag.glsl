@@ -172,6 +172,8 @@ void main() {
 
 	float falloffmix = clamp(vCamLength / uHalfGrid,0.0, 1.0);
 	texNormal = mix(texNormal, texNormal1, falloffmix+.00000001);
+
+	texNormal.xy /= max(1.0,vCamLength/1000.0);
 	texNormal = normalize(texNormal);
 	//texNormal = pNormal;
 
@@ -186,7 +188,7 @@ void main() {
 	float spec = pow(max(0.0, dot(nnvCamDir, sunReflectVec)), 32.0);
 
 
-	float fresnel = max(0.0, min(1.0, .02 + 0.97 * pow(1.0 - dot(texNormal, nnvCamDir), 5.0)));
+	float fresnel = max(0.0, min(1.0, .00 + 1.0 * pow(1.0 - dot(texNormal, nnvCamDir), 9.0)));
 
 
 	float scatter = 1.0 - dot( texNormal, nnvCamDir);
@@ -199,9 +201,9 @@ void main() {
 	//ref = min(1.0, ref);
 
 	float dist = 0.3;
-	vec3 ref_vec = reflect(-camdir, texNormal);
-	ref_vec = mix(-ref_vec, ref_vec, sign(ref_vec.z));
-	sky = uReflectPow * .333 * textureCube(texture, ref_vec).xyz;
+	vec3 ref_vec = -reflect(-camdir, texNormal);
+	//ref_vec = mix(-ref_vec, ref_vec, sign(ref_vec.z));
+	sky = uReflectPow * .333 * pow(textureCube(texture, ref_vec).xyz,vec3(2.2));
 
 
 
@@ -235,7 +237,7 @@ void main() {
 		
 	D1 = LinearizeDepth(D1);
 
-	vec3 ocean_bottom_color = texture2D(refractionColorRtt , sspos.xy + texNormal.xy / 20.0).xyz;
+	vec3 ocean_bottom_color = pow(texture2D(refractionColorRtt , sspos.xy + texNormal.xy / 20.0).xyz,vec3(2.2));
 
 	float depth = D1 - D0;
 	if(depth > -0.001)
@@ -305,7 +307,7 @@ void main() {
 	vec3 L0TP = LZTP_sum +   Ldf0_sum;
 
 
-	vec4 water  =  vec4(mix(L0TP, sky, ref), 1.0);
+	vec4 water  =  vec4(mix(pow(L0TP,vec3(2.2)), sky, ref), 1.0);
 	water += vec4(directionalLightColor[ 0 ], 1.0) * spec;
 
 	vec4 foam = vec4(1.0, 1.0, 1.0, 1.0) * ndotl + vec4(ambientLightColor, 1.0);;
@@ -324,6 +326,7 @@ void main() {
 	// D0 = (D0 /gl_FragCoord.w);
 	// D1 = D1/gl_FragCoord.w;
 	
+	gl_FragColor.xyz = pow(gl_FragColor.xyz,vec3(1.0/2.2));
 	//gl_FragColor = vec4(0.0,0.0,0.0,1.0);
 		//gl_FragColor.xyz = texNormal.xyz;
 
