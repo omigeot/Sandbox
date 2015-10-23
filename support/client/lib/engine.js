@@ -1178,7 +1178,7 @@ this.propertyUpdated = function(id,name,val)
         if(!this.propertyDataUpdates[id])
             this.propertyDataUpdates[id] = {};
 
-        this.propertyDataUpdates[id][name] = val;
+        this.propertyDataUpdates[id][name] = JSON.parse(JSON.stringify(val));
     }
 }
 this.receive = function( nodeID, actionName, memberName, parameters, respond, origin ) {
