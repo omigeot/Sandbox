@@ -14,6 +14,7 @@
 var jsDriverSelf = this;
 var propertiesSet = {};
 var contextPostTime;
+var inTick = false;
 function defaultContext()
 {
     this.setProperty = function(id, name, val)
@@ -2043,22 +2044,31 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             });
             node.hasOwnProperty(eventName) || // TODO: recalculate as properties, methods, events and children are created and deleted; properties take precedence over methods over events over children, for example
             Object.defineProperty(node, eventName, { // "this" is node in get/set
-                get: function() {
-                    return function( /* parameter1, parameter2, ... */ ) { // "this" is node
+                get: function()
+                {
+                    return function( /* parameter1, parameter2, ... */ )
+                    { // "this" is node
                         return jsDriverSelf.getTopContext().fireEvent(this.id, eventName, arguments);
                     };
                 },
-                set: function(value) {
+                set: function(value)
+                {
                     var listeners = this.private.listeners[eventName] ||
                         (this.private.listeners[eventName] = []); // array of { handler: function, context: node, phases: [ "phase", ... ] }
-                    if (typeof value == "function" || value instanceof Function) {
-                        listeners.push({
+                    if (typeof value == "function" || value instanceof Function)
+                    {
+                        listeners.push(
+                        {
                             handler: value,
                             context: this
                         }); // for node.*event* = function() { ... }, context is the target node
-                    } else if (value.add) {
-                        if (!value.phases || value.phases instanceof Array) {
-                            listeners.push({
+                    }
+                    else if (value.add)
+                    {
+                        if (!value.phases || value.phases instanceof Array)
+                        {
+                            listeners.push(
+                            {
                                 handler: value.handler,
                                 context: value.context,
                                 phases: value.phases
@@ -2071,10 +2081,11 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                                 return listener.context !== value.context;
                             });
                         }
-                    },
-                    enumerable: true,
-                    configurable: true
-                });
+                    }
+                },
+                enumerable: true,
+                configurable: true
+            });
             node.private.listeners[eventName] = [];
             node.private.events[eventName] = [];
             if (eventBody)

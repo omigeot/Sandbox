@@ -42,7 +42,7 @@
             }
             this.initializingNode = function() {
                 window.requestAnimationFrame(this.update);
-                vwf.setProperty(this.ID, 'controlPoints', this.controlPoints);
+                Engine.setProperty(this.ID, 'controlPoints', this.controlPoints);
                 Math.sign = function(e) {
                     return e < 0 ? -1 : 1
                 };
@@ -138,7 +138,7 @@
 
                 this.terrainParams = data;
 
-                vwf.setProperty(this.ID, 'terrainParams', data);
+                Engine.setProperty(this.ID, 'terrainParams', data);
                 if (!this.init) return;
                 this.cancelUpdates();
                 this.quadtree.walk(function(n) {

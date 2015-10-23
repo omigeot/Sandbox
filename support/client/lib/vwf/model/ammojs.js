@@ -1408,14 +1408,19 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
         },
         ticking: function() {
             delete this.pendingReset;
-            if (this.nodes[Engine.application()] && this.nodes[Engine.application()].active === true) {
+            if (this.nodes[Engine.application()] && this.nodes[Engine.application()].active === true)
+            {
                 var nodekeys = Object.keys(this.allNodes).sort();
-                for (var g =0; g < nodekeys.length; g++) {
+                for (var g = 0; g < nodekeys.length; g++)
+                {
                     var node = this.allNodes[nodekeys[g]];
-                    if (node && node.update) {
+                    if (node && node.update)
+                    {
                         node.update();
-                        var propkeys = Object.keys(node.delayedProperties || {});
-                        for (var i =0; i < propkeys.length; i++) {
+                        var propkeys = Object.keys(node.delayedProperties ||
+                        {});
+                        for (var i = 0; i < propkeys.length; i++)
+                        {
                             this.settingProperty(node.id, propkeys[i], node.delayedProperties[propkeys[i]]);
                         }
                         delete node.delayedProperties;
@@ -1428,27 +1433,31 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                 this.reEntry = true;
                 var tempmat = [];
                 var nodekeys = Object.keys(this.allNodes).sort();
-                 for (var i =0; i < nodekeys.length; i++) {
+                for (var i = 0; i < nodekeys.length; i++)
+                {
                     var node = this.allNodes[nodekeys[i]];
-                   // if(vwf.isSimulating(node.id))
-                    {    
-                        if (node.body && node.initialized === true && node.mass > 0 && node.getActivationState() != 2) {
-                        Engine.setProperty(node.id, 'transform', node.getTransform(tempmat));
+                    // if(vwf.isSimulating(node.id))
+                    {
+                        if (node.body && node.initialized === true && node.mass > 0 && node.getActivationState() != 2)
+                        {
+                            Engine.setProperty(node.id, 'transform', node.getTransform(tempmat));
                             //so, we were setting these here in order to inform the kernel that the property changed. Can we not do this, and 
                             //rely on the getter? that would be great....
-                        Engine.setPropertyFast(node.id, '___physics_activation_state', node.getActivationState());
-                        Engine.setPropertyFast(node.id, '___physics_velocity_angular', node.getAngularVelocity());
-                        Engine.setPropertyFast(node.id, '___physics_velocity_linear', node.getLinearVelocity());
-                        Engine.setPropertyFast(node.id, '___physics_deactivation_time', node.getDeactivationTime());
-                        }if(node.joint)
+                            Engine.setPropertyFast(node.id, '___physics_activation_state', node.getActivationState());
+                            Engine.setPropertyFast(node.id, '___physics_velocity_angular', node.getAngularVelocity());
+                            Engine.setPropertyFast(node.id, '___physics_velocity_linear', node.getLinearVelocity());
+                            Engine.setPropertyFast(node.id, '___physics_deactivation_time', node.getDeactivationTime());
+                        }
+                        if (node.joint)
                         {
-                         Engine.setProperty(node.id, 'transform', node.getTransform(tempmat));
+                            Engine.setProperty(node.id, 'transform', node.getTransform(tempmat));
+                        }
                     }
-
+                    this.triggerCollisions();
+                    this.reEntry = false;
                 }
-                this.triggerCollisions();
-                this.reEntry = false;
-            } else {}
+              
+            }
         },
         // -- initializingNode ---------------------------------------------------------------------
         initializingNode: function(nodeID, childID, childExtendsID, childImplementsIDs, childSource, childType, childIndex, childName) {
