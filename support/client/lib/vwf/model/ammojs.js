@@ -407,6 +407,7 @@ phyObject.prototype.getWorldScale = function() {
 phyObject.prototype.addForce = function(vec, offset) {
     if (vec.length !== 3) return;
     if (this.initialized === true) {
+        this.wake();
         var f = new Ammo.btVector3(vec[0], vec[1], vec[2]);
 		if(offset){
 			var o = new Ammo.btVector3(offset[0], offset[1], offset[2]);
@@ -435,6 +436,7 @@ phyObject.prototype.setConstantTorque = function(vec) {
 phyObject.prototype.addTorque = function(vec) {
     if (vec.length !== 3) return;
     if (this.initialized === true) {
+        this.wake();
         var f = new Ammo.btVector3(vec[0], vec[1], vec[2]);
         this.body.applyTorque(f);
         Ammo.destroy(f);
@@ -443,6 +445,7 @@ phyObject.prototype.addTorque = function(vec) {
 phyObject.prototype.addForceImpulse = function(vec) {
     if (vec.length !== 3) return;
     if (this.initialized === true) {
+        this.wake();
         var f = new Ammo.btVector3(vec[0], vec[1], vec[2]);
         this.body.applyImpulse(f);
         Ammo.destroy(f);
@@ -451,6 +454,7 @@ phyObject.prototype.addForceImpulse = function(vec) {
 phyObject.prototype.addTorqueImpulse = function(vec) {
     if (vec.length !== 3) return;
     if (this.initialized === true) {
+        this.wake();
         var f = new Ammo.btVector3(vec[0], vec[1], vec[2])
         this.body.applyTorqueImpulse(f);
         Ammo.destroy(f);
@@ -490,8 +494,9 @@ phyObject.prototype.setAngularFactor = function(vec) {
 phyObject.prototype.startSimulating = function()
 {   
     if(this.simulating == true) return;
+    this.wake();
     this.simulating = true;
-    this.setMass(this.massBackup,true);
+    this.setMass(this.mass,true);
 }
 phyObject.prototype.stopSimulating = function()
 {
@@ -499,23 +504,21 @@ phyObject.prototype.stopSimulating = function()
     if(this.simulating == false) return;
     this.simulating = false;
     this.massBackup = this.mass;
-    this.setMass(0,true);
+    this.setMass(this.mass,true);
 }
 phyObject.prototype.setMass = function(mass,force) {
 
-    if(!force)
-        this.massBackup = mass;
-    if(!vwf.isSimulating(this.id) && !force)
-    {    
-        mass = 0;
-    }
+  
 
-    if (this.mass == mass) return;
+    if (this.mass == mass && !force) return;
     this.mass = mass;
     if (this.initialized === true) {
         var localInertia = new Ammo.btVector3();
         this.collision.calculateLocalInertia(this.mass, localInertia);
-        this.body.setMassProps(this.mass, localInertia);
+        if(this.simulating)
+            this.body.setMassProps(this.mass, localInertia);
+        else
+            this.body.setMassProps(0, localInertia);
         this.body.updateInertiaTensor();
         Ammo.destroy(localInertia);
         //todo: need to inform parents that mass has changed, might require recompute of center of mass for compound body
@@ -760,11 +763,8 @@ phyObject.prototype.setActivationState = function(state) {
 }
 phyObject.prototype.wake = function() {
     if (this.initialized === true) {
-        this.body.setActivationState(1);
-        this.body.forceActivationState(1);
-        this.activationState = 1;
-        this.body.setDeactivationTime(-1);
-    } else this.activationState = 1;
+        this.body.activate();
+    } 
 }
 phyObject.prototype.getDeactivationTime = function() {
     if (this.initialized === true) {
