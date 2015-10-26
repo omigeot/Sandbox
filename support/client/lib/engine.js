@@ -2955,9 +2955,9 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
                             } );
 
                             // Mark the node as initialized.
-                            nodes.initialize( childID );
-                            progressScreen.stopCreateNode(nodeID);
-                            series_callback_async( err, undefined );
+                            series_callback_async( err, undefined );    
+                            
+                            
                         } );
                 } );
             } );
@@ -2971,7 +2971,7 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
 
         // Always complete asynchronously so that the stack doesn't grow from node to node
         // while createChild() recursively traverses a component.
-
+        progressScreen.stopCreateNode(nodeID);
         if(err)
         {
             console.error("Error loading entity: " + err);
@@ -2981,10 +2981,11 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
             
             queue.suspend( "before completing " + childID ); // suspend the queue
 
-            async.nextTick( function() {
+            nodes.initialize( childID );
+            
+            requestAnimationFrame( function() {
                 callback_async( childID );
                 queue.resume( "after completing " + childID ); // resume the queue; may invoke dispatch(), so call last before returning to the host
-                
             } );
 
         }
