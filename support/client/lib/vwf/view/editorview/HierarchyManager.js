@@ -2,7 +2,7 @@
 
 define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf/view/editorview/manageAssets'], function(app, SidePanel)
 {
-	app.directive('treeNode', ['$compile','$timeout', function($compile, $timeout)
+	/*app.directive('treeNode', ['$compile','$timeout', function($compile, $timeout)
 	{
 		var template = $('#hierarchyManager #hierarchyNodeTemplate').html();
 
@@ -131,6 +131,19 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 				$compile(template)($scope, function(e){
 					elem.html(e);
 				});
+			}
+		};
+	}]);*/
+
+	app.directive('treeNodeUnified', ['$compile', function($compile)
+	{
+		return
+		{
+			restrict: 'E',
+			scope: false,
+			link: function($scope, elem, attrs)
+			{
+				
 			}
 		};
 	}]);
