@@ -49,7 +49,7 @@ define(function()
         	this.stateLoadTotalSteps = count;
         	var progress = (this.stateLoadSteps/this.stateLoadTotalSteps);
         	$('#preloadprogress').progressbar("value", progress * 100);
-            $('#preloadprogress .progress-label').text("Creating State: " + this.stateLoadSteps + ' of ' +this.stateLoadTotalSteps);
+            $('#preloadprogress .progress-label').text("Creating World: " + this.stateLoadSteps + ' of ' +this.stateLoadTotalSteps);
         }
         this.startContinuesNode = function(node)
         {
@@ -85,7 +85,7 @@ define(function()
         	this.stateLoadSteps++;
         	var progress = (this.stateLoadSteps/this.stateLoadTotalSteps);
         	$('#preloadprogress').progressbar("value", progress * 100);
-        	$('#preloadprogress .progress-label').text("Creating State: " + this.stateLoadSteps + ' of ' +this.stateLoadTotalSteps );
+        	$('#preloadprogress .progress-label').text("Creating World: " + this.stateLoadSteps + ' of ' +this.stateLoadTotalSteps );
         }
         this.endSetState = function(node)
         {
