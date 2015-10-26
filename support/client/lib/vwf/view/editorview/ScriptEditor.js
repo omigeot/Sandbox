@@ -219,8 +219,9 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 					else
 						$scope.sessions[item.id].setMode("ace/mode/javascript");
 
-					$scope.sessions[item.id].on('changeAnnotation', function(data){
-						$scope.$emit('codeLinted', data);
+					$scope.sessions[item.id].on('changeAnnotation', function(a, b){
+						// this thing is undocumented, god only knows if it'll keep working
+						$scope.$emit('codeLinted', b.$annotations);
 					});
 				}
 
@@ -513,11 +514,9 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 		// determine if Ace has detected any syntax errors in the current code window
 		var annotations = null, checkerCb = null;
 		$scope.$on('codeChanged', function(evt){
-			console.log('changed');
 			annotations = null;
 		});
 		$scope.$on('codeLinted', function(evt, ann){
-			console.log('linted');
 			annotations = ann;
 			if(checkerCb) checkerCb();
 		});
