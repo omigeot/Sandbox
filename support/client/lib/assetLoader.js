@@ -206,11 +206,12 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                 this.BuildCollisionData = function(root, cb3)
                 {
                     var self = this;
+                    progressScreen.stepForward();
                     if (root instanceof THREE.Geometry || root instanceof THREE.BufferGeometry)
                     {
                         root.GenerateBounds();
                         root.BuildRayTraceAccelerationStructure();
-                        $('#preloadguiText').text($('#preloadguiText').text() + '.');
+                        
                     }
                     if (root.children)
                     {

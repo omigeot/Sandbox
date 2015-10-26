@@ -1,5 +1,6 @@
 define(function()
 {
+    var names = {};
     function progressScreen(){
     	var self = this;
         this.startProgressGui = function(total)
@@ -34,16 +35,17 @@ define(function()
         {
         	
         	var count = 1;
-        	function walk(node)
+        	function walk(node,j)
         	{
         		
         		if(!node.extends && !node.continues && !node.properties && !node.source && !node.type)
         			return;
         		count++;
-        		if(!node || !node.children)
+                names[j] = true;
+                if(!node || !node.children)
         			return;
         		for(var i in node.children)
-        			walk(node.children[i])
+        			walk(node.children[i],i)
         	}
         	walk(state.nodes[0]);
         	this.stateLoadTotalSteps = count;
@@ -55,16 +57,17 @@ define(function()
         {
         	
         	var count = 0;
-        	function walk(node)
+        	function walk(node,j)
         	{
         		
         		if(!node.extends && !node.continues && !node.properties && !node.source && !node.type)
         			return;
         		count++;
+                names[j] = true;
         		if(!node || !node.children)
         			return;
         		for(var i in node.children)
-        			walk(node.children[i])
+        			walk(node.children[i],i)
         	}
         	walk(node);
         	
@@ -80,17 +83,27 @@ define(function()
         {
 			$('#preloadguiText').text(node);
         }
+        this.stepForward = function()
+        {
+            $('#preloadprogress').progressbar("value", $('#preloadprogress').progressbar("value") + 1);
+        }
         this.stopCreateNode = function(node)
         {
         	this.stateLoadSteps++;
+            this.stateLoadTotalSteps = Object.keys(names).length;
         	var progress = (this.stateLoadSteps/this.stateLoadTotalSteps);
         	$('#preloadprogress').progressbar("value", progress * 100);
-        	$('#preloadprogress .progress-label').text("Creating World: " + this.stateLoadSteps + ' of ' +this.stateLoadTotalSteps );
+        	$('#preloadprogress .progress-label').text("Creating World" );
         }
         this.endSetState = function(node)
         {
+            $('#preloadprogress').progressbar("value", 1 * 100);
+            $('#preloadprogress .progress-label').text("Creating World" );
+        	window.setTimeout(function(){
 
-        	this.closeProgressGui();
+                this.closeProgressGui();    
+            }.bind(this),500)
+            
         }
     }
     return new progressScreen();

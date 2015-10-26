@@ -2416,7 +2416,7 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
     //       childID = childComponent.id || childComponent.uri || ( childComponent["extends"] || nodeTypeURI ) + "." + childName; 
     //     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters  // TODO: hash uri => childID to shorten for faster lookups?  // TODO: canonicalize uri
 
-     function cleanChildComponent(node)
+    function cleanChildComponent(node)
     {
         if(node===null || node === undefined)
             return null;
@@ -2439,7 +2439,12 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
     if(!childComponent)
     {
         console.log('skipping null node ' + nodeID)
-        callback_async(childID);
+        async.nextTick(function()
+        {
+            progressScreen.stopCreateNode();
+            callback_async(childID);    
+        })
+        
         return;
     }
 
@@ -2492,13 +2497,14 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
                             }
                         }
                     }
+
                     cleanChildNames(data);
                     continuesDefs[childComponent.continues + childID] = JSON.parse(JSON.stringify(data));
 
                     $.extend(true, data, childComponent)
 
                     childComponent = data;
-                    progressScreen.startContinuesNode(childComponent);
+                    progressScreen.startContinuesNode(data);
                     series_callback_async(undefined, undefined);
                     queue.resume( "after beginning " + childID );
                 }
@@ -2983,7 +2989,7 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
 
             nodes.initialize( childID );
             
-            requestAnimationFrame( function() {
+            async.nextTick( function() {
                 callback_async( childID );
                 queue.resume( "after completing " + childID ); // resume the queue; may invoke dispatch(), so call last before returning to the host
             } );
