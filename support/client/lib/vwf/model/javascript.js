@@ -20,15 +20,17 @@ function defaultContext()
     this.setProperty = function(id, name, val)
     {
 
-            
-
-        var now = performance.now();
-        
+        var now = performance.now();        
         //here's the magic. If we are not the client simulating the node, send over the reflector
-        if(vwf.isSimulating(id))
-            vwf.setProperty(id,name,val);
+        if(Engine.isSimulating(id))
+        {
+            if(inTick)
+                Engine.setPropertyFast(id,name,val);
+            else    
+                Engine.setProperty(id,name,val);
+        }
         else
-            vwf_view.kernel.setProperty(id,name,val);
+            Engine.emit.setProperty(id,name,val);
 
         if(!propertiesSet[name])
         propertiesSet[name] = 0;
@@ -48,22 +50,33 @@ function defaultContext()
     this.callMethod = function(id,methodname,params)
     {
         //node that this forces sync!
-        if(vwf.isSimulating(id))
-            return vwf.callMethod(id,methodname,params);
+        if(Engine.isSimulating(id))
+            return Engine.callMethod(id,methodname,params);
         else
-            return vwf.callMethod(id,methodname,params);
+            return Engine.emit.callMethod(id,methodname,params);
     }
     this.fireEvent = function(id,eventName,params)
     {
-        if(vwf.isSimulating(id))
-            vwf.fireEvent(id,eventName,params);
+        if(Engine.isSimulating(id))
+            Engine.fireEvent(id,eventName,params);
         else
-            vwf_view.kernel.fireEvent(id,methodname,params);
+            Engine.emit.fireEvent(id,methodname,params);
     }
-    this.fireEvent = function(id, eventName, params)
-        {
-            vwf_view.kernel.fireEvent(id, eventName, params);
-        }
+    this.createChild = function(id,childname,childdef,childuri,callback)
+    {
+        if(Engine.isSimulating(id))
+            Engine.createChild(id,childname,childdef,childuri,callback);
+        else
+            Engine.emit.createChild(id,childname,childdef,childuri,callback);
+    }
+    this.deleteNode = function(id)
+    {
+        if(Engine.isSimulating(id))
+            Engine.deleteNode(id);
+        else
+            Engine.emit.deleteNode(id);
+    }
+    
         //this is also where we should be notifiying the refelector of new methods, events, properties and nodes
 }
 //when a function is called, a context is created to observe changes. When the funtion return, we post changes to Engine.
@@ -137,6 +150,14 @@ executionContext.prototype.callMethod = function(id, methodname, params)
 executionContext.prototype.fireEvent = function(id, eventName, params)
 {
     this.parent.fireEvent(id, eventName, params);
+}
+executionContext.prototype.createChild = function(id,childname,childdef,childuri,callback)
+{
+    this.parent.createChild(id,childname,childdef,childuri,callback);
+}
+executionContext.prototype.deleteNode = function(id)
+{
+    this.parent.deleteNode(id);
 }
 var APIModules = {
     clientAPI: function(id)
@@ -1000,12 +1021,12 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                             {
                                 if (targetPos && fromPos && MATH.distanceVec3(fromPos, targetPos) < range)
                                 {
-                                    jsDriverSelf.callingMethod(targetNode.id, signal, [data], thisid);
+                                    jsDriverSelf.getTopContext().callMethod(targetNode.id, signal, [data], thisid);
                                 }
                             }
                             else
                             {
-                                jsDriverSelf.callingMethod(targetNode.id, signal, [data], thisid);
+                                jsDriverSelf.getTopContext().callMethod(targetNode.id, signal, [data], thisid);
                             }
                         }
                     }
@@ -1029,12 +1050,12 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                         {
                             if (targetPos && fromPos && MATH.distanceVec3(fromPos, targetPos) < range)
                             {
-                                jsDriverSelf.callingMethod(targetNode.id, signal, [data], thisid);
+                                jsDriverSelf.getTopContext().callMethod(targetNode.id, signal, [data], thisid);
                             }
                         }
                         else
                         {
-                            jsDriverSelf.callingMethod(targetNode.id, signal, [data], thisid);
+                            jsDriverSelf.getTopContext().callMethod(targetNode.id, signal, [data], thisid);
                         }
                     }
                 },
@@ -1050,7 +1071,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                     var targetNode = jsDriverSelf.nodes[id];
                     if (targetNode)
                     {
-                        jsDriverSelf.callingMethod(targetNode.id, signal, [data], thisid);
+                        jsDriverSelf.getTopContext().callMethod(targetNode.id, signal, [data], thisid);
                     }
                 },
                 enumerable: false,
@@ -1153,70 +1174,6 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
   
             if (nodeID)
                 this.addingChild(nodeID, childID, childName);
-        },
-        //hook up the system API. They are defined in properties, and we dont' want to cause the context to think it needs to set them
-        //so the user should not really call the APIs directly, but instead use these getters
-        hookUpAPIs : function(node)
-        {
-            
-            if(node.hasOwnProperty("___transformAPI"))
-            {
-                Object.defineProperty(node, "transformAPI", { // TODO: only define on shared "node" prototype?
-                    get: function() {
-                        return vwf.getProperty(this.id,"___transformAPI");
-                    },
-                    enumerable: true,
-                });
-            }
-           if(node.hasOwnProperty("___audioAPI"))
-            {
-                Object.defineProperty(node, "audioAPI", { // TODO: only define on shared "node" prototype?
-                    get: function() {
-                        return vwf.getProperty(this.id,"___audioAPI");
-                    },
-                    enumerable: true,
-                });
-            }
-            if(node.hasOwnProperty("___physicsAPI"))
-            {
-                Object.defineProperty(node, "physicsAPI", { // TODO: only define on shared "node" prototype?
-                    get: function() {
-                        return vwf.getProperty(this.id,"___physicsAPI")},
-                    enumerable: true,
-                });
-            }
-            if(node.hasOwnProperty("___clientAPI"))
-            {
-                Object.defineProperty(node, "clientAPI", { // TODO: only define on shared "node" prototype?
-                    get: function() {
-                        return vwf.getProperty(this.id,"___clientAPI")},
-                    enumerable: true,
-                });
-            }
-            if(node.hasOwnProperty("___commsAPI"))
-            {
-                Object.defineProperty(node, "commsAPI", { // TODO: only define on shared "node" prototype?
-                    get: function() {
-                        return vwf.getProperty(this.id,"___commsAPI")},
-                    enumerable: true,
-                });
-            }
-            if(node.hasOwnProperty("___xAPI"))
-            {
-                Object.defineProperty(node, "xAPI", { // TODO: only define on shared "node" prototype?
-                    get: function() {
-                        return vwf.getProperty(this.id,"___xAPI")},
-                    enumerable: true,
-                });
-            }
-            if(node.hasOwnProperty("___traceAPI"))
-            {
-                Object.defineProperty(node, "traceAPI", { // TODO: only define on shared "node" prototype?
-                    get: function() {
-                        return vwf.getProperty(this.id,"___traceAPI")},
-                    enumerable: true,
-                });
-            }
         },
         //allow a behavior node to directly acess the properties of it's parent
         hookupBehaviorProperty: function(behaviorNode, parentid, propname)
