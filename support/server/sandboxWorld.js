@@ -135,8 +135,8 @@ var timeout = function(world)
                             }));
                             client.emit('m', this.messageCompress.pack(
                             {
-                                "action": "createNode",
-                                "parameters": [state],
+                                "action": "setState",
+                                "parameters": {nodes:[state],kernel:{time:this.namespace.getStateTime},annotations:{"1":"application"}},
                                 "time": this.namespace.getStateTime
                             }));
                             client.pending = false;
@@ -423,10 +423,9 @@ function sandboxWorld(id, metadata)
                 "time": self.time
             }, true, false);
             //note: don't have to worry about pending status here, client is first
-            self.messageClients(
-            {
-                "action": "createNode",
-                "parameters": [scene],
+            self.messageClients({
+                "action": "setState",
+                "parameters": {nodes:[scene],kernel:{time:0},annotations:{"1":"application"}},
                 "time": self.time
             }, true, true);
             self.simulationManager.startScene();
