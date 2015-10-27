@@ -3752,6 +3752,7 @@ this.setPropertyFast = function(nodeID, propertyName,propertyValue)
             this.views[i].satProperty(nodeID,propertyName,answer)
         }
     }
+    this.propertyUpdated(nodeID,propertyName,answer || propertyValue);
     return answer;
 },
 this.getProperty = function( nodeID, propertyName, ignorePrototype, testDelegation) {
@@ -6177,6 +6178,18 @@ var queue = this.private.queue = {
 
         this.queue.sort( function( a, b ) {
 
+            if ( a.action == "startSimulating" && b.action != "startSimulating" ) {
+                return -1;
+            }
+            if ( a.action != "startSimulating" && b.action == "startSimulating" ) {
+                return 1;
+            }
+            if ( a.action == "stopSimulating" && b.action != "stopSimulating" ) {
+                return -1;
+            }
+            if ( a.action != "stopSimulating" && b.action == "stopSimulating" ) {
+                return 1;
+            }
             if ( a.action == "resyncNode" && b.action != "resyncNode" ) {
                 return 1;
             }
