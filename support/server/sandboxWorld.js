@@ -703,7 +703,10 @@ function sandboxWorld(id, metadata)
                 else if (message.action == "activeResync")
                 {
                     //here we deal with continual resycn messages
+                    if(!message.result)
+                        return;
                     var node = message.result.node;
+
                     if (false && !global.configuration.disableResync && node)
                     {
                         if (message.time >= this.time)
