@@ -106,5 +106,6 @@ define(function()
             
         }
     }
-    return new progressScreen();
+    window._dProgressScreen=  new progressScreen();
+    return window._dProgressScreen;
 });
