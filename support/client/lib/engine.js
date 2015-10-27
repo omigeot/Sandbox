@@ -2427,7 +2427,7 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
         var newChildren = {}
         for( var i in node.children)
         {
-            var c = cleanChildComponent();
+            var c = cleanChildComponent(node.children[i]);
             if(c)
                 newChildren[i] = c;
         }
