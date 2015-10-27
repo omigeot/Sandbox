@@ -135,15 +135,20 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 		};
 	}]);*/
 
-	app.directive('treeNodeUnified', ['$compile', function($compile)
+	app.directive('treeViewUnified', ['$interpolate', function($interpolate)
 	{
-		return
-		{
+		var template = $('#hierarchyManager #hierarchyNodeUnifiedTemplate').html();
+
+		return {
 			restrict: 'E',
 			scope: false,
+			template: function(elem, attrs)
+			{
+				// should return an html string
+				// use $interpolate to fill in {{values}} from attributes
+			},
 			link: function($scope, elem, attrs)
 			{
-				
 			}
 		};
 	}]);
@@ -151,6 +156,34 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 	app.controller('HierarchyController', ['$scope', function($scope)
 	{
 		window._HierarchyManager = $scope;
+
+		/************************
+		 * UI handlers
+		 ***********************/
+
+		$scope.getIcon = function(elem){
+			var classes = ['hierarchyicon', 'glyphicon'];
+			if( $('ul li', elem).length === 0 )
+				classes.push('glyphicon-ban-circle');
+			else if($scope.open())
+				classes.push('glyphicon-triangle-bottom');
+			else
+				classes.push('glyphicon-triangle-right');
+
+			return classes;
+		}
+
+		$scope.toggleCollapse = function(elem){
+			if( elem.hasClass('collapsed') )
+				elem.removeClass('collapsed');
+			else
+				elem.addClass('collapsed');
+		}
+
+
+		/************************
+		 * Logic handlers
+		 ***********************/
 
 		$scope.selectedThreeNode = null;
 		var selectionBounds = null;
