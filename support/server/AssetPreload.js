@@ -96,9 +96,24 @@ function walk(object, list)
 //get all assets from the state data and make unique
 function parseStateForAssets(state,cb)
 {
-	
 	var list = [];
 	walk(state,list);
+
+	// Load Additional Assets selected by the User.  For now, the State file needs to be manually edited to
+	// append the assets that are to be preloaded.  The following line shows the text that needs to be
+	// appended at the end of the State file to load the 7e6084c4 asset.
+	//
+	// "___additionalAssets":["/sas/assets/7e6084c4"]
+	//
+	// Note: The variable name starts with three underscore characters.
+	if(state !== null) {
+		var additionalAssets = state[state.length - 1]['___additionalAssets'];
+		if (additionalAssets !== undefined) {
+			for (var idx = 0; idx < additionalAssets.length; idx++) {
+				list.push({type: "unknown", url: additionalAssets[idx]});
+			}
+		}
+	}
 
 	var unique = [];
 	for(var i =0; i < list.length; i++)
@@ -117,12 +132,9 @@ function parseStateForAssets(state,cb)
 			unique.push(list[i]);
 		}
 	}
-
-
-
 	cb(unique);
-
 }
+
 //get either the last cached copy of the state, or load it from disk
 function getState(id,cb)
 {
