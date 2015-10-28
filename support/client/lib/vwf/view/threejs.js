@@ -712,7 +712,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                 var    publishSettings = instanceData.publishSettings;
 
                 this.cameraID = publishSettings.camera;
-                this.setCamera_internal(this.cameraID);
+                this.setCamera(this.cameraID);
             }
         },
 
