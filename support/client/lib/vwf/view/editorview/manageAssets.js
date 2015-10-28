@@ -88,8 +88,9 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 			}
 			out.sort(function(a, b) {
 				var ret = 0;
-				if (a[field] < b[field]) ret = -1;
-				else if (a[field] == b[field]) ret = 0;
+				var aField = a[field].toLowerCase(), bField = b[field].toLowerCase();
+				if (aField < bField) ret = -1;
+				else if (aField == bField) ret = 0;
 				else ret = 1;
 				return reverse ? -ret : ret;
 			});
