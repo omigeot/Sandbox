@@ -443,11 +443,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 		$scope.saveData = function(id)
 		{
 			// generate file buffer from in-memory version if available
-			if( $scope.assets[id] && $scope.assets[id].doc ){
-				fileData[id] = strToBytes( JSON.stringify($scope.assets[id].doc, null, '\t') );
-			}
-			else if( id === 'new' && $scope.new.doc ){
-				fileData[id] = strToBytes( JSON.stringify($scope.new.doc, null, '\t') );
+			var meta = id === 'new' ? $scope.new : $scope.assets[id];
+			if( meta && meta.type === 'model/vnd.gltf+json' && meta.doc )
+			{
+				fileData[id] = strToBytes( JSON.stringify(meta.doc, null, '\t') );
 			}
 
 			if (!id || id === 'new')
