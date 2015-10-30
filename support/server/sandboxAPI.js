@@ -1000,6 +1000,11 @@ function GetThumbnail(request, SID, response)
 
 function GetCameras(SID, response, URL)
 	{
+		if (!URL.query.SID)
+		{
+			respond(response, 400, "No State Identifier");
+			return;
+		}
 		function helper(node)
 		{
 			if (!node)
@@ -1790,6 +1795,11 @@ function serve(request, response)
 					break;
 				case "getassets":
 					{
+						if (!URL.query.SID)
+						{
+							respond(response, 400, "No State Identifier");
+							return;
+						}
 						assetPreload.getAssets(request, response, URL);
 					}
 					break;
