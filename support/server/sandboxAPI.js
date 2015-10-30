@@ -137,7 +137,7 @@ function InstanceLogout(response, URL)
 {
 	if (!URL.loginData)
 	{
-		respond("Client Not Logged In", 401, response);
+		respond(response,401,"Client Not Logged In");
 		return;
 		
 	}
