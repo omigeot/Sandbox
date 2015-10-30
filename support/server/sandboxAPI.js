@@ -349,7 +349,12 @@ function deleteGlobalInventoryItem(URL, response)
 		return;
 	}
 	DAL.getInventoryItemMetaData('___Global___', URL.query.AID, function(item)
-	{
+	{	
+		if(!item)
+		{
+			respond(response, 500, 'asset not found');		
+			return;
+		}
 		if (item.uploader == URL.loginData.UID)
 		{
 			DAL.deleteInventoryItem('___Global___', URL.query.AID, function()
@@ -755,7 +760,14 @@ function CopyInstance(URL, SID, response)
 					],
 					function copyExampleComplete(err)
 					{
-						var displayID = newid.replace("_adl_sandbox",global.configuration.appPath.replace(/\//g,"_"));
+						if(err)
+						{
+							respond(response, 500, 'Error in trying to copy world');
+							return;
+						}
+						
+						var displayID = newid.replace("_adl_sandbox",
+							global.configuration.appPath.replace(/\//g,"_"));
 						if (err)
 							respond(response, 500, 'Error in trying to copy world');
 						else
@@ -1606,6 +1618,11 @@ function serve(request, response)
 					break;
 				case "statedata":
 					{
+						if(!SID)
+						{
+							respond(response, 500, 'state not found');
+							return;
+						}
 						DAL.getInstance(SID, function(state)
 						{
 							if (state)
