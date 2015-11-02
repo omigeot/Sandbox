@@ -2,7 +2,7 @@
 
 define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf/view/editorview/manageAssets'], function(app, SidePanel)
 {
-	/*app.directive('treeNode', ['$compile','$timeout', function($compile, $timeout)
+	app.directive('treeNode', ['$compile','$timeout', function($compile, $timeout)
 	{
 		var template = $('#hierarchyManager #hierarchyNodeTemplate').html();
 
@@ -133,22 +133,22 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 				});
 			}
 		};
-	}]);*/
+	}]);
 
-	app.directive('treeViewUnified', ['$interpolate', function($interpolate)
+	app.directive('treeNodeUnified', ['$interpolate', '$compile', function($interpolate, $compile)
 	{
-		var template = $('#hierarchyManager #hierarchyNodeUnifiedTemplate').html();
+		var templateBase = $('#hierarchyManager #hierarchyNodeUnifiedTemplate').html();
 
 		return {
 			restrict: 'E',
 			scope: false,
-			template: function(elem, attrs)
-			{
-				// should return an html string
-				// use $interpolate to fill in {{values}} from attributes
-			},
 			link: function($scope, elem, attrs)
 			{
+				var template = templateBase.replace(/\[\[(\w+?)\]\]/g, function(match, attrName){
+					return attrs[attrName] || "";
+				});
+
+				elem.html('').append($compile(template)($scope));
 			}
 		};
 	}]);
