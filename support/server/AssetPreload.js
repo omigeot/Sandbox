@@ -99,18 +99,42 @@ function parseStateForAssets(state,cb)
 	var list = [];
 	walk(state,list);
 
-	// Load Additional Assets selected by the User.  For now, the State file needs to be manually edited to
-	// append the assets that are to be preloaded.  The following line shows the text that needs to be
-	// appended at the end of the State file to load the 7e6084c4 asset.
+	// Load Additional Assets selected by the User.  We have three ways to do this function;
+	// 1) The State file is manually edited to append the assets that are to be preloaded.  The following line shows the
+	// 	text that needs to be appended at the end of the State file to load the 7e6084c4 asset.
 	//
-	// "___additionalAssets":["/sas/assets/7e6084c4"]
+	// 	"___additionalAssets":["/sas/assets/7e6084c4"]	Note: The variable name starts with three underscore characters
 	//
-	// Note: The variable name starts with three underscore characters.
+	// 2) The User enter a Url in the properties section of the scene editor.
+	//
+	// 3) The User selects one or more assets from the list of assets in the properties section of the scene editor
+	//
 	if(state !== null) {
+		// Load assets added manually to the state file
 		var additionalAssets = state[state.length - 1]['___additionalAssets'];
 		if (additionalAssets !== undefined) {
 			for (var idx = 0; idx < additionalAssets.length; idx++) {
 				list.push({type: "unknown", url: additionalAssets[idx]});
+			}
+		}
+
+		// Load assets enter/selected by the User in the properties section of the scene editor
+		for(var idx=0; idx < state.length; idx++) {
+			// Check for input asset.
+			var additionalUrlAsset = state[idx]['additionalUrlAsset'];
+			if( (additionalUrlAsset !== null) && (additionalUrlAsset !== undefined))
+			{
+				list.push({type: "unknown", url: additionalUrlAsset})
+			}
+
+			// Check for selected assets.
+			var additionalUrlAssetsList = state[idx]['additionalUrlAssetsList'];
+			if( (additionalUrlAssetsList !== null) && (additionalUrlAssetsList !== undefined) )
+			{
+				for(var idx=0; idx < additionalUrlAssetsList.length; idx++)
+				{
+					list.push({type: "unknown", url: additionalUrlAssetsList[idx]})
+				}
 			}
 		}
 	}
