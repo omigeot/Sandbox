@@ -48,9 +48,9 @@ block content
 
 	#hierarchyNodeUnifiedTemplate(ng-non-bindable, style='display: none;')
 
-		span.hierarchyicon.glyphicon.glyphicon-ban-circle
+		span(ng-class='getIcon("[[nodeId]]")', ng-click='toggleCollapse("[[nodeId]]")')
 		span.name {{"[[label]]" || fields.nodes["[[nodeId]]"].name}}
 
 		ul
 			li(ng-repeat='child in fields.nodes["[[nodeId]]"].children')
-				tree-node-unified(node-id='{{child}}')
+				tree-node-unified.collapsed(node-id='{{child}}')

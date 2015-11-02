@@ -161,11 +161,18 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 		 * UI handlers
 		 ***********************/
 
-		$scope.getIcon = function(elem){
+		$scope.getIcon = function(nodeId, threeId)
+		{
+			if(nodeId)
+				var elem = $('#hierarchyManager tree-node-unified[node-id="'+nodeId+'"]');
+			else if(threeId)
+				elem = $('#hierarchyManager tree-node-unified[three-id="'+threeId+'"]');
+			else return;
+
 			var classes = ['hierarchyicon', 'glyphicon'];
 			if( $('ul li', elem).length === 0 )
 				classes.push('glyphicon-ban-circle');
-			else if($scope.open())
+			else if(!elem.hasClass('collapsed'))
 				classes.push('glyphicon-triangle-bottom');
 			else
 				classes.push('glyphicon-triangle-right');
@@ -173,7 +180,14 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 			return classes;
 		}
 
-		$scope.toggleCollapse = function(elem){
+		$scope.toggleCollapse = function(nodeId, threeId)
+		{
+			if(nodeId)
+				var elem = $('#hierarchyManager tree-node-unified[node-id="'+nodeId+'"]');
+			else if(threeId)
+				elem = $('#hierarchyManager tree-node-unified[three-id="'+threeId+'"]');
+			else return;
+
 			if( elem.hasClass('collapsed') )
 				elem.removeClass('collapsed');
 			else
