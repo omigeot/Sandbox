@@ -591,9 +591,15 @@ phyObject.prototype.initialize = function() {
         }
         this.startTransform = new Ammo.btTransform();
         this.startTransform.setIdentity();
-        var isDynamic = (this.mass != 0);
+
+        var realMass = this.mass;
+        if(!this.simulating)
+            realMass = 0
+
+
+        var isDynamic = (realMass != 0);
         var localInertia = new Ammo.btVector3(0, 0, 0);
-        if (isDynamic) this.collision.calculateLocalInertia(this.mass, localInertia);
+        if (isDynamic) this.collision.calculateLocalInertia(realMass, localInertia);
         // Ammo.destroy(localInertia);
         //localoffset is used to offset the center of mass from the pivot point of the parent object
         if (this.localOffset) {
@@ -605,8 +611,12 @@ phyObject.prototype.initialize = function() {
             this.startTransform.setOrigin(f);
             // Ammo.destroy(f);
         }
+
+       
+        
+
         var myMotionState = new Ammo.btDefaultMotionState(this.startTransform);
-        var rbInfo = new Ammo.btRigidBodyConstructionInfo(this.mass, myMotionState, this.collision, localInertia);
+        var rbInfo = new Ammo.btRigidBodyConstructionInfo(realMass, myMotionState, this.collision, localInertia);
         this.body = new Ammo.btRigidBody(rbInfo);
         var damp = this.damping;
         this.body.setDamping(damp, damp);
