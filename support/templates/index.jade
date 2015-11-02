@@ -57,6 +57,18 @@ html
 
 		script(type="text/javascript").
 			// here we go! this fires a bunch of loads, and when they are don, launches the VWF
+			var count = 0;
+			var total = 151;
+
+			requirejs.onResourceLoad = function (context, map, depArray) {
+			  //jQuery(".progress-label").text(map);
+			  var div = document.getElementById("preloadprogress");
+			  count++;
+			  div.style.backgroundColor = "#ccE";
+			  div.style.width = count/total * 95 +'%';
+			  console.log(count);
+			}
+
 			require(['../load']);
 
 
@@ -70,8 +82,8 @@ html
 			The main content renders to "#vwf-root", the item with the id "vwf-root".
 
 		//- asset preload loading screen
-		div#preloadGUIBack(style='display:none')
-			span#fullscreenlink Please enter full screen mode. Click here or hit F11.
+		div#preloadGUIBack(style='display:block')
+			
 			img#loadingSplash
 			div#preloadGUI
 				div.preloadCenter

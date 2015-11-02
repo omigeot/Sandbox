@@ -217,27 +217,38 @@ void main() {
 	//cosT = max(.001,cosT);
 	cosT = -cosT;
 
-	vec4 rawDepth = texture2D(refractionDepthRtt , sspos.xy + texNormal.xy / 20.0);
+	
+	vec4 rawDepth0 = texture2D(refractionDepthRtt , sspos.xy);
 
 	//float Z0 = .01/(gl_FragCoord.z * -2.0 + 1.0 - 10000.0);
 	//float Z1 = .01/(unpackDepth(rawDepth) * -2.0 + 1.0 - 10000.0);
 
 	
+	float D01 = unpackDepth(rawDepth0);
+	float D1 = gl_FragCoord.z;
+	D1 = LinearizeDepth(D1);
+	
 
+	D01 = LinearizeDepth(D01);
+
+		
+	
+
+	float rd = min(0.05,abs(D1-D01)/30.0);
+	vec4 rawDepth = texture2D(refractionDepthRtt , sspos.xy + texNormal.xy *rd);
 
 	float D0 = unpackDepth(rawDepth);
+	
 
-	float D1 = gl_FragCoord.z;
+	
 
 	// D0 = .01/(D0 * -2.0 + 1.0 - 10000.0);
 	// D1 = .01/(D1 * -2.0 + 1.0 - 10000.0);
 
 	D0 = LinearizeDepth(D0);
+	
 
-		
-	D1 = LinearizeDepth(D1);
-
-	vec3 ocean_bottom_color = pow(texture2D(refractionColorRtt , sspos.xy + texNormal.xy / 20.0).xyz,vec3(2.2));
+	vec3 ocean_bottom_color = pow(texture2D(refractionColorRtt , sspos.xy + texNormal.xy * rd).xyz,vec3(2.2));
 
 	float depth = D1 - D0;
 	if(depth > -0.001)
