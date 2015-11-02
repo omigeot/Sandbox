@@ -221,7 +221,7 @@ define(["vwf/model/threejs/backgroundLoader", "vwf/view/editorview/lib/alertify.
                         {
                             self.BuildCollisionData(child, function()
                             {
-                                window.setImmediate(cb4);
+                                async.nextTick(cb4);
                             });
                         }, cb3)
                     }
