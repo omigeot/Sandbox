@@ -215,10 +215,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 				$scope.selectedThreeNode = null;
 
 				if( !_SidePanel.isTabOpen('hierarchyManager') )
-					$('#hierarchyDisplay tree-node[node-id="'+newval.id+'"]').parents('tree-node:not(.collapsed)').addClass('collapsed');
+					$('#hierarchyDisplay tree-node-unified[node-id="'+newval.id+'"]').parents('tree-node-unified:not(.collapsed)').addClass('collapsed');
 
 				// open ancestor nodes
-				$('#hierarchyDisplay tree-node[node-id="'+newval.id+'"]').parents('tree-node.collapsed').removeClass('collapsed');
+				$('#hierarchyDisplay tree-node-unified[node-id="'+newval.id+'"]').parents('tree-node-unified.collapsed').removeClass('collapsed');
 			}
 		});
 
@@ -229,10 +229,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 				$scope.makeBounds();
 		});
 
-		$scope.select = function(node, evt)
+		$scope.select = function(nodeId, evt)
 		{
+			var node;
+
 			// vwf nodes
-			if( $scope.fields.nodes[node.id] )
+			if( node = $scope.fields.nodes[nodeId] )
 			{
 				$scope.selectedThreeNode = null;
 

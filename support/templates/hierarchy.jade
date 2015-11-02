@@ -49,7 +49,9 @@ block content
 	#hierarchyNodeUnifiedTemplate(ng-non-bindable, style='display: none;')
 
 		span(ng-class='getIcon("[[nodeId]]")', ng-click='toggleCollapse("[[nodeId]]")')
-		span.name {{"[[label]]" || fields.nodes["[[nodeId]]"].name}}
+		span.name(ng-click='select("[[nodeId]]", $event)',
+			ng-class='{selected: fields.selectedNodeIds.indexOf("[[nodeId]]") > -1}')
+			{{"[[label]]" || fields.nodes["[[nodeId]]"].name}}
 
 		ul
 			li(ng-repeat='child in fields.nodes["[[nodeId]]"].children')
