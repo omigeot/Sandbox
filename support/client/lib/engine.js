@@ -1130,7 +1130,7 @@ this.tryStringify = function(o)
 this.postSimulationStateUpdates = function(freqlist)
 {
 
-     var updates = {};
+    var updates = {};
     for(var i = 0; i < this.nodesSimulating.length; i++)
     {
         var nodeID = this.nodesSimulating[i];
@@ -1141,13 +1141,10 @@ this.postSimulationStateUpdates = function(freqlist)
         var keys = Object.keys(this.propertyDataUpdates[nodeID]);
         for(var j = 0; j < keys.length; j++)
         {
+
             if(this.lastPropertyDataUpdates && this.lastPropertyDataUpdates[nodeID]&&this.lastPropertyDataUpdates[nodeID][keys[j]] && this.tryStringify(props[keys[j]]) == this.lastPropertyDataUpdates[nodeID][keys[j]])
                 delete props[keys[j]];
             // if provided with a frequency list, and the key is not in that list, remove it
-            if(freqlist && freqlist.indexOf(keys[j]) == -1)
-            {
-                 delete props[keys[j]];
-            }
         }
         }
         if(props && Object.keys(props).length)
@@ -1169,7 +1166,9 @@ this.postSimulationStateUpdates = function(freqlist)
         for(var j = 0; j < keys2.length; j++)
             this.lastPropertyDataUpdates[keys[i]][keys2[j]] = this.tryStringify(this.lastPropertyDataUpdates[keys[i]][keys2[j]]);
     }
-    this.propertyDataUpdates = {};
+   
+        this.propertyDataUpdates = {};
+     
 }
 this.propertyUpdated = function(id,name,val)
 {
@@ -1397,7 +1396,7 @@ this.tick = function() {
     }, this );
     }
     this.tickCount ++;
-    this.postSimulationStateUpdates(this.tickCount % 20 != 0 ? ['transform','animationFrame'] : null);
+    this.postSimulationStateUpdates(this.tickCount % 20 != 0 ? ['transform','animationFrame','visible'] : null);
 };
 
 // -- setState -----------------------------------------------------------------------------
@@ -2493,8 +2492,6 @@ this.createDepth = 0;
 this.createChild = function( nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ ) {
     Engine.createDepth++;
     progressScreen.startCreateNode(nodeID);
-
-
 
     this.logger.debuggx( "createChild", function() {
         return [ nodeID, childName, JSON.stringify( loggableComponent( childComponent ) ), childURI ];
@@ -3752,6 +3749,7 @@ this.setPropertyFast = function(nodeID, propertyName,propertyValue)
             this.views[i].satProperty(nodeID,propertyName,answer)
         }
     }
+    this.propertyUpdated(nodeID,propertyName,answer||propertyValue);
     return answer;
 },
 this.getProperty = function( nodeID, propertyName, ignorePrototype, testDelegation) {

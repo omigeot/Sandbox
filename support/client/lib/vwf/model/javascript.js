@@ -1140,6 +1140,20 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 enumerable: true,
                 configurable: false
             });
+            Object.defineProperty(node,"createChild",
+            {
+                value: function(name, def)
+                {
+                    Engine.emit.createChild(node.id,name,def);
+                }
+            })
+            Object.defineProperty(node,"delete",
+            {
+                value: function(name, def)
+                {
+                    Engine.emit.deleteNode(node.id);
+                }
+            })
             Object.defineProperty(node, 'unbind',
             {
                 value: function(eventName, value)
