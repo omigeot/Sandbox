@@ -1140,6 +1140,20 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 enumerable: true,
                 configurable: false
             });
+            Object.defineProperty(node,"createChild",
+            {
+                value: function(name, def)
+                {
+                    Engine.emit.createChild(node.id,name,def);
+                }
+            })
+            Object.defineProperty(node,"delete",
+            {
+                value: function(name, def)
+                {
+                    Engine.emit.deleteNode(node.id);
+                }
+            })
             Object.defineProperty(node, 'unbind',
             {
                 value: function(eventName, value)
@@ -1340,17 +1354,9 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             child.private.initialized = true;
             this.indexMethods(child);
             var scriptText = "this.initialize && this.initialize()";
-            try
+            if(child.private.bodies["initialize"])
             {
-                return (function(scriptText)
-                {
-                    return eval(scriptText)
-                }).call(child, scriptText);
-            }
-            catch (e)
-            {
-                console.error("initializingNode", childID,
-                    "exception in initialize:", utility.exceptionMessage(e));
+                this.tryCallMethod(child,child.private.bodies["initialize"],"initialize",[])
             }
            
             return undefined;
@@ -1387,17 +1393,9 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 child.parent = undefined;
             }
             var scriptText = "this.deinitialize && this.deinitialize()";
-            try
+            if(child.private.bodies["deinitialize"])
             {
-                (function(scriptText)
-                {
-                    return eval(scriptText)
-                }).call(child, scriptText);
-            }
-            catch (e)
-            {
-                console.error("deinitializingNode", childID,
-                    "exception in deinitialize:", utility.exceptionMessage(e));
+                this.tryCallMethod(child,child.private.bodies["deinitialize"],"deinitialize",[])
             }
             delete this.nodes[nodeID];
         },
@@ -1415,30 +1413,14 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                     (node[childName] = child);
             }
             var scriptText = "this.attached && this.attached()";
-            try
+            if(child.private.bodies["attached"])
             {
-                (function(scriptText)
-                {
-                    return eval(scriptText)
-                }).call(child, scriptText);
-            }
-            catch (e)
-            {
-                console.error("addingChild", childID,
-                    "exception in addingChild:", utility.exceptionMessage(e));
+                this.tryCallMethod(child,child.private.bodies["attached"],"attached",[])
             }
             scriptText = "this.childAdded && this.childAdded('" + childID + "')";
-            try
+            if(child.private.bodies["childAdded"])
             {
-                (function(scriptText)
-                {
-                    return eval(scriptText)
-                }).call(node, scriptText);
-            }
-            catch (e)
-            {
-                console.error("addingChild", childID,
-                    "exception in addingChild:", utility.exceptionMessage(e));
+                this.tryCallMethod(child,child.private.bodies["childAdded"],"childAdded",[childID])
             }
         },
         // TODO: removingChild
@@ -1738,7 +1720,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             };
             try
             {
-                node.private.bodies[methodName] = eval(bodyScript(methodParameters || [], methodBody || "",methodName,node.id));
+                node.private.bodies[methodName] = this.evalBody(methodParameters || [], methodBody || "",methodName,node.id);
             }
             catch (e)
             {
@@ -1760,6 +1742,12 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 if(this.methodIndex[methodName].indexOf(node.id) == -1)
                      this.methodIndex[methodName].push(node.id)
             }
+        },
+        evalBody:function (methodParameters , methodBody ,methodName,nodeID)
+        {
+            var body = new Function(methodParameters,methodBody);
+            return body;
+
         },
         deletingMethod: function(nodeID, methodName)
         {
@@ -2053,7 +2041,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                         handler: null,
                         context: node
                     }
-                    handler.handler = eval(bodyScript(eventParameters || [], eventBody || "",eventName,node.id));
+                    handler.handler = this.evalBody(eventParameters || [], eventBody || "",eventName,node.id);
                     node.private.listeners[eventName].push(handler);
                     node.private.events[eventName].push(
                     {

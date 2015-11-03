@@ -3,17 +3,21 @@ define(function()
     var names = {};
     function progressScreen(){
     	var self = this;
+
+        
         this.startProgressGui = function(total)
         {
             //$(document.body).append('<div id = "preloadGUIBack" class=""><span id="fullscreenlink">Please enter full screen mode. Click here or hit F11.</span><img id="loadingSplash" /><div id = "preloadGUI" class=""><div class="preloadCenter"><div id="preloadprogress"><p class="progress-label">Loading...</p></div></div><div class=""><div class="" id="preloadguiText">Loading...</div></div></div></div>');
             $('#preloadGUIBack').css('display', 'block');
+            $('#preloadprogress').css('width','95%');
+
             $('#preloadprogress').progressbar();
             $('#preloadprogress').progressbar("value", 0);
-            $('#preloadprogress .progress-label').text("0%");
+            $('#preloadprogress .progress-label').text("Loading Assets: 0%");
             var regExp = new RegExp(window.appPath + ".*\/");
             var sid = regExp.exec(window.location.pathname.toString()).toString();
-            $('#loadingSplash').attr('src', "../vwfdatamanager.svc/thumbnail?SID=" + sid);
-            $('#loadingSplash').attr('onerror', " this.src = '/adl/sandbox/img/thumbnotfound.png'");
+           // $('#loadingSplash').attr('src', "../vwfdatamanager.svc/thumbnail?SID=" + sid);
+           // $('#loadingSplash').attr('onerror', " this.src = '/adl/sandbox/img/thumbnotfound.png'");
             $('#fullscreenlink').click(function()
             {
                 RunPrefixMethod(document.body, "RequestFullScreen", 1);
@@ -21,6 +25,8 @@ define(function()
         },
         this.updateProgressGui = function(count, data)
         {
+
+             $('#preloadprogress').css('width','95%');
             $('#preloadprogress').progressbar("value", count * 100);
             $('#preloadguiText').text((data.name ? data.name + ": " : "") + data.url);
             $('#preloadprogress .progress-label').text("Loading Assets: " + parseInt(count * 100) + "%");
@@ -33,7 +39,7 @@ define(function()
         this.stateLoadSteps = 0;
         this.startSetState = function(state)
         {
-        	
+        	$('#preloadprogress').css('width','95%');
         	var count = 1;
         	function walk(node,j)
         	{
@@ -106,5 +112,6 @@ define(function()
             
         }
     }
-    return new progressScreen();
+    window._dProgressScreen=  new progressScreen();
+    return window._dProgressScreen;
 });
