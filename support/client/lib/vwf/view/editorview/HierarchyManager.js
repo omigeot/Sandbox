@@ -75,62 +75,6 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 					}, 200);
 				});
 
-				$scope.open = function(){
-					return !elem.hasClass('collapsed');
-				}
-
-				$scope.getIcon = function(){
-					var classes = ['hierarchyicon', 'glyphicon'];
-					if( $('ul li', elem).length === 0 )
-						classes.push('glyphicon-ban-circle');
-					else if($scope.open())
-						classes.push('glyphicon-triangle-bottom');
-					else
-						classes.push('glyphicon-triangle-right');
-
-					return classes;
-				}
-
-				$scope.toggleCollapse = function(){
-					if( elem.hasClass('collapsed') )
-						elem.removeClass('collapsed');
-					else
-						elem.addClass('collapsed');
-				}
-
-				$scope.isBound = function(id)
-				{
-					if( $scope.fields.nodes[id] ){
-						return false;
-					}
-					else
-					{
-						for(var i=0; i<$scope.vwfNode.children.length; i++)
-						{
-							var vwfChild = $scope.fields.nodes[$scope.vwfNode.children[i]];
-							if( vwfChild.threeId && id && vwfChild.threeId === id )
-								return true;
-						}
-						return false;
-					}
-				}
-
-				$scope.hasUnboundChild = function(node)
-				{
-					if(node)
-					{
-						for(var i=0; i<node.children.length; i++){
-							if( !$scope.isBound(node.children[i]) )
-								return true;
-						}
-					}
-					else
-						return false;
-				}
-
-				$compile(template)($scope, function(e){
-					elem.html(e);
-				});
 			}
 		};
 	}]);
@@ -144,6 +88,11 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 			scope: false,
 			link: function($scope, elem, attrs)
 			{
+				if(attrs.nodeId){
+					$scope.buildThreeDescendants(attrs.nodeId);
+				}
+
+
 				var template = templateBase.replace(/\[\[(\w+?)\]\]/g, function(match, attrName){
 					return attrs[attrName] || "";
 				});
@@ -153,51 +102,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 		};
 	}]);
 
+
 	app.controller('HierarchyController', ['$scope', function($scope)
 	{
 		window._HierarchyManager = $scope;
-
-		/************************
-		 * UI handlers
-		 ***********************/
-
-		$scope.getIcon = function(nodeId, threeId)
-		{
-			if(nodeId)
-				var elem = $('#hierarchyManager tree-node-unified[node-id="'+nodeId+'"]');
-			else if(threeId)
-				elem = $('#hierarchyManager tree-node-unified[three-id="'+threeId+'"]');
-			else return;
-
-			var classes = ['hierarchyicon', 'glyphicon'];
-			if( $('ul li', elem).length === 0 )
-				classes.push('glyphicon-ban-circle');
-			else if(!elem.hasClass('collapsed'))
-				classes.push('glyphicon-triangle-bottom');
-			else
-				classes.push('glyphicon-triangle-right');
-
-			return classes;
-		}
-
-		$scope.toggleCollapse = function(nodeId, threeId)
-		{
-			if(nodeId)
-				var elem = $('#hierarchyManager tree-node-unified[node-id="'+nodeId+'"]');
-			else if(threeId)
-				elem = $('#hierarchyManager tree-node-unified[three-id="'+threeId+'"]');
-			else return;
-
-			if( elem.hasClass('collapsed') )
-				elem.removeClass('collapsed');
-			else
-				elem.addClass('collapsed');
-		}
-
-
-		/************************
-		 * Logic handlers
-		 ***********************/
 
 		$scope.selectedThreeNode = null;
 		var selectionBounds = null;
@@ -207,9 +115,102 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 			type: 'any'
 		};
 
+
+
+		/***********************************************
+		 * Three.js Node Handling/detection
+		 ***********************************************/
+
+		$scope.threeMaps = {};
+
+		$scope.buildThreeDescendants = function(nodeId)
+		{
+			var threenode = _Editor.findviewnode(nodeId);
+			var node = $scope.fields.nodes[nodeId];
+
+			if( node && node.prototype === 'asset-vwf' && threenode )
+			{
+				if(node.subtype !== 'link_existing/threejs')
+				{
+					var threeMap = {'root': threenode.uuid};
+					buildTree(threenode);
+					$scope.threeMaps[nodeId] = threeMap[threenode.uuid];
+				}
+				else {
+					$scope.threeMaps[nodeId] = $scope.threeMaps[node.parent].map[threenode.uuid];
+				}
+
+				node.threeId = threenode.uuid;
+			}
+
+			function buildTree(threenode)
+			{
+				var id = threenode.uuid;
+				threeMap[threenode.uuid] = {
+					id: threenode.uuid,
+					name: threenode.name || threenode.uuid || threenode.vwfID || 'No Name',
+					prototype: 'threejs_node',
+					children: [],
+
+					node: threenode,
+					map: threeMap
+				};
+				
+				for(var i=0; i<threenode.children.length; i++)
+				{
+					var childnode = threenode.children[i];
+					threeMap[id].children.push( childnode.uuid );
+					buildTree(childnode);
+					threeMap[childnode.uuid].parent = id;
+				}
+
+				threeMap[id].children.sort(function(a,b)
+				{
+					a = threeMap[a];
+					b = threeMap[b];
+
+					if( !b || !b.name && a.name || a.name.toLowerCase() < b.name.toLowerCase() )
+						return -1;
+					else if( !a || !a.name && b.name || b.name.toLowerCase() < a.name.toLowerCase() )
+						return 1;
+					else
+						return 0;
+				});
+			}
+		}
+		
+		$scope.isThreeNodeBound = function(threeId, ancestorVwfId)
+		{
+			var vwfNode = $scope.fields.nodes[ancestorVwfId];
+			for(var i=0; i<vwfNode.children.length; i++)
+			{
+				var vwfChild = $scope.fields.nodes[vwfNode.children[i]];
+				if( vwfChild.threeId && threeId && vwfChild.threeId === threeId )
+					return true;
+			}
+			return false;
+		}
+
+		$scope.hasUnboundThreeChild = function(vwfId)
+		{
+			var threeNode = $scope.threeMaps[vwfId];
+
+			for(var i=0; threeNode && i<threeNode.children.length; i++){
+				if( !$scope.isThreeNodeBound(threeNode.children[i], vwfId) )
+					return true;
+			}
+			return false;
+		}
+
+
+
+		/***********************************************
+		 * Miscellaneous Utilities
+		 ***********************************************/
+
+		// open path to selected node on selection
 		$scope.$watch('fields.selectedNode', function(newval)
 		{
-
 			if( newval )
 			{
 				$scope.selectedThreeNode = null;
@@ -222,6 +223,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 			}
 		});
 
+		// apply box effect to selected three nodes
 		$scope.$watch('selectedThreeNode', function(newval){
 			if( newval )
 				$scope.makeBounds(newval.node);
@@ -390,54 +392,6 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 			}
 		}
 
-		$scope.getThreeDescendants = function(node)
-		{
-			var threenode = _Editor.findviewnode(node.id);
-			node.threeId = threenode && threenode.uuid || null;
-
-			if( node.prototype === 'asset-vwf' && threenode )
-			{
-				var threeMap = {};
-				buildTree(threenode);
-				return threeMap;
-			}
-
-			function buildTree(threenode)
-			{
-				var id = threenode.uuid;
-				threeMap[threenode.uuid] = {
-					id: threenode.uuid,
-					name: threenode.name || threenode.uuid || threenode.vwfID || 'No Name',
-					prototype: 'threejs_node',
-					children: [],
-
-					node: threenode,
-					map: threeMap
-				};
-				
-				for(var i=0; i<threenode.children.length; i++)
-				{
-					var childnode = threenode.children[i];
-					threeMap[id].children.push( childnode.uuid );
-					buildTree(childnode);
-					threeMap[childnode.uuid].parent = id;
-				}
-
-				threeMap[id].children.sort(function(a,b)
-				{
-					a = threeMap[a];
-					b = threeMap[b];
-
-					if( !b || !b.name && a.name || a.name.toLowerCase() < b.name.toLowerCase() )
-						return -1;
-					else if( !a || !a.name && b.name || b.name.toLowerCase() < a.name.toLowerCase() )
-						return 1;
-					else
-						return 0;
-				});
-			}
-		}
-
 		$scope.makeBounds = function(node)
 		{
 			if(node)
@@ -577,6 +531,50 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 		}
 
 	}]);
+
+	app.directive('collapseToggle', function()
+	{
+		return {
+			scope: {
+				collapseToggle: '=',
+				map: '='
+			},
+			link: function($scope, elem, attrs)
+			{
+				$scope.updateIcon = function()
+				{
+					var classes = ['hierarchyicon', 'glyphicon'];
+
+					if( $('ul li', $(elem).parent()).length === 0 )
+						classes.push('glyphicon-ban-circle');
+
+					else if(!$(elem).parent().hasClass('collapsed'))
+						classes.push('glyphicon-triangle-bottom');
+
+					else
+						classes.push('glyphicon-triangle-right');
+
+					attrs.$set('class', classes.join(' '));
+				}
+
+				$(elem).click(function()
+				{
+					if( $(this).parent().hasClass('collapsed') )
+						$(this).parent().removeClass('collapsed');
+					else
+						$(this).parent().addClass('collapsed');
+
+					$scope.updateIcon();
+				});
+
+				$scope.$watchCollection('map["'+attrs.collapseToggle+'"].children', function(newval){
+					$scope.updateIcon();
+				});
+			}
+		};
+	});
+
+
 
 	app.directive('customSelect', function()
 	{

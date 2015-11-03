@@ -36,7 +36,7 @@ block content
 			ng-class='{"nonselectable": vwfNode.threeId === node.id, "selected": fields.selectedNodeIds.indexOf(node.id) > -1 || selectedThreeNode === node, "continues": node.continues}'
 			adl-scroll-to='node.id === fields.selectedNode.id || node.id === selectedThreeNode.id'
 		)
-			{{label || node.name || node.id}}
+			| {{label || node.name || node.id}}
 
 		ul
 			li(ng-repeat='child in node.children', ng-if='!isBound(child)')
@@ -48,11 +48,19 @@ block content
 
 	#hierarchyNodeUnifiedTemplate(ng-non-bindable, style='display: none;')
 
-		span(ng-class='getIcon("[[nodeId]]")', ng-click='toggleCollapse("[[nodeId]]")')
+		span(collapse-toggle='[[nodeId]]', map='"[[nodeId]]" ? fields.nodes["[[nodeId]]"] : threeMaps["[[assetRoot]]"]')
 		span.name(ng-click='select("[[nodeId]]", $event)',
-			ng-class='{selected: fields.selectedNodeIds.indexOf("[[nodeId]]") > -1}')
-			{{"[[label]]" || fields.nodes["[[nodeId]]"].name}}
+			ng-class='{selected: fields.selectedNodeIds.indexOf("[[nodeId]]") > -1, continues: fields.nodes["[[nodeId]]"].continues}',
+			adl-scroll-to='"[[nodeId]]" === fields.selectedNode.id'
+		)
+			| {{"[[label]]" || fields.nodes["[[nodeId]]"].name || "[[nodeId]]" || threeMaps["[[assetRoot]]"].map["[[threeId]]"].name}}
 
 		ul
 			li(ng-repeat='child in fields.nodes["[[nodeId]]"].children')
 				tree-node-unified.collapsed(node-id='{{child}}')
+
+			li(ng-repeat='child in threeMaps["[[assetRoot]]"].map["[[threeId]]"].children', ng-if='!isThreeNodeBound("[[threeId]]", "[[assetRoot]]")')
+				tree-node-unified.collapsed(asset-root='[[assetRoot]]', three-id='{{child}}')
+
+			li(ng-if='threeMaps["[[nodeId]]"] && hasUnboundThreeChild("[[nodeId]]")')
+				tree-node-unified.three.collapsed(asset-root='[[nodeId]]', three-id='{{threeMaps["[[nodeId]]"].id}}', label='unbound-nodes')
