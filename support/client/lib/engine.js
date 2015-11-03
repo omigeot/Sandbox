@@ -1072,7 +1072,9 @@ this.startSimulating = function(nodeID)
             this.nodesSimulating.push(nodes[i]);
         }
         this.callMethod(this.application(),"startSimulatingNode",nodes[i])
+        this.lastPropertyDataUpdates[nodes[i]] = {};
     }
+
 }
 this.stopSimulating = function(nodeID)
 {
@@ -1084,8 +1086,10 @@ this.stopSimulating = function(nodeID)
         {
             this.nodesSimulating.splice(this.nodesSimulating.indexOf(nodes[i]),1);
         }
-        this.callMethod(this.application(),"stopSimulatingNode",nodes[i])
+        this.callMethod(this.application(),"stopSimulatingNode",nodes[i]);
+        delete this.lastPropertyDataUpdates[nodes[i]];
     }
+    
 }
 this.isSimulating = function(nodeID)
 {
@@ -1127,48 +1131,46 @@ this.tryStringify = function(o)
         return undefined;
     }
 }
+this.lastPropertyDataUpdates = {};
 this.postSimulationStateUpdates = function(freqlist)
 {
-
     var updates = {};
     for(var i = 0; i < this.nodesSimulating.length; i++)
     {
         var nodeID = this.nodesSimulating[i];
         if(!this.propertyDataUpdates[nodeID]) continue;
         var props = this.tryParse(this.tryStringify(this.propertyDataUpdates[nodeID]));
+        var postprops = {};
         if(props)
         {
-        var keys = Object.keys(this.propertyDataUpdates[nodeID]);
-        for(var j = 0; j < keys.length; j++)
-        {
+            var keys = freqlist || Object.keys(props) ;
+            for(var j = 0; j < keys.length; j++)
+            {
+                if(props.hasOwnProperty(keys[j]))
+                {
+                    if(this.lastPropertyDataUpdates[nodeID]&&this.lastPropertyDataUpdates[nodeID][keys[j]] && this.tryStringify(props[keys[j]]) == this.lastPropertyDataUpdates[nodeID][keys[j]])
+                    {
 
-            if(this.lastPropertyDataUpdates && this.lastPropertyDataUpdates[nodeID]&&this.lastPropertyDataUpdates[nodeID][keys[j]] && this.tryStringify(props[keys[j]]) == this.lastPropertyDataUpdates[nodeID][keys[j]])
-                delete props[keys[j]];
-            // if provided with a frequency list, and the key is not in that list, remove it
+                    }
+                    else
+                    {
+                        postprops[keys[j]] = props[keys[j]];
+                        delete this.propertyDataUpdates[nodeID][keys[j]];
+                        this.lastPropertyDataUpdates[nodeID][keys[j]] =  this.tryStringify(props[keys[j]]);
+                      
+                    }
+                }
+            }
         }
-        }
-        if(props && Object.keys(props).length)
-            updates[nodeID] = props;
-        var action = "simulationStateUpdate";
-        
+        if(postprops && Object.keys(postprops).length)
+            updates[nodeID] = postprops;
+        var action = "simulationStateUpdate";   
     }
-   if(Object.keys(updates).length)
+    if(Object.keys(updates).length)
     {
         var payload = updates;//JSON.stringify(updates);
         this.send(vwf.application(),action,"null",payload);
-        
     }
-    this.lastPropertyDataUpdates = this.propertyDataUpdates;
-    var keys = Object.keys(this.lastPropertyDataUpdates)
-    for(var i = 0; i <keys.length ; i++)
-    {
-        var keys2 = Object.keys(this.lastPropertyDataUpdates[keys[i]]);
-        for(var j = 0; j < keys2.length; j++)
-            this.lastPropertyDataUpdates[keys[i]][keys2[j]] = this.tryStringify(this.lastPropertyDataUpdates[keys[i]][keys2[j]]);
-    }
-   
-        this.propertyDataUpdates = {};
-     
 }
 this.propertyUpdated = function(id,name,val)
 {
