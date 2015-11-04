@@ -14,8 +14,13 @@ var connect = require('connect'),
 YAML = require('js-yaml');
 var logger = require('./logger');
 var xapi = require('./xapi');
+
+
+var logChats = require('./logChats').logChats;
+
 function startup(listen)
 {
+    require('./logChats').init();
     //create socket server
     logger.info('startup refector', 0);
     sio = sio(listen,
@@ -995,6 +1000,9 @@ function ClientConnected(socket, namespace, instancedata)
                         thisInstance.clients[textmessage.receiver].emit('message', messageCompress.pack(JSON.stringify(message)));
                     if (textmessage.sender)
                         thisInstance.clients[textmessage.sender].emit('message', messageCompress.pack(JSON.stringify(message)));
+
+                    logChats(textmessage,thisInstance.clients[textmessage.sender],thisInstance.clients[textmessage.receiver]);
+
                     return;
                 }
                 // only allow users to hang up their own RTC calls
