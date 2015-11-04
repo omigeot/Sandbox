@@ -1,13 +1,13 @@
 var SandboxAPI = require('./sandboxAPI');
 var logger = require('./logger');
 //we're going to allow the client to request a list of assets the system will need for this scene
-//this allows the client to load and parse some stuff before connecting to the server, so it does not build up a load 
+//this allows the client to load and parse some stuff before connecting to the server, so it does not build up a load
 //of events to process while parsing assets
 
 //note that the state could change between the time that the client gets the list of assets, and the time that the client requests the  state
 // this is not really an issue, as the client will just have to load the new assets normally.
 function ServeJSON(jsonobject,response,URL)
-{    
+{
 	response.writeHead(200, {
 		"Content-Type": "text/json"
 	});
@@ -131,9 +131,9 @@ function parseStateForAssets(state,cb)
 			var additionalUrlAssetsList = state[idx]['additionalUrlAssetsList'];
 			if( (additionalUrlAssetsList !== null) && (additionalUrlAssetsList !== undefined) )
 			{
-				for(var idx=0; idx < additionalUrlAssetsList.length; idx++)
+				for(var idy=0; idy < additionalUrlAssetsList.length; idy++)
 				{
-					list.push({type: "unknown", url: additionalUrlAssetsList[idx]})
+					list.push({type: "unknown", url: additionalUrlAssetsList[idy]})
 				}
 			}
 		}
@@ -162,7 +162,7 @@ function parseStateForAssets(state,cb)
 //get either the last cached copy of the state, or load it from disk
 function getState(id,cb)
 {
-	
+
 	if(global.instances && global.instances.get(id) && global.instances.get(id).state)
 	{
 		var state = global.instances.get(id).state;
@@ -173,15 +173,15 @@ function getState(id,cb)
 		logger.info('getting assets to preload from database state: WARNING - this will not preload avatars!');
 		SandboxAPI.getState(id.replace(/\//g,"_"),function(state)
 			{
-				parseStateForAssets(state,cb);		
+				parseStateForAssets(state,cb);
 			});
-		
+
 	}
 }
 function getAssets(request,response,URL)
 {
 	var id = URL.query.SID;
-	
+
 
 	getState(id,function(assets)
 	{
