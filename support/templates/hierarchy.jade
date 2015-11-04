@@ -23,7 +23,9 @@ block content
 
 	#hierarchyDisplay(tabindex='0', ng-keydown='handleKeyPress($event)')
 
-		input#makeNode(type='button', ng-show='selectedThreeNode && !selectedThreeNode.node.vwfID', ng-click='makeVWFNode()', value='Three.js > VWF', scroll-fixed='top right', style='top: 0px; right: 0px;')
+		input#makeNode(type='button', ng-click='makeVWFNode()', value='Three.js > VWF', scroll-fixed='top right', style='top: 0px; right: 0px;'
+			ng-show='selectedThreeNode && selectedThreeNode.name && !selectedThreeNode.node.vwfID'
+		)
 
 		ul: li
 			tree-node-unified(node-id='index-vwf', label='Scene')
@@ -49,11 +51,16 @@ block content
 	#hierarchyNodeUnifiedTemplate(ng-non-bindable, style='display: none;')
 
 		span(collapse-toggle='[[nodeId]]', map='"[[nodeId]]" ? fields.nodes["[[nodeId]]"] : threeMaps["[[assetRoot]]"]')
-		span.name(ng-click='select("[[nodeId]]", $event)',
-			ng-class='{selected: fields.selectedNodeIds.indexOf("[[nodeId]]") > -1, continues: fields.nodes["[[nodeId]]"].continues}',
-			adl-scroll-to='"[[nodeId]]" === fields.selectedNode.id'
+		span.name(ng-click='select("[[nodeId]]" || "[[threeId]]", "[[assetRoot]]", $event)'
+			ng-dblclick='focusNode("[[nodeId]]")'
+			ng-class='{\
+				selected: fields.selectedNodeIds.indexOf("[[nodeId]]") > -1 || selectedThreeNode.id === "[[threeId]]", \
+				nonselectable: fields.nodes["[[assetRoot]]"].threeId === "[[threeId]]", \
+				continues: fields.nodes["[[nodeId]]"].continues \
+			}'
+			adl-scroll-to='"[[nodeId]]" === fields.selectedNode.id || selectedThreeNode.id === "[[threeId]]"'
 		)
-			| {{"[[label]]" || fields.nodes["[[nodeId]]"].name || "[[nodeId]]" || threeMaps["[[assetRoot]]"].map["[[threeId]]"].name}}
+			| {{"[[label]]" || fields.nodes["[[nodeId]]"].name || "[[nodeId]]" || threeMaps["[[assetRoot]]"].map["[[threeId]]"].name || "[[threeId]]"}}
 
 		ul
 			li(ng-repeat='child in fields.nodes["[[nodeId]]"].children')

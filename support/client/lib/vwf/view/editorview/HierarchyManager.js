@@ -148,7 +148,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 				var id = threenode.uuid;
 				threeMap[threenode.uuid] = {
 					id: threenode.uuid,
-					name: threenode.name || threenode.uuid || threenode.vwfID || 'No Name',
+					name: threenode.name,
 					prototype: 'threejs_node',
 					children: [],
 
@@ -231,30 +231,32 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 				$scope.makeBounds();
 		});
 
-		$scope.select = function(nodeId, evt)
+		$scope.select = function(nodeId, ancestorId, evt)
 		{
 			var node;
-
+			console.log(nodeId);
 			// vwf nodes
-			if( node = $scope.fields.nodes[nodeId] )
+			if( $scope.fields.nodes[nodeId] )
 			{
 				$scope.selectedThreeNode = null;
 
 				// new selection = 0, add = 2, subtract = 3
 				if( !evt.ctrlKey )
 				{
-					_Editor.SelectObjectPublic(node.id, 0);
+					_Editor.SelectObjectPublic(nodeId, 0);
 				}
-				else if( $scope.fields.selectedNodeIds.indexOf(node.id) === -1 )
-					_Editor.SelectObjectPublic(node.id, 2);
+				else if( $scope.fields.selectedNodeIds.indexOf(nodeId) === -1 )
+					_Editor.SelectObjectPublic(nodeId, 2);
 				else
-					_Editor.SelectObjectPublic(node.id, 3);
+					_Editor.SelectObjectPublic(nodeId, 3);
 			}
 
 			// three.js nodes
-			else
+			else if( $scope.threeMaps[ancestorId].map[nodeId] && $scope.fields.nodes[ancestorId].threeId !== nodeId )
 			{
 				_Editor.SelectObject();
+
+				var node = $scope.threeMaps[ancestorId].map[nodeId];
 
 				if( $scope.selectedThreeNode !== node ){
 					$scope.selectedThreeNode = node;
@@ -265,9 +267,9 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 			}
 		}
 
-		$scope.focusNode = function(threeNode)
+		$scope.focusNode = function(nodeId)
 		{
-			if(!threeNode){
+			if(nodeId){
 				_Editor.focusSelected();
 			}
 		}
@@ -289,7 +291,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 				_Editor.SelectObject();
 			}
 			else if( 'Space' === evt.key || evt.which === 32 ){
-				$('#hierarchyDisplay .selected').closest('tree-node').toggleClass('collapsed');
+				$('#hierarchyDisplay .selected').closest('tree-node-unified').toggleClass('collapsed');
 			}
 
 			// select previous sibling
