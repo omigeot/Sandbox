@@ -233,8 +233,6 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 
 		$scope.select = function(nodeId, ancestorId, evt)
 		{
-			var node;
-			console.log(nodeId);
 			// vwf nodes
 			if( $scope.fields.nodes[nodeId] )
 			{
@@ -537,13 +535,13 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 	app.directive('collapseToggle', function()
 	{
 		return {
-			scope: {
-				collapseToggle: '=',
-				map: '='
-			},
+			scope: false,
 			link: function($scope, elem, attrs)
 			{
-				$scope.updateIcon = function()
+				var key = attrs.collapseToggle.split(',')[0];
+				var assetRoot = attrs.collapseToggle.split(',')[1];
+
+				function updateIcon()
 				{
 					var classes = ['hierarchyicon', 'glyphicon'];
 
@@ -566,12 +564,22 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 					else
 						$(this).parent().addClass('collapsed');
 
-					$scope.updateIcon();
+					updateIcon();
 				});
 
-				$scope.$watchCollection('map["'+attrs.collapseToggle+'"].children', function(newval){
-					$scope.updateIcon();
-				});
+				updateIcon();
+
+				/*if(!assetRoot){
+					$scope.$watchCollection('fields.nodes["'+key+'"].children', function(newval){
+					});
+				}
+				else {
+					//li(ng-repeat='child in threeMaps["[[assetRoot]]"].map["[[threeId]]"].children', ng-if='!isThreeNodeBound(child, "[[assetRoot]]")')
+					$scope.$watchCollection('threeMaps["'+assetRoot+'"].map["'+key+'"].children', function(newval){
+						console.log('three node updating icon');
+						$scope.updateIcon();
+					});
+				}*/
 			}
 		};
 	});

@@ -50,7 +50,7 @@ block content
 
 	#hierarchyNodeUnifiedTemplate(ng-non-bindable, style='display: none;')
 
-		span(collapse-toggle='[[nodeId]]', map='"[[nodeId]]" ? fields.nodes["[[nodeId]]"] : threeMaps["[[assetRoot]]"]')
+		span(collapse-toggle='[[nodeId]][[threeId]],[[assetRoot]]')
 		span.name(ng-click='select("[[nodeId]]" || "[[threeId]]", "[[assetRoot]]", $event)'
 			ng-dblclick='focusNode("[[nodeId]]")'
 			ng-class='{\
