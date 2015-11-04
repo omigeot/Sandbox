@@ -1120,8 +1120,11 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             });
             Object.defineProperty(node, 'bind',
             {
-                value: function(eventName, value)
+
+                value: function(eventName, value,context)
                 {
+                    if(!context || !context.id || context.id == Engine.application())
+                        throw("Invalid context for event handling")
                     var listeners = this.private.listeners[eventName] ||
                         (this.private.listeners[eventName] = []); // array of { handler: function, context: node, phases: [ "phase", ... ] }
                     if (typeof value == "function" || value instanceof Function)
@@ -1129,7 +1132,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                         listeners.push(
                         {
                             handler: value,
-                            context: this
+                            context: context
                         }); // for n
                     }
                     else
@@ -1683,7 +1686,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             Object.defineProperty(node.methods, methodName, { // "this" is node.methods in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node.methods
-                        if(!vwf.isSimulating(this.id)) return;
+                        
                         return jsDriverSelf.getTopContext().callMethod(this.id, methodName, arguments);
                     };
                 },
@@ -1700,7 +1703,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             Object.defineProperty(node, methodName, { // "this" is node in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node
-                        if(!vwf.isSimulating(this.id)) return;
+                       
                         return jsDriverSelf.getTopContext().callMethod(this.id, methodName, arguments);
                     };
                 },

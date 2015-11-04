@@ -525,7 +525,7 @@ define(['progressScreen'],function(){
             socket.removeListener( "disconnect", Engine.disconnected);
             socket.disconnect();
             socket = null;
-            window.setInterval(this.generateTick.bind(this),50);
+            //window.setInterval(this.generateTick.bind(this),50);
         };
         this.close = function()
         {
@@ -822,7 +822,7 @@ define(['progressScreen'],function(){
 
         socket.on( "connect", function() {
 
-           
+            window.setInterval(Engine.generateTick.bind(Engine),50);
             Engine.logger.infox( "-socket", "connected" );
 
            
@@ -987,7 +987,14 @@ this.send = function( nodeID, actionName, memberName, parameters, when, callback
     if ( socket ) {
 
        
-        
+        //process own input right away.
+        if(actionName == "setProperty" || actionName == "callMethod" || actionName == "fireEvent" || actionName == "dispatchEvent")
+        {
+            fields = JSON.parse(JSON.stringify(fields));
+            fields.client = this.moniker_; // stamp with the originating client like the reflector does
+            fields.origin = "reflector";
+            queue.insert( fields );
+        }
         socket.send( fields );
 
     } else {
