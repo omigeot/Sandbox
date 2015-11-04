@@ -59,7 +59,7 @@ block content
 			li(ng-repeat='child in fields.nodes["[[nodeId]]"].children')
 				tree-node-unified.collapsed(node-id='{{child}}')
 
-			li(ng-repeat='child in threeMaps["[[assetRoot]]"].map["[[threeId]]"].children', ng-if='!isThreeNodeBound("[[threeId]]", "[[assetRoot]]")')
+			li(ng-repeat='child in threeMaps["[[assetRoot]]"].map["[[threeId]]"].children', ng-if='!isThreeNodeBound(child, "[[assetRoot]]")')
 				tree-node-unified.collapsed(asset-root='[[assetRoot]]', three-id='{{child}}')
 
 			li(ng-if='threeMaps["[[nodeId]]"] && hasUnboundThreeChild("[[nodeId]]")')

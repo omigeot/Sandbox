@@ -127,6 +127,8 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 		{
 			var threenode = _Editor.findviewnode(nodeId);
 			var node = $scope.fields.nodes[nodeId];
+			if(threenode)
+				node.threeId = threenode.uuid;
 
 			if( node && node.prototype === 'asset-vwf' && threenode )
 			{
@@ -139,8 +141,6 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 				else {
 					$scope.threeMaps[nodeId] = $scope.threeMaps[node.parent].map[threenode.uuid];
 				}
-
-				node.threeId = threenode.uuid;
 			}
 
 			function buildTree(threenode)
