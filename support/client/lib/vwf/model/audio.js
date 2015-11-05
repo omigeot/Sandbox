@@ -126,7 +126,7 @@ define(["module", "vwf/model", "vwf/model/buzz/buzz.min"], function(module, mode
                 {
 
                     
-
+                    var vol = params[2] || 100;
                     if (this.sounds[url].getPercent() == 100)
                         this.sounds[url].stop();
                     this.sounds[url].setPercent(0);
@@ -135,7 +135,7 @@ define(["module", "vwf/model", "vwf/model/buzz/buzz.min"], function(module, mode
                         this.sounds[url].loop();
                     else
                         this.sounds[url].unloop();
-                    this.sounds[url].volume = vol;
+                    this.sounds[url].volume = vol/100;
                 }
                 else
                 {
