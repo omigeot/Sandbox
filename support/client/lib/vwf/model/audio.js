@@ -124,13 +124,18 @@ define(["module", "vwf/model", "vwf/model/buzz/buzz.min"], function(module, mode
                 //cache the sound - can only be played simultainously by different nodes
                 if (this.sounds[url])
                 {
+
+                    
+
                     if (this.sounds[url].getPercent() == 100)
                         this.sounds[url].stop();
+                    this.sounds[url].setPercent(0);
                     this.sounds[url].play();
                     if (loop)
                         this.sounds[url].loop();
                     else
                         this.sounds[url].unloop();
+                    this.sounds[url].volume = vol;
                 }
                 else
                 {
