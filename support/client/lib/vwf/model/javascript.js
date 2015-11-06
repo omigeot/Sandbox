@@ -81,7 +81,7 @@ executionContext.prototype.getProperty = function(id, name)
         this.touchedProperties[id + name] = {
             id: id,
             name: name,
-            val: null,
+            val: val,
             originalVal: null
         }
         if (!(typeof(val) == "string" ||  typeof(val) == "number" || typeof(val) == "boolean" || val == null || val == undefined))
