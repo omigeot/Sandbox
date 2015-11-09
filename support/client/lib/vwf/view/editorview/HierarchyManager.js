@@ -92,12 +92,48 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 					$scope.buildThreeDescendants(attrs.nodeId);
 				}
 
+				function updateIcon(forceArrow)
+				{
+					var classes = ['hierarchyicon', 'glyphicon'];
+
+					if(!forceArrow && $('ul li', $(elem)).length === 0)
+						classes.push('glyphicon-ban-circle');
+
+					else if(!$(elem).hasClass('collapsed'))
+						classes.push('glyphicon-triangle-bottom');
+
+					else
+						classes.push('glyphicon-triangle-right');
+
+					$(elem).children('.hierarchyicon').attr('class', classes.join(' '));
+					//attrs.$set('class', classes.join(' '));
+				}
+
+				$scope.toggleCollapse = function()
+				{
+					if( $(elem).hasClass('collapsed') )
+						$(elem).removeClass('collapsed');
+					else
+						$(elem).addClass('collapsed');
+
+					updateIcon();
+				};
+
 
 				var template = templateBase.replace(/\[\[(\w+?)\]\]/g, function(match, attrName){
 					return attrs[attrName] || "";
 				});
 
 				elem.html('').append($compile(template)($scope));
+
+				if(attrs.nodeId){
+					$scope.$watchCollection('fields.nodes["'+attrs.nodeId+'"].children', function(newval){
+						updateIcon();
+					});
+				}
+				else if(attrs.threeId && attrs.assetRoot){
+					updateIcon($scope.threeMaps[attrs.assetRoot].map[attrs.threeId].children.length);
+				}
 			}
 		};
 	}]);
@@ -350,7 +386,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 			// select parent
 			else if( 'ArrowLeft' === evt.key || evt.which === 37 )
 			{
-				$('#hierarchyDisplay .selected').closest('tree-node').addClass('collapsed');
+				$('#hierarchyDisplay .selected').closest('tree-node-unified').addClass('collapsed');
 
 				if( $scope.fields.selectedNode && parent)
 				{
@@ -370,7 +406,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 			// select first child
 			else if( 'ArrowRight' === evt.key || evt.which === 39 )
 			{
-				$('#hierarchyDisplay .selected').closest('tree-node').removeClass('collapsed');
+				$('#hierarchyDisplay .selected').closest('tree-node-unified').removeClass('collapsed');
 
 				if( $scope.fields.selectedNode )
 				{
@@ -531,59 +567,6 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 		}
 
 	}]);
-
-	app.directive('collapseToggle', function()
-	{
-		return {
-			scope: false,
-			link: function($scope, elem, attrs)
-			{
-				var key = attrs.collapseToggle.split(',')[0];
-				var assetRoot = attrs.collapseToggle.split(',')[1];
-
-				function updateIcon()
-				{
-					var classes = ['hierarchyicon', 'glyphicon'];
-
-					if( $('ul li', $(elem).parent()).length === 0 )
-						classes.push('glyphicon-ban-circle');
-
-					else if(!$(elem).parent().hasClass('collapsed'))
-						classes.push('glyphicon-triangle-bottom');
-
-					else
-						classes.push('glyphicon-triangle-right');
-
-					attrs.$set('class', classes.join(' '));
-				}
-
-				$(elem).click(function()
-				{
-					if( $(this).parent().hasClass('collapsed') )
-						$(this).parent().removeClass('collapsed');
-					else
-						$(this).parent().addClass('collapsed');
-
-					updateIcon();
-				});
-
-				updateIcon();
-
-				/*if(!assetRoot){
-					$scope.$watchCollection('fields.nodes["'+key+'"].children', function(newval){
-					});
-				}
-				else {
-					//li(ng-repeat='child in threeMaps["[[assetRoot]]"].map["[[threeId]]"].children', ng-if='!isThreeNodeBound(child, "[[assetRoot]]")')
-					$scope.$watchCollection('threeMaps["'+assetRoot+'"].map["'+key+'"].children', function(newval){
-						console.log('three node updating icon');
-						$scope.updateIcon();
-					});
-				}*/
-			}
-		};
-	});
-
 
 
 	app.directive('customSelect', function()
