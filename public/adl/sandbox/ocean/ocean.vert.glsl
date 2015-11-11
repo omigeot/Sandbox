@@ -11,7 +11,7 @@ varying mat3 TBN;
 varying float h;
 varying float behind;
 varying vec2 sspos;
-
+varying vec3 stCamDir;
 uniform vec3 oCamPos;
 uniform vec3 wPosition;
 uniform float uChop;
@@ -178,7 +178,16 @@ void main() {
       vCamDir = (viewMatrix  * vec4(tPos, 1.0)).xyz;
       vCamDir = normalize(vCamDir);
 
+
       vCamDir = normalize( vec4(vCamDir, 0.0) * viewMatrix ).xyz;
+      mat4 viewMatrixNoT = viewMatrix;
+      viewMatrixNoT[3][2] = 0.0;
+      viewMatrixNoT[3][1] = 0.0;
+      viewMatrixNoT[3][0] = 0.0;
+      viewMatrixNoT[2][3] = 0.0;
+      viewMatrixNoT[1][3] = 0.0;
+      viewMatrixNoT[0][3] = 0.0;
+      stCamDir = normalize( vec4(0.0,0.0,1.0, 0.0) *viewMatrixNoT ).xyz;
       vCamLength = distance(oCamPos , tPos );
       tPos.x -= oCamPos.x;
       tPos.y -= oCamPos.y;

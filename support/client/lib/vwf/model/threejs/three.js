@@ -17798,7 +17798,7 @@ THREE.ShaderLib = {
             "#endif\n" +
             "#endif\n" +
             "   vec4 temp = vec4(mix(cubeColor.xyz,skycolor,colorBlend),1.0);\n" +
-            "   gl_FragColor = vec4(mix(temp.xyz,tFogColor.xyz,fogBlend),1.0);\n" +
+            "   gl_FragColor = vec4(mix(temp.xyz,tFogColor.xyz,fogBlend),0.0);\n" +
             "}\n",
 
         //the default shader - the one used by the analytic solver, just has some simple stuff

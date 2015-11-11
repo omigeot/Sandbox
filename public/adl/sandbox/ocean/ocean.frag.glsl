@@ -62,7 +62,9 @@ uniform samplerCube texture;
 uniform sampler2D oNormal;
 uniform sampler2D diffuse;
 uniform sampler2D refractionColorRtt;
+uniform sampler2D reflectionColorRtt;
 
+ 
 uniform mat4 projectionMatrix;
 
 
@@ -84,6 +86,7 @@ uniform vec3 Kd;
 
 uniform float waveEffectDepth;
 
+varying vec3 stCamDir;
 float unpackDepth( const in vec4 rgba_depth ) {
 
 	const vec4 bit_shift = vec4( 1.0 / ( 256.0 * 256.0 * 256.0 ), 1.0 / ( 256.0 * 256.0 ), 1.0 / 256.0, 1.0 );
@@ -204,7 +207,9 @@ void main() {
 	vec3 ref_vec = -reflect(-camdir, texNormal);
 	//ref_vec = mix(-ref_vec, ref_vec, sign(ref_vec.z));
 	sky = uReflectPow * .333 * pow(textureCube(texture, ref_vec).xyz,vec3(2.2));
-
+	vec4 skyPlaner = pow(texture2D(reflectionColorRtt,sspos.xy+ texNormal.xy/5.0).xyzw,vec4(2.2));
+	float planerMix = pow(dot(normalize(ref_vec),normalize(-stCamDir)),1.0); 
+	sky = mix(skyPlaner.xyz,sky,1.0-pow(planerMix,1.0) * skyPlaner.a);
 
 
 
@@ -319,7 +324,7 @@ void main() {
 
 
 	vec4 water  =  vec4(mix(pow(L0TP,vec3(2.2)), sky, ref), 1.0);
-	water += vec4(directionalLightColor[ 0 ], 1.0) * spec;
+	water += vec4(directionalLightColor[ 0 ], 1.0) * spec * max(0.0,1.0-skyPlaner.a);
 
 	vec4 foam = vec4(1.0, 1.0, 1.0, 1.0) * ndotl + vec4(ambientLightColor, 1.0);;
 	foam.a = 1.0;
@@ -338,8 +343,7 @@ void main() {
 	// D1 = D1/gl_FragCoord.w;
 	
 	gl_FragColor.xyz = pow(gl_FragColor.xyz,vec3(1.0/2.2));
-	//gl_FragColor = vec4(0.0,0.0,0.0,1.0);
-		//gl_FragColor.xyz = texNormal.xyz;
+	
 
 	//if(vCamLength > depth*100.0)
 	//	depth = 100.0;
