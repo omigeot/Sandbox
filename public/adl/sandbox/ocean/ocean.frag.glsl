@@ -265,7 +265,7 @@ void main() {
 	sky = uReflectPow * .333 * pow(textureCube(texture, ref_vec).xyz,vec3(2.2));
 	vec4 skyPlaner = pow(texture2D(reflectionColorRtt,sspos.xy+ texNormal.xy/5.0).xyzw,vec4(2.2));
 	float planerMix = pow(dot(normalize(ref_vec),normalize(-stCamDir)),1.0); 
-	sky = mix(skyPlaner.xyz,sky,1.0-pow(planerMix,1.0) * skyPlaner.a);
+	sky = mix(skyPlaner.xyz,sky,clamp((1.0-planerMix) * skyPlaner.a,0.0,1.0));
 
 
 
@@ -385,7 +385,8 @@ void main() {
 	vec4 foam = vec4(1.0, 1.0, 1.0, 1.0) * ndotl + vec4(ambientLightColor, 1.0);;
 	foam.a = 1.0;
 
-	float foamMix = max(0.0, h * diffuseTex.r) ;
+	float foamMix = max(0.0,  h * diffuseTex.r ) ;
+	foamMix += clamp(1.0+depth/0.3,0.0,1.0) * texture2D(diffuse,uv1 ).r;
 	//foamMix += (1.0-max(-depth/2.0,0.0))* diffuseTex.r;
 	gl_FragColor = mix(water, foam, clamp(foamMix * uFoam, 0.0, 1.0));
 
@@ -406,6 +407,7 @@ void main() {
         	#endif
 		#endif
 	#endif	
+          		//gl_FragColor.xyz = vec3();
 	//gl_FragColor.xyz = vFogPosition;
 	//if(vCamLength > depth*100.0)
 	//	depth = 100.0;
