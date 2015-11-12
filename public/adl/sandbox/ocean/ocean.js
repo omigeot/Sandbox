@@ -363,6 +363,7 @@
             this.mat.lights = true;
             this.mat.side = 0;
             this.mat.wireframe = false;
+            this.mat.fog = true;
             if (this.nearmesh)
                 this.nearmesh.material = this.mat;
         }
@@ -629,8 +630,12 @@
         {
              if (this.disable) return;
             var rttcam = _dView.getCamera();
-           
-
+            
+            var oldFogStart = _dScene.fog.vFalloffStart;
+            var camZ = rttcam.matrixWorld.elements[14];
+            var camHeightOverFog = camZ - oldFogStart;
+            var oldShadowEnabled = _dRenderer.shadowMapEnabled;
+            _dRenderer.shadowMapEnabled = false
             this.reflectionCam.near = rttcam.near;
             this.reflectionCam.far = rttcam.far;
             this.reflectionCam.fov = rttcam.fov;
@@ -643,16 +648,18 @@
             m.fromArray([1, 0, 0, 0 ,0, 1, 0, 0, 0, 0,-1,0, 0, 0, this.waterHeight *2, 1]);
          
             this.reflectionCam.matrix.multiplyMatrices(m,this.reflectionCam.matrix.clone());
-                this.reflectionCam.updateMatrixWorld(true);
+                
 
-            var e = this.reflectionCam.matrixWorld.elements;
+            var e = this.reflectionCam.matrix.elements;
             var front = [e[0],e[1],e[2]];
-            var side = [e[4],e[5],e[6]];
-            var up = MATH.crossVec3(side,front);
-            e[8] = up[0];
-            e[9] = up[1];
-            e[10] = up[2];
+            var side = [e[8],e[9],e[10]];
+            var up = MATH.crossVec3(front,side);
+            e[4] = up[0];
+            e[5] = up[1];
+            e[6] = up[2];
+            this.reflectionCam.updateMatrixWorld(true);
 
+            _dScene.fog.vFalloffStart = this.reflectionCam.matrixWorld.elements[14] - camHeightOverFog;
             _dRenderer.setRenderTarget(this.reflectionColorRtt);
             _dRenderer.clear();
             _dRenderer.setBlending(THREE.CustomBlending,THREE.AddEquation,THREE.OneFactor,THREE.ZeroFactor);
@@ -660,17 +667,20 @@
             _dSky.material.transparent = true;
             _RenderManager.renderObject(_dSky,_dScene,this.reflectionCam);
             _dSky.material.transparent = false;
-            _dRenderer.setRenderTarget(this.null);
+            _dRenderer.setRenderTarget(null);
             _dSky.visible = false;
             _dSky.material.blending = 9;
             this.setupProjectionMatrix(this.reflectionCam)
              this.nearmesh.visible = false;
            //flip all faces by tricking three.js into thinking front is back and back is front
-            THREE.BackSide = 0;
-            THREE.FrontSide = 1;
+         //   THREE.BackSide = 0;
+            //THREE.FrontSide = 1;
+            _dRenderer.flipCulling = true;
             _dRenderer.render(_dScene, this.reflectionCam, this.reflectionColorRtt, false);
-            THREE.BackSide = 1;
-            THREE.FrontSide = 0;
+            _dRenderer.flipCulling = false;
+            _dScene.fog.vFalloffStart = oldFogStart;
+           // THREE.BackSide = 1;
+            //THREE.FrontSide = 0;
             _dSky.visible = true;
            
 
@@ -697,6 +707,7 @@
             _dRenderer.setClearColor(new THREE.Color(0,0,1),1);
             
             this.nearmesh.visible = true;
+            _dRenderer.shadowMapEnabled = oldShadowEnabled;
          //       _dView.getCamera().far = _far;
 
         }
@@ -790,4 +801,6 @@
         var ocean1 = new ocean(childID, childSource, childName, childType, assetSource, asyncCallback);
         return ocean1;
     }
+    
 })();
+//@ sourceURL=threejs.subdriver.ocean

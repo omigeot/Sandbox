@@ -12,8 +12,10 @@ varying float h;
 varying float behind;
 varying vec2 sspos;
 varying vec3 stCamDir;
+varying vec3 vFogPosition;
+
 uniform vec3 oCamPos;
-uniform vec3 wPosition;
+uniform vec3 wPosition; 
 uniform float uChop;
 uniform mat4 mProj;
 uniform float t;
@@ -193,7 +195,7 @@ void main() {
       tPos.y -= oCamPos.y;
 
 
-
+      vFogPosition = (modelMatrix * vec4(tPos.xyz,1.0)).xyz;
       gl_Position = projectionMatrix * modelViewMatrix * vec4(tPos , 1);
       sspos = gl_Position.xy / gl_Position.w;
       sspos = sspos * .5 + 0.5 ;
