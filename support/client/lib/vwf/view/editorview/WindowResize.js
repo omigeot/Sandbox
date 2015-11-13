@@ -140,7 +140,7 @@ define({
 
 			}, 80);
 		};
-
+        if($('#vwf-root > #resizer').length > 0 && $('#vwf-root > #resizer')[0].contentDocument)
 		$('#vwf-root > #resizer')[0].contentDocument.defaultView.addEventListener('resize', window._resizeCanvas);
         if(toolsLoaded) //don't show the blue focus border on worlds that don't have editor tools
         {

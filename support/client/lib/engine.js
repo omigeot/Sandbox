@@ -2475,7 +2475,7 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
 
             if (componentIsDescriptor(childComponent) && childComponent.continues && componentIsURI(childComponent.continues))
             { // TODO: for "includes:", accept an already-loaded component (which componentIsURI exludes) since the descriptor will be loaded again
-                function continueBaseLoaded(data)
+                var continueBaseLoaded = function (data)
                 {
                     //cache for future use
                     if (!continuesDefs[childComponent.continues])
