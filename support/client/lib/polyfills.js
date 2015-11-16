@@ -52,7 +52,12 @@ var fills = {
             }
 
         }
+        Math.sign = function(a)
+        {
+            if(a >= 0) return true;
+            return false;
 
+        }
         fills.disableLog();
     },
     debounce:function()
