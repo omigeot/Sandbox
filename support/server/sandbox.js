@@ -9,7 +9,7 @@ var libpath = require('path'),
     YAML = require('js-yaml'),
 	sass = require('node-sass');
 var logger = require('./logger');
-
+var requestProxy = require('express-request-proxy');
 
 
 
@@ -263,10 +263,17 @@ function startVWF() {
 					});
 				}
 				else {
-					app.all(global.configuration.assetAppPath+'/*', function(req,res){
-						var actualPath = req.path.slice(global.configuration.assetAppPath.length);
-						res.redirect(global.configuration.remoteAssetServerURL+actualPath);
-					});
+                    app.all(global.configuration.assetAppPath+'/:id(*)', function(req,res,next)
+                    {   
+                        //proxy the traffic to avoid redirect follow issues
+                        var proxy = requestProxy({
+                        url:global.configuration.remoteAssetServerURL + "/" + req.params.id,
+                        cache:false});
+                        proxy(req,res,next)
+                    });
+                    
+                   
+					
 					logger.info('Hosting assets remotely at', global.configuration.remoteAssetServerURL);
 				}
 				cb();
