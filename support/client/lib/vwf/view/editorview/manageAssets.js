@@ -34,7 +34,24 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 					updateAsset(id);
 				} else {
 					var cb = typeof(id) === 'function' ? id : null;
-					$http.get(self.appPath + '/assets/by-user/' + _UserManager.GetCurrentUserName()).success(
+					$http.get(
+						self.appPath + '/assets/by-meta/all-of' +
+						'?user_name=' + encodeURIComponent(_UserManager.GetCurrentUserName()) +
+						'&returns=id,name,description,type,size,license,thumbnail,permissions,group_name' +
+						'&permFormat=json')
+					.success(function(list, status)
+					{
+						if( status === 200 ){
+							for(var i in list.matches){
+								self[i] = list.matches[i];
+							}
+							for(var i in self){
+								if(!list.matches[i])
+									delete self[i];
+							}
+						}
+					});
+					/*$http.get(self.appPath + '/assets/by-user/' + _UserManager.GetCurrentUserName()).success(
 						function(list, status) {
 							if (status !== 304) {
 								var ids = Object.keys(list.assets);
@@ -44,7 +61,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 								}
 							}
 						}
-					);
+					);*/
 				}
 			}.bind(data)
 		});
