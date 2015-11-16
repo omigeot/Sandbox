@@ -57,10 +57,12 @@
         this.seed = 12312123;
         this.generateWaves = function()
         {
+            this.uniforms.maxWaveDisplace.value = this.amplitude;
             seedRandom = new Math.seedrandom(this.seed);
             for (var i = 0; i < this.waveNum; i++)
             {
                 this.timers[i] = (rnd2());
+                this.uniforms.gB.value[i] = 1;
             }
             this.uniforms.waves.value.length = 0;
             for (var i = 0; i < this.waveNum; i++)
@@ -72,7 +74,7 @@
                 var b = rnd2();
                 var amp = rnd2() * this.amplitudeVariation + this.amplitude;
                 this.uniforms.waves.value[i].x = amp;
-                this.uniforms.waves.value[i].ox = amp;
+                this.uniforms.waves.value[i].ox = 5 + 10 * rnd2();
                 this.uniforms.waves.value[i].w = b;
                 console.log(amp);
             }
@@ -127,7 +129,7 @@
                 A[i] = 0.5 / (w * 2.718281828459045); //for ocean on Earth, A is ususally related to L
                 
                 //S[i] =     1.0 * uMag; //for ocean on Earth, S is ususally related to L
-                S[i] = (waves[i].w + 0.5) * Math.sqrt(.98 * (3.0 * PI / w));
+                S[i] = .65 * (waves[i].w + 0.5) * Math.sqrt(.98 * (3.0 * PI / w));
                 W[i] = w;
                 Q[i] = Qa / (w * A[i] * this.waveNum);
             }
@@ -197,6 +199,7 @@
                 S:{type: "fv1",value: []},
                 W:{type: "fv1",value: []},
                 Q:{type: "fv1",value: []},
+                gB:{type: "fv1",value: []},
                 uHalfGrid:
                 {
                     type: "f",
@@ -303,6 +306,11 @@
                 {
                     type: "v3",
                     value: new THREE.Vector3(0, 0, 0, 1)
+                },
+                maxWaveDisplace:
+                {
+                    type: "f",
+                    value: 1
                 }
             };
             var sky = vwf_view.kernel.kernel.callMethod(vwf.application(), 'getSkyMat')
@@ -385,15 +393,16 @@
             root.updateMatrixWorld();
             var now = performance.now();
             var deltaT = now - this.lastFrame || 0;
-            /*for(var i =0; i < this.waveNum; i++)
+            
+            for(var i =0; i < this.waveNum; i++)
             {
                 this.timers[i] += deltaT;
-                this.waves[i].x = this.waves[i].ox * ((Math.sin(this.timers[i]/100)+1.0)/2.0);
-                if(this.waves[i].x < .001)
+                this.uniforms.gB.value[i] =   ((Math.sin(this.waves[i].ox +this.timers[i]/(this.waves[i].ox * 20000))+1.0)/2.0);
+                if(this.uniforms.gB.value[i] < .0001)
                 {
                     var amp = rnd2() * this.amplitudeVariation + this.amplitude;
-                    this.waves.x = amp;
-                    this.waves.ox = amp;
+                    //this.waves[i].x = amp;
+                   // this.waves[i].ox = amp;
                     var amp = rnd2() * this.directionVariation + this.direction;
                     var dir = [1,0];
                     var x1 = 1 * Math.cos(amp) - 0 * Math.sin(amp);
@@ -401,7 +410,7 @@
                     this.uniforms.waves.value[i].y = x1;
                     this.uniforms.waves.value[i].z = y1;
                 }
-            }*/
+            }
             var _viewProjectionMatrix = new THREE.Matrix4();
             var target = new THREE.Vector3(0, 0, -Math.abs(this.f));
             target.applyMatrix4(_dView.getCamera().matrixWorld);
@@ -472,8 +481,7 @@
                 if (projSpacePoints[i].y > yMax)
                     yMax = projSpacePoints[i].y;
             }
-           // xMin -= this.b;
-           // xMax += this.b;
+          
             yMin -= this.b;
             
 
@@ -672,15 +680,12 @@
             _dSky.material.blending = 9;
             this.setupProjectionMatrix(this.reflectionCam)
              this.nearmesh.visible = false;
-           //flip all faces by tricking three.js into thinking front is back and back is front
-         //   THREE.BackSide = 0;
-            //THREE.FrontSide = 1;
+         
             _dRenderer.flipCulling = true;
             _dRenderer.render(_dScene, this.reflectionCam, this.reflectionColorRtt, false);
             _dRenderer.flipCulling = false;
             _dScene.fog.vFalloffStart = oldFogStart;
-           // THREE.BackSide = 1;
-            //THREE.FrontSide = 0;
+        
             _dSky.visible = true;
            
 
@@ -693,7 +698,7 @@
             _dRenderer.render(_dScene, rttcam, rtt);
            
             var _far = _dView.getCamera().far;
-          //      _dView.getCamera().far = 100.0;
+        
           _dRenderer.setBlending(THREE.CustomBlending,THREE.AddEquation,THREE.OneFactor,THREE.ZeroFactor);
             rtt = this.refractionDepthRtt;
             _dRenderer.setRenderTarget(rtt);
@@ -708,7 +713,7 @@
             
             this.nearmesh.visible = true;
             _dRenderer.shadowMapEnabled = oldShadowEnabled;
-         //       _dView.getCamera().far = _far;
+       
 
         }
         this.settingProperty = function(propertyName, propertyValue)

@@ -34,6 +34,7 @@ uniform float A[numWaves];
 uniform float S[numWaves];
 uniform float W[numWaves];
 uniform float Q[numWaves];
+uniform float gB[numWaves];
 uniform vec2 D[numWaves];
 uniform float gA;
 
@@ -81,9 +82,6 @@ void main() {
 
       vec4 tpos1 = mProj * vec4(tPos.xy, -0.0, 1.0);
       vec4 tpos2 = mProj * vec4(tPos.xy, 1.0, 1.0);
-
-
-
 
 
       float p_x = tpos1.x;
@@ -139,11 +137,11 @@ void main() {
                   float yi = Qi * Ai * D[i].y * cos( dot(w * D[i], xy) + q * st);
                   float hi =  Ai * sin( dot(w * D[i], xy) + q * st );
 
-                  tPos.x += xi * gA;
-                  tPos.y += yi * gA;
-                  tPos.z += hi * gA;
+                  tPos.x += xi * gA*gB[i];
+                  tPos.y += yi * gA*gB[i];
+                  tPos.z += hi * gA*gB[i];
 
-                  float WA = w * Ai * gA;
+                  float WA = w * Ai * gA *gB[i];
                   float S0 = sin(w * dot(D[i], tPos.xy) + q * st);
                   float C0 = cos(w * dot(D[i], tPos.xy) + q * st);
 
