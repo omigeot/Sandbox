@@ -336,9 +336,9 @@
             this.getRoot().add(this.nearmesh);
             this.nearmesh.renderDepth = 3;
             this.nearmesh.frustumCulled = false;
-            _dView.bind('prerender', this.prerender.bind(this));
+            _dView.bind('prerender', this.prerender);
             if(_SettingsManager.getKey('reflections'))
-                _dView.bind('postprerender', this.renderRefractions.bind(this));
+                _dView.bind('postprerender', this.renderRefractions);
             window._dOcean = this;
             this.waves = this.uniforms.waves.value;
             this.generateWaves();
@@ -514,7 +514,7 @@
             this.uniforms.wPosition.value.set(0, 0, 0);
             this.lastFrame = now;
             this.uniforms.uWaterHeight.value = this.waterHeight;
-        }
+        }.bind(this)
         this.mRange = [
             1, 0, 0, 0,
             0, 1, 0, 0,
@@ -693,7 +693,7 @@
             _dRenderer.flipCulling = false;
             _dScene.fog.vFalloffStart = oldFogStart;
         
-            _dSky.visible = true;
+           
            
 
 
@@ -720,8 +720,14 @@
             
             this.nearmesh.visible = true;
             _dRenderer.shadowMapEnabled = oldShadowEnabled;
+             _dSky.visible = true;
        
 
+        }.bind(this)
+        this.deletingNode = function(propertyName, propertyValue)
+        {
+            _dRenderer.unBind("prerender",this.prerender);
+            _dRenderer.unBind("postprerender",this.renderRefractions);
         }
         this.settingProperty = function(propertyName, propertyValue)
         {
@@ -729,6 +735,10 @@
             {
                 this.uniforms.uMag.value = propertyValue;
                 this.setupGertsnerShadeConstants()
+            }
+            if (propertyName == "waterHeight")
+            {
+                this.waterHeight = propertyValue;
             }
             if (propertyName == "amplitude")
             {
