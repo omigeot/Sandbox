@@ -1,8 +1,7 @@
 
 
 #define PI 3.1415926535897932384626433832795
-//#define useReflections
-//#define useRefractions
+
 uniform vec3 ambientLightColor;
 #if MAX_DIR_LIGHTS > 0
 uniform vec3 directionalLightColor[ MAX_DIR_LIGHTS ];

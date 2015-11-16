@@ -327,7 +327,8 @@
             {
                 this.uniforms[i] = THREE.UniformsLib.lights[i];
             }
-            this.setupRenderTargets();
+            if(_SettingsManager.getKey('reflections'))
+                this.setupRenderTargets();
             this.buildMat();
             this.near = new THREE.PlaneGeometry(1, 1, this.resolution, this.resolution);
             this.nearmesh = new THREE.Mesh(this.near, this.mat);
@@ -336,7 +337,8 @@
             this.nearmesh.renderDepth = 3;
             this.nearmesh.frustumCulled = false;
             _dView.bind('prerender', this.prerender.bind(this));
-            _dView.bind('postprerender', this.renderRefractions.bind(this));
+            if(_SettingsManager.getKey('reflections'))
+                _dView.bind('postprerender', this.renderRefractions.bind(this));
             window._dOcean = this;
             this.waves = this.uniforms.waves.value;
             this.generateWaves();
@@ -357,9 +359,14 @@
             this.uniforms.uHalfGrid.value = this.resolution / 2;
         }
         this.buildMat = function()
-        {
-            this.vertexShader = "#define numWaves " + this.waveNum + "\n" + this.getSync(this.vertShaderURL);
-            this.fragmentShader = "#define numWaves " + this.waveNum + "\n" + this.getSync(this.fragShaderURL);
+        {   
+            var defines = "#define numWaves " + this.waveNum + "\n";
+            if(_SettingsManager.getKey('reflections'))
+            {
+                defines += "#define useReflections\n#define useRefractions\n"
+            }
+            this.vertexShader = defines + this.getSync(this.vertShaderURL);
+            this.fragmentShader = defines + this.getSync(this.fragShaderURL);
             this.mat = new THREE.ShaderMaterial(
             {
                 uniforms: this.uniforms,
