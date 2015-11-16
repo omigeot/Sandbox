@@ -47,7 +47,7 @@
     "passport.socketio": "~3.4.1",
     "request": "~2.30.0",
     "requirejs": "~2.1.8",
-    "sandbox-asset-server": "1.2.x",
+    "sandbox-asset-server": "1.3.x",
     "serve-favicon": "~2.2.0",
     "socket.io": "~1.3.2",
     "socket.io-client": "~0.9.16",
