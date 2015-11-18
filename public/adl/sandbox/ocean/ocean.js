@@ -726,8 +726,8 @@
         }.bind(this)
         this.deletingNode = function(propertyName, propertyValue)
         {
-            _dRenderer.unBind("prerender",this.prerender);
-            _dRenderer.unBind("postprerender",this.renderRefractions);
+            _dRenderer.unbind("prerender",this.prerender);
+            _dRenderer.unbind("postprerender",this.renderRefractions);
         }
         this.settingProperty = function(propertyName, propertyValue)
         {
