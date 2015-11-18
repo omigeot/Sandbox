@@ -455,6 +455,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 			return perms;
 		}
 
+		$scope.previewUrl = function(id){
+			window.open($scope.assets.appPath+'/assets/'+id);
+		};
+
 		$scope.fetchJSONAsset = function(id)
 		{
 			$.getJSON($scope.assets.appPath+'/assets/'+id)
