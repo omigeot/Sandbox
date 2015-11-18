@@ -37,10 +37,12 @@ mixin manageAssets_body
 
 		#propertyBrowser.verticalLayout
 
-			p#assetUrl.fixed-height(onselectstart='event.stopImmediatePropagation()') 
+			//p#assetUrl.fixed-height(onselectstart='event.stopImmediatePropagation()') 
+			a#assetUrl.fixed-height(ng-href='{{assets.appPath}}/assets/{{selectedAsset}}', target='_blank')
 				| {{assets.appPath}}
 				wbr
 				| /assets/{{selectedAsset}}
+
 
 			.scrollArea
 
