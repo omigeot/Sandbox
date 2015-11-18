@@ -364,7 +364,7 @@ function startVWF() {
                     }
                     //first, check if the build file already exists. if so, skip this step
                     if (fs.existsSync(libpath.resolve(libpath.join(__dirname, '..', '..', 'build', 'index.css')))) {
-                        logger.warn('Build already exists. Use --clean to rebuild');
+                        logger.warn('Build already exists. Use -clean to rebuild');
                         loadCssIntoCache();
                         return;
                     } else {
