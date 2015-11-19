@@ -3,7 +3,6 @@
 #define PI 3.1415926535897932384626433832795
 
 varying vec3 vNormal;
-varying vec3 vSundir;
 varying vec3 vCamDir;
 varying vec3 texcoord0;
 varying float vCamLength;
@@ -24,11 +23,9 @@ uniform float uHalfGrid;
 
 uniform float uWaterHeight;
 
-uniform vec4 waves[9];
 
 
 
-vec3 sundir = vec3(.5, .5, .1);
 uniform float L[numWaves];
 uniform float A[numWaves];
 uniform float S[numWaves];
@@ -119,8 +116,8 @@ void main() {
       for (int i = 0; i < numWaves; i++)
       {
 
-            float x = tPos.x + D[i].x * waves[i].w;
-            float y = tPos.y + D[i].y * waves[i].w;
+            float x = tPos.x + D[i].x * W[i];
+            float y = tPos.y + D[i].y * W[i];
             //if (L[i] > edgeLen2*4.0)
             {
                   float st = t;
@@ -168,7 +165,7 @@ void main() {
                  tNormal.x, tNormal.y, tNormal.z);
 
       vNormal = normalize(tNormal);
-      vSundir = normalize(sundir);
+      
 
 
 
