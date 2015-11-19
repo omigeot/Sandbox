@@ -40,8 +40,8 @@ varying vec3 texcoord0;
 varying mat3 TBN;
 varying float vCamLength;
 varying float h;
-varying float behind;
 varying vec2 sspos;
+
 
 float nSnell = 1.34;
 float kD = .91;
@@ -86,7 +86,7 @@ uniform vec3 Kd;
 
 uniform float waveEffectDepth;
 
-varying vec3 stCamDir;
+
 
 
 
@@ -175,7 +175,7 @@ float LinearizeDepth(float depth)
 
 void main() {
 
-	if (behind > 0.0)
+	if (vCamLength < 0.5)
 	{
 		discard;
 	//	return;
@@ -266,7 +266,7 @@ void main() {
 	
 	#ifdef useReflections
 		vec4 skyPlaner = pow(texture2D(reflectionColorRtt,sspos.xy+ (texNormal.xy+vec2(0.0007,0.0))/vec2(50.0,500.0) * (vCamLength)).xyzw,vec4(2.2));
-		float planerMix = dot(normalize(ref_vec),normalize(-stCamDir));
+		float planerMix = dot(normalize(ref_vec),normalize(vCamDir));
 		planerMix = clamp((planerMix) * (skyPlaner.a),0.0,1.0);
 		sky = mix(sky,skyPlaner.xyz,planerMix);
 	#else
