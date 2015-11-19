@@ -2864,9 +2864,9 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             this.BuildMoveGizmo();
             this.SelectObject(null, 2, true);
             _dView.bind('prerender', this.updateGizmo.bind(this));
-            document.oncontextmenu = function() {
+            $('#vwf-root').on('contextmenu', function() {
                 return false;
-            };
+            });
             this.SelectionBoundsContainer = new THREE.Object3D();
             this.SelectionBoundsContainer.name = "SelectionBoundsContainer";
             this.findscene().add(this.SelectionBoundsContainer, true);
