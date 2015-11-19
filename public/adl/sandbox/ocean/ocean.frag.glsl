@@ -34,14 +34,12 @@ uniform vec3 wrapRGB;
 
 
 varying vec3 vFogPosition;
-varying vec3 vSundir;
 varying vec3 vNormal;
 varying vec3 vCamDir;
 varying vec3 texcoord0;
 varying mat3 TBN;
 varying float vCamLength;
 varying float h;
-varying vec3 vViewPosition;
 varying float behind;
 varying vec2 sspos;
 
@@ -73,7 +71,6 @@ uniform sampler2D refractionDepthRtt;
 uniform float uChop;
 uniform float uReflectPow;
 uniform float uFoam;
-uniform vec4 waves[9];
 uniform float uHalfGrid;
 uniform float uAmbientPower;
 uniform float uSunPower;
@@ -223,7 +220,7 @@ void main() {
 
 	mapNormal /= 2.0;
 	mapNormal = 2.0 * mapNormal.xyz - 1.0;
-	mapNormal.xy *= max(0.0, (uChop / 30.0 *  waves[0].x));
+	mapNormal.xy *= max(0.0, (uChop / 0.6 *  A[0]));
 	mapNormal.xy *= uNormalPower;
 	mapNormal = normalize(mapNormal);
 	pNormal.xy *= max(0.0, uChop / 4.0);
