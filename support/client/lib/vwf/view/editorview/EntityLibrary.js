@@ -10,10 +10,9 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			},
 			link: function(scope, elem, attrs)
 			{
-				elem.accordion({header: 'h3', heightStyle: 'content', collapsible: true});
+				elem.accordion({header: 'h3', heightStyle: 'content', collapsible: true, active: false});
 
-				scope.$watch('data', function(newval)
-				{
+				scope.$watchCollection('data', function(newval){
 					elem.accordion('refresh');
 				});
 
@@ -67,7 +66,6 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 		libraries.addLibrary = function(name, url)
 		{	
-
 			var newLib = {name: name};
 			$http.get(url).success(function(lib){
 				newLib.content = lib;
@@ -86,7 +84,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 		return libraries;
 	}]);
 
-	app.controller('EntityLibraryController', ['$scope','LibraryDataManager','AssetDataManager', function($scope, staticLibs, assets)
+	app.controller('EntityLibraryController', ['$scope','LibraryDataManager','AssetDataManager','$http', function($scope, staticLibs, assets, $http)
 	{
 		window._EntityLibrary = $scope;
 		
@@ -191,10 +189,26 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			alertify.prompt('Enter the URL for an asset library',function(ok,val){
 				if(ok)
 				{
-					var name = val.match(/\/[\._a-zA-Z0-9]*?$/) ? val.match(/\/[\._a-zA-Z0-9]*?$/)[0] : val;
-					staticLibs.addLibrary(name,val);
+					var name = val.match(/\/[\._a-zA-Z0-9]*?$/);
+					name = name && name[0] || val;
+					var newLib = {name: name, userAdded: true};
+					$http.get(val+'/meta/name').then(function(res){
+						newLib.name = res.data;
+					});
+					$http.get(val).then(function(res){
+						newLib.content = res.data;
+						$scope.combinedLibs.splice(0,0, newLib);
+					},
+					function(){
+						alertify.log('Failed to add content library');
+					});
 				}
 			});
+		}
+
+		$scope.promptRemoveLibrary = function(index)
+		{
+			console.log(index);
 		}
 
 		$scope.combinedLibs = convertAndCombine(assets, staticLibs);
