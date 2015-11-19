@@ -268,9 +268,10 @@ void main() {
 	sky = uReflectPow * .333 * pow(textureCube(texture, ref_vec).xyz,vec3(2.2));
 	
 	#ifdef useReflections
-		vec4 skyPlaner = pow(texture2D(reflectionColorRtt,sspos.xy+ texNormal.xy/5.0).xyzw,vec4(2.2));
+		vec4 skyPlaner = pow(texture2D(reflectionColorRtt,sspos.xy+ (texNormal.xy+vec2(0.0007,0.0))/vec2(50.0,500.0) * (vCamLength)).xyzw,vec4(2.2));
 		float planerMix = dot(normalize(ref_vec),normalize(-stCamDir));
-		sky = mix(skyPlaner.xyz,sky,clamp((1.0-planerMix) * skyPlaner.a,0.0,1.0));
+		planerMix = clamp((planerMix) * (skyPlaner.a),0.0,1.0);
+		sky = mix(sky,skyPlaner.xyz,planerMix);
 	#else
 		vec4 skyPlaner = vec4(0.0,0.0,0.0,0.0);	
 	#endif
@@ -365,5 +366,6 @@ void main() {
         	#endif
 		#endif
 	#endif	
+	//gl_FragColor.xyz = vec3(planerMix);
           		
 }
