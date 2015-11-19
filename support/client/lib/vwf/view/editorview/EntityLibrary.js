@@ -189,8 +189,8 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			alertify.prompt('Enter the URL for an asset library',function(ok,val){
 				if(ok)
 				{
-					var name = val.match(/\/[\._a-zA-Z0-9]*?$/);
-					name = name && name[0] || val;
+					var name = val.match(/\/([ \._a-zA-Z0-9]+)\.json$/);
+					name = name && name[1] || val;
 					var newLib = {name: name, userAdded: true};
 					$http.get(val+'/meta/name').then(function(res){
 						newLib.name = res.data;
@@ -206,9 +206,18 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			});
 		}
 
-		$scope.promptRemoveLibrary = function(index)
+		$scope.promptRemoveLibrary = function(index, $event)
 		{
-			console.log(index);
+			$event.stopImmediatePropagation();
+			console.info(index);
+			alertify.confirm('Are you sure you want to remove the "'+$scope.combinedLibs[index].name+'" library?',
+				function(ok){
+					if(ok){
+						$scope.combinedLibs.splice(index, 1);
+						$scope.$apply();
+					}
+				}
+			);
 		}
 
 		$scope.combinedLibs = convertAndCombine(assets, staticLibs);
