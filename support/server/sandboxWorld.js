@@ -12,6 +12,13 @@ var xapi = require('./xapi');
 var sandboxState = require('./sandboxState').sandboxState;
 var _simulationManager = require('./simulationManager').simulationManager;
 var GUID = require('node-uuid').v4;
+
+function QueuedMessage(a,b)
+{
+    this.message = a;
+    this.client = b;
+
+}
 //***node, uses REGEX, escape properly!
 function strEndsWith(str, suffix)
     {
@@ -581,159 +588,231 @@ function sandboxWorld(id, metadata)
             this.requestTimer = new timeout(this);
         this.status = STATUS.PENDING_STATE;
     }
+    this.queue = [];
+    this.ready = true;
     this.message = function(msg, sendingclient)
     {
+        this.queue.push(new QueuedMessage(msg,sendingclient));
+        this.dispatch();
+    }
+    this.dispatch = function()
+    {
+        if (this.queue.length > 0 && this.ready)
+        {
+            var message = this.queue.shift();
+            this.ready = false;
+            var self = this;
+           
+            this.process_message(message.message, message.client, function()
+            {
+                
+                
+                async.nextTick(function()
+                {
+                    self.ready = true;
+                    self.dispatch();    
+                })
+                
+            });
+        }
+    }
+    this.process_message = function(msg, sendingclient, cb)
+    {
+        var doReflect = true;
+        var internals = {};
         try
         {
-            //need to add the client identifier to all outgoing messages
-            try
-            {
-                var message = this.messageCompress.unpack(msg);
-                message.time = this.time;
-            }
-            catch (e)
-            {
-                return;
-            }
-            //logger.info(message);
-            message.client = sendingclient.id;
-            if (message.action == "saveStateResponse")
-            {
-                SaveInstanceState(this.id, message.data, sendingclient);
-                return;
-            }
-            //do not accept messages from clients that have not been claimed by a user
-            //currently, allow getstate from anonymous clients
-            if (!this.state.metadata.publishSettings.allowAnonymous && sendingclient.loginData.anonymous && message.action != "getState" && message.member != "latencyTest")
-            {
-                return;
-            }
-            //route callmessage to the state to it can respond to manip the server side copy
-            if (message.action == 'callMethod')
-                this.state.calledMethod(message.node, message.member, message.parameters);
-            if (message.action == 'simulationStateUpdate')
-                this.state.simulationStateUpdate(message.parameters);
-            if (message.action == 'callMethod' && message.node == 'index-vwf' && message.member == 'PM')
-            {
-                var textmessage = JSON.parse(message.parameters[0]);
-                if (textmessage.receiver == '*System*')
-                {
-                    var red, blue, reset;
-                    red = '\u001b[31m';
-                    blue = '\u001b[33m';
-                    reset = '\u001b[0m';
-                    logger.warn(blue + textmessage.sender + ": " + textmessage.text + reset, 0);
-                }
-                //send the message to the sender and to the receiver
-                if (textmessage.receiver)
-                    this.clients[textmessage.receiver].emit('m', this.messageCompress.pack(message));
-                if (textmessage.sender)
-                    this.clients[textmessage.sender].emit('m', this.messageCompress.pack(message));
-                return;
-            }
-            // only allow users to hang up their own RTC calls
-            var rtcMessages = ['rtcCall', 'rtcVideoCall', 'rtcData', 'rtcDisconnect'];
-            if (message.action == 'callMethod' && message.node == 'index-vwf' && rtcMessages.indexOf(message.member) != -1)
-            {
-                var params = message.parameters[0];
-                // allow no transmitting of the 'rtc*Call' messages; purely client-side
-                if (rtcMessages.slice(0, 2)
-                    .indexOf(message.member) != -1)
-                    return;
-                // route messages by the 'target' param, verifying 'sender' param
-                if (rtcMessages.slice(2)
-                    .indexOf(message.member) != -1 &&
-                    params.sender == socket.id
-                )
-                {
-                    var client = this.clients[params.target];
-                    if (client)
-                        client.emit('m', this.messageCompress.pack(message));
-                }
-                return;
-            }
-            //We'll only accept a setProperty if the user has ownership of the object
-            if (message.action == "deleteNode" || message.action == "createMethod" || message.action == "createProperty" || message.action == "createEvent" ||
-                message.action == "deleteMethod" || message.action == "deleteProperty" || message.action == "deleteEvent" || message.action == "setProperty")
-            {
-                if (!this.state.validate(message.action, message.node, sendingclient))
-                {
-                    return;
-                }
-            }
-            if (message.action == "setProperty")
-                this.state.satProperty(message.node, message.member, message.parameters[0]);
-            //We'll only accept a deleteNode if the user has ownership of the object
-            if (message.action == "deleteNode")
-            {
-                var displayname = this.state.getProperty(message.node, 'DisplayName');
-                this.state.deletedNode(message.node)
-                this.simulationManager.nodeDeleted(message.node);
-                xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, displayname || message.node, null, this.id);
-            }
-            //We'll only accept a createChild if the user has ownership of the object
-            //Note that you now must share a scene with a user!!!!
-            if (message.action == "createChild")
-            {
-                var childComponent = JSON.parse(JSON.stringify(message.parameters[0]));
-                if (!this.state.validateCreate(message.node, message.member, childComponent, sendingclient))
-                {
-                    return;
-                }
-                var childID = this.state.createdChild(message.node, message.member, childComponent)
-                xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties.DisplayName, null, this.id);
-            }
-            var compressedMessage = this.messageCompress.pack(message);
-            //distribute message to all clients on given instance
-            //for now, we need better filtering of messages. 
-            //var concernedClients = this.simulationManager.getClientsForMessage(message, sendingclient)
-            for (var i in this.clients)
-            {
-                var client = this.clients[i];
-                //if the message was get state, then fire all the pending messages after firing the setState
-                if (message.action == "getState" && client.pending == true)
-                {
-                    this.Log('Got State', 2);
-                    if (this.requestTimer)
-                        this.requestTimer.deleteMe();
-                    var state = message.result;
-                    this.status = STATUS.DEFAULT;
-                    this.state.setVWFDef(JSON.parse(JSON.stringify(state)));
-                    this.messageClient(client,
-                    {
-                        "action": "status",
-                        "parameters": ["State Received, Transmitting"],
-                        "time": this.getStateTime
-                    }, false, false)
-                    this.messageClient(client,
-                    {
-                        "action": "setState",
-                        "parameters": [state],
-                        "time": this.getStateTime
-                    }, true, true)
-                    client.pending = false;
-                    this.trigger('stateSent');
-                }
-                else
-                {
-                    //if (concernedClients.indexOf(client) != -1)
-                        this.messageClient(client, compressedMessage, false, false);
-                }
-            }
-            if (message.action == "createChild")
-            {
-                console.log('client simulate own node:' + childID)
-                this.simulationManager.nodeCreated(childID, sendingclient);
-            }
+            var message = this.messageCompress.unpack(msg);
+            message.time = this.time;
         }
         catch (e)
         {
-            //safe to catch and continue here
-            logger.error('Error in reflector: onMessage');
-            logger.error(e);
-            logger.error(e.stack);
+            cb();
+            return;
         }
+        var self = this;
+        async.series([
+
+                function process(cb2)
+                {
+                    //need to add the client identifier to all outgoing messages
+                    try
+                    {
+                        //logger.info(message);
+                        message.client = sendingclient.id;
+                        if (message.action == "saveStateResponse")
+                        {
+                            SaveInstanceState(self.id, message.data, sendingclient);
+                            doReflect = false;
+                            cb2();
+                            return;
+                        }
+                        //do not accept messages from clients that have not been claimed by a user
+                        //currently, allow getstate from anonymous clients
+                        if (!self.state.metadata.publishSettings.allowAnonymous && sendingclient.loginData.anonymous && message.action != "getState" && message.member != "latencyTest")
+                        {
+                            doReflect = false;
+                            cb2();
+                            return;
+                        }
+                        //route callmessage to the state to it can respond to manip the server side copy
+                        if (message.action == 'callMethod')
+                            self.state.calledMethod(message.node, message.member, message.parameters);
+                        if (message.action == 'simulationStateUpdate')
+                            self.state.simulationStateUpdate(message.parameters);
+                        if (message.action == 'callMethod' && message.node == 'index-vwf' && message.member == 'PM')
+                        {
+                            var textmessage = JSON.parse(message.parameters[0]);
+                            if (textmessage.receiver == '*System*')
+                            {
+                                var red, blue, reset;
+                                red = '\u001b[31m';
+                                blue = '\u001b[33m';
+                                reset = '\u001b[0m';
+                                logger.warn(blue + textmessage.sender + ": " + textmessage.text + reset, 0);
+                            }
+                            //send the message to the sender and to the receiver
+                            if (textmessage.receiver)
+                                self.clients[textmessage.receiver].emit('m', self.messageCompress.pack(message));
+                            if (textmessage.sender)
+                                self.clients[textmessage.sender].emit('m', self.messageCompress.pack(message));
+                            doReflect = false;
+                            cb2();
+                            return;
+                        }
+                        // only allow users to hang up their own RTC calls
+                        var rtcMessages = ['rtcCall', 'rtcVideoCall', 'rtcData', 'rtcDisconnect'];
+                        if (message.action == 'callMethod' && message.node == 'index-vwf' && rtcMessages.indexOf(message.member) != -1)
+                        {
+                            var params = message.parameters[0];
+                            // allow no transmitting of the 'rtc*Call' messages; purely client-side
+                            if (rtcMessages.slice(0, 2)
+                                .indexOf(message.member) != -1)
+
+                                doReflect = false;
+                            cb2();
+                            return;
+
+                            // route messages by the 'target' param, verifying 'sender' param
+                            if (rtcMessages.slice(2)
+                                .indexOf(message.member) != -1 &&
+                                params.sender == socket.id
+                            )
+                            {
+                                var client = self.clients[params.target];
+                                if (client)
+                                    client.emit('m', self.messageCompress.pack(message));
+                            }
+                            doReflect = false;
+                            cb2();
+                            return;
+                        }
+                        //We'll only accept a setProperty if the user has ownership of the object
+                        if (message.action == "deleteNode" || message.action == "createMethod" || message.action == "createProperty" || message.action == "createEvent" ||
+                            message.action == "deleteMethod" || message.action == "deleteProperty" || message.action == "deleteEvent" || message.action == "setProperty")
+                        {
+                            if (!self.state.validate(message.action, message.node, sendingclient))
+                            {
+                                doReflect = false;
+                                cb2();
+                                return;
+                            }
+                        }
+                        if (message.action == "setProperty")
+                            self.state.satProperty(message.node, message.member, message.parameters[0]);
+                        //We'll only accept a deleteNode if the user has ownership of the object
+                        if (message.action == "deleteNode")
+                        {
+                            var displayname = self.state.getProperty(message.node, 'DisplayName');
+                            self.state.deletedNode(message.node)
+                            self.simulationManager.nodeDeleted(message.node);
+                            xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, displayname || message.node, null, self.id);
+                        }
+                        //We'll only accept a createChild if the user has ownership of the object
+                        //Note that you now must share a scene with a user!!!!
+                        if (message.action == "createChild")
+                        {
+                            var childComponent = JSON.parse(JSON.stringify(message.parameters[0]));
+                            if (!self.state.validateCreate(message.node, message.member, childComponent, sendingclient))
+                            {
+                                doReflect = false;
+                                cb2();
+                                return;
+                            }
+                            var childID = self.state.createdChild(message.node, message.member, childComponent);
+                            internals.childID = childID; 
+                            xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties.DisplayName, null, self.id);
+                        }
+                        cb2();
+                    }
+                    catch (e)
+                    {
+                        //safe to catch and continue here
+                        logger.error('Error in reflector: onMessage');
+                        logger.error(e);
+                        logger.error(e.stack);
+                        cb2();
+                    }
+                },
+                function reflect(cb2)
+                {
+                    if (!doReflect)
+                    {
+                        cb2();
+                        return;
+                    }
+                    var compressedMessage = self.messageCompress.pack(message);
+                    //distribute message to all clients on given instance
+                    //for now, we need better filtering of messages. 
+                    //var concernedClients = self.simulationManager.getClientsForMessage(message, sendingclient)
+                    for (var i in self.clients)
+                    {
+                        var client = self.clients[i];
+                        //if the message was get state, then fire all the pending messages after firing the setState
+                        if (message.action == "getState" && client.pending == true)
+                        {
+                            self.Log('Got State', 2);
+                            if (self.requestTimer)
+                                self.requestTimer.deleteMe();
+                            var state = message.result;
+                            self.status = STATUS.DEFAULT;
+                            self.state.setVWFDef(JSON.parse(JSON.stringify(state)));
+                            self.messageClient(client,
+                            {
+                                "action": "status",
+                                "parameters": ["State Received, Transmitting"],
+                                "time": self.getStateTime
+                            }, false, false)
+                            self.messageClient(client,
+                            {
+                                "action": "setState",
+                                "parameters": [state],
+                                "time": self.getStateTime
+                            }, true, true)
+                            client.pending = false;
+                            self.trigger('stateSent');
+                        }
+                        else
+                        {
+                            //if (concernedClients.indexOf(client) != -1)
+                            self.messageClient(client, compressedMessage, false, false);
+                        }
+                    }
+                    if (message.action == "createChild")
+                    {
+                        console.log('client simulate own node:' + internals.childID)
+                        self.simulationManager.nodeCreated(internals.childID, sendingclient);
+                    }
+                    cb2();
+                }
+
+            ],
+            function done(err)
+            {
+                cb();
+            })
     }
+
     this.clientCountForUser = function(userID)
     {
         var count = 0;

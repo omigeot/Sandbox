@@ -1851,9 +1851,15 @@ this.deleteNode = function( nodeID ) {
     // Call deletedNode() on each view. The view is being notified that a node has been
     // deleted.
 
+    if(!socket) //if we're offline in loopback mode, we must stop simulating all our own nodes
+    {
+        Engine.stopSimulating(nodeID);
+    }
+
     this.views.forEach( function( view ) {
         view.deletedNode && view.deletedNode( nodeID );
     } );
+
 
     if(this.tickable.nodeIDs.indexOf(nodeID) > -1)
     {
@@ -3126,6 +3132,12 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
         {
             console.error("Error loading entity: " + err);
         }
+
+        if(!socket) //if we're offline in loopback mode, we must start simulating all our own nodes
+        {
+            Engine.startSimulating(childID);
+        }
+
         if ( callback_async ) {
 
             

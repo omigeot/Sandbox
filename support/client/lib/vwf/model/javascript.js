@@ -417,22 +417,22 @@ var APIModules = {
         this.id = id;
         this.playSound=function(soundURL /* the url of the sound */, loop /* loop or not */, volume,restart /* restart at 0 if playing */)
         {
-            vwf.callMethod(this.id,'playSound',[soundURL,loop,volume,restart])
+            vwf_view.kernel.callMethod(this.id,'playSound',[soundURL,loop,volume,restart])
             
         }
         this.stopSound=function(soundURL /* the url of the sound */)
         {
-            vwf.callMethod(this.id,'stopSound',[soundURL])
+            vwf_view.kernel.callMethod(this.id,'stopSound',[soundURL])
            
         }
        this.pauseSound=function(soundURL /* the url of the sound */)
         {
-            vwf.callMethod(this.id,'pauseSound',[soundURL])
+            vwf_view.kernel.callMethod(this.id,'pauseSound',[soundURL])
            
         }
         this.deleteSound=function(soundURL /* the url of the sound */)
         {
-            vwf.callMethod(this.id,'deleteSound',[soundURL])  
+            vwf_view.kernel.callMethod(this.id,'deleteSound',[soundURL])  
         }
     },
     transformAPI: function(id)
