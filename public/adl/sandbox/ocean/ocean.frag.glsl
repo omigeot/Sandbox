@@ -33,7 +33,7 @@ uniform vec3 wrapRGB;
 #endif
 
 
-
+varying vec3 vFogPosition;
 varying vec3 vSundir;
 varying vec3 vNormal;
 varying vec3 vCamDir;
@@ -55,6 +55,7 @@ uniform float L[numWaves];
 uniform float A[numWaves];
 uniform float S[numWaves];
 uniform vec2 D[numWaves];
+uniform float gB[numWaves];
 
 uniform float uMag;
 uniform float t;
@@ -62,7 +63,9 @@ uniform samplerCube texture;
 uniform sampler2D oNormal;
 uniform sampler2D diffuse;
 uniform sampler2D refractionColorRtt;
+uniform sampler2D reflectionColorRtt;
 
+ 
 uniform mat4 projectionMatrix;
 
 
@@ -76,6 +79,8 @@ uniform float uAmbientPower;
 uniform float uSunPower;
 uniform float uOceanDepth;
 uniform float uNormalPower;
+uniform float maxWaveDisplace;
+uniform vec3 oCamPos;
 //physical params
 uniform vec3 c;
 uniform vec3 bb;
@@ -83,6 +88,62 @@ uniform vec3 a;
 uniform vec3 Kd;
 
 uniform float waveEffectDepth;
+
+varying vec3 stCamDir;
+
+
+
+#ifdef USE_FOG
+
+uniform vec3 fogColor;
+
+#ifdef FOG_EXP2
+
+uniform vec3 vAtmosphereColor; //vec3(0.0, 0.02, 0.04);
+uniform vec3 vHorizonColor; //vec3(0.88, 0.94, 0.999);
+uniform vec3 vApexColor; //vec3(0.78, 0.82, 0.999)
+uniform float vAtmosphereDensity; //.0005
+uniform float vFalloff;
+uniform float vFalloffStart;
+      uniform float fogDensity;
+
+#if MAX_DIR_LIGHTS > 0
+ 
+
+
+vec3 atmosphereColor(vec3 rayDirection){
+    float a = max(0.0, dot(rayDirection, vec3(0.0, 1.0, 0.0)));
+    vec3 skyColor = mix(vHorizonColor, vApexColor, a);
+    float sunTheta = max( dot(rayDirection, directionalLightDirection[0].xzy), 0.0 );
+    return skyColor+directionalLightColor[0]*4.0*pow(sunTheta, 16.0)*0.5;
+}
+
+vec3 applyFog(vec3 albedo, float dist, vec3 rayOrigin, vec3 rayDirection){
+    float fogDensityA = fogDensity ;
+    float fog = exp((-rayOrigin.y*vFalloff)*fogDensityA) * (1.0-exp(-dist*rayDirection.y*vFalloff*fogDensityA))/(rayDirection.y*vFalloff);
+    return mix(albedo, fogColor, clamp(fog, 0.0, 1.0));
+}
+
+vec3 aerialPerspective(vec3 albedo, float dist, vec3 rayOrigin, vec3 rayDirection){
+ //rayOrigin.y = max(-vFalloffStart,rayOrigin.y);
+ rayOrigin.y += vFalloffStart;
+ rayOrigin.y = abs(rayOrigin.y);
+     
+    vec3 atmosphere = atmosphereColor(rayDirection)+vAtmosphereColor; 
+    atmosphere = mix( atmosphere, atmosphere*.85, clamp(1.0-exp(-dist*vAtmosphereDensity), 0.0, 1.0));
+    vec3 color = mix( applyFog(albedo, dist, rayOrigin, rayDirection), atmosphere, clamp(1.0-exp(-dist*vAtmosphereDensity)-log(rayOrigin.y)/10.0, 0.0, 1.0));
+    return color;
+}                      
+#endif
+  #else
+
+       uniform float fogNear;
+       uniform float fogFar;
+
+   #endif
+
+#endif
+
 
 float unpackDepth( const in vec4 rgba_depth ) {
 
@@ -120,7 +181,7 @@ void main() {
 	if (behind > 0.0)
 	{
 		discard;
-		return;
+	//	return;
 	}
 	vec3 tc = texcoord0;
 	vec3 pNormal;
@@ -134,12 +195,12 @@ void main() {
 			vec2 texToWaveLen =  texToWorld / L[0];
 			vec2 directionAndSpeed = D[0] * S[0] / ( wavesInTexture * 15.0);
 			pNormal +=  A[0] *  texture2D(oNormal, texToWaveLen  + directionAndSpeed * t ).xyz;
-			powerSum += A[0];
+			powerSum +=  A[0];
 		
 			texToWaveLen =  texToWorld / L[1];
 			directionAndSpeed = D[1] * S[1] / ( wavesInTexture * 15.0);
 			pNormal +=  A[1] *  texture2D(oNormal, texToWaveLen  + directionAndSpeed * t ).xyz;
-			powerSum += A[1];
+			powerSum +=  A[1];
 	}
 
 	pNormal /= powerSum ;
@@ -151,9 +212,10 @@ void main() {
 	float t2 = 0.015 * t;
 	float t3 = 0.05 * t;
 
-	vec2 uv1 = (tc.xy / waves[0].x) + t1;
-	vec2 uv2 = (tc.xy / (waves[0].x * 2.0)) + t2;
-	vec2 uv3 = (tc.xy / waves[0].x) + t3;
+	float wave0Amp = maxWaveDisplace;
+	vec2 uv1 = (tc.xy / wave0Amp) + t1;
+	vec2 uv2 = (tc.xy / (wave0Amp * 2.0)) + t2;
+	vec2 uv3 = (tc.xy / wave0Amp) + t3;
 
 
 	vec3 mapNormal = texture2D(oNormal, uv1).rgb + texture2D(oNormal, uv2).rgb;//+ texture2D(oNormal, uv3).rgb;
@@ -204,8 +266,15 @@ void main() {
 	vec3 ref_vec = -reflect(-camdir, texNormal);
 	//ref_vec = mix(-ref_vec, ref_vec, sign(ref_vec.z));
 	sky = uReflectPow * .333 * pow(textureCube(texture, ref_vec).xyz,vec3(2.2));
-
-
+	
+	#ifdef useReflections
+		vec4 skyPlaner = pow(texture2D(reflectionColorRtt,sspos.xy+ (texNormal.xy+vec2(0.0007,0.0))/vec2(50.0,500.0) * (vCamLength)).xyzw,vec4(2.2));
+		float planerMix = dot(normalize(ref_vec),normalize(-stCamDir));
+		planerMix = clamp((planerMix) * (skyPlaner.a),0.0,1.0);
+		sky = mix(sky,skyPlaner.xyz,planerMix);
+	#else
+		vec4 skyPlaner = vec4(0.0,0.0,0.0,0.0);	
+	#endif
 
 
 
@@ -218,85 +287,45 @@ void main() {
 	cosT = -cosT;
 
 	
-	vec4 rawDepth0 = texture2D(refractionDepthRtt , sspos.xy);
+	#ifdef useRefractions
+		vec4 rawDepth0 = texture2D(refractionDepthRtt , sspos.xy);
 
-	//float Z0 = .01/(gl_FragCoord.z * -2.0 + 1.0 - 10000.0);
-	//float Z1 = .01/(unpackDepth(rawDepth) * -2.0 + 1.0 - 10000.0);
+		float D01 = unpackDepth(rawDepth0);
+		float D1 = gl_FragCoord.z;
+		D1 = LinearizeDepth(D1);
+		D01 = LinearizeDepth(D01);
 
-	
-	float D01 = unpackDepth(rawDepth0);
-	float D1 = gl_FragCoord.z;
-	D1 = LinearizeDepth(D1);
-	
+			
+		float rd = min(0.05,abs(D1-D01)/30.0);
+		vec4 rawDepth = texture2D(refractionDepthRtt , sspos.xy + texNormal.xy *rd);
+		float D0 = unpackDepth(rawDepth);
 
-	D01 = LinearizeDepth(D01);
-
+		D0 = LinearizeDepth(D0);
 		
-	
+		vec3 ocean_bottom_color = pow(texture2D(refractionColorRtt , sspos.xy + texNormal.xy * rd).xyz,vec3(2.2));
 
-	float rd = min(0.05,abs(D1-D01)/30.0);
-	vec4 rawDepth = texture2D(refractionDepthRtt , sspos.xy + texNormal.xy *rd);
-
-	float D0 = unpackDepth(rawDepth);
-	
-
-	
-
-	// D0 = .01/(D0 * -2.0 + 1.0 - 10000.0);
-	// D1 = .01/(D1 * -2.0 + 1.0 - 10000.0);
-
-	D0 = LinearizeDepth(D0);
-	
-
-	vec3 ocean_bottom_color = pow(texture2D(refractionColorRtt , sspos.xy + texNormal.xy * rd).xyz,vec3(2.2));
-
-	float depth = D1 - D0;
+		float depth = D1 - D0;
+	#else
+		float depth = 1000.0;
+		vec3 ocean_bottom_color = vec3(0.0,0.0,0.0);
+	#endif
+		
 	if(depth > -0.001)
 	{
 		depth =  -1000.0;
 		ocean_bottom_color = vec3(0.0,0.0,0.0);
 	}
-//if(length(rawDepth) < .2)
-//		depth =  -1000.0 ;
 
 	
 	vec3 LZTP = ocean_bottom_color;
-
-
 
 
 	float Z = max(0.00, abs(depth) * uOceanDepth ); //);//depth
 	float R = -Z * cosT;
 
 
-
 	vec3 Ldf0_sum = vec3(0.0, 0.0, 0.0);
 	vec3 Ldf0 = vec3(0.0, 0.0, 0.0);
-
-	/*float b0 = 0.037;
-
-	float Kd_r =  36.0; //645nm
-	float Kd_g =  3.4;  //510nm
-	float Kd_b =  1.9;      //440nm
-
-	float wl0 = 514.0;
-	float m = -0.00113;
-	float i = -1.62517;
-	float b645 = b0+((645.0*m+i)/(wl0*m+i));
-	float b510 = b0+((510.0*m+i)/(wl0*m+i));
-	float b440 = b0+((440.0*m+i)/(wl0*m+i));
-
-	float bb645 = 0.01829*b645 + 0.00006;
-	float bb510 = 0.01829*b510 + 0.00006;
-	float bb440 = 0.01829*b440 + 0.00006;
-
-	float a645 = Kd_r;
-	float a510 = Kd_g;
-	float a440 = Kd_b;
-
-	float c645 = a645 + b645;
-	float c510 = a510 + b510;
-	float c440 = a440 + b440;*/
 
 	vec3 ed0 =  vec3(ndotl) * directionalLightColor[0] * uSunPower + (ambientLightColor) * uAmbientPower; //sun plus sky lighting on water surface
 
@@ -319,32 +348,24 @@ void main() {
 
 
 	vec4 water  =  vec4(mix(pow(L0TP,vec3(2.2)), sky, ref), 1.0);
-	water += vec4(directionalLightColor[ 0 ], 1.0) * spec;
+	water += vec4(directionalLightColor[ 0 ], 1.0) * spec * max(0.0,1.0-skyPlaner.a);
 
 	vec4 foam = vec4(1.0, 1.0, 1.0, 1.0) * ndotl + vec4(ambientLightColor, 1.0);;
 	foam.a = 1.0;
 
-	float foamMix = max(0.0, h * diffuseTex.r) ;
-	//foamMix += (1.0-max(-depth/2.0,0.0))* diffuseTex.r;
+	float foamMix = max(0.0,  h * diffuseTex.r ) ;
+	foamMix += clamp(1.0+depth/0.3,0.0,1.0) * texture2D(diffuse,uv1 ).r;
+	
 	gl_FragColor = mix(water, foam, clamp(foamMix * uFoam, 0.0, 1.0));
 
-
-//	vec3 vsNormal = (viewMatrix * vec4(vNormal , 0.0)).xyz;
-	//gl_FragColor = vec4(L0TP.r,L0TP.g,L0TP.b,1.0);
-	float eyedot = dot(vNormal, nnvCamDir);
-	eyedot =  clamp(0.0, 1.0, eyedot);
-
-	// D0 = (D0 /gl_FragCoord.w);
-	// D1 = D1/gl_FragCoord.w;
-	
 	gl_FragColor.xyz = pow(gl_FragColor.xyz,vec3(1.0/2.2));
-	//gl_FragColor = vec4(0.0,0.0,0.0,1.0);
-		//gl_FragColor.xyz = texNormal.xyz;
-
-	//if(vCamLength > depth*100.0)
-	//	depth = 100.0;
-
-	
-
-
+	#ifdef USE_FOG
+		#ifdef FOG_EXP2
+			#if MAX_DIR_LIGHTS > 0
+          		gl_FragColor.xyz = aerialPerspective(gl_FragColor.xyz, distance(vFogPosition.xyz,oCamPos),oCamPos.xzy, normalize(vFogPosition.xyz-oCamPos).xzy);
+        	#endif
+		#endif
+	#endif	
+	//gl_FragColor.xyz = vec3(planerMix);
+          		
 }
