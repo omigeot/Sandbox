@@ -1,5 +1,5 @@
 'use strict';
-
+fills.enableLog();
 define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor'], function(app, baseClass){
     var primEditor = {};
     var isInitialized = false;
@@ -421,18 +421,18 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             scope.isUpdating = false;
             scope.onChange = function(index){
                 //setTimeout is necessary because the model is not up-to-date when this event is fired
-                window.setTimeout(function(){
+                //window.setTimeout(function(){
                     var node = scope.vwfNode, prop = scope.property, value;
                     if(Array.isArray(prop)) prop = prop[index];
 
                     value = node.properties[prop];
 
                     if(value !== Engine.getProperty(node.id, prop)){
-                        pushUndoEvent(node, prop, value);
+                        //pushUndoEvent(node, prop, value);
                         setProperty(node, prop, value);
                     }
 
-                }, 50);
+                //}, 10);
             };
 
             if(scope.vwfProp){
@@ -505,7 +505,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
                         //Update occasionally only while user is sliding
                         if(newVal !== oldVal && scope.isUpdating){
-                            delayedUpdate(scope.vwfNode, scope.property, newVal);
+                        //    delayedUpdate(scope.vwfNode, scope.property, newVal);
                         }
                     }, true);
 

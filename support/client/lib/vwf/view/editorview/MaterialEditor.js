@@ -318,6 +318,8 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 					}
 					else $scope.mantissa = ui.value;
 					$scope.$apply();
+
+					$scope.change();
 				});
 
 				// update sliding status
