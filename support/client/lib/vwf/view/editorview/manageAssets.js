@@ -182,6 +182,8 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 			}
 		};
 	}]);
+
+
 	app.controller('AssetManagerController', ['$scope', '$http', 'AssetDataManager', function($scope, $http, assets)
 	{
 		window._AssetManager = $scope;
@@ -454,10 +456,6 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 			}
 			return perms;
 		}
-
-		$scope.previewUrl = function(id){
-			window.open($scope.assets.appPath+'/assets/'+id);
-		};
 
 		$scope.fetchJSONAsset = function(id)
 		{
