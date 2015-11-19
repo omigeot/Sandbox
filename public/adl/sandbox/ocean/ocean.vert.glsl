@@ -8,9 +8,8 @@ varying vec3 texcoord0;
 varying float vCamLength;
 varying mat3 TBN;
 varying float h;
-varying float behind;
 varying vec2 sspos;
-varying vec3 stCamDir;
+
 varying vec3 vFogPosition;
 
 uniform vec3 oCamPos;
@@ -91,10 +90,10 @@ void main() {
       float p_dw = tpos2.w - p_w;
       float p_h = uWaterHeight;
       float i_t = (p_w * p_h - p_z) / ((p_dz - p_dw * p_h));
-      behind = 0.0;
+     
       if (i_t > 1.0000)
       {
-            behind = 1.0;
+            vCamLength = -1.0;
             return;
       }
 
@@ -184,7 +183,7 @@ void main() {
       viewMatrixNoT[2][3] = 0.0;
       viewMatrixNoT[1][3] = 0.0;
       viewMatrixNoT[0][3] = 0.0;
-      stCamDir = normalize( vec4(0.0,0.0,1.0, 0.0) *viewMatrixNoT ).xyz;
+
       vCamLength = distance(oCamPos , tPos );
       tPos.x -= oCamPos.x;
       tPos.y -= oCamPos.y;
