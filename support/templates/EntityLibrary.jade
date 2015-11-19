@@ -19,7 +19,7 @@ mixin EntityLibrary_body
 			#EntityLibraryAccordion(vws-accordion='combinedLibs')
 				h3.modifiersection(ng-repeat-start='lib in combinedLibs')
 					a(href="#"): strong {{lib.name}}
-					.glyphicon.glyphicon-minus(ng-show='lib.userAdded', ng-click='promptRemoveLibrary($index)')
+					.glyphicon.glyphicon-minus(title='Remove Library', ng-show='lib.userAdded', ng-click='promptRemoveLibrary($index, $event)')
 				.modifiersection(ng-repeat-end)
 					.libraryAsset(ng-repeat='asset in lib.content', ng-click='create(asset)', draggable-asset='asset')
 						lazy-img(src='asset.preview', load-when='isOpen')
