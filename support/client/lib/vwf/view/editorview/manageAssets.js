@@ -37,7 +37,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 					$http.get(
 						self.appPath + '/assets/by-meta/all-of' +
 						'?user_name=' + encodeURIComponent(_UserManager.GetCurrentUserName()) +
-						'&returns=id,name,description,type,size,license,thumbnail,permissions,group_name' +
+						'&returns=id,name,description,type,size,license,thumbnail,permissions,group_name,isTexture' +
 						'&permFormat=json')
 					.success(function(list, status)
 					{
@@ -182,6 +182,8 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 			}
 		};
 	}]);
+
+
 	app.controller('AssetManagerController', ['$scope', '$http', 'AssetDataManager', function($scope, $http, assets)
 	{
 		window._AssetManager = $scope;

@@ -3,15 +3,13 @@
 #define PI 3.1415926535897932384626433832795
 
 varying vec3 vNormal;
-varying vec3 vSundir;
 varying vec3 vCamDir;
 varying vec3 texcoord0;
 varying float vCamLength;
 varying mat3 TBN;
 varying float h;
-varying float behind;
 varying vec2 sspos;
-varying vec3 stCamDir;
+
 varying vec3 vFogPosition;
 
 uniform vec3 oCamPos;
@@ -24,11 +22,9 @@ uniform float uHalfGrid;
 
 uniform float uWaterHeight;
 
-uniform vec4 waves[9];
 
 
 
-vec3 sundir = vec3(.5, .5, .1);
 uniform float L[numWaves];
 uniform float A[numWaves];
 uniform float S[numWaves];
@@ -94,10 +90,10 @@ void main() {
       float p_dw = tpos2.w - p_w;
       float p_h = uWaterHeight;
       float i_t = (p_w * p_h - p_z) / ((p_dz - p_dw * p_h));
-      behind = 0.0;
+     
       if (i_t > 1.0000)
       {
-            behind = 1.0;
+            vCamLength = -1.0;
             return;
       }
 
@@ -119,8 +115,8 @@ void main() {
       for (int i = 0; i < numWaves; i++)
       {
 
-            float x = tPos.x + D[i].x * waves[i].w;
-            float y = tPos.y + D[i].y * waves[i].w;
+            float x = tPos.x + D[i].x * W[i];
+            float y = tPos.y + D[i].y * W[i];
             //if (L[i] > edgeLen2*4.0)
             {
                   float st = t;
@@ -168,7 +164,7 @@ void main() {
                  tNormal.x, tNormal.y, tNormal.z);
 
       vNormal = normalize(tNormal);
-      vSundir = normalize(sundir);
+      
 
 
 
@@ -187,7 +183,7 @@ void main() {
       viewMatrixNoT[2][3] = 0.0;
       viewMatrixNoT[1][3] = 0.0;
       viewMatrixNoT[0][3] = 0.0;
-      stCamDir = normalize( vec4(0.0,0.0,1.0, 0.0) *viewMatrixNoT ).xyz;
+
       vCamLength = distance(oCamPos , tPos );
       tPos.x -= oCamPos.x;
       tPos.y -= oCamPos.y;

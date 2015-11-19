@@ -195,6 +195,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             this.mouseDownScreenPoint = [e.clientX, e.clientY];
             if (MoveGizmo && e.button == 0) {
 
+                this.saveTransforms();
                 MoveGizmo.mouseDown(e);
 
                 if (MoveGizmo.getAxis() == -1 && SelectMode == 'Pick') {

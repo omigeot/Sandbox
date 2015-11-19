@@ -54,8 +54,8 @@ var fills = {
         }
         Math.sign = function(a)
         {
-            if(a >= 0) return true;
-            return false;
+            if(a >= 0) return 1;
+            return -1;
 
         }
         fills.disableLog();

@@ -149,9 +149,11 @@ function startVWF() {
 
                 p = process.argv.indexOf('-d');
                 datapath = p >= 0 ? process.argv[p + 1] : (global.configuration.datapath ? libpath.normalize(global.configuration.datapath) : libpath.join(__dirname, "../../data"));
+                
+                datapath = libpath.resolve(datapath,'.');
                 global.datapath = datapath;
                 global.configuration.datapath = datapath;
-
+                console.log(datapath);
                 logger.initFileOutput(datapath);
 
                 p = process.argv.indexOf('-ls');
@@ -364,7 +366,7 @@ function startVWF() {
                     }
                     //first, check if the build file already exists. if so, skip this step
                     if (fs.existsSync(libpath.resolve(libpath.join(__dirname, '..', '..', 'build', 'index.css')))) {
-                        logger.warn('Build already exists. Use --clean to rebuild');
+                        logger.warn('Build already exists. Use -clean to rebuild');
                         loadCssIntoCache();
                         return;
                     } else {
