@@ -349,51 +349,8 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
     }]);
 
     app.directive('vwfEditorProperty', ['$compile', function($compile){
-        var lastValue = null;
-        var valueBeforeSliding;
 
-        function updateSliderValue(node, prop, isUpdating){
-            if(Array.isArray(prop)){
-
-                if(!valueBeforeSliding) valueBeforeSliding = [];
-                for(var i = 0; i < prop.length; i++){
-                    var sliderValue = node.properties[prop[i]];
-
-                    if(isUpdating) valueBeforeSliding[i] = sliderValue;
-
-                    //The assumption here is only one property can change at a time...
-                    else if(sliderValue !== valueBeforeSliding[i]){
-                        pushUndoEvent(node, prop[i], sliderValue, valueBeforeSliding[i]);
-                        break;
-                    }
-                }
-            }
-            else{
-                var sliderValue = node.properties[prop];
-
-                //On initial slide, save value before slide occurred
-                //Once done sliding, push value onto undo stack
-                if(isUpdating) valueBeforeSliding = sliderValue;
-                else pushUndoEvent(node, prop, sliderValue, valueBeforeSliding);
-
-                console.log("Change in isUpdating!", prop, isUpdating, sliderValue, valueBeforeSliding);
-            }
-        }
-
-        function delayedUpdate(node, prop, value){
-            if(lastValue === null){
-                window.setTimeout(function(){
-                    console.log("delayedUpdate", value);
-
-                    setProperty(node, prop, lastValue);
-                    lastValue = null;
-                }, 75);
-            }
-
-            lastValue = value;
-        }
-
-		function pickNode(vwfNode, vwfProp){
+		    function pickNode(vwfNode, vwfProp){
             _Editor.TempPickCallback = function(node) {
                 if(!node) return;
 
@@ -419,18 +376,78 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
         function linkFn(scope, elem, attr){
             scope.isUpdating = false;
+            var lastValue = null;
+            var valueBeforeSliding;
+
+            function updateSliderValue(node, prop, isUpdating){
+              console.log("Change in isUpdating!", prop, isUpdating, sliderValue, valueBeforeSliding);
+
+                if(Array.isArray(prop)){
+
+                    if(!valueBeforeSliding) valueBeforeSliding = [];
+                    for(var i = 0; i < prop.length; i++){
+                        var sliderValue = node.properties[prop[i]];
+
+                        if(isUpdating) valueBeforeSliding[i] = sliderValue;
+
+                        //The assumption here is only one property can change at a time...
+                        else if(sliderValue !== valueBeforeSliding[i]){
+                            pushUndoEvent(node, prop[i], sliderValue, valueBeforeSliding[i]);
+                            break;
+                        }
+                    }
+                }
+                else{
+                    var sliderValue = node.properties[prop];
+
+                    //On initial slide, save value before slide occurred
+                    //Once done sliding, push value onto undo stack
+                    if(isUpdating){
+                        //if array, shallow copy
+                        if(Array.isArray(sliderValue)){
+                            valueBeforeSliding = [];
+                            for(var i = 0; i < sliderValue.length; i++){
+                                valueBeforeSliding.push(sliderValue[i]);
+                            }
+                        }
+                        else{
+                            valueBeforeSliding = sliderValue;
+                        }
+
+                    }
+                    else pushUndoEvent(node, prop, sliderValue, valueBeforeSliding);
+                }
+            }
+
+            function delayedUpdate(node, prop, value){
+                if(lastValue === null){
+                    window.setTimeout(function(){
+                        console.log("delayedUpdate", value);
+
+                        setProperty(node, prop, lastValue);
+                        lastValue = null;
+                    }, 50);
+                }
+
+                lastValue = value;
+            }
+
             scope.onChange = function(index){
                 //setTimeout is necessary because the model is not up-to-date when this event is fired
                 //window.setTimeout(function(){
-                    var node = scope.vwfNode, prop = scope.property, value;
-                    if(Array.isArray(prop)) prop = prop[index];
 
-                    value = node.properties[prop];
+                  var node = scope.vwfNode, prop = scope.property, value;
+                  if(Array.isArray(prop)) prop = prop[index];
 
-                    if(value !== Engine.getProperty(node.id, prop)){
-                        //pushUndoEvent(node, prop, value);
-                        setProperty(node, prop, value);
-                    }
+                  value = node.properties[prop];
+
+                  console.log("onChange called: ", value, Engine.getProperty(node.id, prop));
+                  if(value !== Engine.getProperty(node.id, prop)){
+                      //pushUndoEvent(node, prop, value);
+                      setProperty(node, prop, value);
+                  }
+
+
 
                 //}, 10);
             };
@@ -500,15 +517,6 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                     }
                 }
                 else if(scope.type.indexOf("slider") > -1 || scope.type == "color"){
-                    scope.$watch('vwfNode.properties[property]', function(newVal, oldVal){
-                        console.log(scope.vwfProp, scope.vwfNode.id, newVal);
-
-                        //Update occasionally only while user is sliding
-                        if(newVal !== oldVal && scope.isUpdating){
-                        //    delayedUpdate(scope.vwfNode, scope.property, newVal);
-                        }
-                    }, true);
-
                     scope.$watch('isUpdating', function(newVal, oldVal){
                         if(newVal !== oldVal) updateSliderValue(scope.vwfNode, scope.property, newVal);
                     });

@@ -433,28 +433,34 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				colorArr: '=',
 				colorObj: '=',
 				disabled: '=',
-				sliding: '='
+				sliding: '=',
+				change: '&?'
 			},
 			link: function($scope, elem, attrs)
 			{
+				$scope.change = $scope.change || $.noop;
 				$scope.colorObj = $scope.colorObj || {r:0, g:0, b:0};
 
-				$scope.$watch('colorArr[0] + colorArr[1] + colorArr[2]', function(newVal){
+				$scope.$watch('colorArr[0] + colorArr[1] + colorArr[2]', function(newVal, oldVal){
 					 if(newVal){
 					 	$scope.colorObj.r = $scope.colorArr[0];
 					 	$scope.colorObj.g = $scope.colorArr[1];
 					 	$scope.colorObj.b = $scope.colorArr[2];
+
+						if(newVal != oldVal) $scope.change();
 					 }
 				});
 
 				// set color of icon when upstream color changes
-				$scope.$watch('colorObj.r + colorObj.b + colorObj.g', function(newVal){
+				$scope.$watch('colorObj.r + colorObj.b + colorObj.g', function(newVal, oldVal){
 					$('.colorPickerIcon', elem).css('background-color', '#'+color());
 
 					if($scope.colorArr){
 					 	$scope.colorArr[0] = $scope.colorObj.r;
 					 	$scope.colorArr[1] = $scope.colorObj.g;
 					 	$scope.colorArr[2] = $scope.colorObj.b;
+
+						if(newVal != oldVal) $scope.change();
 					}
 				});
 
@@ -503,9 +509,13 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 					},
 					// set upstream color when new color is picked
 					onChange: function(hsb, hex, rgb, el){
-						$scope.sliding = true;
-						color(hex);
+						//This ensures that watches on $scope.sliding are fired BEFORE the color is updated
+						if(!$scope.sliding){
+							$scope.sliding = true;
+							$scope.$apply();
+						}
 
+						color(hex);
 						if(handle) $timeout.cancel(handle);
 
 						//500ms isn't enough time to determine whether or not sliding has actually "stopped"
