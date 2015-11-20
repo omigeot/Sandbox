@@ -17,13 +17,13 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 							self[id] = data;
 							self[id].id = id;
 						}
-						cb && cb(data);
+						cb && cb(self[id]);
 					})
 					.error(function(data, status) {
 						if (status === 404) {
 							delete self[id];
 						}
-						cb && cb(null);
+						//cb && cb(null);
 					});
 				}
 
@@ -598,7 +598,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 					function checkRemaining() {
 						toComplete -= 1;
 						if (toComplete === 0) {
-							$scope.assets.refresh($scope.selected.id);
+							$scope.assets.refresh($scope.selected.id, function(meta){
+								var last_modified = new Date(Date.parse(metadata.last_modified));
+								$scope.selected._uploadCallback && $scope.selected._uploadCallback(null, last_modified);
+							});
 						}
 					}
 					if (fileData[$scope.selected.id]) {
@@ -610,12 +613,6 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 							} else {
 								$scope.clearFileInput();
 								fileData[$scope.selected.id] = null;
-								if ($scope.selected._uploadCallback) {
-									$.getJSON($scope.assets.appPath + '/assets/' + $scope.selected.id + "/meta", function(metadata) {
-										var last_modified = new Date(Date.parse(metadata.last_modified));
-										$scope.selected._uploadCallback(null, last_modified);
-									})
-								}
 							}
 							checkRemaining();
 						});
@@ -708,8 +705,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 					'application/vnd.vws-entity+json',
 					overwrite ? node.properties.sourceAssetId : null,
 					function(id, last_modified) {
-
-						if (id) // id is null if updating
+						if(id) // null if updating
 							vwf_view.kernel.setProperty(nodeId, 'sourceAssetId', id);
 						//get the lastmodified tiem from the server
 						vwf_view.kernel.setProperty(nodeId, '___sourceAssetTimestamp', last_modified.toString());
