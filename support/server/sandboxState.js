@@ -431,7 +431,7 @@ var sandboxState = function(id, metadata,world)
         childID = childID.replace(/[^0-9A-Za-z_]+/g, "-");
         return childID;
     }
-    this.createdChild = function(nodeid, name, childComponent)
+    this.createdChild = function(nodeid, name, childComponent, cb)
     {
         //Keep a record of the new node
         //remove allow for user to create new node on index-vwf. Must have permission!
@@ -449,6 +449,7 @@ var sandboxState = function(id, metadata,world)
         childComponent.name = name;
         fixIDs(node.children[childID]);
         this.Log("created " + childID, 2);
+        cb();
         return childID;
     }
     // so, the player has hit pause after hitting play. They are going to reset the entire state with the state backup. 
