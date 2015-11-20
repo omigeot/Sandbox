@@ -3,7 +3,7 @@
 #EntityLibrary
 {
 	position: relative;
-	width: 250px;
+	width: 260px;
 	@include flex-shrink(0);
 
 	background: #515151 url(../../../../images/ui-bg_diagonals-thick_8_333333_40x40.png) 0% 0% repeat;
@@ -77,10 +77,11 @@
 	{
 		text-align: center;
 		display: inline-block;
-		margin-right: 1.5em;
+		margin: 1em 1.5em 0px .5em;
 		width: 73px;
 		height: 75px;
 		margin-bottom: 9px;
+		vertical-align: bottom;
 
 		div
 		{

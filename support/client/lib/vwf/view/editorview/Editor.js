@@ -195,6 +195,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             this.mouseDownScreenPoint = [e.clientX, e.clientY];
             if (MoveGizmo && e.button == 0) {
 
+                this.saveTransforms();
                 MoveGizmo.mouseDown(e);
 
                 if (MoveGizmo.getAxis() == -1 && SelectMode == 'Pick') {
@@ -379,7 +380,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
         }
         this.dblclick_Gizmo = function(e)
         {
-           window.setTimeout(function()
+          /* window.setTimeout(function()
            {
             if(_Editor.GetSelectedVWFID() && !_PrimitiveEditor.isOpen())
                 _PrimitiveEditor.show();
@@ -387,7 +388,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                 _SidePanel.showPanel();
             },20)
             
-             this.mouseup(e);
+             this.mouseup(e);*/
         }
         this.mouseup_Gizmo = function(e) {
             

@@ -22,7 +22,7 @@ var DBstateToVWFDef = require('./sandboxState').DBstateToVWFDef;
 function startup(listen)
 {
     //create socket server
-    logger.info('startup refector', 0);
+    logger.info('startup reflector', 0);
     sio = sio(listen,
     {
         log: false,

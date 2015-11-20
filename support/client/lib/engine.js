@@ -1858,9 +1858,15 @@ this.deleteNode = function( nodeID ) {
     // Call deletedNode() on each view. The view is being notified that a node has been
     // deleted.
 
+    if(!socket) //if we're offline in loopback mode, we must stop simulating all our own nodes
+    {
+        Engine.stopSimulating(nodeID);
+    }
+
     this.views.forEach( function( view ) {
         view.deletedNode && view.deletedNode( nodeID );
     } );
+
 
     if(this.tickable.nodeIDs.indexOf(nodeID) > -1)
     {
@@ -2621,7 +2627,7 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
 
             if (componentIsDescriptor(childComponent) && childComponent.continues && componentIsURI(childComponent.continues))
             { // TODO: for "includes:", accept an already-loaded component (which componentIsURI exludes) since the descriptor will be loaded again
-                function continueBaseLoaded(data)
+                var continueBaseLoaded = function (data)
                 {
                     //cache for future use
                     if (!continuesDefs[childComponent.continues])
@@ -2657,14 +2663,19 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
 
                 if (!continuesDefs[childComponent.continues])
                 {
-                     queue.suspend( "before beginning " + childID ); // suspend the queue
-                    $.getJSON(childComponent.continues,
-                        continueBaseLoaded).error(function()
+                    queue.suspend( "before beginning " + childID ); // suspend the queue
+                    $.ajax(
                     {
-                       
-                        series_callback_async("Error loading continues base URL: " + childComponent.continues, undefined);
-                         queue.resume( "after beginning " + childID );
-                    });
+                        dataType: "json",
+                        url: childComponent.continues,
+                        cache:false,
+                        success: continueBaseLoaded,
+                        error: function()
+                        {
+                            series_callback_async("Error loading continues base URL: " + childComponent.continues, undefined);
+                            queue.resume("after beginning " + childID);
+                        }
+                    })
                 }
                 else
                 {
@@ -3128,6 +3139,12 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
         {
             console.error("Error loading entity: " + err);
         }
+
+        if(!socket) //if we're offline in loopback mode, we must start simulating all our own nodes
+        {
+            Engine.startSimulating(childID);
+        }
+
         if ( callback_async ) {
 
             

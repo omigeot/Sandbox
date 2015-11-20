@@ -115,7 +115,7 @@ executionContext.prototype.getProperty = function(id, name)
         this.touchedProperties[id + name] = {
             id: id,
             name: name,
-            val: null,
+            val: val,
             originalVal: null
         }
         if (!(typeof(val) == "string" ||  typeof(val) == "number" || typeof(val) == "boolean" || val == null || val == undefined))
@@ -412,8 +412,29 @@ var APIModules = {
             return this.___filterResults(ret);
         }
     },
-    audioAPI:
-    {},
+    audioAPI: function(id)
+    {
+        this.id = id;
+        this.playSound=function(soundURL /* the url of the sound */, loop /* loop or not */, volume,restart /* restart at 0 if playing */)
+        {
+            vwf_view.kernel.callMethod(this.id,'playSound',[soundURL,loop,volume,restart])
+            
+        }
+        this.stopSound=function(soundURL /* the url of the sound */)
+        {
+            vwf_view.kernel.callMethod(this.id,'stopSound',[soundURL])
+           
+        }
+       this.pauseSound=function(soundURL /* the url of the sound */)
+        {
+            vwf_view.kernel.callMethod(this.id,'pauseSound',[soundURL])
+           
+        }
+        this.deleteSound=function(soundURL /* the url of the sound */)
+        {
+            vwf_view.kernel.callMethod(this.id,'deleteSound',[soundURL])  
+        }
+    },
     transformAPI: function(id)
     {
         this.id = id;
@@ -1249,16 +1270,10 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             {
                 node.transformAPI = new APIModules.transformAPI(node.id);
             }
-            if (node.hasOwnProperty("___audioAPI"))
+            if ("___audioAPI" in node)
             {
-                Object.defineProperty(node, "audioAPI",
-                { // TODO: only define on shared "node" prototype?
-                    get: function()
-                    {
-                        return Engine.models.javascript.gettingProperty(this.id, "___audioAPI");
-                    },
-                    enumerable: true,
-                });
+
+               node.audioAPI = new APIModules.audioAPI(node.id);
             }
             if ("___physicsAPI" in node)
             {
