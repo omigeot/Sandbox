@@ -2573,7 +2573,7 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
         if(node===null || node === undefined)
             return null;
 
-        if(node.extends === undefined && !node.properties && !node.continues && !node.source && !node.type)
+        if((node.extends === undefined || node.extends == "http://vwf.example.com/node.vwf") && !node.properties && !node.continues && !node.source && !node.type &&!node.methods &&!node.events)
             return null;
 
         var newChildren = {}

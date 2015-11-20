@@ -724,8 +724,9 @@ function sandboxWorld(id, metadata)
                         if (message.action == "deleteNode")
                         {
                             var displayname = self.state.getProperty(message.node, 'DisplayName');
-                            self.state.deletedNode(message.node)
                             self.simulationManager.nodeDeleted(message.node);
+                            self.state.deletedNode(message.node)
+                           
                             xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, displayname || message.node, null, self.id);
                         }
                         //We'll only accept a createChild if the user has ownership of the object
@@ -739,9 +740,11 @@ function sandboxWorld(id, metadata)
                                 cb2();
                                 return;
                             }
-                            var childID = self.state.createdChild(message.node, message.member, childComponent);
-                            internals.childID = childID; 
-                            xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties.DisplayName, null, self.id);
+                            var childID = self.state.getID(message.member, childComponent);
+                            internals.childID = childID;
+                            xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties ? childComponent.properties.DisplayName : "", null, self.id);
+                            self.state.createdChild(message.node, message.member, childComponent,cb2);
+                            return;// must return here because cb2 is called by the state
                         }
                         cb2();
                     }
@@ -798,7 +801,7 @@ function sandboxWorld(id, metadata)
 		                    {
 		                        //client has already processed own inputs - dont' send back to sender;
 		                    }else{
-		                        this.messageClient(client, compressedMessage, false, false);    
+		                        self.messageClient(client, compressedMessage, false, false);    
 		                    }                       
 						}
                     }
