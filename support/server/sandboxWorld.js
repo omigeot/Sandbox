@@ -395,7 +395,7 @@ function sandboxWorld(id, metadata)
                     "action": "tick",
                     "time": self.time,
                 };
-                self.messageClients(self.time.toFixed(3),false,false,'t',true);
+                //self.messageClients(self.time.toFixed(3),false,false,'t',true);
             }
             self.lasttime = now;
         }.bind(self);
@@ -794,9 +794,13 @@ function sandboxWorld(id, metadata)
                         }
                         else
                         {
-                            //if (concernedClients.indexOf(client) != -1)
-                            self.messageClient(client, compressedMessage, false, false);
-                        }
+		                    if(client == sendingclient && (message.action == "setProperty" || message.action == "dispatchEvent" || message.action == "callMethod" || message.action == "fireEvent"))
+		                    {
+		                        //client has already processed own inputs - dont' send back to sender;
+		                    }else{
+		                        this.messageClient(client, compressedMessage, false, false);    
+		                    }                       
+						}
                     }
                     if (message.action == "createChild")
                     {
