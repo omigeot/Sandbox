@@ -6,7 +6,8 @@
         "allowTools": true, 
         "createAvatar": false, 
         "published": true, 
-        "singlePlayer": true
+        "singlePlayer": true,
+        "camera":"SandboxCamera-vwf-N59ae26a8"
     }, 
     "title": "Example Scene"
 }
