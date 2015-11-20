@@ -37,7 +37,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 					$http.get(
 						self.appPath + '/assets/by-meta/all-of' +
 						'?user_name=' + encodeURIComponent(_UserManager.GetCurrentUserName()) +
-						'&returns=id,name,description,type,size,license,thumbnail,permissions,group_name' +
+						'&returns=id,name,description,type,size,license,thumbnail,permissions,group_name,isTexture' +
 						'&permFormat=json')
 					.success(function(list, status)
 					{
@@ -182,6 +182,8 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 			}
 		};
 	}]);
+
+
 	app.controller('AssetManagerController', ['$scope', '$http', 'AssetDataManager', function($scope, $http, assets)
 	{
 		window._AssetManager = $scope;
@@ -517,9 +519,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 					xhr.addEventListener('loadend', function(e) {
 						if (xhr.status === 201) {
 							if ($scope.selected._uploadCallback) {
-								$.getJSON($scope.assets.appPath + '/assets/' + $scope.selected.id + "/meta", function(metadata) {
+								var scopeCallback = $scope.selected._uploadCallback;
+								$.getJSON($scope.assets.appPath + '/assets/' + xhr.responseText + "/meta", function(metadata) {
 									var last_modified = new Date(Date.parse(metadata.last_modified));
-									$scope.selected._uploadCallback(xhr.responseText, last_modified);
+									scopeCallback(xhr.responseText, last_modified);
 								})
 							}
 							$scope.assets.refresh(xhr.responseText);
@@ -707,6 +710,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/strToBytes', 'vw
 					'application/vnd.vws-entity+json',
 					overwrite ? node.properties.sourceAssetId : null,
 					function(id, last_modified) {
+
 						if (id) // id is null if updating
 							vwf_view.kernel.setProperty(nodeId, 'sourceAssetId', id);
 						//get the lastmodified tiem from the server
