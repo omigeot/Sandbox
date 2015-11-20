@@ -172,6 +172,44 @@ var sandboxState = function(id, metadata,world)
             this.nodes['index-vwf'].children[childID].parent = this.nodes['index-vwf'];
         }
     }
+    this.resolveContinues = function(node, cb)
+    {
+        var self = this;
+        async.series([
+
+            function resolveThisNode(cb2)
+            {
+                if (node.continues)
+                {
+                    cb2();
+                }
+                else
+                {
+                    cb2();
+                }
+            },
+            function resolveAllChildren(cb2)
+            {
+                async.eachSeries(node.children, function eachChild(child, cb3)
+                {
+
+                    self.resolveContinues(child, cb3);
+
+                }, function doneAllChildren(err)
+                {
+                    cb2();
+                })
+            }
+        ], function thisNodeResolved(err)
+        {
+            cb();
+        })
+
+    }
+    this.deResolveContinues = function(node)
+    {
+
+    }
     this.Log = function(log)
     {
 
