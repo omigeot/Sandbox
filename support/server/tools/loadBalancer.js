@@ -16,16 +16,29 @@ global.configuration = {
     "loadBalancerKey" : "SECRETKEY"
 }
 
-app.use(express.methodOverride());
+
+app.use(require('method-override')());
+
 //CORS support
 app.use(ServerFeatures.CORSSupport);
 
-app.use(express.cookieParser());
+//i18n support
+app.use(require('cookie-parser')());
 
-app.use(express.bodyParser());
+//Wait until all data is loaded before continuing
+//app.use (ServerFeatures.waitForAllBody);
+app.use(require('body-parser').json({
+    maxFieldsSize: 16 * 1024 * 1024 * 1024,
+    limit: '50mb'
+}));
+app.use(require('body-parser').urlencoded({
+    extended: true
+}));
+app.use(require('multer')());
 
 
-app.use(app.router);
+
+//app.use(app.router);
 
 
 function Host(url)
