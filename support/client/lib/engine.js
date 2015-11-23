@@ -2434,7 +2434,7 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
         node.children = newChildren;
         return node;
     }
-    if(childComponent)
+    if(nodeID !== 0 && childComponent) //careful not to scrub out protos
         childComponent = cleanChildComponent(childComponent)
     if(!childComponent)
     {
@@ -3593,13 +3593,13 @@ this.setPropertyFast = function(nodeID, propertyName,propertyValue)
     var answer = undefined;
     for(var i =0; i < this.models.length; i++)
     {
-      //  if(!this.setPropertyFastEntrants[nodeID + propertyName + i])
+        if(!this.setPropertyFastEntrants[nodeID + propertyName + i])
         if(this.models[i].settingProperty)
         {
-        //    this.setPropertyFastEntrants[nodeID + propertyName + i] = true;
+            this.setPropertyFastEntrants[nodeID + propertyName + i] = true;
             
             var ret = this.models[i].settingProperty(nodeID,propertyName,propertyValue)
-          //  delete this.setPropertyFastEntrants[nodeID + propertyName + i];    
+            delete this.setPropertyFastEntrants[nodeID + propertyName + i];    
             
             
             if(ret !== undefined)
