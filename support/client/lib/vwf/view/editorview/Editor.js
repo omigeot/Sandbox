@@ -1732,7 +1732,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                 return true;
             }
             this.waitingForSet.push(id);
-            var success = this.setProperty(id, this.transformPropertyName, val);
+            var success = this.setProperty(id, 'transform', val);
             if (!success) this.waitingForSet.pop();
             if (!success) this.SetLocation(MoveGizmo, originalGizmoPos);
             return success;
@@ -1781,7 +1781,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                var node = findviewnode(SelectedVWFNodes[i].id);
                if(node)
                {
-                transforms.push(node.matrixWorld.elements);    
+                transforms.push(_Editor.getTransformCallback(SelectedVWFNodes[i].id));    
                }
             }
             MoveGizmo.updateLocation(transforms);

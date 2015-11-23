@@ -257,9 +257,11 @@ if ( ! object ) return properties;  // TODO: patch until full-graph sync is work
             result = result || {};
 
             // TODO: extends and implements IDs
-
+            if(object)
+            {
             result.source = object.source;
             result.type = object.type;
+            }
 
             return result;
         },
