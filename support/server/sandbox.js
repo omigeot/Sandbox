@@ -400,7 +400,7 @@ function startVWF() {
 
                     //build the engine with the templated info, then insert
 
-                    var buildPath = ('../../support/client/lib/enginebuild.js');
+                    var buildPath = ('../../support/client/lib/engine.js');
                     buildPath = libpath.resolve(__dirname, buildPath);
                   
                     //fs.writeFileSync(buildPath, Landing.getVWFCore());
@@ -410,7 +410,7 @@ function startVWF() {
                    
                     var servepath = libpath.resolve(__dirname,'../../support/client/lib/engine.js');
                    
-                    FileCache.insertFile(servepath, Landing.getVWFCore(), fs.statSync(buildPath), "utf8", cb);
+                    FileCache.insertFile(servepath, Landing.getVWFCore(), fs.statSync(servepath), "utf8", cb);
                     //cb();
                     return;
                 }
