@@ -764,7 +764,7 @@ define(['progressScreen'],function(){
         {
 
 
-            var loadBalancerAddress = 'undefined';
+        var loadBalancerAddress = '{{loadBalancerAddress}}';
         var instance = window.location.pathname;
 
         var instanceHost = $.ajax({
@@ -787,7 +787,14 @@ define(['progressScreen'],function(){
                 window.location.pathname.lastIndexOf("/") );
             var protocol = window.location.protocol;
             var host = window.location.protocol +'//'+ window.location.host;
-        
+           
+            var loadBalancerAddress = '{{loadBalancerAddress}}';
+            
+            if(loadBalancerAddress !== "undefined")
+            {
+                host = this.getInstanceHost();
+            }
+
             var socketProxy = require('vwf/socket')
             if ( window.location.protocol === "https:" )
             {
@@ -2352,7 +2359,7 @@ this.hashNode = function( nodeID ) {  // TODO: works with patches?  // TODO: onl
 this.createDepth = 0;
 this.createChild = function( nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ ) {
     Engine.createDepth++;
-    progressScreen.startCreateNode(nodeID);
+    progressScreen.startCreateNode(nodeID || childName);
 
 
 
