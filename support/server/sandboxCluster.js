@@ -34,6 +34,8 @@ function GetProxyPort(request, cb) {
         newport = states[id].port;
     } else {
         console.log("random port for " + id)
+        states[id] = proxies[newport - port - 1];
+        console.log(proxies[newport - port - 1].port + " is expected to start " + id);
     }
     async.nextTick(function() {
         if (proxies[newport - port - 1].ready)
@@ -106,7 +108,10 @@ function HandleMessage(message, cb, client) {
             if (!states[message.args[0]]) {
                 states[message.args[0]] = client;
                 console.log("child " + client.port + " is handling " + message.args[0])
-            } else {
+            } else if(states[message.args[0]] == client){
+                console.log("child " + client.port + " is handling " + message.args[0] + " as expected");
+            } else
+            {
                 throw (new Error("State is already running!"));
             }
         }
