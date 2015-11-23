@@ -1,9 +1,5 @@
 [
 	{
-		"name": "Demo Entities",
-        "url": "./contentlibraries/entities.json"
-    },
-	{
 		"name": "Materials",
         "url": "./contentlibraries/materials.json"
     },
