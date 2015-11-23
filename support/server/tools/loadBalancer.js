@@ -105,8 +105,6 @@ function Host(url)
 var hosts = [];
 
 
-
-
 app.get('/',function(req,res,next){
 	var instance = (req.query.instance);
 	logger.info(instance);
@@ -137,7 +135,6 @@ app.get('/register',function(req,res,next){
 	if(host.key == global.configuration.loadBalancerKey)
 	{
 		
-
 		var found = -1;
 		for(var i =0; i < hosts.length; i++)
 		{
