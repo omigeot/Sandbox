@@ -499,6 +499,7 @@ phyObject.prototype.startSimulating = function()
     this.wake();
     this.simulating = true;
     this.setMass(this.mass,true);
+    this.markRootBodyCollisionDirty();
 }
 phyObject.prototype.stopSimulating = function()
 {
@@ -1655,6 +1656,7 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                 //between the GetState being sent to the load client, and this event occuring.
                 // if(Engine.moniker() != args[0])
                 {
+
                     console.log('reset world to sync late joining client at', Engine.getProperty(Engine.application(),'simTime'));
                     if (!this.pendingReset) this.resetWorld();
                 }

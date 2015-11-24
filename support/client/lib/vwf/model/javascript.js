@@ -1145,7 +1145,10 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 value: function(eventName, value,context)
                 {
                     if(!context || !context.id || context.id == Engine.application())
-                        throw("Invalid context for event handling")
+                        {
+                            console.error("Invalid context for event handling");
+                            return
+                        }
                     var listeners = this.private.listeners[eventName] ||
                         (this.private.listeners[eventName] = []); // array of { handler: function, context: node, phases: [ "phase", ... ] }
                     if (typeof value == "function" || value instanceof Function)
@@ -1928,8 +1931,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 if (!inContext)
                     this.exitContext();
                 return ret;
-                if (!inContext)
-                    this.exitContext();
+               
             }
             //call the method on the child behaviors
             for (var i = 0; i < node.children.length; i++)
@@ -2120,11 +2122,13 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             if (!node) return;
             var body = node.private.bodies && node.private.bodies[method];
 
-             var inContext = this.contextStack.length > 1;
+            var inContext = this.contextStack.length > 1;
+            if(!inContext)
+                this.enterNewContext();
+
 			if (body && vwf.isSimulating(node.id)) {
                
-                if(!inContext)
-                    this.enterNewContext();
+                
                 this.tryExec(node,body,args);
                 
             }
@@ -2174,11 +2178,12 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 // phase.
                 if (!phase || listener.phases && listener.phases.indexOf(phase) >= 0)
                 {
-                    jsDriverSelf.enterNewContext();
+                    
                     //var result = listener.handler.apply(listener.context || jsDriverSelf.nodes[0], eventParameters); // default context is the global root  // TODO: this presumes this.creatingNode( undefined, 0 ) is retained above
 
                     var contextID = listener.context.id;
                     if(!vwf.isSimulating(contextID)) return; // be careful not to fire handlers on nodes that are simulated elsewhere
+                    jsDriverSelf.enterNewContext();
                     var result = jsDriverSelf.tryExec(listener.context || jsDriverSelf.nodes[0],listener.handler,eventParameters)
                     jsDriverSelf.exitContext();
                     return handled || result === true || result === undefined; // interpret no return as "return true"

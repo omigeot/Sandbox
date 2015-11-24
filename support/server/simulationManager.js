@@ -1,5 +1,7 @@
 var messageCompress = require('../client/lib/messageCompress')
     .messageCompress;
+
+    var logger = require('./logger');
 var simClient = function(sandboxClient, simulationManager)
 {
     this.manager = simulationManager;
@@ -117,7 +119,12 @@ var simulationManager = function(world)
         //must add to list to get proper average load, then remove so we don't keep distributing
         //nodes from new client to new client
         this.clients[sandboxClient.id] = newClient;
-       
+        if(this.clientCount() == 1) // a new client joined, who is logged in , and all others are observers
+        {
+            //this.startScene();
+            return;
+        }
+
         var average = this.clientAverageLoad();
         delete this.clients[sandboxClient.id];
         var counter = 0;
@@ -177,9 +184,13 @@ var simulationManager = function(world)
         {
             for (var i in this.clients)
             {
+                console.log("distribute " + node + " to " + i);
                 var node = nodes.shift();
                 if (node)
+                {
+                    
                     this.clients[i].startSimulatingNode(node);
+                }
             }
         }
     }
@@ -199,7 +210,10 @@ var simulationManager = function(world)
     }
     this.startScene = function()
     {
-        this.clients[Object.keys(this.clients)[0]].startSimulatingScene();
+        if(this.clients[Object.keys(this.clients)[0]])
+            this.clients[Object.keys(this.clients)[0]].startSimulatingScene();
+        else
+            logger.warn("no logged in client can start simulation");
     }
     this.nodeCreated = function(nodeid, creatingClient)
     {

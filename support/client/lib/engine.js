@@ -1066,6 +1066,7 @@ this.respond = function( nodeID, actionName, memberName, parameters, result ) {
 /// @name module:Engine.receive
 
 this.nodesSimulating = [];
+this.nodesCoSimulating = [];
 this.propertyDataUpdates = {};
 this.startSimulating = function(nodeID)
 {
@@ -1081,7 +1082,22 @@ this.startSimulating = function(nodeID)
         this.callMethod(this.application(),"startSimulatingNode",nodes[i])
         this.lastPropertyDataUpdates[nodes[i]] = {};
     }
-
+}
+this.startCoSimulating = function(nodeID)
+{
+    var nodes = this.decendants(nodeID);
+    this.stopSimulating(nodeID);
+    if(nodeID !== "index-vwf")
+        nodes.push(nodeID);
+    for (var i =0; i < nodes.length; i++)
+    {
+        if(this.nodesCoSimulating.indexOf(nodes[i]) == -1)
+        {
+            this.nodesCoSimulating.push(nodes[i]);
+        }
+        this.callMethod(this.application(),"startSimulatingNode",nodes[i])
+        this.lastPropertyDataUpdates[nodes[i]] = {};
+    }
 }
 this.stopSimulating = function(nodeID)
 {
@@ -1103,7 +1119,21 @@ this.isSimulating = function(nodeID)
     if(socket === null) ///we are in offline mode
         return true;
     return nodeID == "index-vwf" ||
+     (this.nodesSimulating.indexOf(nodeID) != -1 || this.nodesCoSimulating.indexOf(nodeID) != -1)
+}
+this.isSimulatingExclusive = function(nodeID)
+{
+    if(socket === null) ///we are in offline mode
+        return true;
+    return nodeID == "index-vwf" ||
      (this.nodesSimulating.indexOf(nodeID) != -1)
+}
+this.isCoSimulating = function(nodeID)
+{
+    if(socket === null) ///we are in offline mode
+        return true;
+    return nodeID == "index-vwf" ||
+     (this.nodesCoSimulating.indexOf(nodeID) != -1)
 }
 this.simulationStateUpdate = function(nodeID,member,state)
 {
@@ -1181,7 +1211,8 @@ this.postSimulationStateUpdates = function(freqlist)
 }
 this.propertyUpdated = function(id,name,val)
 {
-    if(this.isSimulating(id))
+    if (val == undefined) val = null;
+    if(this.isSimulatingExclusive(id))
     {
         if(!this.propertyDataUpdates[id])
             this.propertyDataUpdates[id] = {};

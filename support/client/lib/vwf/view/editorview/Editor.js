@@ -1727,7 +1727,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
         this.setTransform = function(id, val) {
 
             //don't bother if the value did not actually change
-            if(matComploose(vwf.getProperty(SelectedVWFNodes[i].id,'transform'),val))
+            if(matComploose(vwf.getProperty(id,'transform'),val))
             {
                 return true;
             }
