@@ -379,6 +379,9 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             var lastValue = null;
             var valueBeforeSliding;
 
+            //Necessary because color array references are shared internally and by the Sandbox
+            var colorCopyArr;
+
             function updateSliderValue(node, prop, isUpdating){
               console.log("Change in isUpdating!", prop, isUpdating, sliderValue, valueBeforeSliding);
 
@@ -433,23 +436,26 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             }
 
             scope.onChange = function(index){
-                //setTimeout is necessary because the model is not up-to-date when this event is fired
-                //window.setTimeout(function(){
-
                   var node = scope.vwfNode, prop = scope.property, value;
                   if(Array.isArray(prop)) prop = prop[index];
 
                   value = node.properties[prop];
 
-                  console.log("onChange called: ", value, Engine.getProperty(node.id, prop));
-                  if(value !== Engine.getProperty(node.id, prop)){
-                      //pushUndoEvent(node, prop, value);
+                  if(scope.type == "color"){
+                      if(!value) value = [];
+                      value[0] = colorCopyArr[0];
+                      value[1] = colorCopyArr[1];
+                      value[2] = colorCopyArr[2];
+                      value[3] = colorCopyArr[3];
+
+                      console.log("onChange called: ", value, Engine.getProperty(node.id, prop));
                       setProperty(node, prop, value);
                   }
 
-
-
-                //}, 10);
+                  else if(value !== Engine.getProperty(node.id, prop)){
+                      console.log("onChange called: ", value, Engine.getProperty(node.id, prop));
+                      setProperty(node, prop, value);
+                  }
             };
 
             if(scope.vwfProp){
@@ -520,6 +526,24 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                     scope.$watch('isUpdating', function(newVal, oldVal){
                         if(newVal !== oldVal) updateSliderValue(scope.vwfNode, scope.property, newVal);
                     });
+
+                    if(scope.type == 'color'){
+                        //Interface with updated color picker
+                        scope.rgbColor = {r: 0, g: 0, b: 0, a: 1};
+                        colorCopyArr = [0, 0, 0, 1];
+                        scope.$watch('rgbColor', function(newVal, oldVal){
+                            if(newVal !== oldVal){
+                                console.log("Color updated!");
+
+                                colorCopyArr[0] = newVal.r;
+                                colorCopyArr[1] = newVal.g;
+                                colorCopyArr[2] = newVal.b;
+                                colorCopyArr[3] = newVal.a;
+
+                                scope.onChange();
+                            }
+                        }, true);
+                    }
                 }
                 else if(scope.type === "nodeid") scope.pickNode = pickNode;
                 else if(scope.type === "prompt") scope.showPrompt = showPrompt;

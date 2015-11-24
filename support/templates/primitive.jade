@@ -55,7 +55,8 @@ block content
 	
 	#vwf-template-color(ng-non-bindable, style='display: none;')
 		label.inline {{displayname}}: 
-			color-picker(color-arr='vwfNode.properties[vwfProp.property]', color-obj='{r:0,g:0,b:0}', sliding='isUpdating', change='onChange()')
+			html-palette(rgb-color='rgbColor', use-alpha="true", popup-edge="sw", throttle-apply="100", sliding='isUpdating')
+			//color-picker(color-arr='vwfNode.properties[vwfProp.property]', color-obj='{r:0,g:0,b:0}', sliding='isUpdating', change='onChange()')
 		
 	#vwf-template-check(ng-non-bindable, style='display: none;')
 		label.inline {{displayname}}: 
