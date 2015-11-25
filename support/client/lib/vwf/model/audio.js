@@ -171,7 +171,9 @@ define(["module", "vwf/model", "vwf/model/buzz/buzz.min"], function(module, mode
                 var soundid = id + url;
                 var Sound = this.soundSources[soundid];
                 var campos = [_dView.getCamera().matrixWorld.elements[12], _dView.getCamera().matrixWorld.elements[13], _dView.getCamera().matrixWorld.elements[14]];
-                var dist = MATH.distanceVec3(campos, Engine.getProperty(id, "worldPosition"));
+                var sourcepos = Engine.getProperty(id, "worldPosition");
+                if(!sourcepos) return;
+                var dist = MATH.distanceVec3(campos, sourcepos);
                 if(loop) //no speed of sound sim for looping sounds
                     dist = 0;
               //  window.setTimeout(function()

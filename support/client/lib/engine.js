@@ -1,4 +1,4 @@
-"use strict";
+
 
 // Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
 // Secretary of Defense (Personnel & Readiness).
@@ -822,7 +822,7 @@ define(['progressScreen'],function(){
 
         socket.on( "connect", function() {
 
-            window.setInterval(Engine.generateTick.bind(Engine),50);
+           // window.setInterval(Engine.generateTick.bind(Engine),50);
             Engine.logger.infox( "-socket", "connected" );
 
            
@@ -1090,6 +1090,7 @@ this.startSimulating = function(nodeID)
 }
 this.startCoSimulating = function(nodeID)
 {
+
     var nodes = this.decendants(nodeID);
     this.stopSimulating(nodeID);
     if(nodeID !== "index-vwf")
@@ -1128,21 +1129,21 @@ this.isSimulating = function(nodeID)
     if(socket === null) ///we are in offline mode
         return true;
     return nodeID == "index-vwf" ||
-     (this.nodesSimulatingNames[nodeID]  || this.nodesCoSimulatingNames[nodeID])
+    (this.nodesCoSimulating.indexOf(nodeID) !== -1) || (this.nodesSimulating.indexOf(nodeID) !== -1)
 }
 this.isSimulatingExclusive = function(nodeID)
 {
     if(socket === null) ///we are in offline mode
         return true;
     return nodeID == "index-vwf" ||
-     (this.nodesSimulatingNames[nodeID])
+     (this.nodesSimulating.indexOf(nodeID) !== -1)
 }
 this.isCoSimulating = function(nodeID)
 {
     if(socket === null) ///we are in offline mode
         return true;
     return nodeID == "index-vwf" ||
-     (this.nodesCoSimulatingNames[nodeID])
+     (this.nodesCoSimulating.indexOf(nodeID) !== -1)
 }
 this.simulationStateUpdate = function(nodeID,member,state)
 {
@@ -1191,7 +1192,9 @@ this.postSimulationStateUpdates = function(freqlist)
         {
             if(props.hasOwnProperty(keys[j]))
             {
-                props[keys[j]] = this.tryParse(this.tryStringify(this.getPropertyFast(nodeID,keys[j])));
+                var propval = this.getPropertyFast(nodeID,keys[j]);
+                if(propval !== undefined)
+                    props[keys[j]] = this.tryParse(this.tryStringify(propval));
             }
         }
     }
@@ -1226,8 +1229,9 @@ this.postSimulationStateUpdates = function(freqlist)
         }
         if(postprops && Object.keys(postprops).length)
             updates[nodeID] = postprops;
-        var action = "simulationStateUpdate";   
+         
     }
+    var action = "simulationStateUpdate";  
     if(Object.keys(updates).length)
     {
         var payload = updates;//JSON.stringify(updates);
@@ -6332,6 +6336,12 @@ var queue = this.private.queue = {
             if ( a.action == "startSimulating" && b.action != "startSimulating" ) {
                 return -1;
             }
+            if ( a.action == "simulationStateUpdate" && b.action != "simulationStateUpdate" ) {
+                return 1;
+            }
+            if ( a.action != "simulationStateUpdate" && b.action == "simulationStateUpdate" ) {
+                return -1;
+            }
             if ( a.action != "startSimulating" && b.action == "startSimulating" ) {
                 return 1;
             }
@@ -6370,9 +6380,9 @@ var queue = this.private.queue = {
         // To prevent actions from executing out of order, callers should immediately return
         // to the host after invoking insert with chronic set.
 
-        if ( chronic ) {
+       // if ( chronic ) {
             Engine.dispatch();
-        }
+        //}
 
     },
 

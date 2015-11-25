@@ -12,19 +12,19 @@ var xapi = require('./xapi');
 var sandboxState = require('./sandboxState').sandboxState;
 var _simulationManager = require('./simulationManager').simulationManager;
 var GUID = require('node-uuid').v4;
+var now = require("performance-now");
 
-function QueuedMessage(a,b)
+function QueuedMessage(a, b)
 {
     this.message = a;
     this.client = b;
-
 }
 //***node, uses REGEX, escape properly!
 function strEndsWith(str, suffix)
-    {
-        return str.match(suffix + "$") == suffix;
-    }
-    //Is an event in the websocket stream a mouse event?
+{
+    return str.match(suffix + "$") == suffix;
+}
+//Is an event in the websocket stream a mouse event?
 function isPointerEvent(message)
 {
     if (!message) return false;
@@ -143,7 +143,18 @@ var timeout = function(world)
                             client.emit('m', this.messageCompress.pack(
                             {
                                 "action": "setState",
-                                "parameters": {nodes:[state],kernel:{time:this.namespace.getStateTime},annotations:{"1":"application"}},
+                                "parameters":
+                                {
+                                    nodes: [state],
+                                    kernel:
+                                    {
+                                        time: this.namespace.getStateTime
+                                    },
+                                    annotations:
+                                    {
+                                        "1": "application"
+                                    }
+                                },
                                 "time": this.namespace.getStateTime
                             }));
                             client.pending = false;
@@ -285,7 +296,7 @@ function sandboxWorld(id, metadata)
             logger.error(message);
         }
     }
-    this.messageClient = function(client, message, ignorePending, resolvePending,overrideType)
+    this.messageClient = function(client, message, ignorePending, resolvePending, overrideType)
     {
         if (!client.pending || ignorePending)
         {
@@ -296,18 +307,22 @@ function sandboxWorld(id, metadata)
                 {
                     global.setTimeout(function()
                     {
-                        __client.emit(overrideType||'m', __message);
+                        __client.emit(overrideType || 'm', __message);
                     }, global.latencySim)
                 })(client, message);
             }
             else
             {
-                client.emit(overrideType||'m', message);
+                client.emit(overrideType || 'm', message);
             }
         }
         else
         {
-            client.pendingList.push({message:message,type:(overrideType || 'm')})
+            client.pendingList.push(
+            {
+                message: message,
+                type: (overrideType || 'm')
+            })
         }
         if (resolvePending)
         {
@@ -322,7 +337,7 @@ function sandboxWorld(id, metadata)
             }
         }
     }
-    this.messageClients = function(message, ignorePending, resolvePending,overrideType,noCompress)
+    this.messageClients = function(message, ignorePending, resolvePending, overrideType, noCompress)
     {
         try
         {
@@ -331,14 +346,12 @@ function sandboxWorld(id, metadata)
                 //message.instance = this.id;
                 if (!message.time)
                     message.time = this.time;
-               
             }
             //message to each user the join of the new client. Queue it up for the new guy, since he should not send it until after getstate
             var packedMessage = (!noCompress) ? this.messageCompress.pack(message) : message;
-            
             for (var i in this.clients)
             {
-                this.messageClient(this.clients[i], packedMessage, ignorePending, resolvePending,overrideType);
+                this.messageClient(this.clients[i], packedMessage, ignorePending, resolvePending, overrideType);
             }
         }
         catch (e)
@@ -395,7 +408,7 @@ function sandboxWorld(id, metadata)
                     "action": "tick",
                     "time": self.time,
                 };
-                //self.messageClients(self.time.toFixed(3),false,false,'t',true);
+                self.messageClients(self.time.toFixed(3),false,false,'t',true);
             }
             self.lasttime = now;
         }.bind(self);
@@ -430,12 +443,23 @@ function sandboxWorld(id, metadata)
                 "time": self.time
             }, true, false);
             //note: don't have to worry about pending status here, client is first
-            self.messageClients({
+            self.messageClients(
+            {
                 "action": "setState",
-                "parameters": {nodes:[scene],kernel:{time:0},annotations:{"1":"application"}},
+                "parameters":
+                {
+                    nodes: [scene],
+                    kernel:
+                    {
+                        time: 0
+                    },
+                    annotations:
+                    {
+                        "1": "application"
+                    }
+                },
                 "time": self.time
             }, true, true);
-            
             self.messageClients(
             {
                 "action": "fireEvent",
@@ -476,12 +500,11 @@ function sandboxWorld(id, metadata)
         client.pending = true;
         client.pendingList = [];
         //The client is the first, is can just load the index.vwf, and mark it not pending
-        
         //if this is a new client, and there is no logged in peer to fetch state from, then load the state
         //if this new peer is not anonymous, then tell the peer to start the simulation. 
         var havePeer = false;
-        for(var i in this.clients)
-            if(!this.clients[i].isAnonymous() && this.clients[i] !== client)
+        for (var i in this.clients)
+            if (!this.clients[i].isAnonymous() && this.clients[i] !== client)
                 havePeer = true;
         if (!havePeer)
         {
@@ -491,9 +514,8 @@ function sandboxWorld(id, metadata)
                 //this must come after the client is added. Here, there is only one client
                 self.messageConnection(client.id, client.loginData ? client.loginData.Username : "", client.loginData ? client.loginData.UID : "");
                 var needAvatar = self.state.metadata.publishSettings.createAvatar;
-                if(!client.isAnonymous())
+                if (!client.isAnonymous())
                     self.simulationManager.startScene();
-
                 if (!self.state.metadata.publishSettings.allowAnonymous && client.loginData.anonymous)
                     needAvatar = false;
                 if (needAvatar && !self.state.getAvatarForClient(client.loginData.UID))
@@ -508,14 +530,10 @@ function sandboxWorld(id, metadata)
         //this client is not the first, we need to get the state and mark it pending
         else
         {
-
-
             //if we're loading the files, or waiting for state, then this new client must be at least the 2nd,
             //possilby the 3rd. Eitherway, state will come from either the load or the getState, so just
             //place this client on the list
-
-
-             //the below message should now queue for the pending socket, fire off for others
+            //the below message should now queue for the pending socket, fire off for others
             this.messageConnection(client.id, client.loginData ? client.loginData.Username : "", client.loginData ? client.loginData.UID : "");
 
             function setupAvatar()
@@ -544,8 +562,6 @@ function sandboxWorld(id, metadata)
                     }
                 }
             }
-
-
             if (this.status == STATUS.DEFAULT)
             {
                 this.requestState();
@@ -564,12 +580,12 @@ function sandboxWorld(id, metadata)
                     "parameters": ["Requesting state from clients"],
                     "time": this.getStateTime
                 })));
-            }else{
-
-                this.simulationManager.addClient(client);
-                setupAvatar.apply(this);//this should then mark pending
             }
-
+            else
+            {
+                this.simulationManager.addClient(client);
+                setupAvatar.apply(this); //this should then mark pending
+            }
         }
     }
     this.requestState = function()
@@ -599,30 +615,34 @@ function sandboxWorld(id, metadata)
         this.status = STATUS.PENDING_STATE;
     }
     this.queue = [];
-    this.ready = true;
+    this.ready = 0;
     this.message = function(msg, sendingclient)
     {
-        this.queue.push(new QueuedMessage(msg,sendingclient));
+        var message = this.messageCompress.unpack(msg);
+        //     message.time = this.time;
+     
+        {
+            this.queue.push(new QueuedMessage(message, sendingclient));
+        }
         this.dispatch();
     }
     this.dispatch = function()
     {
-        if (this.queue.length > 0 && this.ready)
+        if (this.queue.length > 0 && this.ready === 0)
         {
+            var lasttime = now();
+            console.log(this.queue.length);
             var message = this.queue.shift();
-            this.ready = false;
+            this.ready++;
             var self = this;
-           
             this.process_message(message.message, message.client, function()
             {
-                
-                
-                async.nextTick(function()
+                setImmediate(function()
                 {
-                    self.ready = true;
-                    self.dispatch();    
+                    console.log(now() - lasttime);
+                    self.ready--
+                        self.dispatch();
                 })
-                
             });
         }
     }
@@ -632,7 +652,7 @@ function sandboxWorld(id, metadata)
         var internals = {};
         try
         {
-            var message = this.messageCompress.unpack(msg);
+            var message = msg;
             message.time = this.time;
         }
         catch (e)
@@ -642,7 +662,6 @@ function sandboxWorld(id, metadata)
         }
         var self = this;
         async.series([
-
                 function process(cb2)
                 {
                     //need to add the client identifier to all outgoing messages
@@ -668,8 +687,6 @@ function sandboxWorld(id, metadata)
                         //route callmessage to the state to it can respond to manip the server side copy
                         if (message.action == 'callMethod')
                             self.state.calledMethod(message.node, message.member, message.parameters);
-                        if (message.action == 'simulationStateUpdate')
-                            self.state.simulationStateUpdate(message.parameters);
                         if (message.action == 'callMethod' && message.node == 'index-vwf' && message.member == 'PM')
                         {
                             var textmessage = JSON.parse(message.parameters[0]);
@@ -698,11 +715,9 @@ function sandboxWorld(id, metadata)
                             // allow no transmitting of the 'rtc*Call' messages; purely client-side
                             if (rtcMessages.slice(0, 2)
                                 .indexOf(message.member) != -1)
-
                                 doReflect = false;
                             cb2();
                             return;
-
                             // route messages by the 'target' param, verifying 'sender' param
                             if (rtcMessages.slice(2)
                                 .indexOf(message.member) != -1 &&
@@ -736,7 +751,6 @@ function sandboxWorld(id, metadata)
                             var displayname = self.state.getProperty(message.node, 'DisplayName');
                             self.simulationManager.nodeDeleted(message.node);
                             self.state.deletedNode(message.node)
-                           
                             xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, displayname || message.node, null, self.id);
                         }
                         //We'll only accept a createChild if the user has ownership of the object
@@ -753,8 +767,8 @@ function sandboxWorld(id, metadata)
                             var childID = self.state.getID(message.member, childComponent);
                             internals.childID = childID;
                             xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties ? childComponent.properties.DisplayName : "", null, self.id);
-                            self.state.createdChild(message.node, message.member, childComponent,cb2);
-                            return;// must return here because cb2 is called by the state
+                            self.state.createdChild(message.node, message.member, childComponent, cb2);
+                            return; // must return here because cb2 is called by the state
                         }
                         cb2();
                     }
@@ -807,13 +821,15 @@ function sandboxWorld(id, metadata)
                         }
                         else
                         {
-		                    if(client == sendingclient && (message.action == "setProperty" || message.action == "dispatchEvent" || message.action == "callMethod" || message.action == "fireEvent"))
-		                    {
-		                        //client has already processed own inputs - dont' send back to sender;
-		                    }else{
-		                        self.messageClient(client, compressedMessage, false, false);    
-		                    }                       
-						}
+                            if (client == sendingclient && (message.action == "setProperty" || message.action == "dispatchEvent" || message.action == "callMethod" || message.action == "fireEvent"))
+                            {
+                                //client has already processed own inputs - dont' send back to sender;
+                            }
+                            else
+                            {
+                                self.messageClient(client, compressedMessage, false, false);
+                            }
+                        }
                     }
                     if (message.action == "createChild")
                     {
@@ -822,14 +838,12 @@ function sandboxWorld(id, metadata)
                     }
                     cb2();
                 }
-
             ],
             function done(err)
             {
                 cb();
             })
     }
-
     this.clientCountForUser = function(userID)
     {
         var count = 0;
@@ -864,61 +878,59 @@ function sandboxWorld(id, metadata)
         }
         else
         {
-            
-                var loginData = client.loginData;
-                logger.debug(client.id, loginData, 2)
-                    //thisInstance.clients[socket.id] = null;
-                    //if it's the last client, delete the data and the timer
-                    //message to each user the join of the new client. Queue it up for the new guy, since he should not send it until after getstate
-                this.messageDisconnection(client.id, client.loginData ? client.loginData.Username : null);
-                this.simulationManager.removeClient(client)
-                if (loginData && loginData.clients)
+            var loginData = client.loginData;
+            logger.debug(client.id, loginData, 2)
+                //thisInstance.clients[socket.id] = null;
+                //if it's the last client, delete the data and the timer
+                //message to each user the join of the new client. Queue it up for the new guy, since he should not send it until after getstate
+            this.messageDisconnection(client.id, client.loginData ? client.loginData.Username : null);
+            this.simulationManager.removeClient(client)
+            if (loginData && loginData.clients)
+            {
+                console.log("Disconnect. Deleting node for user avatar " + loginData.UID);
+                //only delete the avatar if this is the last client owned by the user
+                if (this.clientCountForUser(loginData.UID) == 0)
                 {
-                    console.log("Disconnect. Deleting node for user avatar " + loginData.UID);
-                    //only delete the avatar if this is the last client owned by the user
-                    if (this.clientCountForUser(loginData.UID) == 0)
-                    {
-                        var avatarID = 'character-vwf-' + loginData.UID;
-                        this.state.deletedNode(avatarID);
-                        this.simulationManager.nodeDeleted(avatarID);
-                        this.messageClients(
-                        {
-                            "action": "deleteNode",
-                            "node": avatarID,
-                            "time": this.time
-                        });
-                    }
-                    this.messageClients(
-                    {
-                        "action": "callMethod",
-                        "node": 'index-vwf',
-                        member: 'cameraBroadcastEnd',
-                        "time": this.time,
-                        client: client.id
-                    });
-                    this.messageClients(
-                    {
-                        "action": "callMethod",
-                        "node": 'index-vwf',
-                        member: 'PeerSelection',
-                        parameters: [
-                            []
-                        ],
-                        "time": this.time,
-                        client: client.id
-                    });
+                    var avatarID = 'character-vwf-' + loginData.UID;
                     this.state.deletedNode(avatarID);
                     this.simulationManager.nodeDeleted(avatarID);
+                    this.messageClients(
+                    {
+                        "action": "deleteNode",
+                        "node": avatarID,
+                        "time": this.time
+                    });
                 }
                 this.messageClients(
                 {
-                    "action": "status",
-                    "parameters": ["Peer disconnected: " + (loginData ? loginData.UID : "Unknown")],
-                    "time": this.getStateTime
+                    "action": "callMethod",
+                    "node": 'index-vwf',
+                    member: 'cameraBroadcastEnd',
+                    "time": this.time,
+                    client: client.id
                 });
-                console.log('clientcount is ' + this.clientCount());
-                console.log(this.getClientList());
-            
+                this.messageClients(
+                {
+                    "action": "callMethod",
+                    "node": 'index-vwf',
+                    member: 'PeerSelection',
+                    parameters: [
+                        []
+                    ],
+                    "time": this.time,
+                    client: client.id
+                });
+                this.state.deletedNode(avatarID);
+                this.simulationManager.nodeDeleted(avatarID);
+            }
+            this.messageClients(
+            {
+                "action": "status",
+                "parameters": ["Peer disconnected: " + (loginData ? loginData.UID : "Unknown")],
+                "time": this.getStateTime
+            });
+            console.log('clientcount is ' + this.clientCount());
+            console.log(this.getClientList());
         }
     }
 }
