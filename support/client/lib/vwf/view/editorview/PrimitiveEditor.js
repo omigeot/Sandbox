@@ -383,8 +383,6 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             var colorCopyArr;
 
             function updateSliderValue(node, prop, isUpdating){
-              console.log("Change in isUpdating!", prop, isUpdating, sliderValue, valueBeforeSliding);
-
                 if(Array.isArray(prop)){
 
                     if(!valueBeforeSliding) valueBeforeSliding = [];
@@ -416,7 +414,6 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                         else{
                             valueBeforeSliding = sliderValue;
                         }
-
                     }
                     else pushUndoEvent(node, prop, sliderValue, valueBeforeSliding);
                 }
@@ -435,27 +432,27 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 lastValue = value;
             }
 
-            scope.onChange = function(index){
+            scope.onChange = function(index, inVal){
                   var node = scope.vwfNode, prop = scope.property, value;
-                  if(Array.isArray(prop)) prop = prop[index];
+                 // if(Array.isArray(prop)) prop = prop[index];
 
                   value = node.properties[prop];
 
-                  if(scope.type == "color"){
-                      if(!value) value = [];
-                      value[0] = colorCopyArr[0];
-                      value[1] = colorCopyArr[1];
-                      value[2] = colorCopyArr[2];
-                      value[3] = colorCopyArr[3];
+                  console.log("onChange called: ", inVal, value, Engine.getProperty(node.id, prop));
 
-                      console.log("onChange called: ", value, Engine.getProperty(node.id, prop));
-                      setProperty(node, prop, value);
-                  }
-
-                  else if(value !== Engine.getProperty(node.id, prop)){
-                      console.log("onChange called: ", value, Engine.getProperty(node.id, prop));
-                      setProperty(node, prop, value);
-                  }
+                //   if(scope.type == "color"){
+                //       if(!value) value = [];
+                //       value[0] = colorCopyArr[0];
+                //       value[1] = colorCopyArr[1];
+                //       value[2] = colorCopyArr[2];
+                //       value[3] = colorCopyArr[3];
+                  //
+                //       setProperty(node, prop, value);
+                //   }
+                  //
+                //   else if(value !== Engine.getProperty(node.id, prop)){
+                //       setProperty(node, prop, value);
+                //   }
             };
 
             if(scope.vwfProp){
@@ -510,7 +507,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                     else{
                         for (var i = 0; i < uniques.length; i++) {
                             //The assumption here is that these properties are min, max pairs pointed
-                            //at primitive values (numbers). Thus they shouldn't be need "watchCollection"
+                            //at primitive values (numbers). Thus, they shouldn't need "watchCollection"
                             //getWatchFn simply creates a closure so we know which property has changed.
                             scope.$watch(uniques[i], getWatchFn(i));
                         }
@@ -527,22 +524,35 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                         if(newVal !== oldVal) updateSliderValue(scope.vwfNode, scope.property, newVal);
                     });
 
+                    scope.$watch('vwfNode.properties.' + scope.property, function(newVal, oldVal){
+                        console.log("Watch:", newVal, oldVal);
+                    });
+
                     if(scope.type == 'color'){
                         //Interface with updated color picker
-                        scope.rgbColor = {r: 0, g: 0, b: 0, a: 1};
-                        colorCopyArr = [0, 0, 0, 1];
-                        scope.$watch('rgbColor', function(newVal, oldVal){
+                        //if a color is already set, use it...
+                        colorCopyArr = [];
+
+                        var value = scope.vwfNode.properties[scope.property];
+                        updateColor(value ? value : [0, 0, 0, 1], null, true);
+
+                        scope.rgbColor = rgbaArrToObj(colorCopyArr, {});
+                        scope.$watch('rgbColor', updateColor, true);
+                        scope.$watch('vwfNode.properties.' + scope.property, function(newVal, oldVal){
+                            if(newVal) rgbaArrToObj(newVal, scope.rgbColor);
+                        }, true);
+
+                        function updateColor(newVal, oldVal, skipChange){
                             if(newVal !== oldVal){
                                 console.log("Color updated!");
 
-                                colorCopyArr[0] = newVal.r;
-                                colorCopyArr[1] = newVal.g;
-                                colorCopyArr[2] = newVal.b;
-                                colorCopyArr[3] = newVal.a;
-
-                                scope.onChange();
+                                if(skipChange !== true){
+                                    rgbaObjToArr(newVal, colorCopyArr);
+                                    scope.onChange();
+                                }
+                                else colorCopyArr = newVal.slice();
                             }
-                        }, true);
+                        }
                     }
                 }
                 else if(scope.type === "nodeid") scope.pickNode = pickNode;
@@ -652,6 +662,22 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 uniques.push(arr[i]);
         }
         return uniques;
+    }
+
+    function rgbaObjToArr(colorObj, colorArr){
+        colorArr[0] = colorObj.r;
+        colorArr[1] = colorObj.g;
+        colorArr[2] = colorObj.b;
+        colorArr[3] = colorObj.a;
+        return colorArr;
+    }
+
+    function rgbaArrToObj(colorArr, colorObj){
+        colorObj.r = colorArr[0];
+        colorObj.g = colorArr[1];
+        colorObj.b = colorArr[2];
+        colorObj.a = colorArr[3];
+        return colorObj;
     }
 
     return window._PrimitiveEditor;

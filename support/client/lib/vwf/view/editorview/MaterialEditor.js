@@ -256,8 +256,15 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 			template: [
 				'<div class="mantissa">',
 					'<div class="slider"></div>',
-					'<input type="number" min="{{min}}" max="{{max}}" step="{{step}}" ng-model="value" ng-disabled="disabled || softLimit" ng-hide="range || softLimit" ng-change="change()" ng-model-options="{updateOn: \'blur click change\'}" />',
-					'<input type="number" step="{{step}}" ng-model="value" ng-disabled="disabled || !softLimit" ng-hide="range || !softLimit" ng-change="change()" ng-model-options="{updateOn: \'blur click change\'}" />',
+
+					'<input type="number" min="{{min}}" max="{{max}}" step="{{step}}" ng-model="value" ' +
+					'ng-disabled="disabled || softLimit" ng-hide="range || softLimit" ng-change="change(null, value)"' +
+					' ng-model-options="{updateOn: \'blur click change\'}" />',
+
+					'<input type="number" step="{{step}}" ng-model="value" ' +
+					'ng-disabled="disabled || !softLimit" ng-hide="range || !softLimit" ng-change="change(null, value)"' +
+					' ng-model-options="{updateOn: \'blur click change\'}" />',
+
 				'</div>',
 				'<div class="exponent" ng-show="useExponent">',
 					'Exponent: ',
