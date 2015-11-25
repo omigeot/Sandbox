@@ -1066,8 +1066,11 @@ this.respond = function( nodeID, actionName, memberName, parameters, result ) {
 /// @name module:Engine.receive
 
 this.nodesSimulating = [];
+this.nodesSimulatingNames = {}
 this.nodesCoSimulating = [];
+this.nodesCoSimulatingNames = {};
 this.propertyDataUpdates = {};
+this.enableSync = true;
 this.startSimulating = function(nodeID)
 {
     var nodes = this.decendants(nodeID);
@@ -1078,6 +1081,8 @@ this.startSimulating = function(nodeID)
         if(this.nodesSimulating.indexOf(nodes[i]) == -1)
         {
             this.nodesSimulating.push(nodes[i]);
+            this.nodesSimulatingNames[nodes[i]] = true;
+            this.propertyDataUpdates[nodes[i]] = {};
         }
         this.callMethod(this.application(),"startSimulatingNode",nodes[i])
         this.lastPropertyDataUpdates[nodes[i]] = {};
@@ -1094,6 +1099,8 @@ this.startCoSimulating = function(nodeID)
         if(this.nodesCoSimulating.indexOf(nodes[i]) == -1)
         {
             this.nodesCoSimulating.push(nodes[i]);
+            this.nodesCoSimulatingNames[nodes[i]] = true;
+            this.propertyDataUpdates[nodes[i]] = {};
         }
         this.callMethod(this.application(),"startSimulatingNode",nodes[i])
         this.lastPropertyDataUpdates[nodes[i]] = {};
@@ -1108,6 +1115,8 @@ this.stopSimulating = function(nodeID)
         if(this.nodesSimulating.indexOf(nodes[i]) != -1)
         {
             this.nodesSimulating.splice(this.nodesSimulating.indexOf(nodes[i]),1);
+            this.nodesSimulatingNames[nodes[i]] = false;
+            this.propertyDataUpdates[nodes[i]] = {};
         }
         this.callMethod(this.application(),"stopSimulatingNode",nodes[i]);
         delete this.lastPropertyDataUpdates[nodes[i]];
@@ -1119,21 +1128,21 @@ this.isSimulating = function(nodeID)
     if(socket === null) ///we are in offline mode
         return true;
     return nodeID == "index-vwf" ||
-     (this.nodesSimulating.indexOf(nodeID) != -1 || this.nodesCoSimulating.indexOf(nodeID) != -1)
+     (this.nodesSimulatingNames[nodeID]  || this.nodesCoSimulatingNames[nodeID])
 }
 this.isSimulatingExclusive = function(nodeID)
 {
     if(socket === null) ///we are in offline mode
         return true;
     return nodeID == "index-vwf" ||
-     (this.nodesSimulating.indexOf(nodeID) != -1)
+     (this.nodesSimulatingNames[nodeID])
 }
 this.isCoSimulating = function(nodeID)
 {
     if(socket === null) ///we are in offline mode
         return true;
     return nodeID == "index-vwf" ||
-     (this.nodesCoSimulating.indexOf(nodeID) != -1)
+     (this.nodesCoSimulatingNames[nodeID])
 }
 this.simulationStateUpdate = function(nodeID,member,state)
 {
@@ -1143,7 +1152,7 @@ this.simulationStateUpdate = function(nodeID,member,state)
         if(!nodes.existing[nodeID]) return;
         if(this.isSimulating(nodeID)) return;
         for (var i in state[nodeID])
-            this.setProperty(nodeID,i,state[nodeID][i]);
+            this.setPropertyFast(nodeID,i,state[nodeID][i]);
     }
 }
 
@@ -1171,6 +1180,22 @@ this.tryStringify = function(o)
 this.lastPropertyDataUpdates = {};
 this.postSimulationStateUpdates = function(freqlist)
 {
+    if(!this.enableSync) return;
+
+    for(var i = 0; i < this.nodesSimulating.length; i++)
+    {
+        var nodeID = this.nodesSimulating[i];
+        var props = this.propertyDataUpdates[nodeID];
+        var keys = freqlist || Object.keys(props) ;
+        for(var j = 0; j < keys.length; j++)
+        {
+            if(props.hasOwnProperty(keys[j]))
+            {
+                props[keys[j]] = this.tryParse(this.tryStringify(this.getPropertyFast(nodeID,keys[j])));
+            }
+        }
+    }
+
     var updates = {};
     for(var i = 0; i < this.nodesSimulating.length; i++)
     {
@@ -1211,13 +1236,13 @@ this.postSimulationStateUpdates = function(freqlist)
 }
 this.propertyUpdated = function(id,name,val)
 {
+    if(!this.enableSync) return;
     if (val == undefined) val = null;
     if(this.isSimulatingExclusive(id))
     {
         if(!this.propertyDataUpdates[id])
             this.propertyDataUpdates[id] = {};
-
-        this.propertyDataUpdates[id][name] = JSON.parse(JSON.stringify(val));
+        this.propertyDataUpdates[id][name] = true; //this.tryParse(this.tryStringify(val));
     }
 }
 this.receive = function( nodeID, actionName, memberName, parameters, respond, origin ) {
@@ -1257,9 +1282,13 @@ this.receive = function( nodeID, actionName, memberName, parameters, respond, or
             //when creating over the reflector, call ready on heirarchy after create.
             //nodes from setState are readied in createNode
             Engine.decendants(childID).forEach(function(i){
+                Engine.nodesCoSimulating.unshift(i)
                 Engine.callMethod(i,'ready',[]);
+                Engine.nodesCoSimulating.shift();
             });
+            Engine.nodesCoSimulating.unshift(childID);
             Engine.callMethod(childID,'ready',[]);
+            Engine.nodesCoSimulating.shift();
         });
     }
     // Invoke the action.
@@ -1454,6 +1483,17 @@ this.setState = function( applicationState, callback_async /* () */ ) {
 
    
     $(document).trigger('setstatebegin');
+
+    if(nodes.existing[Engine.application()])
+    {
+        var children = Engine.children(Engine.application());
+        for(var i = 0; i < children.length; i++)
+        {
+            Engine.deleteNode(children[i]);
+        }
+
+    }
+
     progressScreen.startSetState(applicationState);
 
     this.logger.debuggx( "setState" );  // TODO: loggableState
@@ -1472,18 +1512,18 @@ this.setState = function( applicationState, callback_async /* () */ ) {
 
     // Create or update global nodes and their descendants.
 
-    var nodes = applicationState.nodes || [];
+    var newnodes = applicationState.nodes || [];
     var annotations = applicationState.annotations || {};
 
     var nodeIndex = 0;
 
-    async.forEachSeries( nodes, function( nodeComponent, each_callback_async /* ( err ) */ ) {
+    async.forEachSeries( newnodes, function( nodeComponent, each_callback_async /* ( err ) */ ) {
 
         // Look up a possible annotation for this node. For backward compatibility, if the
         // state has exactly one node and doesn't contain an annotations object, assume the
         // node is the application.
 
-        var nodeAnnotation = nodes.length > 1 || applicationState.annotations ?
+        var nodeAnnotation = newnodes.length > 1 || applicationState.annotations ?
             annotations[nodeIndex] : "application";
 
         Engine.createNode( nodeComponent, nodeAnnotation, function( nodeID ) /* async */ {
@@ -1524,9 +1564,13 @@ this.setState = function( applicationState, callback_async /* () */ ) {
             _ProgressBar.hide();
 
             Engine.decendants(Engine.application()).forEach(function(i){
+                Engine.nodesCoSimulating.unshift(i);
                 Engine.callMethod(i,'ready',[]);
+                Engine.nodesCoSimulating.shift();
             });
+            
             Engine.callMethod(Engine.application(),'ready',[]);
+            
 
         
 
@@ -1853,6 +1897,7 @@ this.createNode = function( nodeComponent, nodeAnnotation, callback_async /* ( n
 
 this.deleteNode = function( nodeID ) {
 
+    if(!nodes.existing[nodeID]) return;
     this.logger.debuggx( "deleteNode", nodeID );
 
     // Remove the entry in the components list if this was the root of a component loaded
@@ -2533,6 +2578,56 @@ this.hashNode = function( nodeID ) {  // TODO: works with patches?  // TODO: onl
 /// @name module:Engine.createChild
 /// 
 /// @see {@link module:vwf/api/kernel.createChild}
+
+this.getChildID  = function( nodeID, childName, childComponent, childURI) {
+  
+    childComponent = normalizedComponent( childComponent );
+
+    var child, childID, childIndex, childPrototypeID, childBehaviorIDs = [], deferredInitializations = {};
+
+    // Determine if we're replicating previously-saved state, or creating a fresh object.
+
+    var replicating = !! childComponent.id;
+
+    // Allocate an ID for the node. IDs must be unique and consistent across all clients
+    // sharing the same instance regardless of the component load order. Each node maintains
+    // a sequence counter, and we allocate the ID based on the parent's sequence counter and
+    // ID. Top-level nodes take the ID from their origin URI when available or from a hash
+    // of the descriptor. An existing ID is used when synchronizing to state drawn from
+    // another client or to a previously-saved state.
+
+    var useLegacyID = nodeID === 0 && childURI &&
+        ( childURI == "index.vwf" || childURI == "appscene.vwf" || childURI.indexOf( "http://vwf.example.com/" ) == 0 ) &&
+        childURI != "http://vwf.example.com/node.vwf";
+
+    useLegacyID = true;
+    useLegacyID = useLegacyID ||
+        nodeID == applicationID && childName == "camera"; // TODO: fix static ID references and remove; model/glge still expects a static ID for the camera
+
+    if ( childComponent.id ) {  // incoming replication: pre-calculated id
+        childID = childComponent.id;
+        childIndex = this.children( nodeID ).length;
+    } else if ( nodeID === 0 ) {  // global: component's URI or hash of its descriptor
+        childID = childURI ||
+            Crypto.MD5( JSON.stringify( childComponent ) ).toString();  // TODO: MD5 may be too slow here
+        if ( useLegacyID ) {  // TODO: fix static ID references and remove
+            childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
+        }
+        childIndex = childURI;
+    } else {  // descendant: parent id + next from parent's sequence
+        if ( useLegacyID ) {  // TODO: fix static ID references and remove
+            childID = ( childComponent.continues || childComponent.extends || nodeTypeURI ) + "." + childName;  // TODO: fix static ID references and remove
+            childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" );  // TODO: fix static ID references and remove
+            childIndex = this.children( nodeID ).length;
+        } else {
+            childID = nodeID + ":" + this.sequence( nodeID ) +
+                ( this.configuration["randomize-ids"] ? "-" + ( "0" + Math.floor( this.random( nodeID ) * 100 ) ).slice( -2 ) : "" ) +
+                ( this.configuration["humanize-ids"] ? "-" + childName.replace( /[^0-9A-Za-z_-]+/g, "-" ) : "" );
+            childIndex = this.children( nodeID ).length;
+        }
+    }
+    return childID;
+}
 
 this.createDepth = 0;
 this.createChild = function( nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ ) {

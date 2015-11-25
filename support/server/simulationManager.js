@@ -180,18 +180,21 @@ var simulationManager = function(world)
     this.distribute = function(nodes)
     {
         console.log("distribute");
-        while (nodes.length)
+        var counter = 0;
+        var clientKeys = Object.keys(this.clients);
+        if(clientKeys.length == 0)
         {
-            for (var i in this.clients)
-            {
-                console.log("distribute " + node + " to " + i);
-                var node = nodes.shift();
-                if (node)
-                {
-                    
-                    this.clients[i].startSimulatingNode(node);
-                }
-            }
+            return;
+        }
+        for ( var i = 0; i < nodes.length; i ++)
+        {
+            console.log(nodes[i]);
+            console.log(clientKeys);
+            console.log(i);
+            this.clients[clientKeys[counter]].startSimulatingNode(nodes[i]);
+            counter++;
+            if(counter >= clientKeys.length)
+                counter = 0;
         }
     }
     this.getClientForNode = function(nodeid)

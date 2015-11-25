@@ -435,7 +435,7 @@ function sandboxWorld(id, metadata)
                 "parameters": {nodes:[scene],kernel:{time:0},annotations:{"1":"application"}},
                 "time": self.time
             }, true, true);
-            self.simulationManager.startScene();
+            
             self.messageClients(
             {
                 "action": "fireEvent",
@@ -476,7 +476,14 @@ function sandboxWorld(id, metadata)
         client.pending = true;
         client.pendingList = [];
         //The client is the first, is can just load the index.vwf, and mark it not pending
-        if (this.clientCount() == 1)
+        
+        //if this is a new client, and there is no logged in peer to fetch state from, then load the state
+        //if this new peer is not anonymous, then tell the peer to start the simulation. 
+        var havePeer = false;
+        for(var i in this.clients)
+            if(!this.clients[i].isAnonymous() && this.clients[i] !== client)
+                havePeer = true;
+        if (!havePeer)
         {
             var self = this;
             this.firstConnection(client, function()
@@ -484,6 +491,9 @@ function sandboxWorld(id, metadata)
                 //this must come after the client is added. Here, there is only one client
                 self.messageConnection(client.id, client.loginData ? client.loginData.Username : "", client.loginData ? client.loginData.UID : "");
                 var needAvatar = self.state.metadata.publishSettings.createAvatar;
+                if(!client.isAnonymous())
+                    self.simulationManager.startScene();
+
                 if (!self.state.metadata.publishSettings.allowAnonymous && client.loginData.anonymous)
                     needAvatar = false;
                 if (needAvatar && !self.state.getAvatarForClient(client.loginData.UID))

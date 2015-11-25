@@ -130,8 +130,10 @@ executionContext.prototype.postUpdates = function()
 {
     //debugger;
     var parentRoot = !(this.parent instanceof executionContext)
-    for (var i in this.touchedProperties)
+    var keys = Object.keys(this.touchedProperties)
+    for (var k = 0; k < keys.length; k++)
     {
+        var i = keys[k];
         if (parentRoot)
         {
             if (!(Object.deepEquals(this.touchedProperties[i].val, this.touchedProperties[i].originalVal)))
@@ -417,22 +419,22 @@ var APIModules = {
         this.id = id;
         this.playSound=function(soundURL /* the url of the sound */, loop /* loop or not */, volume,restart /* restart at 0 if playing */)
         {
-            vwf_view.kernel.callMethod(this.id,'playSound',[soundURL,loop,volume,restart])
+            vwf_view.kernel.callMethod(Engine.application(),'playSound',[this.id,soundURL,loop,volume,restart])
             
         }
         this.stopSound=function(soundURL /* the url of the sound */)
         {
-            vwf_view.kernel.callMethod(this.id,'stopSound',[soundURL])
+            vwf_view.kernel.callMethod(Engine.application(),'stopSound',[this.id,soundURL])
            
         }
        this.pauseSound=function(soundURL /* the url of the sound */)
         {
-            vwf_view.kernel.callMethod(this.id,'pauseSound',[soundURL])
+            vwf_view.kernel.callMethod(Engine.application(),'pauseSound',[this.id,soundURL])
            
         }
         this.deleteSound=function(soundURL /* the url of the sound */)
         {
-            vwf_view.kernel.callMethod(this.id,'deleteSound',[soundURL])  
+            vwf_view.kernel.callMethod(Engine.application(),'deleteSound',[this.id,soundURL])  
         }
     },
     transformAPI: function(id)
@@ -1169,9 +1171,12 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             });
             Object.defineProperty(node,"createChild",
             {
-                value: function(name, def)
+                value: function(name, def,uri,callback)
                 {
                     Engine.emit.createChild(node.id,name,def);
+                    var id = Engine.getChildID(node.id,name,def);
+                    if(callback)
+                        callback.apply(node,[id]);
                 }
             })
             Object.defineProperty(node,"delete",
