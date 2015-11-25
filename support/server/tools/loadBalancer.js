@@ -10,10 +10,11 @@ url = require("url"),
 express = require('express'),
 app = express();
 var ServerFeatures = require("../serverFeatures.js");
-
+var logger = require('../logger');
 global.configuration = {
     "port": 3001,            
-    "loadBalancerKey" : "SECRETKEY"
+    "loadBalancerKey" : "SECRETKEY",
+    "appPath" : null
 }
 
 
@@ -105,11 +106,15 @@ function Host(url)
 var hosts = [];
 
 
-
-
 app.get('/',function(req,res,next){
 	var instance = (req.query.instance);
+	if(global.configuration.appPath)
+	{
+		instance = instance.replace(global.configuration.appPath,"/adl/sandbox");
+	}
+
 	logger.info(instance);
+	instance=instance.replace(/\//g,"_");
 	for(var i =0; i < hosts.length; i++)
 	{
 		if(hosts[i].contains(instance))
@@ -137,7 +142,6 @@ app.get('/register',function(req,res,next){
 	if(host.key == global.configuration.loadBalancerKey)
 	{
 		
-
 		var found = -1;
 		for(var i =0; i < hosts.length; i++)
 		{
