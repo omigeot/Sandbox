@@ -408,7 +408,7 @@ function sandboxWorld(id, metadata)
                     "action": "tick",
                     "time": self.time,
                 };
-                self.messageClients(self.time.toFixed(3),false,false,'t',true);
+                //self.messageClients(self.time.toFixed(3),false,false,'t',true);
             }
             self.lasttime = now;
         }.bind(self);
@@ -631,18 +631,18 @@ function sandboxWorld(id, metadata)
         if (this.queue.length > 0 && this.ready === 0)
         {
             var lasttime = now();
-            console.log(this.queue.length);
+            
             var message = this.queue.shift();
             this.ready++;
             var self = this;
             this.process_message(message.message, message.client, function()
             {
-                setImmediate(function()
-                {
-                    console.log(now() - lasttime);
+                //setImmediate(function()
+                //{
+                    console.log(self.queue.length + ", " + (now() - lasttime));
                     self.ready--
                         self.dispatch();
-                })
+                //})
             });
         }
     }
@@ -667,6 +667,7 @@ function sandboxWorld(id, metadata)
                     //need to add the client identifier to all outgoing messages
                     try
                     {
+                        var lasttime = now();
                         //logger.info(message);
                         message.client = sendingclient.id;
                         if (message.action == "saveStateResponse")
@@ -770,6 +771,9 @@ function sandboxWorld(id, metadata)
                             self.state.createdChild(message.node, message.member, childComponent, cb2);
                             return; // must return here because cb2 is called by the state
                         }
+                        if(message.action == 'simulationStateUpdate')
+                            self.state.simulationStateUpdate(message.parameters);
+                        console.log(now() - lasttime + " inner loop ms");
                         cb2();
                     }
                     catch (e)
@@ -788,6 +792,7 @@ function sandboxWorld(id, metadata)
                         cb2();
                         return;
                     }
+                     var lasttime = now();
                     var compressedMessage = self.messageCompress.pack(message);
                     //distribute message to all clients on given instance
                     //for now, we need better filtering of messages. 
@@ -836,6 +841,7 @@ function sandboxWorld(id, metadata)
                         console.log('client simulate own node:' + internals.childID)
                         self.simulationManager.nodeCreated(internals.childID, sendingclient);
                     }
+                    console.log(now() - lasttime + " reflect ms");
                     cb2();
                 }
             ],

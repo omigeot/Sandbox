@@ -822,7 +822,7 @@ define(['progressScreen'],function(){
 
         socket.on( "connect", function() {
 
-           // window.setInterval(Engine.generateTick.bind(Engine),50);
+            window.setInterval(Engine.generateTick.bind(Engine),50);
             Engine.logger.infox( "-socket", "connected" );
 
            
@@ -6316,9 +6316,9 @@ var queue = this.private.queue = {
 
             // }
 
-            if ( chronic ) {
+            //if ( chronic ) {
                 this.time = Math.max( this.time, fields.time ); // save the latest allowed time for suspend/resume
-            }
+           // }
 
         }, this );
 

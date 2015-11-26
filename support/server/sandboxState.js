@@ -7,6 +7,7 @@ var URL = require('url');
 var request = require('request');
 var extend = require("extend");
 var logger = require('./logger');
+var now = require("performance-now");
 //change up the ID of the loaded scene so that they match what the client will have
 var fixIDs = function(node)
     {
@@ -565,11 +566,21 @@ var sandboxState = function(id, metadata, world)
     }
     this.simulationStateUpdate = function(updates)
     {
+        var nodeCount = 0;
+        var propCount = 0;
+        var lastTime = now();
         for (var i in updates)
         {
+            nodeCount++;
             for (var j in updates[i])
+            {
+                propCount++;
                 this.satProperty(i, j, updates[i][j])
+            }
         }
+        var time = now() - lastTime;
+        console.log("update " + nodeCount + " nodes with "+ propCount + " props in " + time + "ms");
+
     }
     var self = this;
     SandboxAPI.getState(this.id, function(state)
