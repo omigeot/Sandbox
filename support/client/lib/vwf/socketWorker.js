@@ -20,6 +20,24 @@ var totalMessagesEncoded = 0;
 var totalEncodeTime = 0;
 var totalDecodeTime = 0;
 
+
+//generate the ticks locally, but not on the main thread - which will suspend the timer if the window minimizes
+var EngineProxy = {
+	time : 0,
+	generateTick : function()
+    {
+    	this.time += .05;
+        var fields = {
+            time: this.time,
+            action: "tick",
+            parameters:[],
+            origin:"reflector"
+            // callback: callback,  // TODO: provisionally add fields to queue (or a holding queue) then execute callback when received back from reflector
+        };
+        onEvent("message",fields);
+    }	
+}
+
 function getUTF8Length(string)
 {
 	var utf8length = 0;
@@ -122,18 +140,14 @@ onmessage = function(e)
 		socket.on("t", function(e)
 		{
 			socketBytesReceived += 16;
-			var tickmessage = {
-                    "action": "tick",
-                    "time": e,
-                    "parameters":[],
-                    "origin":"reflector"
-            };
-            onEvent("message", tickmessage);
+            EngineProxy.time = parseFloat(e);
+            //onEvent("message", tickmessage);
 
 		});
 		socket.on("connect", function(e)
 		{
 			setInterval(socketMonitorInterval, 10000);
+			setInterval(EngineProxy.generateTick.bind(EngineProxy),50);
 			postMessage(
 			{
 				type: ID,

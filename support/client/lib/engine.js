@@ -822,7 +822,7 @@ define(['progressScreen'],function(){
 
         socket.on( "connect", function() {
 
-            window.setInterval(Engine.generateTick.bind(Engine),50);
+            
             Engine.logger.infox( "-socket", "connected" );
 
            

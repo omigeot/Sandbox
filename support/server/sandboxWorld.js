@@ -408,7 +408,7 @@ function sandboxWorld(id, metadata)
                     "action": "tick",
                     "time": self.time,
                 };
-                //self.messageClients(self.time.toFixed(3),false,false,'t',true);
+                self.messageClients(self.time.toFixed(3),false,false,'t',true);
             }
             self.lasttime = now;
         }.bind(self);
@@ -503,8 +503,9 @@ function sandboxWorld(id, metadata)
         //if this is a new client, and there is no logged in peer to fetch state from, then load the state
         //if this new peer is not anonymous, then tell the peer to start the simulation. 
         var havePeer = false;
+
         for (var i in this.clients)
-            if (!this.clients[i].isAnonymous() && this.clients[i] !== client)
+            if ((!this.clients[i].isAnonymous() || this.allowAnonymous) && this.clients[i] !== client)
                 havePeer = true;
         if (!havePeer)
         {
