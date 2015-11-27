@@ -404,7 +404,7 @@ var sandboxState = function(id, metadata, world)
         var node = this.findNode(nodeID);
         if (!node)
         {
-            console.log('server has no record of ' + nodeID + ' ' + type, 1);
+            //console.log('server has no record of ' + nodeID + ' ' + type, 1);
             return true;
         }
         if (this.metadata.publishSettings.allowAnonymous || checkOwner(node, client.loginData.UID))
@@ -413,7 +413,7 @@ var sandboxState = function(id, metadata, world)
         }
         else
         {
-            console.log('permission denied for modifying ' + node.id, 1);
+            //console.log('permission denied for modifying ' + node.id, 1);
             return;
         }
     }
@@ -534,7 +534,7 @@ var sandboxState = function(id, metadata, world)
                 if (!childComponent) return;
                 if (!node.children) node.children = {};
                 var childID = self.getID(name, childComponent);
-                console.log(childID);
+                //console.log(childID);
                 childComponent.id = childID;
                 node.children[childID] = childComponent;
                 node.children[childID].parent = node;
@@ -579,7 +579,7 @@ var sandboxState = function(id, metadata, world)
             }
         }
         var time = now() - lastTime;
-        console.log("update " + nodeCount + " nodes with "+ propCount + " props in " + time + "ms");
+        //console.log("update " + nodeCount + " nodes with "+ propCount + " props in " + time + "ms");
 
     }
     var self = this;

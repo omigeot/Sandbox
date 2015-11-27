@@ -202,6 +202,7 @@ function sandboxWorld(id, metadata)
     this.messageCompress.setServer(this);
     if (this.metadata.publishSettings && this.metadata.publishSettings.allowAnonymous)
         this.allowAnonymous = true;
+    this.simulationStateUpdates = {};
     var log = null;
     try
     {
@@ -356,7 +357,7 @@ function sandboxWorld(id, metadata)
         }
         catch (e)
         {
-            console.log(e)
+            //console.log(e)
         }
     }
     this.messageConnection = function(id, name, UID)
@@ -408,7 +409,18 @@ function sandboxWorld(id, metadata)
                     "action": "tick",
                     "time": self.time,
                 };
-                self.messageClients(self.time.toFixed(3),false,false,'t',true);
+                self.messageClients(self.time.toFixed(3), false, false, 't', true);
+                var simMessage = {
+                    node: "index-vwf",
+                    action: "simulationStateUpdate",
+                    member: "null",
+                    parameters: self.simulationStateUpdates
+                }
+                self.messageClients(simMessage, false, false, 'm', true);
+                self.simulationStateUpdates = {};
+                console.log("Average Message Time: " + (self.messageTotalProcessTime / self.totalMessages));
+                this.totalMessages = 1;
+                this.messageTotalProcessTime = 0;
             }
             self.lasttime = now;
         }.bind(self);
@@ -433,7 +445,7 @@ function sandboxWorld(id, metadata)
         this.simulationManager.addClient(socket);
         this.state.on('loaded', function()
         {
-            console.log('loaded');
+            //console.log('loaded');
             self.status = STATUS.DEFAULT;
             var scene = self.state.getVWFDef();
             self.messageClients(
@@ -503,7 +515,6 @@ function sandboxWorld(id, metadata)
         //if this is a new client, and there is no logged in peer to fetch state from, then load the state
         //if this new peer is not anonymous, then tell the peer to start the simulation. 
         var havePeer = false;
-
         for (var i in this.clients)
             if ((!this.clients[i].isAnonymous() || this.allowAnonymous) && this.clients[i] !== client)
                 havePeer = true;
@@ -617,239 +628,261 @@ function sandboxWorld(id, metadata)
     }
     this.queue = [];
     this.ready = 0;
+    this.totalMessages = 0;
+    this.messageTotalProcessTime = 0;
     this.message = function(msg, sendingclient)
     {
+        this.totalMessages++;
         var message = this.messageCompress.unpack(msg);
         //     message.time = this.time;
-     
+        if (this.queue.length > 0 || message.action == 'createChild')
         {
             this.queue.push(new QueuedMessage(message, sendingclient));
+            this.dispatch();
         }
-        this.dispatch();
+        else
+        {
+            var lasttime = now();
+            this.process_message_sync(message, sendingclient);
+            this.messageTotalProcessTime += (now() - lasttime);
+        }
     }
     this.dispatch = function()
     {
         if (this.queue.length > 0 && this.ready === 0)
         {
             var lasttime = now();
-            
             var message = this.queue.shift();
             this.ready++;
             var self = this;
-            this.process_message(message.message, message.client, function()
+            this.process_message_async(message.message, message.client, function()
             {
                 //setImmediate(function()
                 //{
-                    console.log(self.queue.length + ", " + (now() - lasttime));
-                    self.ready--
-                        self.dispatch();
+                this.messageTotalProcessTime += now() - lasttime;
+                self.ready--;
+                self.dispatch();
                 //})
             });
         }
     }
-    this.process_message = function(msg, sendingclient, cb)
+    this.process_message_sync = function(message, sendingclient)
     {
-        var doReflect = true;
+        var self = this;
+        var internals = this.process_message_internal(self, message, sendingclient, function() {});
+        this.reflect_message(self, message, sendingclient, internals, function() {});
+    }
+    this.process_message_async = function(message, sendingclient, cb)
+    {
         var internals = {};
+        message.time = this.time;
+        var self = this;
+        this.process_message_internal(self, message, sendingclient, function(internals)
+        {
+            self.reflect_message(self, message, sendingclient, internals, cb);
+        });
+    }
+    this.process_message_internal = function(self, message, sendingclient, cb2)
+    {
+        var internals = {};
+        internals.doReflect = true;
+        //need to add the client identifier to all outgoing messages
         try
         {
-            var message = msg;
-            message.time = this.time;
+            var lasttime = now();
+            //logger.info(message);
+            message.client = sendingclient.id;
+            if (message.action == "saveStateResponse")
+            {
+                SaveInstanceState(self.id, message.data, sendingclient);
+                internals.doReflect = false;
+                cb2(internals);
+                return internals;
+            }
+            //do not accept messages from clients that have not been claimed by a user
+            //currently, allow getstate from anonymous clients
+            if (!self.state.metadata.publishSettings.allowAnonymous && sendingclient.loginData.anonymous && message.action != "getState" && message.member != "latencyTest")
+            {
+                internals.doReflect = false;
+                cb2(internals);
+                return internals;
+            }
+            //route callmessage to the state to it can respond to manip the server side copy
+            if (message.action == 'callMethod')
+                self.state.calledMethod(message.node, message.member, message.parameters);
+            if (message.action == 'callMethod' && message.node == 'index-vwf' && message.member == 'PM')
+            {
+                var textmessage = JSON.parse(message.parameters[0]);
+                if (textmessage.receiver == '*System*')
+                {
+                    var red, blue, reset;
+                    red = '\u001b[31m';
+                    blue = '\u001b[33m';
+                    reset = '\u001b[0m';
+                    logger.warn(blue + textmessage.sender + ": " + textmessage.text + reset, 0);
+                }
+                //send the message to the sender and to the receiver
+                if (textmessage.receiver)
+                    self.clients[textmessage.receiver].emit('m', self.messageCompress.pack(message));
+                if (textmessage.sender)
+                    self.clients[textmessage.sender].emit('m', self.messageCompress.pack(message));
+                internals.doReflect = false;
+                cb2(internals);
+                return internals;
+            }
+            // only allow users to hang up their own RTC calls
+            var rtcMessages = ['rtcCall', 'rtcVideoCall', 'rtcData', 'rtcDisconnect'];
+            if (message.action == 'callMethod' && message.node == 'index-vwf' && rtcMessages.indexOf(message.member) != -1)
+            {
+                var params = message.parameters[0];
+                // allow no transmitting of the 'rtc*Call' messages; purely client-side
+                if (rtcMessages.slice(0, 2)
+                    .indexOf(message.member) != -1)
+                    internals.doReflect = false;
+                cb2(internals);
+                return internals;
+                // route messages by the 'target' param, verifying 'sender' param
+                if (rtcMessages.slice(2)
+                    .indexOf(message.member) != -1 &&
+                    params.sender == socket.id
+                )
+                {
+                    var client = self.clients[params.target];
+                    if (client)
+                        client.emit('m', self.messageCompress.pack(message));
+                }
+                internals.doReflect = false;
+                cb2(internals);
+                return internals;
+            }
+            //We'll only accept a setProperty if the user has ownership of the object
+            if (message.action == "deleteNode" || message.action == "createMethod" || message.action == "createProperty" || message.action == "createEvent" ||
+                message.action == "deleteMethod" || message.action == "deleteProperty" || message.action == "deleteEvent" || message.action == "setProperty")
+            {
+                if (!self.state.validate(message.action, message.node, sendingclient))
+                {
+                    internals.doReflect = false;
+                    cb2(internals);
+                    return internals;
+                }
+            }
+            if (message.action == "setProperty")
+                self.state.satProperty(message.node, message.member, message.parameters[0]);
+            //We'll only accept a deleteNode if the user has ownership of the object
+            if (message.action == "deleteNode")
+            {
+                var displayname = self.state.getProperty(message.node, 'DisplayName');
+                self.simulationManager.nodeDeleted(message.node);
+                self.state.deletedNode(message.node)
+                xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, displayname || message.node, null, self.id);
+            }
+            //We'll only accept a createChild if the user has ownership of the object
+            //Note that you now must share a scene with a user!!!!
+            if (message.action == "createChild")
+            {
+                var childComponent = JSON.parse(JSON.stringify(message.parameters[0]));
+                if (!self.state.validateCreate(message.node, message.member, childComponent, sendingclient))
+                {
+                    internals.doReflect = false;
+                    cb2(internals);
+                    return internals;
+                }
+                var childID = self.state.getID(message.member, childComponent);
+                internals.childID = childID;
+                xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties ? childComponent.properties.DisplayName : "", null, self.id);
+                self.state.createdChild(message.node, message.member, childComponent, function()
+                {
+                    //console.log('returned from createChild');
+                    //console.log(internals);
+                    cb2(internals);
+                });
+                return internals; // must return here because cb2 is called by the state
+            }
+            if (message.action == 'simulationStateUpdate')
+            {
+                self.state.simulationStateUpdate(message.parameters);
+                //record all updates - we'll post on tick
+                for (var i in message.parameters)
+                {
+                    self.simulationStateUpdates[i] = message.parameters[i];
+                }
+                internals.doReflect = false;
+                cb2(internals);
+                return internals;
+            }
+            ////console.log(now() - lasttime + " inner loop ms");
+            cb2(internals);
+            return internals;
         }
         catch (e)
         {
-            cb();
+            //safe to catch and continue here
+            logger.error('Error in reflector: onMessage');
+            logger.error(e);
+            logger.error(e.stack);
+            cb2(internals);
+            return internals;
+        }
+    }
+    this.reflect_message = function(self, message, sendingclient, internals, cb2)
+    {
+        var doReflect = internals.doReflect;
+        if (!doReflect)
+        {
+            cb2();
             return;
         }
-        var self = this;
-        async.series([
-                function process(cb2)
-                {
-                    //need to add the client identifier to all outgoing messages
-                    try
-                    {
-                        var lasttime = now();
-                        //logger.info(message);
-                        message.client = sendingclient.id;
-                        if (message.action == "saveStateResponse")
-                        {
-                            SaveInstanceState(self.id, message.data, sendingclient);
-                            doReflect = false;
-                            cb2();
-                            return;
-                        }
-                        //do not accept messages from clients that have not been claimed by a user
-                        //currently, allow getstate from anonymous clients
-                        if (!self.state.metadata.publishSettings.allowAnonymous && sendingclient.loginData.anonymous && message.action != "getState" && message.member != "latencyTest")
-                        {
-                            doReflect = false;
-                            cb2();
-                            return;
-                        }
-                        //route callmessage to the state to it can respond to manip the server side copy
-                        if (message.action == 'callMethod')
-                            self.state.calledMethod(message.node, message.member, message.parameters);
-                        if (message.action == 'callMethod' && message.node == 'index-vwf' && message.member == 'PM')
-                        {
-                            var textmessage = JSON.parse(message.parameters[0]);
-                            if (textmessage.receiver == '*System*')
-                            {
-                                var red, blue, reset;
-                                red = '\u001b[31m';
-                                blue = '\u001b[33m';
-                                reset = '\u001b[0m';
-                                logger.warn(blue + textmessage.sender + ": " + textmessage.text + reset, 0);
-                            }
-                            //send the message to the sender and to the receiver
-                            if (textmessage.receiver)
-                                self.clients[textmessage.receiver].emit('m', self.messageCompress.pack(message));
-                            if (textmessage.sender)
-                                self.clients[textmessage.sender].emit('m', self.messageCompress.pack(message));
-                            doReflect = false;
-                            cb2();
-                            return;
-                        }
-                        // only allow users to hang up their own RTC calls
-                        var rtcMessages = ['rtcCall', 'rtcVideoCall', 'rtcData', 'rtcDisconnect'];
-                        if (message.action == 'callMethod' && message.node == 'index-vwf' && rtcMessages.indexOf(message.member) != -1)
-                        {
-                            var params = message.parameters[0];
-                            // allow no transmitting of the 'rtc*Call' messages; purely client-side
-                            if (rtcMessages.slice(0, 2)
-                                .indexOf(message.member) != -1)
-                                doReflect = false;
-                            cb2();
-                            return;
-                            // route messages by the 'target' param, verifying 'sender' param
-                            if (rtcMessages.slice(2)
-                                .indexOf(message.member) != -1 &&
-                                params.sender == socket.id
-                            )
-                            {
-                                var client = self.clients[params.target];
-                                if (client)
-                                    client.emit('m', self.messageCompress.pack(message));
-                            }
-                            doReflect = false;
-                            cb2();
-                            return;
-                        }
-                        //We'll only accept a setProperty if the user has ownership of the object
-                        if (message.action == "deleteNode" || message.action == "createMethod" || message.action == "createProperty" || message.action == "createEvent" ||
-                            message.action == "deleteMethod" || message.action == "deleteProperty" || message.action == "deleteEvent" || message.action == "setProperty")
-                        {
-                            if (!self.state.validate(message.action, message.node, sendingclient))
-                            {
-                                doReflect = false;
-                                cb2();
-                                return;
-                            }
-                        }
-                        if (message.action == "setProperty")
-                            self.state.satProperty(message.node, message.member, message.parameters[0]);
-                        //We'll only accept a deleteNode if the user has ownership of the object
-                        if (message.action == "deleteNode")
-                        {
-                            var displayname = self.state.getProperty(message.node, 'DisplayName');
-                            self.simulationManager.nodeDeleted(message.node);
-                            self.state.deletedNode(message.node)
-                            xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.derezzed, message.node, displayname || message.node, null, self.id);
-                        }
-                        //We'll only accept a createChild if the user has ownership of the object
-                        //Note that you now must share a scene with a user!!!!
-                        if (message.action == "createChild")
-                        {
-                            var childComponent = JSON.parse(JSON.stringify(message.parameters[0]));
-                            if (!self.state.validateCreate(message.node, message.member, childComponent, sendingclient))
-                            {
-                                doReflect = false;
-                                cb2();
-                                return;
-                            }
-                            var childID = self.state.getID(message.member, childComponent);
-                            internals.childID = childID;
-                            xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties ? childComponent.properties.DisplayName : "", null, self.id);
-                            self.state.createdChild(message.node, message.member, childComponent, cb2);
-                            return; // must return here because cb2 is called by the state
-                        }
-                        if(message.action == 'simulationStateUpdate')
-                            self.state.simulationStateUpdate(message.parameters);
-                        console.log(now() - lasttime + " inner loop ms");
-                        cb2();
-                    }
-                    catch (e)
-                    {
-                        //safe to catch and continue here
-                        logger.error('Error in reflector: onMessage');
-                        logger.error(e);
-                        logger.error(e.stack);
-                        cb2();
-                    }
-                },
-                function reflect(cb2)
-                {
-                    if (!doReflect)
-                    {
-                        cb2();
-                        return;
-                    }
-                     var lasttime = now();
-                    var compressedMessage = self.messageCompress.pack(message);
-                    //distribute message to all clients on given instance
-                    //for now, we need better filtering of messages. 
-                    //var concernedClients = self.simulationManager.getClientsForMessage(message, sendingclient)
-                    for (var i in self.clients)
-                    {
-                        var client = self.clients[i];
-                        //if the message was get state, then fire all the pending messages after firing the setState
-                        if (message.action == "getState" && client.pending == true)
-                        {
-                            self.Log('Got State', 2);
-                            if (self.requestTimer)
-                                self.requestTimer.deleteMe();
-                            var state = message.result;
-                            self.status = STATUS.DEFAULT;
-                            self.state.setVWFDef(JSON.parse(JSON.stringify(state)));
-                            self.messageClient(client,
-                            {
-                                "action": "status",
-                                "parameters": ["State Received, Transmitting"],
-                                "time": self.getStateTime
-                            }, false, false)
-                            self.messageClient(client,
-                            {
-                                "action": "setState",
-                                "parameters": [state],
-                                "time": self.getStateTime
-                            }, true, true)
-                            client.pending = false;
-                            self.trigger('stateSent');
-                        }
-                        else
-                        {
-                            if (client == sendingclient && (message.action == "setProperty" || message.action == "dispatchEvent" || message.action == "callMethod" || message.action == "fireEvent"))
-                            {
-                                //client has already processed own inputs - dont' send back to sender;
-                            }
-                            else
-                            {
-                                self.messageClient(client, compressedMessage, false, false);
-                            }
-                        }
-                    }
-                    if (message.action == "createChild")
-                    {
-                        console.log('client simulate own node:' + internals.childID)
-                        self.simulationManager.nodeCreated(internals.childID, sendingclient);
-                    }
-                    console.log(now() - lasttime + " reflect ms");
-                    cb2();
-                }
-            ],
-            function done(err)
+        var lasttime = now();
+        var compressedMessage = self.messageCompress.pack(message);
+        //distribute message to all clients on given instance
+        //for now, we need better filtering of messages. 
+        //var concernedClients = self.simulationManager.getClientsForMessage(message, sendingclient)
+        for (var i in self.clients)
+        {
+            var client = self.clients[i];
+            //if the message was get state, then fire all the pending messages after firing the setState
+            if (message.action == "getState" && client.pending == true)
             {
-                cb();
-            })
+                self.Log('Got State', 2);
+                if (self.requestTimer)
+                    self.requestTimer.deleteMe();
+                var state = message.result;
+                self.status = STATUS.DEFAULT;
+                self.state.setVWFDef(JSON.parse(JSON.stringify(state)));
+                self.messageClient(client,
+                {
+                    "action": "status",
+                    "parameters": ["State Received, Transmitting"],
+                    "time": self.getStateTime
+                }, false, false)
+                self.messageClient(client,
+                {
+                    "action": "setState",
+                    "parameters": [state],
+                    "time": self.getStateTime
+                }, true, true)
+                client.pending = false;
+                self.trigger('stateSent');
+            }
+            else
+            {
+                if (client == sendingclient && (message.action == "setProperty" || message.action == "dispatchEvent" || message.action == "callMethod" || message.action == "fireEvent"))
+                {
+                    //client has already processed own inputs - dont' send back to sender;
+                }
+                else
+                {
+                    self.messageClient(client, compressedMessage, false, false);
+                }
+            }
+        }
+        if (message.action == "createChild")
+        {
+            //console.log('client simulate own node:' + internals.childID)
+            self.simulationManager.nodeCreated(internals.childID, sendingclient);
+        }
+        ////console.log(now() - lasttime + " reflect ms");
+        cb2();
     }
     this.clientCountForUser = function(userID)
     {
@@ -894,7 +927,7 @@ function sandboxWorld(id, metadata)
             this.simulationManager.removeClient(client)
             if (loginData && loginData.clients)
             {
-                console.log("Disconnect. Deleting node for user avatar " + loginData.UID);
+                //console.log("Disconnect. Deleting node for user avatar " + loginData.UID);
                 //only delete the avatar if this is the last client owned by the user
                 if (this.clientCountForUser(loginData.UID) == 0)
                 {
@@ -936,8 +969,8 @@ function sandboxWorld(id, metadata)
                 "parameters": ["Peer disconnected: " + (loginData ? loginData.UID : "Unknown")],
                 "time": this.getStateTime
             });
-            console.log('clientcount is ' + this.clientCount());
-            console.log(this.getClientList());
+            //console.log('clientcount is ' + this.clientCount());
+            //console.log(this.getClientList());
         }
     }
 }

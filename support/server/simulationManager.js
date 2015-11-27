@@ -80,7 +80,7 @@ var simulationManager = function(world)
         {
             if (!this.getClientForNode(i))
             {
-                console.log("no client for " + i);
+                //console.log("no client for " + i);
                 continue;
             }
             for (var j in this.clientControlTable[i])
@@ -101,19 +101,19 @@ var simulationManager = function(world)
                     this.getClientForNode(i).stopSimulatingNode(i);
                 
                 this.clients[controllingClient].startSimulatingNode(i)
-                console.log('moving ' + i + " to " + controllingClient);
+                //console.log('moving ' + i + " to " + controllingClient);
             }
         }
     }.bind(this);
     this.postLearnedMappingsHandle = setInterval(this.postLearnedMappings, 1000);
     this.addClient = function(sandboxClient)
     {
-        console.log("simulationManager.addClient " + sandboxClient.id )
+        //console.log("simulationManager.addClient " + sandboxClient.id )
         var newClient = new simClient(sandboxClient, this);
         if(sandboxClient.isAnonymous() && !this.world.state.metadata.publishSettings.allowAnonymous)
         {
             this.observers[sandboxClient.id] = newClient;
-            console.log(sandboxClient.id + " is isAnonymous. Not distributing")
+            //console.log(sandboxClient.id + " is isAnonymous. Not distributing")
             return;
         }
         //must add to list to get proper average load, then remove so we don't keep distributing
@@ -148,7 +148,7 @@ var simulationManager = function(world)
         }
         if(errorTimeout == 0)
         {
-            console.log("Error redistributing nodes");
+            //console.log("Error redistributing nodes");
         }
         this.clients[sandboxClient.id] = newClient;
     }
@@ -171,7 +171,7 @@ var simulationManager = function(world)
         {
             if(this.clientControlTable[i][sandboxClient.id])
             {
-                console.log("remove " + sandboxClient.id +" from " + i)
+                //console.log("remove " + sandboxClient.id +" from " + i)
                 delete this.clientControlTable[i][sandboxClient.id];
             }
         }
@@ -179,7 +179,7 @@ var simulationManager = function(world)
     }
     this.distribute = function(nodes)
     {
-        console.log("distribute");
+        //console.log("distribute");
         var counter = 0;
         var clientKeys = Object.keys(this.clients);
         if(clientKeys.length == 0)
@@ -188,9 +188,7 @@ var simulationManager = function(world)
         }
         for ( var i = 0; i < nodes.length; i ++)
         {
-            console.log(nodes[i]);
-            console.log(clientKeys);
-            console.log(i);
+            
             this.clients[clientKeys[counter]].startSimulatingNode(nodes[i]);
             counter++;
             if(counter >= clientKeys.length)
@@ -225,7 +223,7 @@ var simulationManager = function(world)
         if (!rootID)
         {
             this.clients[creatingClient.id].startSimulatingNode(nodeid);
-            console.log(creatingClient.id + " start simulation " + nodeid);
+            //console.log(creatingClient.id + " start simulation " + nodeid);
         }
         else
             this.getClientForNode(rootID).startSimulatingNode(nodeid);

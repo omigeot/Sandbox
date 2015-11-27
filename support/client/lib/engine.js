@@ -1148,10 +1148,11 @@ this.isCoSimulating = function(nodeID)
 this.simulationStateUpdate = function(nodeID,member,state)
 {
     //state = JSON.parse(state);
+   
     for(var nodeID in state)
     {
-        if(!nodes.existing[nodeID]) return;
-        if(this.isSimulating(nodeID)) return;
+        if(!nodes.existing[nodeID]) continue;
+        if(this.isSimulating(nodeID)) continue;
         for (var i in state[nodeID])
             this.setPropertyFast(nodeID,i,state[nodeID][i]);
     }
