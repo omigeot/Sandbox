@@ -258,6 +258,7 @@ function startVWF() {
 						}
 						catch(e){
 							logger.error('Failed to start the asset server! Did it install correctly?');
+                            logger.error(e);
 							app.all(global.configuration.assetAppPath+'/*', function(req,res){
 								res.status(500).send('Asset server not available');
 							});
