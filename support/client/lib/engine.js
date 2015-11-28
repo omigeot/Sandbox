@@ -963,7 +963,7 @@ this.plan = function( nodeID, actionName, memberName, parameters, when, callback
 /// in the instance.
 /// 
 /// @name module:Engine.send
-
+this.localReentryStack = 0;
 this.send = function( nodeID, actionName, memberName, parameters, when, callback_async /* ( result ) */ ) {
 
     this.logger.debuggx( "send", nodeID, actionName, memberName,
@@ -990,10 +990,16 @@ this.send = function( nodeID, actionName, memberName, parameters, when, callback
         //process own input right away.
         if(actionName == "setProperty" || actionName == "callMethod" || actionName == "fireEvent" || actionName == "dispatchEvent")
         {
-            fields = JSON.parse(JSON.stringify(fields));
-            fields.client = this.moniker_; // stamp with the originating client like the reflector does
-            fields.origin = "reflector";
-            queue.insert( fields );
+            if(memberName !== "latencyTest")
+            {
+                fields = JSON.parse(JSON.stringify(fields));
+                fields.client = this.moniker_; // stamp with the originating client like the reflector does
+                fields.origin = "reflector";
+                this.localReentryStack++
+                queue.insert( fields );
+                if(this.localReentryStack > 2)
+                this.localReentryStack--;
+            }
         }
         socket.send( fields );
 
@@ -1009,8 +1015,10 @@ this.send = function( nodeID, actionName, memberName, parameters, when, callback
         //the data traveled over the reflector
         fields = JSON.parse(JSON.stringify(fields));
         //must be careful that we do this actually async, or logic that expects async operation will fail
-        
+        this.localReentryStack++
             queue.insert( fields );;    
+        console.warn(this.localReentryStack);
+        this.localReentryStack--;
        
         
 
@@ -1073,6 +1081,7 @@ this.propertyDataUpdates = {};
 this.enableSync = true;
 this.startSimulating = function(nodeID)
 {
+    alertify.error("Start Simulation of " + (this.getProperty(nodeID,"DisplayName") || nodeID));
     var nodes = this.decendants(nodeID);
     if(nodeID !== "index-vwf")
         nodes.push(nodeID);
@@ -1083,9 +1092,10 @@ this.startSimulating = function(nodeID)
             this.nodesSimulating.push(nodes[i]);
             this.nodesSimulatingNames[nodes[i]] = true;
             this.propertyDataUpdates[nodes[i]] = {};
+            this.callMethod(this.application(),"startSimulatingNode",nodes[i])
+            this.lastPropertyDataUpdates[nodes[i]] = {};
         }
-        this.callMethod(this.application(),"startSimulatingNode",nodes[i])
-        this.lastPropertyDataUpdates[nodes[i]] = {};
+
     }
 }
 this.startCoSimulating = function(nodeID)
@@ -1157,7 +1167,14 @@ this.simulationStateUpdate = function(nodeID,member,state)
             this.setPropertyFast(nodeID,i,state[nodeID][i]);
     }
 }
-
+//request the server mark this client as the simulator for the given node
+//since simulation is distributed by the top level node, find the root for the given ID
+this.requestControl = function(nodeID)
+{
+    while(this.parent(nodeID) && this.parent(nodeID) !== this.application())
+        nodeID = this.parent(nodeID);
+    this.send(nodeID,"requestControlOfNode","null",[]);
+}
 this.tryParse = function(o)
 {
     try
@@ -3267,7 +3284,14 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
 
         // Always complete asynchronously so that the stack doesn't grow from node to node
         // while createChild() recursively traverses a component.
-        progressScreen.stopCreateNode(nodeID);
+        progressScreen.stopCreateNode(childID);
+        if(Engine.isSimulating(childID))
+        {
+            //there might be new children that we have not accounted for, so we 
+            //need to mark them
+            Engine.startSimulating(childID);
+        }
+
         if(err)
         {
             console.error("Error loading entity: " + err);

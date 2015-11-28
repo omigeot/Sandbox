@@ -1,7 +1,6 @@
 var messageCompress = require('../client/lib/messageCompress')
     .messageCompress;
-
-    var logger = require('./logger');
+var logger = require('./logger');
 var simClient = function(sandboxClient, simulationManager)
 {
     this.manager = simulationManager;
@@ -23,6 +22,7 @@ var simClient = function(sandboxClient, simulationManager)
         {
             if (this.nodesSimulating.indexOf(nodeID) == -1)
             {
+                console.log(this.sandboxClient.id + " start simulation of " + nodeID);
                 this.nodesSimulating.push(nodeID)
                 this.sendStartSimMessage(nodeID);
             }
@@ -42,7 +42,6 @@ var simClient = function(sandboxClient, simulationManager)
                 this.sendStopSimMessage(nodeID);
             }
         }
-        
     }
     this.sendStopSimMessage = function(nodeID)
     {
@@ -55,7 +54,6 @@ var simClient = function(sandboxClient, simulationManager)
     }
     this.sendStartSimMessage = function(nodeID)
     {
-       
         this.sandboxClient.emit('m', this.manager.world.messageCompress.pack(JSON.stringify(
         {
             "action": "startSimulating",
@@ -72,10 +70,9 @@ var simulationManager = function(world)
     this.clientControlTable = {}; //learn which clients need to simulate locally most
     //once a second look for client that most needs to simulate a node, and change owners
     var self = this;
-   
     this.postLearnedMappings = function()
     {
-        
+        // console.log('postLearnedMappings',this.clientControlTable);
         for (var i in this.clientControlTable)
         {
             if (!this.getClientForNode(i))
@@ -97,11 +94,13 @@ var simulationManager = function(world)
             }
             if (controllingClient !== this.getClientForNode(i).sandboxClient.id)
             {
-                if(this.getClientForNode(i))
-                    this.getClientForNode(i).stopSimulatingNode(i);
-                
-                this.clients[controllingClient].startSimulatingNode(i)
-                //console.log('moving ' + i + " to " + controllingClient);
+                if(this.clients[controllingClient])
+                {
+                    if (this.getClientForNode(i))
+                        this.getClientForNode(i).stopSimulatingNode(i);
+                    this.clients[controllingClient].startSimulatingNode(i)
+                        //console.log('moving ' + i + " to " + controllingClient);
+                }
             }
         }
     }.bind(this);
@@ -110,7 +109,7 @@ var simulationManager = function(world)
     {
         //console.log("simulationManager.addClient " + sandboxClient.id )
         var newClient = new simClient(sandboxClient, this);
-        if(sandboxClient.isAnonymous() && !this.world.state.metadata.publishSettings.allowAnonymous)
+        if (sandboxClient.isAnonymous() && !this.world.state.metadata.publishSettings.allowAnonymous)
         {
             this.observers[sandboxClient.id] = newClient;
             //console.log(sandboxClient.id + " is isAnonymous. Not distributing")
@@ -119,22 +118,20 @@ var simulationManager = function(world)
         //must add to list to get proper average load, then remove so we don't keep distributing
         //nodes from new client to new client
         this.clients[sandboxClient.id] = newClient;
-        if(this.clientCount() == 1) // a new client joined, who is logged in , and all others are observers
+        if (this.clientCount() == 1) // a new client joined, who is logged in , and all others are observers
         {
             //this.startScene();
             return;
         }
-
         var average = this.clientAverageLoad();
         delete this.clients[sandboxClient.id];
         var counter = 0;
         var errorTimeout = 100;
-        if(this.world.state.nodes["index-vwf"])
-            errorTimeout =  Object.keys(this.world.state.nodes["index-vwf"].children).length;
+        if (this.world.state.nodes["index-vwf"])
+            errorTimeout = Object.keys(this.world.state.nodes["index-vwf"].children).length;
         //divide up work distribute until new client shares load
-        while (newClient.nodesSimulating.length < average -1 && errorTimeout)
+        while (newClient.nodesSimulating.length < average - 1 && errorTimeout)
         {
-            
             var nextClient = this.clients[Object.keys(this.clients)[counter]];
             var node = nextClient.nodesSimulating[0];
             if (node)
@@ -146,7 +143,7 @@ var simulationManager = function(world)
             }
             errorTimeout--;
         }
-        if(errorTimeout == 0)
+        if (errorTimeout == 0)
         {
             //console.log("Error redistributing nodes");
         }
@@ -158,7 +155,7 @@ var simulationManager = function(world)
     }
     this.removeClient = function(sandboxClient)
     {
-        if(this.observers[sandboxClient.id])
+        if (this.observers[sandboxClient.id])
         {
             delete this.observers[sandboxClient.id];
             return;
@@ -166,10 +163,9 @@ var simulationManager = function(world)
         var oldNodes = this.clients[sandboxClient.id].nodesSimulating;
         delete this.clients[sandboxClient.id];
         //redistribute the nodes the client had been simulating
-        
         for (var i in this.clientControlTable)
         {
-            if(this.clientControlTable[i][sandboxClient.id])
+            if (this.clientControlTable[i][sandboxClient.id] != undefined)
             {
                 //console.log("remove " + sandboxClient.id +" from " + i)
                 delete this.clientControlTable[i][sandboxClient.id];
@@ -182,16 +178,15 @@ var simulationManager = function(world)
         //console.log("distribute");
         var counter = 0;
         var clientKeys = Object.keys(this.clients);
-        if(clientKeys.length == 0)
+        if (clientKeys.length == 0)
         {
             return;
         }
-        for ( var i = 0; i < nodes.length; i ++)
+        for (var i = 0; i < nodes.length; i++)
         {
-            
             this.clients[clientKeys[counter]].startSimulatingNode(nodes[i]);
             counter++;
-            if(counter >= clientKeys.length)
+            if (counter >= clientKeys.length)
                 counter = 0;
         }
     }
@@ -211,7 +206,7 @@ var simulationManager = function(world)
     }
     this.startScene = function()
     {
-        if(this.clients[Object.keys(this.clients)[0]])
+        if (this.clients[Object.keys(this.clients)[0]])
             this.clients[Object.keys(this.clients)[0]].startSimulatingScene();
         else
             logger.warn("no logged in client can start simulation");
@@ -230,16 +225,16 @@ var simulationManager = function(world)
     }
     this.nodeDeleted = function(nodeid)
     {
-
         var client = this.getClientForNode(nodeid);
-       
-        if(client)
+        if (client)
             client.stopSimulatingNode(nodeid);
         delete this.clientControlTable[nodeid];
     }
     this.updateClientControlTable = function(nodeid, sendingClient)
     {
         if (nodeid == "index-vwf") return;
+        while (this.world.state.parent(nodeid) && this.world.state.parent(nodeid) !== "index-vwf")
+            nodeid = this.world.state.parent(nodeid);
         var record = this.clientControlTable[nodeid];
         if (!record)
         {
@@ -247,12 +242,46 @@ var simulationManager = function(world)
         }
         if (!record[sendingClient.id])
             record[sendingClient.id] = 0;
-        record[sendingClient.id] ++;
-      
+        record[sendingClient.id]++;
+    }
+    this.clientRequestControlOfNode = function(nodeid, sendingClient)
+    {
+        if (nodeid == "index-vwf") return;
+        //get the top level node - since we distribute only from the root
+        while (this.world.state.parent(nodeid) && this.world.state.parent(nodeid) !== "index-vwf")
+            nodeid = this.world.state.parent(nodeid);
+        var client = this.getClientForNode(nodeid);
+        if (!client)
+        {
+            if (this.clients[sendingClient.id])
+                this.clients[sendingClient.id].startSimulatingNode(nodeid);
+        }
+        else if (client.sandboxClient.id !== sendingClient.id)
+        {
+            client.stopSimulatingNode(nodeid);
+            if (this.clients[sendingClient.id])
+                this.clients[sendingClient.id].startSimulatingNode(nodeid);
+        }
+        //reset the learned control mapping and give the requesting client
+        //a head start. Other clients will need to create a lot of events to 
+        //take back control from the client who just requsted control.
+        var record = this.clientControlTable[nodeid];
+        if (!record)
+        {
+            record = this.clientControlTable[nodeid] = {};
+        }
+        if (!record[sendingClient.id])
+            record[sendingClient.id] = 0;
+        for (var i in record)
+        {
+            if (i == sendingClient.id)
+                record[i] = 100;
+            else
+                record[i] = 0;
+        }
     }
     this.getClientsForMessage = function(message, sendingClient)
     {
-
         var type = message.action;
         var nodeid = message.node;
         // ancestors[0] should be index-vwf. 1 is the root. 
@@ -262,18 +291,17 @@ var simulationManager = function(world)
         for (var i in this.clients)
         {
             //don't bother sending state updates back to the person who posted them
-            if(message.action == "simulationStateUpdate")
+            if (message.action == "simulationStateUpdate")
             {
-                if(sendingClient != this.clients[i].sandboxClient)
+                if (sendingClient != this.clients[i].sandboxClient)
                 {
-                    clients.push(this.clients[i].sandboxClient) 
+                    clients.push(this.clients[i].sandboxClient)
                 }
             }
             else if (type == 'setProperty' || type == 'callMethod' || type == 'fireEvent')
             {
                 if (this.clients[i].isSimulating(nodeid) || nodeid == 'index-vwf')
                     clients.push(this.clients[i].sandboxClient)
-                    this.updateClientControlTable(nodeid,sendingClient)
             }
             else
             {
@@ -283,14 +311,12 @@ var simulationManager = function(world)
         for (var i in this.observers)
         {
             //don't bother sending state updates back to the person who posted them
-            if(message.action == "simulationStateUpdate")
+            if (message.action == "simulationStateUpdate")
             {
-                clients.push(this.observers[i].sandboxClient) 
+                clients.push(this.observers[i].sandboxClient)
             }
             else if (type == 'setProperty' || type == 'callMethod' || type == 'fireEvent')
-            {
-              
-            }
+            {}
             else
             {
                 clients.push(this.observers[i].sandboxClient);

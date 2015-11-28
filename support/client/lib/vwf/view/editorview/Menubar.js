@@ -291,7 +291,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			},
 			MenuLatencyTest: function(e) {
 				var e = {};
-				e.time = new Date();
+				e.time = performance.now();
 				vwf_view.kernel.callMethod('index-vwf', 'latencyTest', [e]);
 			},
 			ResetTransforms: function(e) {

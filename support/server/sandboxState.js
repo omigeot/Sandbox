@@ -285,6 +285,12 @@ var sandboxState = function(id, metadata, world)
     {
         this.VWFDef = newDef;
     }
+    this.parent = function(nodeID)
+    {
+        var root = this.findNode(nodeID);
+        if(!root) return null;
+        return root.parent.id;
+    }
     this.ancestors = function(nodeID, list)
     {
         if (!list) list = [];
@@ -527,8 +533,8 @@ var sandboxState = function(id, metadata, world)
             var self = this;
             //Keep a record of the new node
             //remove allow for user to create new node on index-vwf. Must have permission!
-            this.resolveContinues(childComponent, name, function(newNode)
-            {
+          //  this.resolveContinues(childComponent, name, function(newNode)
+          //  {
                 childComponent = newNode;
                 var node = self.findNode(nodeid);
                 if (!childComponent) return;
@@ -543,8 +549,8 @@ var sandboxState = function(id, metadata, world)
                 childComponent.name = name;
                 fixIDs(node.children[childID]);
                 self.Log("created " + childID, 2);
-                cb();
-            })
+             //   cb();
+          //  })
         }
         // so, the player has hit pause after hitting play. They are going to reset the entire state with the state backup. 
         //The statebackup travels over the wire (though technically I guess we should have a copy of that data in our state already)

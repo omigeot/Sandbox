@@ -418,13 +418,21 @@ function sandboxWorld(id, metadata)
                 }
                 self.messageClients(simMessage, false, false, 'm', true);
                 self.simulationStateUpdates = {};
-                console.log("Average Message Time: " + (self.messageTotalProcessTime / self.totalMessages));
-                this.totalMessages = 1;
-                this.messageTotalProcessTime = 0;
+               
             }
             self.lasttime = now;
         }.bind(self);
+        var monitor = function()
+        {
+
+             if(self.messageTotalProcessTime > 0)
+                        console.log(self.totalMessages + " Messages ,Average Time: " + (self.messageTotalProcessTime / self.totalMessages));
+                this.totalMessages = 1;
+                this.messageTotalProcessTime = 0;
+
+        }.bind(self)
         self.timerID = setInterval(timer, 5);
+        self.monitortimerID = setInterval(monitor, 1000);
         console.warn("timer is " + self.timerID)
     }
     this.firstConnection = function(socket, cb)
@@ -686,15 +694,24 @@ function sandboxWorld(id, metadata)
     {
         var internals = {};
         internals.doReflect = true;
+
         //need to add the client identifier to all outgoing messages
         try
         {
             var lasttime = now();
             //logger.info(message);
             message.client = sendingclient.id;
+            
             if (message.action == "saveStateResponse")
             {
                 SaveInstanceState(self.id, message.data, sendingclient);
+                internals.doReflect = false;
+                cb2(internals);
+                return internals;
+            }
+            if (message.action == "requestControlOfNode")
+            {
+                this.simulationManager.clientRequestControlOfNode(message.node, sendingclient);
                 internals.doReflect = false;
                 cb2(internals);
                 return internals;
@@ -706,6 +723,12 @@ function sandboxWorld(id, metadata)
                 internals.doReflect = false;
                 cb2(internals);
                 return internals;
+            }
+            if(message.member == "latencyTest")
+            {
+                console.log(message);
+                cb2(internals);
+                return internals;   
             }
             //route callmessage to the state to it can respond to manip the server side copy
             if (message.action == 'callMethod')
@@ -767,7 +790,14 @@ function sandboxWorld(id, metadata)
                 }
             }
             if (message.action == "setProperty")
+            {
                 self.state.satProperty(message.node, message.member, message.parameters[0]);
+            }
+            if (message.action == "setProperty" || message.action == "callMethod" || message.action == "fireEvent" ||message.action == "dispatchEvent")
+            {
+                //let the simulation manage know that the client is trying up update the object, possibly reassign control
+                self.simulationManager.updateClientControlTable(message.node,sendingclient);
+            }
             //We'll only accept a deleteNode if the user has ownership of the object
             if (message.action == "deleteNode")
             {
@@ -832,6 +862,7 @@ function sandboxWorld(id, metadata)
             cb2();
             return;
         }
+
         var lasttime = now();
         var compressedMessage = self.messageCompress.pack(message);
         //distribute message to all clients on given instance
@@ -866,9 +897,13 @@ function sandboxWorld(id, metadata)
             }
             else
             {
-                if (client == sendingclient && (message.action == "setProperty" || message.action == "dispatchEvent" || message.action == "callMethod" || message.action == "fireEvent"))
+                if(message.member == "latencyTest" && client == sendingclient)
                 {
-                    //client has already processed own inputs - dont' send back to sender;
+                    self.messageClient(client, compressedMessage, false, false);   
+                }
+                else if (client == sendingclient && (message.action == "setProperty" || message.action == "dispatchEvent" || message.action == "callMethod" || message.action == "fireEvent"))
+                {
+                //    client has already processed own inputs - dont' send back to sender;
                 }
                 else
                 {

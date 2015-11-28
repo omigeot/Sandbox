@@ -809,6 +809,10 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
         },
         setCamera: function(camID) {
             vwf_view.kernel.callMethod(Engine.application(), 'setClientCamera', [Engine.moniker(), camID]);
+            if(camID)
+            {
+                Engine.requestControl(camID);
+            }
         },
         setCamera_internal: function(camID) {
 
