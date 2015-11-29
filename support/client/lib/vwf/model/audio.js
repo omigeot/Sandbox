@@ -119,7 +119,7 @@ define(["module", "vwf/model", "vwf/model/buzz/buzz.min"], function(module, mode
 
            
             //if the scene played the sound, it has no position and just plays at full volume
-            if (name == 'playSound' && id == 'index-vwf' && this._playMode)
+            if (name == 'playSound' && params[0] == 'index-vwf' && this._playMode)
             {
                  var id = params.shift();
                 var url = params[0];
