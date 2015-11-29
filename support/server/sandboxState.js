@@ -210,7 +210,7 @@ var sandboxState = function(id, metadata, world)
                     {
                         url = URL.resolve("http://localhost:" + global.configuration.port + "/" +
                             self.id + "/" + global.appPath, url);
-                        logger.warn("continues base url is " + url);
+                        //logger.warn("continues base url is " + url);
                     }
                     else
                         url = node.continues;
@@ -220,14 +220,14 @@ var sandboxState = function(id, metadata, world)
                         {
                             try
                             {
-                                logger.warn(body);
+                                //logger.warn(body);
                                 var continuesbase = JSON.parse(body);
                                 self.continuesDefs[node.continues] = continuesbase;
-                                logger.warn(node.continues, continuesbase);
+                                //logger.warn(node.continues, continuesbase);
                             }
                             catch (e)
                             {
-                                logger.error(e + " during fetch of continues base url")
+                                //logger.error(e + " during fetch of continues base url")
                                 cb2();
                                 return;
                             }
@@ -533,8 +533,10 @@ var sandboxState = function(id, metadata, world)
             var self = this;
             //Keep a record of the new node
             //remove allow for user to create new node on index-vwf. Must have permission!
+            var lastTime = now();
             this.resolveContinues(childComponent, name, function(newNode)
             {
+                console.log("Created child in " + (now() - lastTime));
                 childComponent = newNode;
                 var node = self.findNode(nodeid);
                 if (!childComponent) return;

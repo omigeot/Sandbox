@@ -445,16 +445,7 @@ scripts:
         return this.skycube.material;
     
     }
-    this.latencyTest = function(e)
-    {
-        if(this.moniker == this.client)
-        {
-          
-            var time = new Date(e.time);
-            var thistime = performance.now() - time;
-            alertify.log("The round trip time to the server was: " + thistime +"ms");
-        }
-    }
+    
     this.getGroundPlane = function()
     {
       return this.groundplane;

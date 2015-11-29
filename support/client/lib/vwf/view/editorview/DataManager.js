@@ -187,15 +187,15 @@ define(function ()
 		}
 		this.getSaveStateData = function()
 		{
-			var scene;
-			if(vwf.getProperty(vwf.application(),'playMode') == 'stop')
-				scene = _Editor.getNode(Engine.application());
-			else
-				scene = Engine.getProperty(Engine.application(),'playBackup');
-			if(!scene)
+
+			if(vwf.getProperty(vwf.application(),'playMode') !== 'stop')
 			{
-				scene = _Editor.getNode(Engine.application());
+				console.error("Can't save while scene is playing");
+				return;
 			}
+
+			var scene = _Editor.getNode(Engine.application());
+			
 			var nodes = [];
 			for (var i in scene.children)
 			{
@@ -244,7 +244,8 @@ define(function ()
 			
 			
 			var data = JSON.stringify(this.getSaveStateData());
-			vwf.saveState(data);
+			if(data)
+					vwf.saveState(data);
 			$('#SceneSaved').text(new Date());
 		}
 		this.getInstances = function ()
