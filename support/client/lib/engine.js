@@ -1031,7 +1031,7 @@ define(['progressScreen'], function()
                             fields.client = this.moniker_; // stamp with the originating client like the reflector does
                             fields.origin = "reflector";
                             this.localReentryStack++
-                                this.processMessage(fields);
+                                queue.insert(fields);
                             if (this.localReentryStack > 2)
                                 this.localReentryStack--;
                         }
@@ -1395,19 +1395,19 @@ define(['progressScreen'], function()
                         this.client_ = fields.client; // ... and note the originating client
                         this.receive(fields.node, fields.action, fields.member, fields.parameters, fields.respond, fields.origin);
                     }
+                    // Advance time to the most recent time received from the server. Tick if the time
+                    // changed.
+                    if (queue.ready() && this.now != queue.time)
+                    {
+                        this.sequence_ = undefined; // clear after the previous action
+                        this.client_ = undefined; // clear after the previous action
+                        this.now = queue.time;
+                    }
                 }
-                // Advance time to the most recent time received from the server. Tick if the time
-                // changed.
-            if (queue.ready() && this.now != queue.time)
-            {
-                this.sequence_ = undefined; // clear after the previous action
-                this.client_ = undefined; // clear after the previous action
-                this.now = queue.time;
-            }
-            // -- log ----------------------------------------------------------------------------------
-            /// Send a log message to the reflector.
-            /// 
-            /// @name module:Engine.log
+                // -- log ----------------------------------------------------------------------------------
+                /// Send a log message to the reflector.
+                /// 
+                /// @name module:Engine.log
             this.log = function()
                 {
                     this.respond(undefined, "log", undefined, undefined, arguments);
