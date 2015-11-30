@@ -726,7 +726,7 @@ function sandboxWorld(id, metadata)
             }
             if(message.member == "latencyTest")
             {
-                console.log(message);
+               // console.log(message);
                 cb2(internals);
                 return internals;   
             }
@@ -810,6 +810,7 @@ function sandboxWorld(id, metadata)
             //Note that you now must share a scene with a user!!!!
             if (message.action == "createChild")
             {
+                console.log('startCreateChild')
                 var childComponent = JSON.parse(JSON.stringify(message.parameters[0]));
                 if (!self.state.validateCreate(message.node, message.member, childComponent, sendingclient))
                 {

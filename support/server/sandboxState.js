@@ -194,7 +194,7 @@ var sandboxState = function(id, metadata, world)
         this.continuesDefs[node.continues + this.getID(name, node)] = JSON.parse(JSON.stringify(base));
         extend(true, base, node);
         node = base;
-        cb( node);
+        cb(node);
     }
     this.resolveContinues = function(node, name, cb)
     {
@@ -257,13 +257,14 @@ var sandboxState = function(id, metadata, world)
             },
             function resolveAllChildren(cb2)
             {
-                async.eachSeries(Object.keys(node.children||{}), function eachChild(child, cb3)
+                async.eachSeries(Object.keys(node.children ||
+                {}), function eachChild(child, cb3)
                 {
                     self.resolveContinues(node.children[child], child, function(newNode)
-                        {
-                            node.children[child] = newNode;
-                            cb3();
-                        });
+                    {
+                        node.children[child] = newNode;
+                        cb3();
+                    });
                 }, function doneAllChildren(err)
                 {
                     cb2();
@@ -276,7 +277,10 @@ var sandboxState = function(id, metadata, world)
     }
     this.deResolveContinues = function(node) {}
     this.Log = function(log) {}
-    this.Error = function(error) {}
+    this.Error = function(error)
+    {
+        logger.error(error)
+    }
     this.getVWFDef = function()
     {
         return this.VWFDef;
@@ -288,7 +292,7 @@ var sandboxState = function(id, metadata, world)
     this.parent = function(nodeID)
     {
         var root = this.findNode(nodeID);
-        if(!root) return null;
+        if (!root) return null;
         return root.parent;
     }
     this.ancestors = function(nodeID, list)
@@ -588,7 +592,6 @@ var sandboxState = function(id, metadata, world)
         }
         var time = now() - lastTime;
         //console.log("update " + nodeCount + " nodes with "+ propCount + " props in " + time + "ms");
-
     }
     var self = this;
     SandboxAPI.getState(this.id, function(state)
@@ -604,9 +607,19 @@ var sandboxState = function(id, metadata, world)
         //turn DB state into VWF root node def
         DBstateToVWFDef(state, self.metadata, function(scene)
         {
-            self.setup(state);
-            self.setVWFDef(scene);
-            self.trigger('loaded');
+            var serverScene = JSON.parse(JSON.stringify(scene));
+            self.resolveContinues(serverScene, "index-vwf", function(newScene)
+            {
+
+                fixIDs(newScene);
+                var resovledState = [];
+                for(var i in newScene.children)
+                    resovledState.push(newScene.children[i]);
+                resovledState.push(newScene.properties);
+                self.setup(resovledState);
+                self.setVWFDef(scene);
+                self.trigger('loaded');
+            });
         });
     });
 }
