@@ -293,7 +293,7 @@ var sandboxState = function(id, metadata, world)
     {
         var root = this.findNode(nodeID);
         if (!root) return null;
-        return root.parent;
+        return root.parent ? root.parent.id : 0;
     }
     this.ancestors = function(nodeID, list)
     {

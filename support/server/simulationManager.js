@@ -8,6 +8,7 @@ var simClient = function(sandboxClient, simulationManager)
     this.nodesSimulating = [];
     this.startSimulatingScene = function()
     {
+        console.log(this.sandboxClient.id + " Starting scene");
         var nodes = this.manager.world.state.children('index-vwf')
         for (var i = 0; i < nodes.length; i++)
         {
@@ -72,7 +73,7 @@ var simulationManager = function(world)
     var self = this;
     this.postLearnedMappings = function()
     {
-        // console.log('postLearnedMappings',this.clientControlTable);
+         console.log('postLearnedMappings',this.clientControlTable);
         for (var i in this.clientControlTable)
         {
             if (!this.getClientForNode(i))
@@ -107,7 +108,7 @@ var simulationManager = function(world)
     this.postLearnedMappingsHandle = setInterval(this.postLearnedMappings, 1000);
     this.addClient = function(sandboxClient)
     {
-        //console.log("simulationManager.addClient " + sandboxClient.id )
+        console.log("simulationManager.addClient " + sandboxClient.id )
         var newClient = new simClient(sandboxClient, this);
         if (sandboxClient.isAnonymous() && !this.world.state.metadata.publishSettings.allowAnonymous)
         {

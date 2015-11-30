@@ -1467,6 +1467,7 @@ define(['progressScreen'], function()
             this.setState = function(applicationState, callback_async /* () */ )
             {
                 $(document).trigger('setstatebegin');
+                queue.suspend();
                 if (nodes.existing[Engine.application()])
                 {
                     var children = Engine.children(Engine.application());
@@ -1506,6 +1507,7 @@ define(['progressScreen'], function()
                     nodeIndex++;
                 }, function(err) /* async */
                 {
+                  
                     // Clear the message queue, except for reflector messages that arrived after the
                     // current action.
                     queue.filter(function(fields)
@@ -1539,6 +1541,7 @@ define(['progressScreen'], function()
                         Engine.nodesCoSimulating.shift();
                     });
                     Engine.callMethod(Engine.application(), 'ready', []);
+                    queue.resume();
                     callback_async && callback_async();
                 });
                 this.logger.debugu();
@@ -2516,6 +2519,8 @@ define(['progressScreen'], function()
                 //     childID = childID.replace( /[^0-9A-Za-z_]+/g, "-" ); // stick to HTML id-safe characters  // TODO: hash uri => childID to shorten for faster lookups?  // TODO: canonicalize uri
                 function cleanChildComponent(node)
                 {
+                    return node;
+                    /*
                     if (node === null || node === undefined)
                         return null;
                     if ((node.extends === undefined || node.extends == "http://vwf.example.com/node.vwf") && (!node.properties || (Object.keys(node.properties).length == 1 && Object.keys(node.properties)[0] == "___assetServerOriginalID")) && !node.continues && !node.source && !node.type)
@@ -2528,7 +2533,7 @@ define(['progressScreen'], function()
                             newChildren[i] = c;
                     }
                     node.children = newChildren;
-                    return node;
+                    return node;*/
                 }
                 if (childComponent)
                     childComponent = cleanChildComponent(childComponent)
