@@ -258,11 +258,11 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 					'<div class="slider"></div>',
 
 					'<input type="number" min="{{min}}" max="{{max}}" step="{{step}}" ng-model="value" ' +
-					'ng-disabled="disabled || softLimit" ng-hide="range || softLimit" ng-change="change(null, value)"' +
+					'ng-disabled="disabled || softLimit" ng-hide="range || softLimit" ng-change="update(value)"' +
 					' ng-model-options="{updateOn: \'blur click change\'}" />',
 
 					'<input type="number" step="{{step}}" ng-model="value" ' +
-					'ng-disabled="disabled || !softLimit" ng-hide="range || !softLimit" ng-change="change(null, value)"' +
+					'ng-disabled="disabled || !softLimit" ng-hide="range || !softLimit" ng-change="update(value)"' +
 					' ng-model-options="{updateOn: \'blur click change\'}" />',
 
 				'</div>',
@@ -277,7 +277,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				max: '=',
 				step: '=',
 				range: '=?',
-				change: '&?',
+				change: '&',
 
 				useExponent: '=',  // determine if the final value should be represented in exponential notation
 				value: '=',        // two-way binding for the final value of the widget
@@ -292,7 +292,12 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				$scope.softLimit = attrs.softlimit ? true : false;
 				$scope.mantissa = !isNaN($scope.value) ? $scope.value : $scope.min;
 				$scope.exponent = 0;
-				$scope.change = $scope.change || $.noop;
+
+				$scope.update = function(value){
+					var fn = $scope.change();
+					if(fn) fn(null, value)
+				}
+
 				var opts = {
 					min: $scope.min,
 					max: $scope.max,

@@ -51,7 +51,7 @@ block content
 	
 	#vwf-template-slider(ng-non-bindable, style='display: none;') 
 		label.vMargin {{displayname}}: 
-			slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property]', sliding='isUpdating', change='onChange(null, vwfNode.properties[vwfProp.property])', softlimit="true")
+			slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property]', sliding='isUpdating', change='onChange', softlimit="true")
 	
 	#vwf-template-color(ng-non-bindable, style='display: none;')
 		label.inline {{displayname}}: 
@@ -60,7 +60,7 @@ block content
 		
 	#vwf-template-check(ng-non-bindable, style='display: none;')
 		label.inline {{displayname}}: 
-			input(type='checkbox', ng-model='vwfNode.properties[vwfProp.property]', ng-change='onChange()')
+			input(type='checkbox', ng-model='vwfNode.properties[vwfProp.property]', ng-change='onChange(null, vwfNode.properties[vwfProp.property])')
 		
 	#vwf-template-button(ng-non-bindable, style='display: none;')
 		.method-container

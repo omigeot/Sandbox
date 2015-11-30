@@ -434,25 +434,26 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
             scope.onChange = function(index, inVal){
                   var node = scope.vwfNode, prop = scope.property, value;
-                 // if(Array.isArray(prop)) prop = prop[index];
+                  if(Array.isArray(prop)) prop = prop[index];
 
+                  if(inVal != undefined) node.properties[prop] = inVal;
                   value = node.properties[prop];
 
                   console.log("onChange called: ", inVal, value, Engine.getProperty(node.id, prop));
 
-                //   if(scope.type == "color"){
-                //       if(!value) value = [];
-                //       value[0] = colorCopyArr[0];
-                //       value[1] = colorCopyArr[1];
-                //       value[2] = colorCopyArr[2];
-                //       value[3] = colorCopyArr[3];
-                  //
-                //       setProperty(node, prop, value);
-                //   }
-                  //
-                //   else if(value !== Engine.getProperty(node.id, prop)){
-                //       setProperty(node, prop, value);
-                //   }
+                  if(scope.type == "color"){
+                      if(!value) value = [];
+                      value[0] = colorCopyArr[0];
+                      value[1] = colorCopyArr[1];
+                      value[2] = colorCopyArr[2];
+                      value[3] = colorCopyArr[3];
+
+                      setProperty(node, prop, value);
+                  }
+
+                  else if(value !== Engine.getProperty(node.id, prop)){
+                      setProperty(node, prop, value);
+                  }
             };
 
             if(scope.vwfProp){
