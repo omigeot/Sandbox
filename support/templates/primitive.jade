@@ -68,7 +68,7 @@ block content
 		
 	#vwf-template-rangeslider(ng-non-bindable, style='display: none;')
 		label.vMargin {{displayname}}: 
-			slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property[0]]', upper-value='vwfNode.properties[vwfProp.property[1]]', range="true", sliding='isUpdating')
+			slider(min="min", max="max", step="step || 1", value='vwfNode.properties[vwfProp.property[0]]', upper-value='vwfNode.properties[vwfProp.property[1]]', range="true", sliding='isUpdating', change='onChange')
 		
 	#vwf-template-vector(ng-non-bindable, style='display: none;')
 		label {{displayname}}: 

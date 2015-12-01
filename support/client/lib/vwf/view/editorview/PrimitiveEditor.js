@@ -376,7 +376,6 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
         function linkFn(scope, elem, attr){
             scope.isUpdating = false;
-            var lastValue = null;
             var valueBeforeSliding;
 
             //Necessary because color array references are shared internally and by the Sandbox
@@ -417,19 +416,6 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                     }
                     else pushUndoEvent(node, prop, sliderValue, valueBeforeSliding);
                 }
-            }
-
-            function delayedUpdate(node, prop, value){
-                if(lastValue === null){
-                    window.setTimeout(function(){
-                        console.log("delayedUpdate", value);
-
-                        setProperty(node, prop, lastValue);
-                        lastValue = null;
-                    }, 50);
-                }
-
-                lastValue = value;
             }
 
             scope.onChange = function(index, override){
@@ -488,12 +474,6 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                                     }
                                 }
                             }
-                            else if(scope.type === "rangeslider"){
-                                //Update occasionally only while user is sliding
-                                if(newVal !== oldVal && scope.isUpdating){
-                                    delayedUpdate(scope.vwfNode, scope.property[propIndex], newVal);
-                                }
-                            }
                             else if(newVal !== oldVal){
                                 //scope.vwfNode[scope.property[propIndex]] = newVal;
                                 setProperty(scope.vwfNode, scope.property[propIndex], newVal);
@@ -509,17 +489,19 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                         }
                     }
                     else{
-                        for (var i = 0; i < uniques.length; i++) {
-                            //The assumption here is that these properties are min, max pairs pointed
-                            //at primitive values (numbers). Thus, they shouldn't need "watchCollection"
-                            //getWatchFn simply creates a closure so we know which property has changed.
-                            scope.$watch(uniques[i], getWatchFn(i));
-                        }
-
                         if(scope.type === "rangeslider"){
                             scope.$watch('isUpdating', function(newVal, oldVal){
                                 if(newVal !== oldVal) updateSliderValue(scope.vwfNode, scope.property, newVal);
                             });
+                        }
+
+                        else{
+                            for (var i = 0; i < uniques.length; i++) {
+                                //The assumption here is that these properties are min, max pairs pointed
+                                //at primitive values (numbers). Thus, they shouldn't need "watchCollection"
+                                //getWatchFn simply creates a closure so we know which property has changed.
+                                scope.$watch(uniques[i], getWatchFn(i));
+                            }
                         }
                     }
                 }

@@ -268,7 +268,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				'</div>',
 				'<div class="exponent" ng-show="useExponent">',
 					'Exponent: ',
-					'<input type="number" min="0" step="1" ng-model="exponent" ng-disabled="disabled" ng-change="change()"></input>',
+					'<input type="number" min="0" step="1" ng-model="exponent" ng-disabled="disabled" ng-change="update(exponent)"></input>',
 				'</div>',
 			].join(''),
 			scope: {
@@ -277,7 +277,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				max: '=',
 				step: '=',
 				range: '=?',
-				change: '&',
+				change: '&?',
 
 				useExponent: '=',  // determine if the final value should be represented in exponential notation
 				value: '=',        // two-way binding for the final value of the widget
@@ -324,15 +324,18 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 
 				// update the value when sliding
 				slider.on('slide', function(evt, ui){
+					var fn = $scope.change();
+					var changedIndex = undefined;
+
 					if(rangeMode){
+						changedIndex = $scope.value !== ui.values[0] ? 0 : 1;
 						$scope.value = ui.values[0];
 						$scope.upperValue = ui.values[1];
 					}
 					else $scope.mantissa = ui.value;
 					$scope.$apply();
 
-					var fn = $scope.change();
-					if(fn) fn();
+					if(fn) fn(changedIndex);
 				});
 
 				// update sliding status
