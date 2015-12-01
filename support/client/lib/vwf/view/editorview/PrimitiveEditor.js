@@ -350,7 +350,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
     app.directive('vwfEditorProperty', ['$compile', function($compile){
 
-		    function pickNode(vwfNode, vwfProp){
+		function pickNode(vwfNode, vwfProp){
             _Editor.TempPickCallback = function(node) {
                 if(!node) return;
 
@@ -432,17 +432,19 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 lastValue = value;
             }
 
-            scope.onChange = function(index, inVal){
+            scope.onChange = function(index, override){
                   var node = scope.vwfNode, prop = scope.property, value;
                   if(Array.isArray(prop)) prop = prop[index];
 
-                  if(inVal != undefined) node.properties[prop] = inVal;
+                  if(override != undefined) node.properties[prop] = override;
                   value = node.properties[prop];
 
-                  console.log("onChange called: ", inVal, value, Engine.getProperty(node.id, prop));
+                  console.log("onChange called: ", override, value, Engine.getProperty(node.id, prop));
 
                   if(scope.type == "color"){
-                      if(!value) value = [];
+                      if(!value) value = [0, 0, 0, 1];
+                      if(!scope.isUpdating) pushUndoEvent(node, prop, colorCopyArr, value);
+
                       value[0] = colorCopyArr[0];
                       value[1] = colorCopyArr[1];
                       value[2] = colorCopyArr[2];
@@ -452,6 +454,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                   }
 
                   else if(value !== Engine.getProperty(node.id, prop)){
+                      if(!scope.isUpdating) pushUndoEvent(node, prop, value);
                       setProperty(node, prop, value);
                   }
             };
@@ -523,10 +526,6 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 else if(scope.type.indexOf("slider") > -1 || scope.type == "color"){
                     scope.$watch('isUpdating', function(newVal, oldVal){
                         if(newVal !== oldVal) updateSliderValue(scope.vwfNode, scope.property, newVal);
-                    });
-
-                    scope.$watch('vwfNode.properties.' + scope.property, function(newVal, oldVal){
-                        console.log("Watch:", newVal, oldVal);
                     });
 
                     if(scope.type == 'color'){
@@ -614,7 +613,21 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
     }
 
     function pushUndoEvent(node, prop, newVal, oldVal){
+        //Ensure arrays are actually different (by value)
+        if(Array.isArray(oldVal) && Array.isArray(oldVal) && newVal.length === oldVal.length){
+            var isDiff = false;
+            for(var i = 0; i < newVal.length; i++){
+                if(oldVal[i] != newVal[i]){
+                    isDiff = true;
+                    break;
+                }
+            }
+
+            if(!isDiff) return;
+        }
+
         console.log("New undo event!", prop, newVal, oldVal);
+
         if(oldVal != undefined)
             _UndoManager.pushEvent( new _UndoManager.SetPropertyEvent(node.id, prop, newVal, oldVal) );
         else

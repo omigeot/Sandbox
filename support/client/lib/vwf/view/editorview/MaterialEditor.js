@@ -295,7 +295,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 
 				$scope.update = function(value){
 					var fn = $scope.change();
-					if(fn) fn(null, value)
+					if(fn) fn(null, value);
 				}
 
 				var opts = {
@@ -331,7 +331,8 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 					else $scope.mantissa = ui.value;
 					$scope.$apply();
 
-					$scope.change();
+					var fn = $scope.change();
+					if(fn) fn();
 				});
 
 				// update sliding status
