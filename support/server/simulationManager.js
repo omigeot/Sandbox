@@ -17,6 +17,7 @@ var simClient = function(sandboxClient, simulationManager)
         }
         this.sendStartSimMessage('index-vwf');
     }
+    
     this.startSimulatingNode = function(nodeID)
     {
         if (this.manager.world.state.findNode(nodeID))
@@ -73,7 +74,7 @@ var simulationManager = function(world)
     var self = this;
     this.postLearnedMappings = function()
     {
-         console.log('postLearnedMappings',this.clientControlTable);
+         
         for (var i in this.clientControlTable)
         {
             if (!this.getClientForNode(i))
@@ -173,6 +174,23 @@ var simulationManager = function(world)
             }
         }
         this.distribute(oldNodes);
+    }
+    this.distributeAll = function()
+    {
+        console.log("distributeAll")
+        var nodes = this.world.state.children('index-vwf');
+        console.log(nodes);
+        var ids = [];
+        for(var i in nodes)
+        {
+            var id = nodes[i];
+            ids.push(id);
+            console.log("redistribute " + id);
+            var client = this.getClientForNode(id);
+            if(client)
+                client.stopSimulatingNode(id)
+        }
+        this.distribute(ids);
     }
     this.distribute = function(nodes)
     {

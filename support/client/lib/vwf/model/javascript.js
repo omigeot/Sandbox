@@ -15,6 +15,13 @@ var jsDriverSelf = this;
 var propertiesSet = {};
 var contextPostTime;
 var inTick = false;
+function argumentsToArray(arg)
+{
+    var ret = [];
+    for(var i =0; i < arg.length; i++)
+        ret.push(arg[i]);
+    return ret;
+}
 function defaultContext()
 {
     this.setProperty = function(id, name, val)
@@ -49,6 +56,7 @@ function defaultContext()
     }
     this.callMethod = function(id,methodname,params)
     {
+        if(jsDriverSelf.isPendingDelete(id)) return;
         //node that this forces sync!
         if(Engine.isSimulating(id))
             return Engine.callMethod(id,methodname,params);
@@ -912,6 +920,10 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
         creatingNode: function(nodeID, childID, childExtendsID, childImplementsIDs,
             childSource, childType, childURI, childName, callback /* ( ready ) */ )
         {
+            //if a node was on the pending delete list but was recreated by the play/pause system with the same id, be sure to remove it from the list
+            var pendingIdx = this.pendingDelete.indexOf(nodeID);
+            if(pendingIdx !== -1)
+                this.pendingDelete.splice(pendingIdx,1);
             // Get the prototype node.
             var prototype = this.nodes[childExtendsID] || Object.prototype;
             // Get the behavior nodes.
@@ -1014,8 +1026,13 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 }
             });
 
-            Object.defineProperty(node.children, "delete", {
-                value: function(child) {
+            Object.defineProperty(node.children, "delete",
+            {
+                value: function(child)
+                {
+                    var pendingIdx = jsDriverSelf.pendingDelete.indexOf(child.id);
+                    if (pendingIdx !== -1)
+                        jsDriverSelf.pendingDelete.push(child.id);
                     return vwf_view.kernel.deleteNode(child.id);
                 }
             });
@@ -1183,6 +1200,11 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             {
                 value: function(name, def)
                 {
+                    var pendingIdx = jsDriverSelf.pendingDelete.indexOf(node.id);
+                    if (pendingIdx !== -1)
+                        jsDriverSelf.pendingDelete.push(node.id);
+
+                    
                     Engine.emit.deleteNode(node.id);
                 }
             })
@@ -1387,11 +1409,19 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
            
             return undefined;
         },
+        pendingDelete:[],
+        isPendingDelete:function(id)
+        {
+            return this.pendingDelete.indexOf(id) !== -1;    
+        },
         // -- deletingNode -------------------------------------------------------------------------
         deletingNode: function(nodeID)
         {
             var child = this.nodes[nodeID];
             this.deindexMethods(child);
+            var pendingIdx = this.pendingDelete.indexOf(nodeID);
+            if(pendingIdx !== -1)
+                this.pendingDelete.splice(pendingIdx,1);
             //this.callMethodTraverse(this.nodes['index-vwf'],'deletingNode',[nodeID]);
             var node = child.parent;
             if (child.parent && child.parent.__children_by_name)
@@ -1574,6 +1604,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
         {
             //notify all nodes of property changes
             //this.callMethodTraverse(this.nodes['index-vwf'],'satProperty',[nodeID, propertyName, propertyValue]);
+            if(this.isPendingDelete(nodeID)) return;
             var node = this.nodes[nodeID];
             if (!node) return; // TODO: patch until full-graph sync is working; drivers should be able to assume that nodeIDs refer to valid objects
             if (propertyName == 'DisplayName' && this.nodes[node.parentId])
@@ -1710,7 +1741,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node.methods
                         
-                        return jsDriverSelf.getTopContext().callMethod(this.id, methodName, arguments);
+                        return jsDriverSelf.getTopContext().callMethod(this.id, methodName, argumentsToArray(arguments));
                     };
                 },
                 set: function(value)
@@ -1727,7 +1758,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node
                        
-                        return jsDriverSelf.getTopContext().callMethod(this.id, methodName, arguments);
+                        return jsDriverSelf.getTopContext().callMethod(this.id, methodName, argumentsToArray(arguments));
                     };
                 },
                     set: function(value)
@@ -1959,7 +1990,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             Object.defineProperty(node.events, eventName, { // "this" is node.events in get/set
                 get: function() {
                     return function( /* parameter1, parameter2, ... */ ) { // "this" is node.events
-                        return jsDriverSelf.getTopContext().fireEvent(this.node.id, eventName, arguments);
+                        return jsDriverSelf.getTopContext().fireEvent(this.node.id, eventName, argumentsToArray(arguments));
                     };
                 },
                 set: function(value) {
@@ -2020,7 +2051,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 {
                     return function( /* parameter1, parameter2, ... */ )
                     { // "this" is node
-                        return jsDriverSelf.getTopContext().fireEvent(this.id, eventName, arguments);
+                        return jsDriverSelf.getTopContext().fireEvent(this.id, eventName, argumentsToArray(arguments));
                     };
                 },
                 set: function(value)
@@ -2129,6 +2160,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
         callMethodTraverse: function(node, method, args)
         {
             if (!node) return;
+            if(jsDriverSelf.isPendingDelete(node.id)) return;
             var body = node.private.bodies && node.private.bodies[method];
 
             var inContext = this.contextStack.length > 1;
@@ -2309,7 +2341,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                             return function( /* parameter1, parameter2, ... */ )
                             { // "this" is proxy.methods
                                 if (jsDriverSelf.nodes[this.node.id])
-                                    return jsDriverSelf.kernel.callMethod(this.node.id, methodName, arguments);
+                                    return jsDriverSelf.kernel.callMethod(this.node.id, methodName, argumentsToArray(arguments));
                             };
                         },
                         set: function(value)
@@ -2327,7 +2359,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                             {
                                 return function( /* parameter1, parameter2, ... */ )
                                 { // "this" is proxy
-                                    return jsDriverSelf.kernel.callMethod(this.id, methodName, arguments);
+                                    return jsDriverSelf.kernel.callMethod(this.id, methodName, argumentsToArray(arguments));
                                 };
                             },
                             set: function(value)
@@ -2360,7 +2392,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                         {
                             return function( /* parameter1, parameter2, ... */ )
                             { // "this" is proxy.events
-                                return jsDriverSelf.kernel.fireEvent(this.node.id, eventName, arguments);
+                                return jsDriverSelf.kernel.fireEvent(this.node.id, eventName, argumentsToArray(arguments));
                             };
                         },
                         set: function(value)
@@ -2420,7 +2452,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                             {
                                 return function( /* parameter1, parameter2, ... */ )
                                 { // "this" is proxy
-                                    return jsDriverSelf.kernel.fireEvent(this.id, eventName, arguments);
+                                    return jsDriverSelf.kernel.fireEvent(this.id, eventName, argumentsToArray(arguments));
                                 };
                             },
                             set: function(value)
@@ -2560,7 +2592,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                                 return function( /* parameter1, parameter2, ... */ )
                                 { // "this" is future.methods
                                     return jsDriverSelf.kernel.callMethod(this.future.id,
-                                        methodName, arguments, this.future.private.when, this.future.private.callback
+                                        methodName, argumentsToArray(arguments), this.future.private.when, this.future.private.callback
                                     );
                                 }
                             },
@@ -2574,7 +2606,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                                     return function( /* parameter1, parameter2, ... */ )
                                     { // "this" is future
                                         return jsDriverSelf.kernel.callMethod(this.id,
-                                            methodName, arguments, this.private.when, this.private.callback
+                                            methodName, argumentsToArray(arguments), this.private.when, this.private.callback
                                         );
                                     }
                                 },
@@ -2603,7 +2635,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                                 return function( /* parameter1, parameter2, ... */ )
                                 { // "this" is future.events
                                     return jsDriverSelf.kernel.fireEvent(this.future.id,
-                                        eventName, arguments, this.future.private.when, this.future.private.callback
+                                        eventName, argumentsToArray(arguments), this.future.private.when, this.future.private.callback
                                     );
                                 };
                             },
@@ -2617,7 +2649,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                                     return function( /* parameter1, parameter2, ... */ )
                                     { // "this" is future
                                         return jsDriverSelf.kernel.fireEvent(this.id,
-                                            eventName, arguments, this.private.when, this.private.callback
+                                            eventName, argumentsToArray(arguments), this.private.when, this.private.callback
                                         );
                                     };
                                 },

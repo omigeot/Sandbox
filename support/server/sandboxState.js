@@ -32,6 +32,7 @@ var fixIDs = function(node)
         }
     }
     //Check that a user has permission on a node
+
 function checkOwner(node, name)
 {
     var level = 0;
@@ -201,6 +202,7 @@ var sandboxState = function(id, metadata, world)
         var self = this;
         var childID = this.getID(name, node);
         async.series([
+
             function resolveThisNode(cb2)
             {
                 if (node.continues)
@@ -397,6 +399,7 @@ var sandboxState = function(id, metadata, world)
         if (!node.properties)
             node.properties = {};
         node.properties[prop] = val;
+
     }
     this.setProperty = function(nodeid, prop, val)
     {
@@ -533,35 +536,35 @@ var sandboxState = function(id, metadata, world)
         return childID;
     }
     this.createdChild = function(nodeid, name, childComponent, cb)
+    {
+        var self = this;
+        //Keep a record of the new node
+        //remove allow for user to create new node on index-vwf. Must have permission!
+        var lastTime = now();
+        this.resolveContinues(childComponent, name, function(newNode)
         {
-            var self = this;
-            //Keep a record of the new node
-            //remove allow for user to create new node on index-vwf. Must have permission!
-            var lastTime = now();
-            this.resolveContinues(childComponent, name, function(newNode)
-            {
-                console.log("Created child in " + (now() - lastTime));
-                childComponent = newNode;
-                var node = self.findNode(nodeid);
-                if (!childComponent) return;
-                if (!node.children) node.children = {};
-                var childID = self.getID(name, childComponent);
-                //console.log(childID);
-                childComponent.id = childID;
-                node.children[childID] = childComponent;
-                node.children[childID].parent = node;
-                if (!childComponent.properties)
-                    childComponent.properties = {};
-                childComponent.name = name;
-                fixIDs(node.children[childID]);
-                self.Log("created " + childID, 2);
-                cb();
-            })
-        }
-        // so, the player has hit pause after hitting play. They are going to reset the entire state with the state backup. 
-        //The statebackup travels over the wire (though technically I guess we should have a copy of that data in our state already)
-        //when it does, we can receive it here. Because the server is doing some tracking of state, we need to restore the server
-        //side state.
+            console.log("Created child in " + (now() - lastTime));
+            childComponent = newNode;
+            var node = self.findNode(nodeid);
+            if (!childComponent) return;
+            if (!node.children) node.children = {};
+            var childID = self.getID(name, childComponent);
+            //console.log(childID);
+            childComponent.id = childID;
+            node.children[childID] = childComponent;
+            node.children[childID].parent = node;
+            if (!childComponent.properties)
+                childComponent.properties = {};
+            childComponent.name = name;
+            fixIDs(node.children[childID]);
+            self.Log("created " + childID, 2);
+            cb();
+        })
+    }
+    // so, the player has hit pause after hitting play. They are going to reset the entire state with the state backup. 
+    //The statebackup travels over the wire (though technically I guess we should have a copy of that data in our state already)
+    //when it does, we can receive it here. Because the server is doing some tracking of state, we need to restore the server
+    //side state.
     this.calledMethod = function(id, name, args)
     {
         if (id == 'index-vwf' && name == 'restoreState')
@@ -573,6 +576,7 @@ var sandboxState = function(id, metadata, world)
                 this.nodes['index-vwf'] = JSON.parse(JSON.stringify(args[0][0]));
                 //here, we need to hook back up the .parent property, so we can walk the graph for other operations.
                 this.reattachParents(this.nodes['index-vwf']);
+                this.world.simulationManager.distributeAll();
             }
         }
     }
@@ -613,7 +617,7 @@ var sandboxState = function(id, metadata, world)
 
                 fixIDs(newScene);
                 var resovledState = [];
-                for(var i in newScene.children)
+                for (var i in newScene.children)
                     resovledState.push(newScene.children[i]);
                 resovledState.push(newScene.properties);
                 self.setup(resovledState);
