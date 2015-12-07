@@ -155,7 +155,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 					$scope.$apply();
 				});
 
-				
+
 				var autocomplete = AC.initialize(editor);
 
 				$scope.sessions = {};
@@ -167,13 +167,13 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 							if($scope.sessions[i])
 							{
 								$scope.sessions[i].destroy();
-								delete $scope.sessions[i];	
+								delete $scope.sessions[i];
 							}
 					}
 				}
 				$scope.$watchGroup(['selectedField','dirty[selectedField.id]'], function(newvals)
 				{
-					
+
 
 					if(newvals[0])
 					{
@@ -207,7 +207,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 					}
 					if($scope.sessions[item.id])
 					{
-						
+
 						var oldSession = $scope.sessions[item.id];
 						oldSession.destroy();
 					}
@@ -239,12 +239,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 					{
 						e.preventDefault();
 
-						
+
 						//Don't show for lines that have ( or ) (other than the one that triggered the autocomplete) because function calls
 						//might have side effects
-						
+
 						autocomplete.autoComplete(editor, true);
-						
+
 					}
 
 				});
@@ -319,7 +319,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 					$scope.currentList = newvals[1];
 					$scope.currentSuggestions = methodSuggestions;
 				break;
-			
+
 				case 'events':
 					$scope.currentList = newvals[2];
 					$scope.currentSuggestions = eventSuggestions;
@@ -342,7 +342,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 		{
 			if( newvals[0] )
 			{
-				$scope.selectedField = 
+				$scope.selectedField =
 					newvals[0].reduce(function(old,cur){ return cur.name === newvals[1] ? cur : old; }, null)
 					||
 					$scope.currentSuggestions.reduce(function(old,cur){ return cur.name === newvals[1] ? cur : old; }, null);
@@ -386,7 +386,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 			}
 		});
 
-		$scope.$watchCollection('fields.selectedNode.properties', function(){
+		$scope.$watch('fields.selectedNode.properties', function(){
 			propertiesDirty = true;
 			if(!timeoutSet){
 				timeoutSet = $timeout(function(){
@@ -394,7 +394,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 					methodsDirty = eventsDirty = propertiesDirty = timeoutSet = false;
 				});
 			}
-		});
+		}, true);
 
 		// Life would be easier if currentList could be an object, but alas.
 		// This function does a name lookup on the given list.
@@ -773,6 +773,3 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 		}
 	};
 });
-
-
-

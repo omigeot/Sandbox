@@ -1,5 +1,5 @@
 'use strict';
-fills.enableLog();
+
 define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor'], function(app, baseClass){
     var primEditor = {};
     var isInitialized = false;
@@ -420,13 +420,15 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
 
             scope.onChange = function(index, override){
                   var node = scope.vwfNode, prop = scope.property, value;
+
+                  //Some props are actually arrays (!), use index to get real property name
                   if(Array.isArray(prop)) prop = prop[index];
 
+                  //Override is necessary to deal with cases where the model is not up to date
                   if(override != undefined) node.properties[prop] = override;
                   value = node.properties[prop];
 
-                  console.log("onChange called: ", override, value, Engine.getProperty(node.id, prop));
-
+                  //If property type is color, assign by value and not reference
                   if(scope.type == "color"){
                       if(!value) value = [0, 0, 0, 1];
                       if(!scope.isUpdating) pushUndoEvent(node, prop, colorCopyArr, value);
