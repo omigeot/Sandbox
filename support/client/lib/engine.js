@@ -947,6 +947,7 @@ define(['progressScreen'], function()
                         if (memberName !== "latencyTest")
                         {
                             fields = JSON.parse(JSON.stringify(fields));
+                            fields.time = Engine.realTime();
                             fields.client = this.moniker_; // stamp with the originating client like the reflector does
                             fields.origin = "reflector";
                             this.localReentryStack++
@@ -1256,6 +1257,20 @@ define(['progressScreen'], function()
                 // origin == "reflector" ?
                 //     this.logger.infou() : this.logger.debugu();
             };
+            this.propertyTime = function(nodeID,propertyName)
+            {
+                return this._propertySetTimes[nodeID+propertyName];
+            }
+            this.propertyAge = function(nodeID,propertyName)
+            {
+                return this.realTime() - this.propertyTime(nodeID,propertyName);
+            }
+            this.messageTime = function()
+            {
+                if(!this.message)
+                    return;
+                else return this.message.time;
+            }
             // -- dispatch -----------------------------------------------------------------------------
             /// Dispatch incoming messages waiting in the queue. "currentTime" specifies the current
             /// simulation time that we should advance to and was taken from the time stamp of the last
@@ -1263,7 +1278,8 @@ define(['progressScreen'], function()
             /// 
             /// @name module:Engine.dispatch
             this.lastTick = 0;
-            this.propertySetTimes = {},
+            this._propertySetTimes = {};
+            this._lastRealTime = 0;
                 this.dispatch = function()
                 {
                     // Handle messages until we empty the queue or reach the new current time. For each,
@@ -1282,30 +1298,10 @@ define(['progressScreen'], function()
                 {
                     this.message = fields;
                     // Advance the time.
-                    if (this.now != fields.time)
+                    if (this.now < fields.time)
                     {
                         this.now = fields.time;
-                        this.sequence_ = undefined; // clear after the previous action
-                        this.client_ = undefined; // clear after the previous action                    
-                        var time = (this.now - this.lastTick);
-                        if (time < 1)
-                        {
-                            while (time >= .5)
-                            {
-                                var now = performance.now();
-                                var realTickDif = now - this.lastRealTick;
-                                this.lastRealTick = now;
-                                //this.receive(0,'tick');
-                                time -= .05;
-                            }
-                            //save the leftovers
-                            this.lastTick = this.now - time;
-                        }
-                        else
-                        {
-                            //giving up, cant go fast enough
-                            this.lastTick = fields.time;
-                        }
+                        this._lastRealTime = performance.now();
                     }
                     // Perform the action.
                     if (fields.action)
@@ -3304,17 +3300,20 @@ define(['progressScreen'], function()
             /// @see {@link module:vwf/api/kernel.setProperty}
             this.setProperty = function(nodeID, propertyName, propertyValue)
             {
+
                 this.logger.debuggx("setProperty", function()
                 {
                     return [nodeID, propertyName, JSON.stringify(loggableValue(propertyValue))];
                 });
                 var node = nodes.existing[nodeID];
                 if (!node) return;
-                if (!node)
+                
+                if(this.propertyTime(nodeID,propertyName) > this.messageTime())
                     return;
                 // Record calls into this function by nodeID and propertyName so that models may call
                 // back here (directly or indirectly) to delegate responses further down the chain
                 // without causing infinite recursion.
+
                 var entrants = this.setProperty.entrants;
                 var entry = entrants[nodeID + '-' + propertyName] ||
                 {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
@@ -3452,6 +3451,7 @@ define(['progressScreen'], function()
                 }
                 this.propertyUpdated(nodeID, propertyName, propertyValue);
                 this.logger.debugu();
+                Engine._propertySetTimes[nodeID + propertyName] = Engine.realTime();
                 return propertyValue;
             };
             this.setProperty.entrants = {}; // maps ( nodeID + '-' + propertyName ) => { index: i, value: v }
@@ -3485,17 +3485,19 @@ define(['progressScreen'], function()
             this.setPropertyFast = function(nodeID, propertyName, propertyValue)
                 {
                     var answer = undefined;
+                    if (this.propertyTime(nodeID, propertyName) > this.messageTime())
+                        return answer;
                     for (var i = 0; i < this.models.length; i++)
                     {
-        if(!this.setPropertyFastEntrants[nodeID + propertyName + i])
-                        if (this.models[i].settingProperty)
-                        {
-            this.setPropertyFastEntrants[nodeID + propertyName + i] = true;
-                            var ret = this.models[i].settingProperty(nodeID, propertyName, propertyValue)
-            delete this.setPropertyFastEntrants[nodeID + propertyName + i];    
-                            if (ret !== undefined)
-                                answer = ret;
-                        }
+                        if (!this.setPropertyFastEntrants[nodeID + propertyName + i])
+                            if (this.models[i].settingProperty)
+                            {
+                                this.setPropertyFastEntrants[nodeID + propertyName + i] = true;
+                                var ret = this.models[i].settingProperty(nodeID, propertyName, propertyValue)
+                                delete this.setPropertyFastEntrants[nodeID + propertyName + i];
+                                if (ret !== undefined)
+                                    answer = ret;
+                            }
                     }
                     for (var i = 0; i < this.views.length; i++)
                     {
@@ -3862,6 +3864,10 @@ define(['progressScreen'], function()
             this.time = function()
             {
                 return this.now;
+            };
+            this.realTime = function()
+            {
+                return this.now + (performance.now() - this._lastRealTime)/1000.0;
             };
             // -- client -------------------------------------------------------------------------------
             /// The moniker of the client responsible for the current action. Will be falsy for actions
@@ -5530,46 +5536,6 @@ define(['progressScreen'], function()
                     // order when the earlier sort keys don't provide the order.
                     this.queue.sort(function(a, b)
                     {
-                        if (a.action == "startSimulating" && b.action != "startSimulating")
-                        {
-                            return -1;
-                        }
-                        if (a.action == "simulationStateUpdate" && b.action != "simulationStateUpdate")
-                        {
-                            return 1;
-                        }
-                        if (a.action != "simulationStateUpdate" && b.action == "simulationStateUpdate")
-                        {
-                            return -1;
-                        }
-                        if (a.action != "startSimulating" && b.action == "startSimulating")
-                        {
-                            return 1;
-                        }
-                        if (a.action == "stopSimulating" && b.action != "stopSimulating")
-                        {
-                            return -1;
-                        }
-                        if (a.action != "stopSimulating" && b.action == "stopSimulating")
-                        {
-                            return 1;
-                        }
-                        if (a.action == "resyncNode" && b.action != "resyncNode")
-                        {
-                            return 1;
-                        }
-                        if (a.action != "resyncNode" && b.action == "resyncNode")
-                        {
-                            return -1;
-                        }
-                        if (a.action == "activeResync" && b.action != "activeResync")
-                        {
-                            return 1;
-                        }
-                        if (a.action != "activeResync" && b.action == "activeResync")
-                        {
-                            return -1;
-                        }
                         if (a.time != b.time)
                         {
                             return a.time - b.time;
