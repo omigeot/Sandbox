@@ -1590,10 +1590,10 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                     w = parseInt($('#index-vwf').attr('width') / 3);
                     h = parseInt($('#index-vwf').attr('height') / 3);
 
-
-                    renderer.setViewport(0, 0, w, w);
+                    var dpr = _dRenderer.devicePixelRatio;
+                    renderer.setViewport(0, 0, w/dpr, w/dpr);
                     _Editor.hideMoveGizmo();
-                    _dRenderer.setScissor(0, 0, w, w);
+                    _dRenderer.setScissor(0, 0, w/dpr, w/dpr);
                     renderer.enableScissorTest(true);
 
 
@@ -1607,15 +1607,15 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                     insetvp = MATH.transposeMat4(_viewProjectionMatrix.toArray(temparray));
 
 
-                    self.trigger('postprerender', [insetvp, w, w]);
+                    self.trigger('postprerender', [insetvp, w/dpr, w/dpr]);
 
                     renderer.clear(true, true, true);
                     renderer.render(scene, selcam);
 
                     self.cameraID = camback;
                     _Editor.showMoveGizmo();
-                    _dRenderer.setViewport(0, 0, parseInt($('#index-vwf').attr('width')), parseInt($('#index-vwf').attr('height')));
-                    _dRenderer.setScissor(0, 0, parseInt($('#index-vwf').attr('width')), parseInt($('#index-vwf').attr('height')));
+                    _dRenderer.setViewport(0, 0, parseInt($('#index-vwf').attr('width'))/dpr, parseInt($('#index-vwf').attr('height'))/dpr);
+                    _dRenderer.setScissor(0, 0, parseInt($('#index-vwf').attr('width'))/dpr, parseInt($('#index-vwf').attr('height'))/dpr);
                     renderer.enableScissorTest(false);
                     selcam.aspect = oldaspect;
                     selcam.updateProjectionMatrix();

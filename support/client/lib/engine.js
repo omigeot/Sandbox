@@ -237,145 +237,56 @@ define(['progressScreen'], function()
                     var callback = args.shift();
                     jQuery = $;
                     var requireArray = [
-                    {
-                        library: "domReady",
-                        active: true
-                    },
-                    {
-                        library: "vwf/socket",
-                        active: true
-                    },
-                    {
-                        library: "vwf/configuration",
-                        active: true
-                    },
-                    {
-                        library: "vwf/kernel/model",
-                        active: true
-                    },
-                    {
-                        library: "vwf/model/javascript",
-                        active: true
-                    },
-                    {
-                        library: "vwf/model/ammojs",
-                        linkedLibraries: ["vwf/model/ammo.js/ammo"],
-                        active: false
-                    },
-                    {
-                        library: "vwf/model/threejs",
-                        linkedLibraries: ["vwf/model/threejs/three.js.r68", "vwf/model/threejs/ColladaLoader"],
-                        disabledBy: ["vwf/model/glge", "vwf/view/glge"],
-                        active: false
-                    },
-                    {
-                        library: "vwf/model/object",
-                        active: true
-                    },
-                    {
-                        library: "vwf/model/stage/log",
-                        active: true
-                    },
-                    {
-                        library: "vwf/kernel/view",
-                        active: true
-                    },
-                    {
-                        library: "vwf/view/document",
-                        active: true
-                    },
-                    {
-                        library: "vwf/view/editor",
-                        active: false
-                    },
-                    {
-                        library: "vwf/view/threejs",
-                        disabledBy: ["vwf/model/glge", "vwf/view/glge"],
-                        active: false
-                    },
-                    {
-                        library: "vwf/view/webrtc",
-                        linkedLibraries: ["vwf/view/webrtc/adapter"],
-                        active: false
-                    },
-                    {
-                        library: "vwf/utility",
-                        active: true
-                    },
-                    {
-                        library: "vwf/model/ammo.js/ammo",
-                        active: true
-                    },
-                    {
-                        library: "vwf/view/webrtc/adapter",
-                        active: false
-                    },
-                    {
-                        library: "vwf/view/editorview/ObjectPools",
-                        active: true
-                    },
-                    {
-                        library: "/socket.io/socket.io.js",
-                        active: true
-                    },
-                    {
-                        library: "vwf/view/EditorView",
-                        active: true
-                    },
-                    {
-                        library: "vwf/view/WebRTC",
-                        active: true
-                    },
-                    {
-                        library: "vwf/model/audio",
-                        active: true
-                    },
-                    {
-                        library: "messageCompress",
-                        active: true
-                    },
-                    {
-                        library: "vwf/view/xapi",
-                        active: true
-                    }];
+                { library: "domReady", active: true },
+                { library: "vwf/socket", active: true },
+                { library: "vwf/configuration", active: true },
+                { library: "vwf/kernel/model", active: true },
+                { library: "vwf/model/javascript", active: true },
+                { library: "vwf/model/ammojs", linkedLibraries: ["vwf/model/ammo.js/ammo"], active: false },
+         
+                { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three.js.r68", "vwf/model/threejs/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
+          
+                { library: "vwf/model/object", active: true },
+                { library: "vwf/model/stage/log", active: true },
+                { library: "vwf/kernel/view", active: true },
+                { library: "vwf/view/document", active: true },
+                { library: "vwf/view/editor", active: false },
+          
+                { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
+                { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
+          
+                { library: "vwf/utility", active: true },
+          
+                { library: "ohm", active: true },
+              
+                { library: "vwf/model/ammo.js/ammo", active: true },
+                { library: "vwf/view/webrtc/adapter", active: false },
+            
+
+
+                { library: "vwf/view/editorview/ObjectPools", active: true },
+                { library: "/socket.io/socket.io.js", active: true },
+                { library: "vwf/view/EditorView", active: true },
+                { library: "vwf/view/WebRTC", active: true },
+                { library: "vwf/model/audio", active: true },
+                { library: "messageCompress", active: true },
+                { library: "vwf/view/xapi", active: true }
+
+            ];
+
                     var initializers = {
                         model: [
-                        {
-                            library: "vwf/model/javascript",
-                            active: true
-                        },
-                        {
-                            library: "vwf/model/ammojs",
-                            active: true
-                        },
-                        {
-                            library: "vwf/model/glge",
-                            active: false
-                        },
-                        {
-                            library: "vwf/model/threejs",
-                            active: true
-                        },
-                        {
-                            library: "vwf/model/cesium",
-                            active: false
-                        },
-                        {
-                            library: "vwf/model/object",
-                            active: true
-                        },
-                        {
-                            library: "vwf/model/wires",
-                            active: true
-                        },
-                        {
-                            library: "vwf/model/jqueryui",
-                            active: true
-                        },
-                        {
-                            library: "vwf/model/audio",
-                            active: true
-                        }, ],
+                    { library: "vwf/model/javascript", active: true },
+                    { library: "vwf/model/ammojs", active: true },
+                    { library: "vwf/model/glge", active: false },
+                    { library: "vwf/model/threejs", active: true },
+                    { library: "vwf/model/cesium", active: false },
+                    { library: "ohm", active: true },
+                    { library: "vwf/model/object", active: true },
+                    { library: "vwf/model/wires", active: true },
+                    { library: "vwf/model/jqueryui", active: true },
+                    { library: "vwf/model/audio", active: true },
+                ],
                         view: [
                         {
                             library: "vwf/view/glge",
@@ -576,6 +487,7 @@ define(['progressScreen'], function()
                                     "vwf/model/wires",
                                     "vwf/model/threejs",
                                     "vwf/model/jqueryui",
+                        "ohm",
                                     "vwf/model/audio",
                                     "vwf/model/object",
                                 ];
@@ -834,7 +746,7 @@ define(['progressScreen'], function()
             /// @name module:Engine.ready
             this.getInstanceHost = function()
             {
-                var loadBalancerAddress = 'undefined';
+        var loadBalancerAddress = '{{loadBalancerAddress}}';
                 var instance = window.location.pathname;
                 var instanceHost = $.ajax(
                 {
@@ -858,6 +770,13 @@ define(['progressScreen'], function()
                         window.location.pathname.lastIndexOf("/"));
                     var protocol = window.location.protocol;
                     var host = window.location.protocol + '//' + window.location.host;
+            var loadBalancerAddress = '{{loadBalancerAddress}}';
+            
+            if(loadBalancerAddress !== "undefined")
+            {
+                host = this.getInstanceHost();
+            }
+
                     var socketProxy = require('vwf/socket')
                     if (window.location.protocol === "https:")
                     {
@@ -2460,7 +2379,7 @@ define(['progressScreen'], function()
             this.createChild = function(nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ )
             {
                 Engine.createDepth++;
-                progressScreen.startCreateNode(nodeID);
+    progressScreen.startCreateNode(nodeID || childName);
                 this.logger.debuggx("createChild", function()
                 {
                     return [nodeID, childName, JSON.stringify(loggableComponent(childComponent)), childURI];
@@ -2535,7 +2454,7 @@ define(['progressScreen'], function()
                     node.children = newChildren;
                     return node;*/
                 }
-                if (childComponent)
+    if(nodeID !== 0 && childComponent) //careful not to scrub out protos
                     childComponent = cleanChildComponent(childComponent)
                 if (!childComponent)
                 {
@@ -3568,12 +3487,12 @@ define(['progressScreen'], function()
                     var answer = undefined;
                     for (var i = 0; i < this.models.length; i++)
                     {
-                        //  if(!this.setPropertyFastEntrants[nodeID + propertyName + i])
+        if(!this.setPropertyFastEntrants[nodeID + propertyName + i])
                         if (this.models[i].settingProperty)
                         {
-                            //    this.setPropertyFastEntrants[nodeID + propertyName + i] = true;
+            this.setPropertyFastEntrants[nodeID + propertyName + i] = true;
                             var ret = this.models[i].settingProperty(nodeID, propertyName, propertyValue)
-                                //  delete this.setPropertyFastEntrants[nodeID + propertyName + i];    
+            delete this.setPropertyFastEntrants[nodeID + propertyName + i];    
                             if (ret !== undefined)
                                 answer = ret;
                         }

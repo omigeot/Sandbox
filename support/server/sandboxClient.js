@@ -4,7 +4,7 @@ var connect = require('connect'),
     var DAL = require('./DAL')
     .DAL;
 var sessions = require('./sessions.js');
-
+var logger = require('./logger');
 
 var sandboxClient = function(socket)
 {
@@ -59,10 +59,9 @@ var sandboxClient = function(socket)
     var self = this;
     socket.on('authenticate', function(msg)
     {
-        console.log(msg.cookie);
-        try
+        //try
         {
-            var cookieData = parseSignedCookie(cookie.parse(msg.cookie.join(';'))[global.configuration.sessionKey ? global.configuration.sessionKey : 'virtual'],
+            var cookieData = parseSignedCookie(cookie.parse(msg.cookie.join(';'))[global.configuration.sessionKey ? global.configuration.sessionKey : 'session'],
                 global.configuration.sessionSecret ? global.configuration.sessionSecret : 'unsecure cookie secret');
             logger.warn(cookieData);
             sessions.GetSessionData(
@@ -76,10 +75,10 @@ var sandboxClient = function(socket)
                 self.trigger('authenticate');
             });
         }
-        catch (e)
-        {
-            logger.error(e);
-        }
+    //    catch (e)
+    //    {
+    //        logger.error(e);
+     //   }
     });
     socket.on('m', function(msg)
     {
