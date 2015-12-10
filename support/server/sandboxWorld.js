@@ -11,6 +11,7 @@ var logger = require('./logger');
 var xapi = require('./xapi');
 var sandboxState = require('./sandboxState').sandboxState;
 var GUID = require('node-uuid').v4;
+var logChats = require('./logChats').logChats;
 //***node, uses REGEX, escape properly!
 function strEndsWith(str, suffix)
 {
@@ -614,6 +615,9 @@ function sandboxWorld(id, metadata)
                     this.clients[textmessage.receiver].emit('message', messageCompress.pack(JSON.stringify(message)));
                 if (textmessage.sender)
                     this.clients[textmessage.sender].emit('message', messageCompress.pack(JSON.stringify(message)));
+
+                logChats(textmessage,this.clients[textmessage.sender],this.clients[textmessage.receiver]);
+
                 return;
             }
             // only allow users to hang up their own RTC calls
