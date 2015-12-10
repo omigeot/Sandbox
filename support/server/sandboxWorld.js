@@ -106,20 +106,20 @@ var timeout = function(world)
                 if (this.count < 5)
                 {
                     logger.warn('did not get state, resending request', 2);
-                    this.world.getStateTime = this.world.time;
+                    this.world.getStateTime = this.world.time();
                     //update 11/2/14
                     //if the last loadclient does not respond, pick a new client randomly
                     loadClient.emit('m', this.messageCompress.pack(
                     {
                         "action": "getState",
                         "respond": true,
-                        "time": this.world.time
+                        "time": this.world.time()
                     }));
                     socket.emit('m', this.messageCompress.pack(
                     {
                         "action": "status",
                         "parameters": ["Did not get state, resending request."],
-                        "time": this.world.time
+                        "time": this.world.time()
                     }));
                     this.handle = global.setTimeout(this.time.bind(this), 2000);
                 }
@@ -192,7 +192,7 @@ function sandboxWorld(id, metadata)
 {
     this.id = id;
     this.clients = {};
-    this.time = 0.0;
+    this._time = 0.0;
     this.state = {};
     this.metadata = metadata;
     this.allowAnonymous = false;
@@ -203,6 +203,7 @@ function sandboxWorld(id, metadata)
     if (this.metadata.publishSettings && this.metadata.publishSettings.allowAnonymous)
         this.allowAnonymous = true;
     this.simulationStateUpdates = {};
+    this.propertySetTimes = {};
     var log = null;
     try
     {
@@ -213,6 +214,14 @@ function sandboxWorld(id, metadata)
         logger.error(e.message + ' when opening ' + SandboxAPI.getDataPath() + '//Logs/' + id.replace(/[\\\/]/g, '_'));
     }
     this.events = {};
+    this.propertySetTime = function(id,prop)
+    {
+        return this.propertySetTimes[id+prop] || -1;
+    }
+    this.setPropertyTime = function(id,prop,val)
+    {
+        this.propertySetTimes[id+prop] = this.time();
+    }
     this.on = function(name, callback)
     {
         if (!this.events[name])
@@ -346,7 +355,7 @@ function sandboxWorld(id, metadata)
             {
                 //message.instance = this.id;
                 if (!message.time)
-                    message.time = this.time;
+                    message.time = this.time();
             }
             //message to each user the join of the new client. Queue it up for the new guy, since he should not send it until after getstate
             var packedMessage = (!noCompress) ? this.messageCompress.pack(message) : message;
@@ -366,7 +375,7 @@ function sandboxWorld(id, metadata)
             "action": "fireEvent",
             "parameters": ["clientConnected", [id, name, UID]],
             node: "index-vwf",
-            "time": this.time
+            "time": this.time()
         };
         this.messageClients(joinMessage);
     }
@@ -376,7 +385,7 @@ function sandboxWorld(id, metadata)
             "action": "fireEvent",
             "parameters": ["clientDisconnected", [id, name, UID]],
             node: "index-vwf",
-            "time": this.time
+            "time": this.time()
         };
         this.messageClients(joinMessage);
     }
@@ -403,13 +412,13 @@ function sandboxWorld(id, metadata)
             while (self.accum > .05)
             {
                 self.accum -= .05;
-                self.time += .05;
+                self._time += .05;
                 self.ticknum++;
                 var tickmessage = {
                     "action": "tick",
-                    "time": self.time,
+                    "time": self.time(),
                 };
-                self.messageClients(self.time.toFixed(3), false, false, 't', true);
+                self.messageClients(self.time().toFixed(3), false, false, 't', true);
                 var simMessage = {
                     node: "index-vwf",
                     action: "simulationStateUpdate",
@@ -435,6 +444,17 @@ function sandboxWorld(id, metadata)
         self.monitortimerID = setInterval(monitor, 1000);
         console.warn("timer is " + self.timerID)
     }
+    this.time = function() {
+        return this._time;
+    }
+    this.realTime = function()
+    {
+         var now = process.hrtime();
+         now = now[0] * 1e9 + now[1];
+         now = now / 1e9;
+         return this.time() + (now - this.lasttime)/1000;
+
+    }
     this.firstConnection = function(socket, cb)
     {
         logger.info('load from db', 2);
@@ -442,7 +462,7 @@ function sandboxWorld(id, metadata)
         {
             "action": "status",
             "parameters": ["Loading state from database"],
-            "time": this.time
+            "time": this.time()
         }));
         var instance = this.id;
         //Get the state and load it.
@@ -460,7 +480,7 @@ function sandboxWorld(id, metadata)
             {
                 "action": "status",
                 "parameters": ["State loaded, sending..."],
-                "time": self.time
+                "time": self.time()
             }, true, false);
             //note: don't have to worry about pending status here, client is first
             self.messageClients(
@@ -478,14 +498,14 @@ function sandboxWorld(id, metadata)
                         "1": "application"
                     }
                 },
-                "time": self.time
+                "time": self.time()
             }, true, true);
             self.messageClients(
             {
                 "action": "fireEvent",
                 "parameters": ["loaded", []],
                 node: "index-vwf",
-                "time": self.time
+                "time": self.time()
             }, false, false);
             self.startTimer();
             cb();
@@ -499,7 +519,7 @@ function sandboxWorld(id, metadata)
             {
                 "action": "status",
                 "parameters": ["Peer Connected"],
-                "time": this.time
+                "time": this.time()
             }));
         }
     }
@@ -578,6 +598,7 @@ function sandboxWorld(id, metadata)
                         var avatar = this.state.getAvatarForClient(client.loginData.UID);
                         var controller = avatar.properties.ownerClientID;
                         controller.push(client.id);
+
                         this.state.setProperty(avatar.id, 'ownerClientID', controller);
                     }
                 }
@@ -613,7 +634,7 @@ function sandboxWorld(id, metadata)
         var loadClient = this.getLoadClient();
         logger.info('load from client', 2);
         //  socket.pending = true;
-        this.getStateTime = this.time;
+        this.getStateTime = this.time();
         loadClient.emit('m', this.messageCompress.pack(
         {
             "action": "status",
@@ -626,7 +647,7 @@ function sandboxWorld(id, metadata)
         {
             "action": "getState",
             "respond": true,
-            "time": this.time,
+            "time": this.time(),
             "origin": "reflector"
         }));
         this.Log('GetState from Client', 2);
@@ -642,7 +663,7 @@ function sandboxWorld(id, metadata)
     {
         this.totalMessages++;
         var message = this.messageCompress.unpack(msg);
-        //     message.time = this.time;
+        //     message.time() = this.time();
         if (this.queue.length > 0 || message.action == 'createChild')
         {
             this.queue.push(new QueuedMessage(message, sendingclient));
@@ -683,7 +704,7 @@ function sandboxWorld(id, metadata)
     this.process_message_async = function(message, sendingclient, cb)
     {
         var internals = {};
-        message.time = this.time;
+        message.time = this.time();
         var self = this;
         this.process_message_internal(self, message, sendingclient, function(internals)
         {
@@ -791,7 +812,16 @@ function sandboxWorld(id, metadata)
             }
             if (message.action == "setProperty")
             {
-                self.state.satProperty(message.node, message.member, message.parameters[0]);
+                if(message.time >= this.propertySetTime(message.node,message.memeber))
+                {
+                    this.setPropertyTime(message.node,message.member,message.time);
+                    self.state.satProperty(message.node, message.member, message.parameters[0]);
+                }else
+                {
+                    internals.doReflect = false;
+                    cb2(internals);
+                    return internals;
+                }
             }
             if (message.action == "setProperty" || message.action == "callMethod" || message.action == "fireEvent" ||message.action == "dispatchEvent")
             {
@@ -831,11 +861,23 @@ function sandboxWorld(id, metadata)
             }
             if (message.action == 'simulationStateUpdate')
             {
-                self.state.simulationStateUpdate(message.parameters);
+                //self.state.simulationStateUpdate(message.parameters);
                 //record all updates - we'll post on tick
                 for (var i in message.parameters)
                 {
-                    self.simulationStateUpdates[i] = message.parameters[i];
+                    if(!self.simulationStateUpdates[i])
+                        self.simulationStateUpdates[i] = {};
+
+                    var values = message.parameters[i];
+                    for(var j in values)
+                    {
+                        if(message.time >= this.propertySetTime(i,j))
+                        {
+                            self.setPropertyTime(i,j,message.time);
+                            self.state.satProperty(i,j, values[j]);
+                            self.simulationStateUpdates[i][j] = values[j];
+                        }
+                    }
                 }
                 internals.doReflect = false;
                 cb2(internals);
@@ -974,7 +1016,7 @@ function sandboxWorld(id, metadata)
                     {
                         "action": "deleteNode",
                         "node": avatarID,
-                        "time": this.time
+                        "time": this.time()
                     });
                 }
                 this.messageClients(
@@ -982,7 +1024,7 @@ function sandboxWorld(id, metadata)
                     "action": "callMethod",
                     "node": 'index-vwf',
                     member: 'cameraBroadcastEnd',
-                    "time": this.time,
+                    "time": this.time(),
                     client: client.id
                 });
                 this.messageClients(
@@ -993,7 +1035,7 @@ function sandboxWorld(id, metadata)
                     parameters: [
                         []
                     ],
-                    "time": this.time,
+                    "time": this.time(),
                     client: client.id
                 });
                 this.state.deletedNode(avatarID);

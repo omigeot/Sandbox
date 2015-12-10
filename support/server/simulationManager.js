@@ -51,7 +51,7 @@ var simClient = function(sandboxClient, simulationManager)
         {
             "action": "stopSimulating",
             "parameters": [nodeID],
-            "time": this.manager.world.time
+            "time": this.manager.world.time()
         })));
     }
     this.sendStartSimMessage = function(nodeID)
@@ -60,7 +60,7 @@ var simClient = function(sandboxClient, simulationManager)
         {
             "action": "startSimulating",
             "parameters": [nodeID],
-            "time": this.manager.world.time
+            "time": this.manager.world.time()
         })));
     }
 }
