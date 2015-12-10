@@ -963,6 +963,7 @@ define(['progressScreen'], function()
                     // In single-user mode, loop the message back to the incoming queue.
                     fields.client = this.moniker_; // stamp with the originating client like the reflector does
                     fields.origin = "reflector";
+                    fields.time = Engine.realTime();
                     //need to make sure that the data is serialized and deserialized or else there will be confusion
                     //data in the params can be a structure that changes after the send, which would not be possible if 
                     //the data traveled over the reflector
@@ -970,7 +971,6 @@ define(['progressScreen'], function()
                     //must be careful that we do this actually async, or logic that expects async operation will fail
                     this.localReentryStack++
                         queue.insert(fields);;
-                    console.warn(this.localReentryStack);
                     this.localReentryStack--;
                 }
                 this.logger.debugu();
