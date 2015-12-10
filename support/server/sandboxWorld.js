@@ -716,7 +716,7 @@ function sandboxWorld(id, metadata)
     {
         var internals = {};
         internals.doReflect = true;
-
+        console.log(message.time);
         //need to add the client identifier to all outgoing messages
         try
         {
@@ -877,6 +877,10 @@ function sandboxWorld(id, metadata)
                             self.setPropertyTime(i,j,message.time);
                             self.state.satProperty(i,j, values[j]);
                             self.simulationStateUpdates[i][j] = values[j];
+                        }else
+                        {
+                            logger.info("Rejecting old data for " + i + " " + j);
+                            console.log(message.time , this.propertySetTime(i,j));
                         }
                     }
                 }
