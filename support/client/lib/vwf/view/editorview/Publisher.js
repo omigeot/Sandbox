@@ -196,6 +196,7 @@ define([], function() {
             if (!s) return;
             Engine.private.queue.suspend();
             Engine.models.kernel.disable();
+            Engine.message.time = Infinity; //make sure that property sets are not rejected because the engine remembers newer data
             var currentState = _Editor.getNode(Engine.application(),true);
 
             //find a node from one state in another

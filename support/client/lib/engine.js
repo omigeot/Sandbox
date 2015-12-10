@@ -1268,7 +1268,7 @@ define(['progressScreen'], function()
             this.messageTime = function()
             {
                 if(!this.message)
-                    return;
+                    return Infinity;
                 else return this.message.time;
             }
             // -- dispatch -----------------------------------------------------------------------------
