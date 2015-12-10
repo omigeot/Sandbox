@@ -423,7 +423,8 @@ function sandboxWorld(id, metadata)
                     node: "index-vwf",
                     action: "simulationStateUpdate",
                     member: "null",
-                    parameters: self.simulationStateUpdates
+                    parameters: self.simulationStateUpdates,
+                    time:self.time()
                 }
                 self.messageClients(simMessage, false, false, 'm', true);
                 self.simulationStateUpdates = {};

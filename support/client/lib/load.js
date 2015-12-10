@@ -43,6 +43,43 @@ if (false) {
     ]);
 }
 
+require.config({
+    waitSeconds: 200,
+    paths: {
+        "vwf": "../vwf"
+    },
+    shim: {
+        'vwf/view/editorview/lib/angular-resource': {
+            deps: ['vwf/view/editorview/lib/angular']
+        },
+        'vwf/view/xapi/xapiwrapper': {
+            deps: ['vwf/view/editorview/sha256', "vwf/view/editorview/_3DRIntegration"],
+            exports: 'XAPIWrapper'
+        },
+        'vwf/model/threejs/_THREERayTracer': {
+            deps: ["vwf/model/threejs",'vwf/model/threejs/MATH']
+        },
+        'vwf/model/threejs/MATH': {
+            deps: ["vwf/model/threejs"]
+        },
+        'vwf/model/threejs/scenemanager': {
+            deps: ['vwf/model/threejs/_THREERayTracer']
+        },
+        'vwf/model/threejs/GeometryExporter': {
+            deps: ["vwf/model/threejs"]
+        },
+        'vwf/model/threejs/helvetiker_regular.typeface.js': {
+            deps: ["vwf/model/threejs"]
+        },
+        'vwf/view/editorview/lib/html-palette.min':
+        {
+            deps: ['vwf/view/editorview/lib/angular'],
+            exports:"HtmlPalette"
+        }
+    },
+    waitSeconds: 15
+});
+
 //if window.jQuery is defined, than the Require Optimizer has run, and appended it to the top of this file. Thus, we don't need to worry about loading all the dependancy libraries
 if (!window.jQuery) {
 
