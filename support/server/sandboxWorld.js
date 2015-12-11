@@ -418,6 +418,7 @@ function sandboxWorld(id, metadata)
                     "action": "tick",
                     "time": self.time(),
                 };
+                console.log(self.time());
                 self.messageClients(self.time().toFixed(3), false, false, 't', true);
                 var simMessage = {
                     node: "index-vwf",
@@ -716,7 +717,7 @@ function sandboxWorld(id, metadata)
     {
         var internals = {};
         internals.doReflect = true;
-        console.log(message.time);
+        
         //need to add the client identifier to all outgoing messages
         try
         {

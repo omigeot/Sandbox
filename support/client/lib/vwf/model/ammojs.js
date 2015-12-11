@@ -1,4 +1,4 @@
-"use strict";
+
 // Copyright 2012 United States Government, as represented by the Secretary of Defense, Under
 // Secretary of Defense (Personnel & Readiness).
 //
@@ -1436,8 +1436,12 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                         collisionPointB: collisionPointB,
                         collisionNormal: collisionNormal
                     };
-                    if (!this.oldCollisions[vwfIDA] || this.oldCollisions[vwfIDA].indexOf(vwfIDB) === -1 && vwf.isSimulating(vwfIDA)) vwf.callMethod(vwfIDA, 'collision', [vwfIDB, collision]);
-                    if (!this.oldCollisions[vwfIDB] || this.oldCollisions[vwfIDB].indexOf(vwfIDA) === -1 && vwf.isSimulating(vwfIDB)) vwf.callMethod(vwfIDB, 'collision', [vwfIDA, collision]);
+                    if (!this.oldCollisions[vwfIDA] || this.oldCollisions[vwfIDA].indexOf(vwfIDB) === -1)
+                        if(vwf.isSimulating(vwfIDA)) 
+                            vwf.callMethod(vwfIDA, 'collision', [vwfIDB, collision]);
+                    if (!this.oldCollisions[vwfIDB] || this.oldCollisions[vwfIDB].indexOf(vwfIDA) === -1)
+                        if(vwf.isSimulating(vwfIDB)) 
+                            vwf.callMethod(vwfIDB, 'collision', [vwfIDA, collision]);
                     if (!newCollisions[vwfIDA]) newCollisions[vwfIDA] = [];
                     if (!newCollisions[vwfIDB]) newCollisions[vwfIDB] = [];
                     newCollisions[vwfIDA].push(vwfIDB);

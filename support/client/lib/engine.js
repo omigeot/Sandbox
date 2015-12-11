@@ -1101,7 +1101,10 @@ define(['progressScreen'], function()
                         if (!nodes.existing[nodeID]) continue;
                         if (this.isSimulating(nodeID)) continue;
                         for (var i in state[nodeID])
-                            this.setPropertyFast(nodeID, i, state[nodeID][i]);
+                        {
+                            if(this.propertyTime(nodeID+i) < this.messageTime())
+                                this.setPropertyFast(nodeID, i, state[nodeID][i]);
+                        }
                     }
                 }
                 //request the server mark this client as the simulator for the given node
@@ -1219,6 +1222,13 @@ define(['progressScreen'], function()
                     alertify.log(parameters[0]);
                 }
                 var args = [];
+
+                //dont take outdated property updates
+                if(actionName == "setProperty" && this.propertyTime(nodeID,memberName) > this.messageTime())
+                {
+                    return;
+                }
+
                 if (nodeID || nodeID === 0) args.push(nodeID);
                 if (memberName) args.push(memberName);
                 if (parameters) args = args.concat(parameters); // flatten
@@ -1259,7 +1269,7 @@ define(['progressScreen'], function()
             };
             this.propertyTime = function(nodeID,propertyName)
             {
-                return this._propertySetTimes[nodeID+propertyName];
+                return this._propertySetTimes[nodeID+propertyName] || 0;
             }
             this.propertyAge = function(nodeID,propertyName)
             {
@@ -1298,7 +1308,7 @@ define(['progressScreen'], function()
                 {
                     this.message = fields;
                     // Advance the time.
-                    if (this.now < fields.time)
+                    if (this.now != fields.time)
                     {
                         this.now = fields.time;
                         this._lastRealTime = performance.now();
@@ -1312,11 +1322,10 @@ define(['progressScreen'], function()
                     }
                     // Advance time to the most recent time received from the server. Tick if the time
                     // changed.
-                    if (queue.ready() && this.now != queue.time)
+                    if (queue.ready())
                     {
                         this.sequence_ = undefined; // clear after the previous action
                         this.client_ = undefined; // clear after the previous action
-                        this.now = queue.time;
                     }
                 }
                 // -- log ----------------------------------------------------------------------------------
@@ -3308,11 +3317,7 @@ define(['progressScreen'], function()
                 var node = nodes.existing[nodeID];
                 if (!node) return;
                 
-                if(this.message && this.message.action == "setProperty" && this.propertyTime(nodeID,propertyName) > this.messageTime())
-                {
-
-                    return;
-                }
+                
                 // Record calls into this function by nodeID and propertyName so that models may call
                 // back here (directly or indirectly) to delegate responses further down the chain
                 // without causing infinite recursion.
@@ -3454,7 +3459,7 @@ define(['progressScreen'], function()
                 }
                 this.propertyUpdated(nodeID, propertyName, propertyValue);
                 this.logger.debugu();
-                Engine._propertySetTimes[nodeID + propertyName] = Engine.realTime();
+                Engine._propertySetTimes[nodeID + propertyName] = Engine.time();
                 return propertyValue;
             };
             this.setProperty.entrants = {}; // maps ( nodeID + '-' + propertyName ) => { index: i, value: v }
@@ -3488,8 +3493,7 @@ define(['progressScreen'], function()
             this.setPropertyFast = function(nodeID, propertyName, propertyValue)
                 {
                     var answer = undefined;
-                    if (this.propertyTime(nodeID, propertyName) > this.messageTime())
-                        return answer;
+                    
                     for (var i = 0; i < this.models.length; i++)
                     {
                         if (!this.setPropertyFastEntrants[nodeID + propertyName + i])
