@@ -378,7 +378,7 @@ function setupPhyObject(node, id, world) {
     node.angularVelocity = [0, 0, 0];
     node.linearVelocity = [0, 0, 0];
     node.localScale = [1, 1, 1];
-    node.activationState = 1;
+    node.activationState = 0;
     node.deactivationTime = 0;
     node.linearFactor = [1, 1, 1];
     node.angularFactor = [1, 1, 1];
@@ -643,6 +643,7 @@ phyObject.prototype.initialize = function() {
         
 
         this.body.forceActivationState(this.activationState);
+        this.body.setActivationState(this.activationState);
         this.body.setDeactivationTime(this.deactivationTime);
         var mat = Engine.getProperty(this.id, 'transform');
         if (mat) this.setTransform(mat);
@@ -775,7 +776,8 @@ phyObject.prototype.getActivationState = function() {
     } else return this.activationState;
 }
 phyObject.prototype.setActivationState = function(state) {
-    if (this.activationState == Number(state)) return;
+    if(state == 0) state = 1; //much confusion about the #defines for 1 and 0. Seems like 0 is not a enumerated activation value, yet the bullet code uses 0 in some places and 1 in others for activation enabled
+   // if (this.activationState == Number(state)) return;
     state = Number(state);
     if (this.initialized === true) {
         this.body.setActivationState(state);
@@ -785,7 +787,9 @@ phyObject.prototype.setActivationState = function(state) {
 }
 phyObject.prototype.wake = function() {
     if (this.initialized === true) {
-        this.body.activate();
+        
+        this.body.setDeactivationTime(0);
+        this.body.setActivationState(1);
     } 
 }
 phyObject.prototype.getDeactivationTime = function() {
@@ -1466,7 +1470,7 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                 }
                 //step 50ms per tick.
                 //this is dictated by the input from the reflector
-                this.nodes[Engine.application()].world.stepSimulation(1 / 20, 1, 1 / 20);
+                this.nodes[Engine.application()].world.stepSimulation(1 / 20, 0, 1 / 20);
                 this.reEntry = true;
                 var tempmat = [];
                 var nodekeys = Object.keys(this.allNodes).sort();
@@ -1475,7 +1479,9 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                     var node = this.allNodes[nodekeys[i]];
                     // if(vwf.isSimulating(node.id))
                     {
-                        if (node.body && node.initialized === true && node.mass > 0 && node.getActivationState() != 2)
+                        if(node.ticked)
+                            node.ticked();
+                        if (node.body && node.initialized === true && node.mass > 0 && Engine.isSimulating(node.id))
                         {
                             Engine.setProperty(node.id, 'transform', node.getTransform(tempmat));
                             //so, we were setting these here in order to inform the kernel that the property changed. Can we not do this, and 

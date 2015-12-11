@@ -3308,8 +3308,11 @@ define(['progressScreen'], function()
                 var node = nodes.existing[nodeID];
                 if (!node) return;
                 
-                if(this.propertyTime(nodeID,propertyName) > this.messageTime())
+                if(this.message && this.message.action == "setProperty" && this.propertyTime(nodeID,propertyName) > this.messageTime())
+                {
+
                     return;
+                }
                 // Record calls into this function by nodeID and propertyName so that models may call
                 // back here (directly or indirectly) to delegate responses further down the chain
                 // without causing infinite recursion.
