@@ -2052,7 +2052,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                             SelectedVWFNodes.splice(index, 1);
                         }
 
-
+                        Engine.requestControl(VWFNode[i].id);
                     }
                 if (SelectedVWFNodes[0]) this.SelectedVWFID = SelectedVWFNodes[0].id;
                 else this.SelectedVWFID = null;
