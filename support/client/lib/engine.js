@@ -928,8 +928,8 @@ define(['progressScreen'], function()
                 this.logger.debuggx("send", nodeID, actionName, memberName,
                     parameters && parameters.length, when, callback_async && "callback"); // TODO: loggableParameters()
                 var time = when > 0 ? // absolute (+) or relative (-)
-                    Math.max(this.time(), when) :
-                    this.time()
+                    Math.max(this.realTime(), when) :
+                    this.realTime()
                 // Attach the current simulation time and pack the message as an array of the arguments.
                 var fields = {
                     time: time,
@@ -942,7 +942,7 @@ define(['progressScreen'], function()
                 if (socket)
                 {
                     //process own input right away.
-                    if (actionName == "setProperty" || actionName == "callMethod" || actionName == "fireEvent" || actionName == "dispatchEvent")
+                    if (actionName == "createChild" || actionName == "deleteNode" || actionName == "setProperty" || actionName == "callMethod" || actionName == "fireEvent" || actionName == "dispatchEvent")
                     {
                         if (memberName !== "latencyTest")
                         {
