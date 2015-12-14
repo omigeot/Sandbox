@@ -565,7 +565,7 @@ var sandboxState = function(id, metadata, world)
     //The statebackup travels over the wire (though technically I guess we should have a copy of that data in our state already)
     //when it does, we can receive it here. Because the server is doing some tracking of state, we need to restore the server
     //side state.
-    this.calledMethod = function(id, name, args)
+    this.calledMethod = function(id, name, args,internals)
     {
         if (id == 'index-vwf' && name == 'restoreState')
         {
@@ -576,7 +576,12 @@ var sandboxState = function(id, metadata, world)
                 this.nodes['index-vwf'] = JSON.parse(JSON.stringify(args[0][0]));
                 //here, we need to hook back up the .parent property, so we can walk the graph for other operations.
                 this.reattachParents(this.nodes['index-vwf']);
-                this.world.simulationManager.distributeAll();
+                var self = this;
+                internals.then = function(){
+                    self.world.simulationManager.distributeAll();
+                }
+                
+
             }
         }
     }

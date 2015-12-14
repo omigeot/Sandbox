@@ -755,7 +755,7 @@ function sandboxWorld(id, metadata)
             }
             //route callmessage to the state to it can respond to manip the server side copy
             if (message.action == 'callMethod')
-                self.state.calledMethod(message.node, message.member, message.parameters);
+                self.state.calledMethod(message.node, message.member, message.parameters,internals);
             if (message.action == 'callMethod' && message.node == 'index-vwf' && message.member == 'PM')
             {
                 var textmessage = JSON.parse(message.parameters[0]);
@@ -842,7 +842,10 @@ function sandboxWorld(id, metadata)
             //Note that you now must share a scene with a user!!!!
             if (message.action == "createChild")
             {
-                console.log('startCreateChild')
+                
+
+
+
                 var childComponent = JSON.parse(JSON.stringify(message.parameters[0]));
                 if (!self.state.validateCreate(message.node, message.member, childComponent, sendingclient))
                 {
@@ -852,6 +855,12 @@ function sandboxWorld(id, metadata)
                 }
                 var childID = self.state.getID(message.member, childComponent);
                 internals.childID = childID;
+
+                internals.then = function()
+                {
+                    self.simulationManager.nodeCreated(internals.childID, sendingclient);
+                }
+
                 xapi.sendStatement(sendingclient.loginData.UID, xapi.verbs.rezzed, childID, childComponent.properties ? childComponent.properties.DisplayName : "", null, self.id);
                 self.state.createdChild(message.node, message.member, childComponent, function()
                 {
@@ -960,10 +969,10 @@ function sandboxWorld(id, metadata)
                 }
             }
         }
-        if (message.action == "createChild")
+        
+        if(internals.then)
         {
-            //console.log('client simulate own node:' + internals.childID)
-            self.simulationManager.nodeCreated(internals.childID, sendingclient);
+            internals.then();
         }
         ////console.log(now() - lasttime + " reflect ms");
         cb2();
