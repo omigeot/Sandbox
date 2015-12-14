@@ -285,6 +285,7 @@ define([], function() {
                 Engine.models.kernel.enable();
 
                 Engine.callMethod(Engine.application(), 'postWorldRestore');
+                Engine.propertyTimeReset();
                 Engine.private.queue.resume();
 
             });

@@ -90,20 +90,6 @@ properties:
       displayname: Show glyph
       property: showGlyph
       type: check
-    ABstartAlpha:
-      displayname: "Alpha: start"
-      property: startAlpha
-      type: slider
-      min: 0
-      max: 1
-      step: .01
-    ABstartAlphaEnd:
-      displayname: "Alpha:  end"
-      property:  endAlpha
-      type: slider
-      min: 0
-      max: 1
-      step: .01
     ABstartAlphaEndRange:
       displayname: "Alpha:  range"
       property:  alphaRange
@@ -208,15 +194,15 @@ properties:
       type: map
     YStartColor:
       displayname: Start Color
-      property: startColor_noAplha
+      property: startColor
       type: color
     YEndColor:
       displayname: End Color
-      property: endColor_noAplha
+      property: endColor
       type: color
     YVariationColor:
       displayname: Color Variation
-      property: colorRange_noAplha
+      property: colorRange
       type: color
     solver:
       displayname: "Simulation Solver"

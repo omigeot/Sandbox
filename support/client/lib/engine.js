@@ -1267,6 +1267,10 @@ define(['progressScreen'], function()
                 // origin == "reflector" ?
                 //     this.logger.infou() : this.logger.debugu();
             };
+            this.propertyTimeReset = function()
+            {
+                 this._propertySetTimes = {}; 
+            }
             this.propertyTime = function(nodeID,propertyName)
             {
                 return this._propertySetTimes[nodeID+propertyName] || 0;
