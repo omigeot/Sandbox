@@ -1102,7 +1102,7 @@ define(['progressScreen'], function()
                         if (this.isSimulating(nodeID)) continue;
                         for (var i in state[nodeID])
                         {
-                            if(this.propertyTime(nodeID+i) < this.messageTime())
+                            if(this.messageTime() >= this.propertyTime(nodeID,i) )
                                 this.setPropertyFast(nodeID, i, state[nodeID][i]);
                         }
                     }
@@ -1224,7 +1224,7 @@ define(['progressScreen'], function()
                 var args = [];
 
                 //dont take outdated property updates
-                if(actionName == "setProperty" && this.propertyTime(nodeID,memberName) > this.messageTime())
+                if(actionName == "setProperty" && this.propertyTime(nodeID,memberName) >= this.messageTime())
                 {
                     return;
                 }
@@ -1308,7 +1308,7 @@ define(['progressScreen'], function()
                 {
                     this.message = fields;
                     // Advance the time.
-                    if (this.now != fields.time)
+                    if (this.now < fields.time)
                     {
                         this.now = fields.time;
                         this._lastRealTime = performance.now();
@@ -3459,7 +3459,7 @@ define(['progressScreen'], function()
                 }
                 this.propertyUpdated(nodeID, propertyName, propertyValue);
                 this.logger.debugu();
-                Engine._propertySetTimes[nodeID + propertyName] = Engine.time();
+                Engine._propertySetTimes[nodeID + propertyName] = Engine.messageTime();
                 return propertyValue;
             };
             this.setProperty.entrants = {}; // maps ( nodeID + '-' + propertyName ) => { index: i, value: v }
@@ -3514,6 +3514,7 @@ define(['progressScreen'], function()
                         }
                     }
                     this.propertyUpdated(nodeID, propertyName, answer || propertyValue);
+                    this._propertySetTimes[nodeID+propertyName] = Engine.messageTime();
                     return answer;
                 },
                 this.getProperty = function(nodeID, propertyName, ignorePrototype, testDelegation)
