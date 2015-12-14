@@ -1034,6 +1034,7 @@ define(['progressScreen'], function()
             }
             this.startCoSimulating = function(nodeID)
             {
+                if (!nodes.existing[nodeID]) return;
                 var nodes = this.decendants(nodeID);
                 this.stopSimulating(nodeID);
                 if (nodeID !== "index-vwf")
@@ -1052,18 +1053,19 @@ define(['progressScreen'], function()
             }
             this.stopSimulating = function(nodeID)
             {
-                var nodes = this.decendants(nodeID);
-                nodes.push(nodeID);
-                for (var i = 0; i < nodes.length; i++)
+                if (!nodes.existing[nodeID]) return;
+                var decendants = this.decendants(nodeID);
+                decendants.push(nodeID);
+                for (var i = 0; i < decendants.length; i++)
                 {
-                    if (this.nodesSimulating.indexOf(nodes[i]) != -1)
+                    if (this.nodesSimulating.indexOf(decendants[i]) != -1)
                     {
-                        this.nodesSimulating.splice(this.nodesSimulating.indexOf(nodes[i]), 1);
-                        this.nodesSimulatingNames[nodes[i]] = false;
-                        this.propertyDataUpdates[nodes[i]] = {};
+                        this.nodesSimulating.splice(this.nodesSimulating.indexOf(decendants[i]), 1);
+                        this.nodesSimulatingNames[decendants[i]] = false;
+                        this.propertyDataUpdates[decendants[i]] = {};
                     }
-                    this.callMethod(this.application(), "stopSimulatingNode", nodes[i]);
-                    delete this.lastPropertyDataUpdates[nodes[i]];
+                    this.callMethod(this.application(), "stopSimulatingNode", decendants[i]);
+                    delete this.lastPropertyDataUpdates[decendants[i]];
                 }
             }
             this.isSimulating = function(nodeID)
@@ -1735,6 +1737,9 @@ define(['progressScreen'], function()
             {
                 if (!nodes.existing[nodeID]) return;
                 this.logger.debuggx("deleteNode", nodeID);
+
+                //collect children and stop simulating
+                Engine.stopSimulating(nodeID);
                 // Remove the entry in the components list if this was the root of a component loaded
                 // from a URI.
                 Object.keys(components).some(function(nodeURI)
@@ -1762,12 +1767,7 @@ define(['progressScreen'], function()
                 {
                     applicationID = undefined;
                 }
-                // Call deletedNode() on each view. The view is being notified that a node has been
-                // deleted.
-                if (!socket) //if we're offline in loopback mode, we must stop simulating all our own nodes
-                {
-                    Engine.stopSimulating(nodeID);
-                }
+                
 
                 //remove the timing info for the properties
                 for(var i in this._propertySetTimes)

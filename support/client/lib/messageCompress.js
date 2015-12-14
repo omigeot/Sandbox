@@ -34,10 +34,10 @@ function messageCompress()
                 return this.enc_mappings[message]
                 else
                 {
-                    if(message.length > 5 && message.length < 200 && message.indexOf('\n') == -1)
+                    if(message.length > 5 && message.length < 25 && message.indexOf('\n') == -1)
                        {
                              this.learnedMappings[message] = '';
-                         //    console.log('learning mapping for ' + message);
+                             console.log('learning mapping for ' + message);
                        }
                     return message;
                 } 

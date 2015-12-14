@@ -204,7 +204,8 @@ var simulationManager = function(world)
         for (var i = 0; i < nodes.length; i++)
         {
             this.clients[clientKeys[counter]].startSimulatingNode(nodes[i]);
-            this.clientControlTable[nodes[i]] = {clientKeys[counter]:25};
+            this.clientControlTable[nodes[i]] = {};
+            this.clientControlTable[nodes[i]][clientKeys[counter]] = 25;
             counter++;
             if (counter >= clientKeys.length)
                 counter = 0;
