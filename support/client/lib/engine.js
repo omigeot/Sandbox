@@ -319,7 +319,7 @@ define(['progressScreen'],function(){
           
                 { library: "vwf/utility", active: true },
           
-                
+                { library: "ohm", active: true },
               
                 { library: "vwf/model/ammo.js/ammo", active: true },
                 { library: "vwf/view/webrtc/adapter", active: false },
@@ -343,6 +343,7 @@ define(['progressScreen'],function(){
                     { library: "vwf/model/glge", active: false },
                     { library: "vwf/model/threejs", active: true },
                     { library: "vwf/model/cesium", active: false },
+                    { library: "ohm", active: true },
                     { library: "vwf/model/object", active: true },
                     { library: "vwf/model/wires", active: true },
                     { library: "vwf/model/jqueryui", active: true },
@@ -481,6 +482,7 @@ define(['progressScreen'],function(){
                         "vwf/model/wires",
                         "vwf/model/threejs",
                         "vwf/model/jqueryui",
+                        "ohm",
                         "vwf/model/audio",
                         "vwf/model/object",
                     ];
@@ -764,7 +766,7 @@ define(['progressScreen'],function(){
         {
 
 
-            var loadBalancerAddress = 'undefined';
+        var loadBalancerAddress = '{{loadBalancerAddress}}';
         var instance = window.location.pathname;
 
         var instanceHost = $.ajax({
@@ -787,7 +789,14 @@ define(['progressScreen'],function(){
                 window.location.pathname.lastIndexOf("/") );
             var protocol = window.location.protocol;
             var host = window.location.protocol +'//'+ window.location.host;
-        
+           
+            var loadBalancerAddress = '{{loadBalancerAddress}}';
+            
+            if(loadBalancerAddress !== "undefined")
+            {
+                host = this.getInstanceHost();
+            }
+
             var socketProxy = require('vwf/socket')
             if ( window.location.protocol === "https:" )
             {
@@ -2352,7 +2361,7 @@ this.hashNode = function( nodeID ) {  // TODO: works with patches?  // TODO: onl
 this.createDepth = 0;
 this.createChild = function( nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ ) {
     Engine.createDepth++;
-    progressScreen.startCreateNode(nodeID);
+    progressScreen.startCreateNode(nodeID || childName);
 
 
 
@@ -2421,7 +2430,7 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
         if(node===null || node === undefined)
             return null;
 
-        if(node.extends === undefined && !node.properties && !node.continues && !node.source && !node.type)
+        if((node.extends === undefined || node.extends == "http://vwf.example.com/node.vwf") && (!node.properties || ( Object.keys(node.properties).length == 1 && Object.keys(node.properties)[0] == "___assetServerOriginalID" ) )  && !node.continues && !node.source && !node.type)
             return null;
 
         var newChildren = {}
@@ -2434,7 +2443,7 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
         node.children = newChildren;
         return node;
     }
-    if(childComponent)
+    if(nodeID !== 0 && childComponent) //careful not to scrub out protos
         childComponent = cleanChildComponent(childComponent)
     if(!childComponent)
     {
@@ -2477,6 +2486,8 @@ this.createChild = function( nodeID, childName, childComponent, childURI, callba
             { // TODO: for "includes:", accept an already-loaded component (which componentIsURI exludes) since the descriptor will be loaded again
                 var continueBaseLoaded = function (data)
                 {
+
+                    data = cleanChildComponent(data);
                     //cache for future use
                     if (!continuesDefs[childComponent.continues])
                         continuesDefs[childComponent.continues] = JSON.parse(JSON.stringify(data));
@@ -3591,13 +3602,13 @@ this.setPropertyFast = function(nodeID, propertyName,propertyValue)
     var answer = undefined;
     for(var i =0; i < this.models.length; i++)
     {
-      //  if(!this.setPropertyFastEntrants[nodeID + propertyName + i])
+        if(!this.setPropertyFastEntrants[nodeID + propertyName + i])
         if(this.models[i].settingProperty)
         {
-        //    this.setPropertyFastEntrants[nodeID + propertyName + i] = true;
+            this.setPropertyFastEntrants[nodeID + propertyName + i] = true;
             
             var ret = this.models[i].settingProperty(nodeID,propertyName,propertyValue)
-          //  delete this.setPropertyFastEntrants[nodeID + propertyName + i];    
+            delete this.setPropertyFastEntrants[nodeID + propertyName + i];    
             
             
             if(ret !== undefined)

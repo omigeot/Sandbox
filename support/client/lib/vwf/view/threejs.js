@@ -459,44 +459,57 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
         },
         resetInterpolation: function()
         {
-            if (_Editor.GetMoveGizmo().getGizmoHead().matrix) {
-                    this.gizmoLastTickTransform = this.gizmoThisTickTransform;
-                    this.gizmoThisTickTransform = _Editor.GetMoveGizmo().getGizmoHead().matrix.clone();
+        	var gizmoHead = _Editor.GetMoveGizmo().getGizmoHead();
+            if (gizmoHead.matrix)
+            {
+                this.gizmoLastTickTransform = this.gizmoThisTickTransform;
+                this.gizmoThisTickTransform = gizmoHead.matrix.clone();
+            }
+
+            var keys = Object.keys(this.nodes);
+
+            var EngineTime = Engine.time();
+            for (var j = 0; j < keys.length; j++)
+            {
+                var i = keys[j];
+                var thisNode = this.nodes[i];
+                var stateNode = this.state.nodes[i];
+                //don't do interpolation for static objects
+                if (thisNode.isStatic) continue;
+                if (thisNode.lastTransformStep + 1 < EngineTime)
+                {
+                    thisNode.lastTickTransform = null;
+                    thisNode.lastFrameInterp = null;
+                    thisNode.thisTickTransform = null;
                 }
-
-                var keys = Object.keys(this.nodes);
-
-                for (var j = 0; j < keys.length; j++) {
-                    var i = keys[j];
-                    //don't do interpolation for static objects
-                    if (this.nodes[i].isStatic) continue;
-                    if (this.nodes[i].lastTransformStep + 1 < Engine.time()) {
-                        this.nodes[i].lastTickTransform = null;
-                        this.nodes[i].lastFrameInterp = null;
-                        this.nodes[i].thisTickTransform = null;
-                    } else if (this.state.nodes[i] && this.state.nodes[i].gettingProperty) {
-                        this.nodes[i].lastTickTransform = matset(this.nodes[i].lastTickTransform, this.nodes[i].thisTickTransform);
-                        this.nodes[i].thisTickTransform = matset(this.nodes[i].thisTickTransform, this.state.nodes[i].gettingProperty('transform'));
-                    }
-                    if (this.state.nodes[i] && this.state.nodes[i].gettingProperty) {
-                        if (this.nodes[i].lastAnimationStep + 1 < Engine.time()) {
-                            this.nodes[i].lastAnimationFrame = null;
-                            this.nodes[i].thisAnimationFrame = null;
-                        } else {
-                            this.nodes[i].lastAnimationFrame = this.nodes[i].thisAnimationFrame;
-                            this.nodes[i].thisAnimationFrame = this.state.nodes[i].gettingProperty('animationFrame');
-                        }
-
-                    }
-                    if(window._Editor && this.nodes[i] && window._Editor.isSelected(i))
+                else if (stateNode && stateNode.gettingProperty)
+                {
+                    thisNode.lastTickTransform = matset(thisNode.lastTickTransform, thisNode.thisTickTransform);
+                    thisNode.thisTickTransform = matset(thisNode.thisTickTransform, stateNode.gettingProperty('transform'));
+                }
+                if (stateNode && stateNode.gettingProperty)
+                {
+                    if (thisNode.lastAnimationStep + 1 < EngineTime)
                     {
-                        this.nodes[i].lastAnimationFrame = null;
-                        this.nodes[i].thisAnimationFrame = null;
-                        this.nodes[i].lastTickTransform = null;
-                        this.nodes[i].lastFrameInterp = null;
-                        this.nodes[i].thisTickTransform = null;
+                        thisNode.lastAnimationFrame = null;
+                        thisNode.thisAnimationFrame = null;
                     }
+                    else
+                    {
+                        thisNode.lastAnimationFrame = thisNode.thisAnimationFrame;
+                        thisNode.thisAnimationFrame = stateNode.gettingProperty('animationFrame');
+                    }
+
                 }
+                if (window._Editor && thisNode && window._Editor.isSelected(i))
+                {
+                    thisNode.lastAnimationFrame = null;
+                    thisNode.thisAnimationFrame = null;
+                    thisNode.lastTickTransform = null;
+                    thisNode.lastFrameInterp = null;
+                    thisNode.thisTickTransform = null;
+                }
+            }
 
 
         },
@@ -528,20 +541,20 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
                 }
 
-                last = this.nodes[i].lastAnimationFrame;
-                now = this.nodes[i].thisAnimationFrame;
-                if (last && now && Math.abs(now - last) < 3) {
+                var lastF = this.nodes[i].lastAnimationFrame;
+                var nowF = this.nodes[i].thisAnimationFrame;
+                if (lastF && nowF && Math.abs(nowF - lastF) < 3) {
 
                     var interpA = 0;
 
 
-                    interpA = this.lerp(last, now, step);
+                    interpA = this.lerp(lastF, nowF, step);
 
 
                     this.nodes[i].currentAnimationFrame = this.state.nodes[i].gettingProperty('animationFrame');
                     if (this.state.nodes[i].setAnimationFrameInternal) {
                         if (this.state.nodes[i].lastAnimationInterp)
-                            interpA = this.lerp(this.state.nodes[i].lastAnimationInterp, now, lerpStep);
+                            interpA = this.lerp(this.state.nodes[i].lastAnimationInterp, nowF, lerpStep);
                         
                         this.state.nodes[i].backupTransforms(this.nodes[i].currentAnimationFrame);
                         this.state.nodes[i].setAnimationFrameInternal(interpA, false);
@@ -710,7 +723,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
                 var instanceData = _DataManager.getInstanceData();
                 var    publishSettings = instanceData.publishSettings;
-
+                if(publishSettings)
                 this.cameraID = publishSettings.camera;
                 this.setCamera(this.cameraID);
             }
@@ -820,6 +833,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
             this.cameraID = camID  || defaultCameraID;
 
             //allow the default 
+            if(publishSettings)
             if(!camID && publishSettings.allowTools)
                 this.cameraID = null;
 
@@ -1584,10 +1598,10 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                     w = parseInt($('#index-vwf').attr('width') / 3);
                     h = parseInt($('#index-vwf').attr('height') / 3);
 
-
-                    renderer.setViewport(0, 0, w, w);
+                    var dpr = _dRenderer.devicePixelRatio;
+                    renderer.setViewport(0, 0, w/dpr, w/dpr);
                     _Editor.hideMoveGizmo();
-                    _dRenderer.setScissor(0, 0, w, w);
+                    _dRenderer.setScissor(0, 0, w/dpr, w/dpr);
                     renderer.enableScissorTest(true);
 
 
@@ -1601,15 +1615,15 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                     insetvp = MATH.transposeMat4(_viewProjectionMatrix.toArray(temparray));
 
 
-                    self.trigger('postprerender', [insetvp, w, w]);
+                    self.trigger('postprerender', [insetvp, w/dpr, w/dpr]);
 
                     renderer.clear(true, true, true);
                     renderer.render(scene, selcam);
 
                     self.cameraID = camback;
                     _Editor.showMoveGizmo();
-                    _dRenderer.setViewport(0, 0, parseInt($('#index-vwf').attr('width')), parseInt($('#index-vwf').attr('height')));
-                    _dRenderer.setScissor(0, 0, parseInt($('#index-vwf').attr('width')), parseInt($('#index-vwf').attr('height')));
+                    _dRenderer.setViewport(0, 0, parseInt($('#index-vwf').attr('width'))/dpr, parseInt($('#index-vwf').attr('height'))/dpr);
+                    _dRenderer.setScissor(0, 0, parseInt($('#index-vwf').attr('width'))/dpr, parseInt($('#index-vwf').attr('height'))/dpr);
                     renderer.enableScissorTest(false);
                     selcam.aspect = oldaspect;
                     selcam.updateProjectionMatrix();

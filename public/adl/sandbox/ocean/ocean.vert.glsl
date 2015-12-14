@@ -9,7 +9,6 @@ varying float vCamLength;
 varying mat3 TBN;
 varying float h;
 varying vec2 sspos;
-
 varying vec3 vFogPosition;
 
 uniform vec3 oCamPos;
@@ -122,7 +121,7 @@ void main() {
                   float st = t;
 
                   float w = W[i];
-                  float q = S[i] * w;
+                  float q = S[i];
                   float Ai = A[i] * smoothstep(1.0, 0.0, pow(camDist, 1.3) / (uHalfGrid * L[i]));
 
                   if (Ai < .001) continue;
@@ -133,11 +132,11 @@ void main() {
                   float yi = Qi * Ai * D[i].y * cos( dot(w * D[i], xy) + q * st);
                   float hi =  Ai * sin( dot(w * D[i], xy) + q * st );
 
-                  tPos.x += xi * gA*gB[i];
-                  tPos.y += yi * gA*gB[i];
-                  tPos.z += hi * gA*gB[i];
+                  tPos.x += xi;// * gA;//gB[i];
+                  tPos.y += yi;// * gA;//*gB[i];
+                  tPos.z += hi * gA *gB[i];
 
-                  float WA = w * Ai * gA *gB[i];
+                  float WA = w * Ai * gA ;//*gB[i];
                   float S0 = sin(w * dot(D[i], tPos.xy) + q * st);
                   float C0 = cos(w * dot(D[i], tPos.xy) + q * st);
 
@@ -176,13 +175,7 @@ void main() {
 
 
       vCamDir = normalize( vec4(vCamDir, 0.0) * viewMatrix ).xyz;
-      mat4 viewMatrixNoT = viewMatrix;
-      viewMatrixNoT[3][2] = 0.0;
-      viewMatrixNoT[3][1] = 0.0;
-      viewMatrixNoT[3][0] = 0.0;
-      viewMatrixNoT[2][3] = 0.0;
-      viewMatrixNoT[1][3] = 0.0;
-      viewMatrixNoT[0][3] = 0.0;
+
 
       vCamLength = distance(oCamPos , tPos );
       tPos.x -= oCamPos.x;
