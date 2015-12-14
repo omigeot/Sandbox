@@ -420,14 +420,17 @@ function sandboxWorld(id, metadata)
                 };
                 console.log(self.time());
                 self.messageClients(self.time().toFixed(3), false, false, 't', true);
-                var simMessage = {
-                    node: "index-vwf",
-                    action: "simulationStateUpdate",
-                    member: "null",
-                    parameters: self.simulationStateUpdates,
-                    time:self.time()
+                if(Object.keys(self.simulationStateUpdates) > 0)
+                {
+                    var simMessage = {
+                        node: "index-vwf",
+                        action: "simulationStateUpdate",
+                        member: "null",
+                        parameters: self.simulationStateUpdates,
+                        time:self.time()
+                    }
+                    self.messageClients(simMessage, false, false, 'm', true);
                 }
-                self.messageClients(simMessage, false, false, 'm', true);
                 self.simulationStateUpdates = {};
                
             }
