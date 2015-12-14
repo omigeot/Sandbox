@@ -507,35 +507,45 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                         }
                     }
                 }
-                else if(scope.type.indexOf("slider") > -1 || scope.type == "color"){
+                else if(scope.type.indexOf("slider") > -1){
                     scope.$watch('isUpdating', function(newVal, oldVal){
                         if(newVal !== oldVal) updateSliderValue(scope.vwfNode, scope.property, newVal);
                     });
+                }
+                else if(scope.type == 'color'){
+                    //Interface with updated color picker
+                    //if a color is already set, use it...
+                    colorCopyArr = [];
 
-                    if(scope.type == 'color'){
-                        //Interface with updated color picker
-                        //if a color is already set, use it...
-                        colorCopyArr = [];
 
-                        var value = scope.vwfNode.properties[scope.property];
-                        updateColor(value ? value : [0, 0, 0, 1], null, true);
+                    var value = scope.vwfNode.properties[scope.property];
+                    updateColor(value ? value : [0, 0, 0, 1], null, true);
 
-                        scope.rgbColor = rgbaArrToObj(colorCopyArr, {});
-                        scope.$watch('rgbColor', updateColor, true);
-                        scope.$watch('vwfNode.properties.' + scope.property, function(newVal, oldVal){
-                            if(newVal) rgbaArrToObj(newVal, scope.rgbColor);
-                        }, true);
+                    scope.rgbColor = rgbaArrToObj(colorCopyArr, {});
+                    scope.$watch('rgbColor', updateColor, true);
+                    scope.$watch('vwfNode.properties.' + scope.property, function(newVal, oldVal){
+                        if(newVal) rgbaArrToObj(newVal, scope.rgbColor);
+                    }, true);
 
-                        function updateColor(newVal, oldVal, skipChange){
-                            if(newVal !== oldVal){
-                                console.log("Color updated!");
+                    scope.colorSelect = function(a, b, c){
+                        scope.isUpdating = false;
+                        updateSliderValue(scope.vwfNode, scope.property, scope.isUpdating);
+                    }
 
-                                if(skipChange !== true){
-                                    rgbaObjToArr(newVal, colorCopyArr);
-                                    scope.onChange();
-                                }
-                                else colorCopyArr = newVal.slice();
+                    function updateColor(newVal, oldVal, skipChange){
+                        console.log("Color updated");
+                        if(newVal !== oldVal){
+
+                            if(!scope.isUpdating){
+                                scope.isUpdating = true;
+                                updateSliderValue(scope.vwfNode, scope.property, scope.isUpdating);
                             }
+
+                            if(skipChange !== true){
+                                rgbaObjToArr(newVal, colorCopyArr);
+                                scope.onChange();
+                            }
+                            else colorCopyArr = newVal.slice();
                         }
                     }
                 }
