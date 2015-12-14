@@ -1455,7 +1455,7 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
             delete this.pendingReset;
             if (this.nodes[Engine.application()] && this.nodes[Engine.application()].active === true)
             {
-                var nodekeys = Object.keys(this.allNodes).sort();
+                var nodekeys = Object.keys(this.allNodes);
                 for (var g = 0; g < nodekeys.length; g++)
                 {
                     var node = this.allNodes[nodekeys[g]];
@@ -1477,11 +1477,11 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                 this.nodes[Engine.application()].world.stepSimulation(1 / 20, 0, 1 / 20);
                 this.reEntry = true;
                 var tempmat = [];
-                var nodekeys = Object.keys(this.allNodes).sort();
-                for (var i = 0; i < nodekeys.length; i++)
+                var nodekeys2 = Object.keys(this.allNodes);
+                for (var i = 0; i < nodekeys2.length; i++)
                 {
-                    var node = this.allNodes[nodekeys[i]];
-                    // if(vwf.isSimulating(node.id))
+                    var node = this.allNodes[nodekeys2[i]];
+                    if(node)
                     {
                         if(node.ticked)
                             node.ticked();
@@ -1529,9 +1529,9 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
                 delete node.parent.children[nodeID];
                 node.parent = null;
                 node.deinitialize();
-                delete this.allNodes[nodeID];
                 node = null;
             }
+            delete this.allNodes[nodeID];
         },
         startSimulatingNode : function(nodeID)
         {
@@ -1563,7 +1563,7 @@ define(["module", "vwf/model", "vwf/configuration","vwf/model/ammo.js/ammo"], fu
             var IDs_to_enable = [];
             if (world) {
 
-                var nodekeys = Object.keys(this.allNodes).sort();
+                var nodekeys = Object.keys(this.allNodes);
                 for (var i in nodekeys) {
 
                     var node = this.allNodes[nodekeys[i]];

@@ -1764,6 +1764,14 @@ define(['progressScreen'], function()
                 {
                     Engine.stopSimulating(nodeID);
                 }
+
+                //remove the timing info for the properties
+                for(var i in this._propertySetTimes)
+                {
+                    if(i.indexOf(nodeID) == 0)
+                        delete this._propertySetTimes[i];
+                }
+
                 this.views.forEach(function(view)
                 {
                     view.deletedNode && view.deletedNode(nodeID);
