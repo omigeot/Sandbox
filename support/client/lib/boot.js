@@ -26,7 +26,7 @@ require.config({
         'vwf/model/threejs/helvetiker_regular.typeface.js': {
             deps: ["vwf/model/threejs"]
         },
-        'vwf/view/editorview/lib/html-palette.min':
+        'vwf/view/editorview/lib/html-palette':
         {
             deps: ['vwf/view/editorview/lib/angular'],
             exports:"HtmlPalette"
