@@ -220,7 +220,7 @@ function sandboxWorld(id, metadata)
     }
     this.setPropertyTime = function(id,prop,val)
     {
-        this.propertySetTimes[id+prop] = this.time();
+        this.propertySetTimes[id+prop] = val;
     }
     this.on = function(name, callback)
     {
@@ -706,7 +706,7 @@ function sandboxWorld(id, metadata)
     this.process_message_async = function(message, sendingclient, cb)
     {
         var internals = {};
-        message.time = this.time();
+        
         var self = this;
         this.process_message_internal(self, message, sendingclient, function(internals)
         {
@@ -814,7 +814,7 @@ function sandboxWorld(id, metadata)
             }
             if (message.action == "setProperty")
             {
-                if(message.time >= this.propertySetTime(message.node,message.memeber))
+                if(message.time >= this.propertySetTime(message.node,message.member))
                 {
                     this.setPropertyTime(message.node,message.member,message.time);
                     self.state.satProperty(message.node, message.member, message.parameters[0]);
@@ -959,7 +959,7 @@ function sandboxWorld(id, metadata)
                 {
                     self.messageClient(client, compressedMessage, false, false);   
                 }
-                else if (client == sendingclient && (message.action == "setProperty" || message.action == "dispatchEvent" || message.action == "callMethod" || message.action == "fireEvent"))
+                else if (client == sendingclient && ( message.action == "createChild" || message.action == "deleteNode" ||  message.action == "setProperty" || message.action == "dispatchEvent" || message.action == "callMethod" || message.action == "fireEvent"))
                 {
                 //    client has already processed own inputs - dont' send back to sender;
                 }
