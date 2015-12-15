@@ -418,7 +418,7 @@ function sandboxWorld(id, metadata)
                     "action": "tick",
                     "time": self.time(),
                 };
-                console.log(self.time());
+                
                 self.messageClients(self.time().toFixed(3), false, false, 't', true);
                 if(Object.keys(self.simulationStateUpdates) > 0)
                 {
@@ -1004,7 +1004,7 @@ function sandboxWorld(id, metadata)
             var avatar = this.state.getAvatarForClient(client.loginData.UID);
             if (avatar)
             {
-                var avatarDef = this.state.getNodeDefinition(avatar.id);
+                var avatarDef = this.state.getClientNodeDefinition(avatar.id);
                 client.updateAvatar(avatarDef);
             }
         }

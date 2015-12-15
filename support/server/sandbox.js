@@ -815,6 +815,8 @@ function startVWF() {
                 app.post("/adl/sandbox" + '/admin/:page([a-zA-Z]+)', Landing.handlePostRequest);
                 app.post("/adl/sandbox" + '/data/:action([a-zA-Z_]+)', Landing.handlePostRequest);
 
+                require('./admin').hookupRoutes(app);
+                
                 app.use(appserver.admin_instances);
                 app.use(appserver.routeToAPI);
                 //The file handleing logic for vwf engine files

@@ -8,6 +8,88 @@ var request = require('request');
 var extend = require("extend");
 var logger = require('./logger');
 var now = require("performance-now");
+
+function objectDiff(obj1, obj2, noRecurse, stringCompare)
+            {
+                var delta = {};
+                if (obj1 != obj2 && typeof obj1 == typeof obj2 && typeof obj1 == "number")
+                    return obj1
+                if (typeof obj1 !== typeof obj2)
+                    return obj1;
+                if (obj2 == null && obj1)
+                    return obj1
+                if (obj1 == null && obj2)
+                    return obj1;
+                if (obj2 == null && obj1 == null)
+                    return obj1;
+                if (stringCompare)
+                {
+                    if (JSON.stringify(obj1) !== JSON.stringify(obj2))
+                        return obj1;
+                }
+                if (obj1.constructor != obj2.constructor)
+                    return obj1;
+                if (obj1.constructor == String)
+                {
+                    if (obj1 == obj2)
+                        return undefined;
+                    else
+                        return obj1;
+                }
+                if (obj1.constructor == Array)
+                {
+                    var diff = false;
+                    var ret = obj1.slice(0);
+                    if (obj1.length !== obj2.length)
+                        return obj1;
+                    for (var i in obj1)
+                    {
+                        var ret2 = undefined;
+                        if (!noRecurse) //do the full walk
+                            ret2 = objectDiff(obj1[i], obj2[i], false, false)
+                        else
+                        {
+                            //do a simple compare
+                            ret2 = objectDiff(obj1[i], obj2[i], true, true)
+                        }
+                        if (ret2)
+                        {
+                            diff = true;
+                            ret[i] = ret2;
+                        }
+                    }
+                    if (diff)
+                        return ret;
+                }
+                for (var i in obj1)
+                {
+                    //don't deep compare properties - they are either changed or not, can't be patched
+                    if (i == 'properties')
+                    {
+                        var ret = objectDiff(obj1[i], obj2[i], true, false)
+                        if (ret)
+                            delta[i] = ret;
+                    }
+                    else if (obj2.hasOwnProperty(i))
+                    {
+                        var ret = undefined;
+                        if (!noRecurse) //do the full walk
+                            ret = objectDiff(obj1[i], obj2[i], false, false)
+                        else
+                            ret = objectDiff(obj1[i], obj2[i], true, true)
+                        if (ret)
+                            delta[i] = ret;
+                    }
+                    else
+                    {
+                        delta[i] = obj1[i];
+                    }
+                }
+                if (Object.keys(delta).length > 0)
+                    return delta;
+                return undefined;
+            }
+
 //change up the ID of the loaded scene so that they match what the client will have
 var fixIDs = function(node)
     {
@@ -123,6 +205,7 @@ var sandboxState = function(id, metadata, world)
     this.id = id;
     this.metadata = metadata;
     this.world = world;
+    this.nodes = {};
     if (!this.metadata.publishSettings)
     {
         this.metadata.publishSettings = {
@@ -152,7 +235,7 @@ var sandboxState = function(id, metadata, world)
         for (var i = 0; i < this.events[name].length; i++)
             this.events[name][i].apply(this, [e]);
     }
-    this.nodes = {};
+    
     this.setup = function(state)
     {
         this.nodes['index-vwf'] = {
@@ -169,7 +252,7 @@ var sandboxState = function(id, metadata, world)
             this.nodes['index-vwf'].children[childID].parent = this.nodes['index-vwf'];
         }
     }
-    this.continuesDefs = [];
+    this.continuesDefs = {};
     this.cleanChildNames = function(node, childID)
     {
         if (node.children)
@@ -455,27 +538,49 @@ var sandboxState = function(id, metadata, world)
             return;
         }
     }
-    this.getNodeDefinition = function(nodeID)
+    this.getClientNodeDefinition = function(nodeID)
     {
+        var self = this;
+
+        var removeParents = function(node)
+        {
+            delete node.parent;    
+            for (var i in node.children)
+            {
+                removeParents(node.children[i])
+            }
+        }
+
         var walk = function(node)
         {
             delete node.parent;
-            for (var i in node.children)
-            {
-                walk(node.children[i])
-            }
+           
             var childNames = {};
             for (var i in node.children)
             {
                 childNames[node.children[i].name] = node.children[i];
             }
             node.children = childNames;
+            var nodeID = node.id;
             delete node.id;
+
+            for (var i in node.children)
+            {
+                node.children[i] = walk(node.children[i],i)
+            }
+
+            if(node.continues)
+            {
+                console.log("diff on " + node.continues+nodeID)
+                node = objectDiff(node,self.continuesDefs[node.continues+nodeID],false,false);
+            }
+            return node;
         }
         var node = this.findNode(nodeID);
-        walk(node);
-        node = JSON.parse(JSON.stringify(node))
-        this.reattachParents(nodeID);
+        removeParents(node);
+        node = JSON.parse(JSON.stringify(node));
+        this.reattachParents(this.findNode(nodeID));
+        node = walk(node,nodeID);
         return node;
     }
     this.getAvatarForClient = function(userID)
