@@ -420,7 +420,7 @@ function sandboxWorld(id, metadata)
                 };
                 
                 self.messageClients(self.time().toFixed(3), false, false, 't', true);
-                if(Object.keys(self.simulationStateUpdates) > 0)
+                if(Object.keys(self.simulationStateUpdates).length > 0)
                 {
                     var simMessage = {
                         node: "index-vwf",

@@ -1281,6 +1281,11 @@ define(['progressScreen'], function()
             {
                 return this.realTime() - this.propertyTime(nodeID,propertyName);
             }
+            this.markAllPropsCurrent = function(nodeID,propertyName)
+            {
+                for(var i in this._propertySetTimes)
+                    this._propertySetTimes[i]= this.realTime();
+            }
             this.messageTime = function()
             {
                 if(!this.message)
