@@ -110,7 +110,10 @@ var AvatarCameraController = function()
             this.offset.x = this.offset.x * .97 + charspaceforward[0] * .03;
             this.offset.y = this.offset.y * .97 + charspaceforward[1] * .03;
         }
-        var avatar = _UserManager.GetAvatarForClientID(Engine.moniker()).transformAPI.getPosition();
+        var avatarNode = _UserManager.GetAvatarForClientID(Engine.moniker());
+        if(!avatarNode)
+            return;
+        var avatar = avatarNode.transformAPI.getPosition();
         var center = new THREE.Vector3(avatar[0], avatar[1], avatar[2] + 1.5);
         var pos = center.clone().add(this.offset.setLength(this.zoom));
         pos.z += this.totalz / 200 * this.zoom;
