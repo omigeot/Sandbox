@@ -1117,7 +1117,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             if (SelectedVWFNodes.length > 0 && !(this.findviewnode(SelectedVWFNodes[0].id)).parent) return;
 
 
-            if (this.waitingForSet.length > 0) return;
+            //if (this.waitingForSet.length > 0) return;
 
             if (!MoveGizmo || MoveGizmo == null) {
                 return;
@@ -1817,15 +1817,15 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             {
                 return true;
             }
-            this.waitingForSet.push(id);
+            //this.waitingForSet.push(id);
             var success = this.setProperty(id, 'transform', val);
-            if (!success) this.waitingForSet.pop();
+            //if (!success) this.waitingForSet.pop();
             if (!success) this.SetLocation(MoveGizmo, originalGizmoPos);
             return success;
         }
         this.setTranslation = function(id, val) {
             var success = this.setProperty(id, this.translationPropertyName, val);
-            if (success) this.waitingForSet.push(id);
+            //if (success) this.waitingForSet.push(id);
             if (!success) this.SetLocation(MoveGizmo, originalGizmoPos);
             return success;
         }

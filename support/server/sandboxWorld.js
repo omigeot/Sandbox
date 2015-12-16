@@ -222,6 +222,13 @@ function sandboxWorld(id, metadata)
     {
         this.propertySetTimes[id+prop] = val;
     }
+    this.markAllPropsCurrent = function()
+    {
+        var t = this.realTime();
+        for(var i in  this.propertySetTimes)
+             this.propertySetTimes[i] = t;
+        this.simulationStateUpdates = {}; 
+    }
     this.on = function(name, callback)
     {
         if (!this.events[name])
@@ -429,7 +436,7 @@ function sandboxWorld(id, metadata)
                         parameters: self.simulationStateUpdates,
                         time:self.time()
                     }
-                    self.messageClients(simMessage, false, false, 'm', true);
+                    self.messageClients(simMessage, true, false, 'm', false);
                 }
                 self.simulationStateUpdates = {};
                
@@ -820,7 +827,9 @@ function sandboxWorld(id, metadata)
                 if(message.time >= this.propertySetTime(message.node,message.member))
                 {
                     this.setPropertyTime(message.node,message.member,message.time);
-                    self.state.satProperty(message.node, message.member, message.parameters[0]);
+                    if(this.simulationStateUpdates[message.node])
+                        delete this.simulationStateUpdates[message.node][message.member];
+                    this.state.satProperty(message.node, message.member, message.parameters[0]);
                 }else
                 {
                     internals.doReflect = false;

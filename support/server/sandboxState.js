@@ -677,7 +677,7 @@ var sandboxState = function(id, metadata, world)
             //args[0][0] should be a vwf root node definition
             if (args[0][0])
             {
-                this.world.simulationStateUpdates = {};
+                
                 //note we have to JSON parse and stringify here to avoid creating a circular structure that cannot be reserialized 
                 this.nodes['index-vwf'] = JSON.parse(JSON.stringify(args[0][0]));
                 //here, we need to hook back up the .parent property, so we can walk the graph for other operations.
@@ -685,6 +685,7 @@ var sandboxState = function(id, metadata, world)
                 var self = this;
                 internals.then = function(){
                     self.world.simulationManager.distributeAll();
+                    self.world.markAllPropsCurrent();
                 }
                 
 

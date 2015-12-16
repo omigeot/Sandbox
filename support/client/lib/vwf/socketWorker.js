@@ -26,7 +26,7 @@ var EngineProxy = {
 	time : 0,
 	generateTick : function()
     {
-    	this.time += .05;
+    	//this.time += .05;
         var fields = {
             time: this.time,
             action: "tick",

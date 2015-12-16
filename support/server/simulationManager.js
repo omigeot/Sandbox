@@ -254,6 +254,7 @@ var simulationManager = function(world)
     this.updateClientControlTable = function(nodeid, sendingClient)
     {
         if (nodeid == "index-vwf") return;
+        return;
         while (this.world.state.parent(nodeid) && this.world.state.parent(nodeid) !== "index-vwf")
             nodeid = this.world.state.parent(nodeid);
         var record = this.clientControlTable[nodeid];

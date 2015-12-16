@@ -1283,8 +1283,9 @@ define(['progressScreen'], function()
             }
             this.markAllPropsCurrent = function(nodeID,propertyName)
             {
+                var t = this.realTime() + 1;
                 for(var i in this._propertySetTimes)
-                    this._propertySetTimes[i]= this.realTime();
+                    this._propertySetTimes[i]= t;
             }
             this.messageTime = function()
             {
@@ -1319,7 +1320,8 @@ define(['progressScreen'], function()
                 {
                     this.message = fields;
                     // Advance the time.
-                    if (this.now < fields.time)
+                    document.title = this.realTime();
+                    if (this.now < fields.time && fields.action == "tick")
                     {
                         this.now = fields.time;
                         this._lastRealTime = performance.now();
@@ -5592,7 +5594,7 @@ define(['progressScreen'], function()
                 /// @returns {Object|undefined} The next message if available, otherwise undefined.
                 pull: function()
                 {
-                    if (this.suspension == 0 && this.queue.length > 0 && this.queue[0].time <= this.time)
+                    if (this.suspension == 0 && this.queue.length > 0 )
                     {
                         return this.queue.shift();
                     }
