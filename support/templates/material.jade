@@ -34,7 +34,7 @@ block content
 						label Linked to base
 							input(type='checkbox', ng-model='ambientLinked', ng-disabled='!materialDef')
 						//color-picker(color-obj='materialDef.ambient', disabled='!materialDef', ng-hide='ambientLinked', sliding='suppressUndo')
-						html-palette(ng-hide='ambientLinked', color-profile='rgba', throttle-apply='100', color='materialDef.ambient', disabled='!materialDef', popup-edge='w', update-trigger-bg=true, radial='true', css='toplevel')
+						html-palette(ng-hide='ambientLinked', color-profile='rgb', throttle-apply='100', color='materialDef.ambient', disabled='!materialDef', popup-edge='w', update-trigger-bg=true, radial='true', css='toplevel')
 
 				label Shininess:
 					br
@@ -50,7 +50,7 @@ block content
 
 				label.inline Emissive color:
 					//color-picker(color-obj='materialDef.emit', disabled='!materialDef', sliding='suppressUndo')
-					html-palette(color='materialDef.emit', color-profile='rgba', throttle-apply='100', disabled='!materialDef', popup-edge='w', update-trigger-bg=true, radial='true', css='toplevel')
+					html-palette(color='materialDef.emit', color-profile='rgb', throttle-apply='100', disabled='!materialDef', popup-edge='w', update-trigger-bg=true, radial='true', css='toplevel')
 
 				label Skybox factor:
 					br
