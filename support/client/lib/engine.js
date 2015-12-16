@@ -3476,7 +3476,10 @@ define(['progressScreen'], function()
                 {
                     delete entrants.assignments;
                 }
-                this.propertyUpdated(nodeID, propertyName, propertyValue);
+                //external setProperty events should not color the sent prop as updated, because all clients will have received
+                //the message
+                if(!this.message || (this.message.action != 'setProperty' && this.message.member != propertyName)) 
+                    this.propertyUpdated(nodeID, propertyName, propertyValue);
                 this.logger.debugu();
                 Engine._propertySetTimes[nodeID + propertyName] = Engine.messageTime();
                 return propertyValue;

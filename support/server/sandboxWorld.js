@@ -827,8 +827,8 @@ function sandboxWorld(id, metadata)
                 if(message.time >= this.propertySetTime(message.node,message.member))
                 {
                     this.setPropertyTime(message.node,message.member,message.time);
-                    if(this.simulationStateUpdates[message.node])
-                        delete this.simulationStateUpdates[message.node][message.member];
+                   // if(this.simulationStateUpdates[message.node])
+                   //     delete this.simulationStateUpdates[message.node][message.member];
                     this.state.satProperty(message.node, message.member, message.parameters[0]);
                 }else
                 {
