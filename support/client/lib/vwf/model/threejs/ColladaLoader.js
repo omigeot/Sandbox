@@ -1,3 +1,4 @@
+
 /**
  * @author Tim Knip / http://www.floorplanner.com/ / tim at floorplanner.com
  */
@@ -663,7 +664,7 @@ THREE.ColladaLoader = function() {
         var bones = [];
         setupSkeleton(skeleton, bones, -1);
         setupSkinningMatrices(bones, skinController.skin);
-        v = new THREE.Vector3();
+        var v = new THREE.Vector3();
         var skinned = [];
 
         for (var i = 0; i < geometry.vertices.length; i++) {
@@ -1239,9 +1240,7 @@ THREE.ColladaLoader = function() {
         obj.name = node.name || node.id || "";
         obj.matrix = node.matrix;
 
-        obj.position = new THREE.Vector3();
-        obj.quaternion = new THREE.Quaternion();
-        obj.scale = new THREE.Vector3();
+        obj.position.set(0,0,0);
 
         var props = node.matrix.decompose(obj.position, obj.quaternion, obj.scale);
 

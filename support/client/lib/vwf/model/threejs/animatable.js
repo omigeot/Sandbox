@@ -50,7 +50,7 @@
                 {
                     if(!skins[i].animationHandle.cache)
                         skins[i].animationHandle.cache = [];
-                    for(var j in skins[i].animationHandle.hierarchy)
+                    for(var j =0; j< skins[i].animationHandle.hierarchy.length; j++)
                     {
                         var o  = skins[i].animationHandle.hierarchy[j];
                        
@@ -133,48 +133,26 @@
                 var mod = propertyValue - frame;
                 if (frame < 0) return;
 
-                if (frame === null) return;
-
-                /* let's stop treating morphs as animation. That is an artifact of three.js limitations from 2 years ago
-                if (skins[i].morphTargetInfluences) {
-                    for (var j = 0; j < skins[i].morphTargetInfluences.length; j++) {
-
-                        skins[i].morphTargetInfluences[j] = 0;
-
-
-                    }
-
-                    if (frame == this.animationEnd)
-                        mod = 0;
-
-                    skins[i].morphTargetInfluences[frame] = 1.0 - mod;
-                    if (frame < (this.animationEnd || this.gettingProperty('animationLength')) - 1)
-                        skins[i].morphTargetInfluences[frame + 1] = mod;
-
-                }*/
+                if (frame === null) return;    
+              
                 if (skins[i].animationHandle) {
                    
                     skins[i].animationHandle.setKey(this.animationFrame,this.animationFPS);
-                  
-                    skins[i].updateMatrixWorld();
-                    
-                    //odd, does not seem to update matrix on first child bone. 
-                    //how does the bone relate to the skeleton?
-
-                    //this is no longer necessary in threejs r68
-                    //for (var j = 0; j < skins[i].children.length; j++) {
-                    //  skins[i].children[j].updateMatrixWorld(true);
+                
+                    //for(var j = 0; j<skins[i].skeleton.bones.length; j++)
+                    //{
+                     //   if(skins[i].skeleton.bones[j].parent == skins[i])
+                      //      skins[i].skeleton.bones[j].updateMatrixWorld(true);
                     //}
-                   
+                    skins[i].updateMatrixWorld(true);
+
                     if (updateSceneManager) {
                         var allMeshes = getAllDrawables(skins[i]);
                         for (var k = 0; k < allMeshes.length; k++)
                             _SceneManager.setDirty(allMeshes[k]);
                     }
-
                 }
             }
-
         }
         this.settingProperty = function(propertyName, propertyValue) {
             if (propertyName == 'animationFrame') {
@@ -257,7 +235,7 @@
 
                 }
 
-                vwf.setProperty(this.ID, 'animationFrame', nextframe);
+                Engine.setProperty(this.ID, 'animationFrame', nextframe);
             }
 
         }

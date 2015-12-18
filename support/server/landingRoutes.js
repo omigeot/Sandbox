@@ -60,7 +60,7 @@ function getRoot() {
 
 }
 
-exports.acceptedRoutes = ['about', 'features', 'demos', 'createNotLoggedIn', 'home', 'tools', 'performancetest', 'examples', 'settings', 'restore', 'createNew', 'welcome', 'search', 'forgotPassword', 'editProfile', 'updatePassword', 'test', 'avatar', 'sandbox', 'index', 'create', 'signup', 'login', 'logout', 'edit', 'remove', 'history', 'user', 'worlds', 'admin', 'admin/users', 'admin/worlds', 'admin/edit', 'publish'];
+exports.acceptedRoutes = ['about', 'features', 'demos', 'createNotLoggedIn', 'home', 'tools', 'performancetestJavascript', 'performancetestGraphics', 'examples', 'settings', 'restore', 'createNew', 'welcome', 'search', 'forgotPassword', 'editProfile', 'updatePassword', 'test', 'avatar', 'sandbox', 'index', 'create', 'signup', 'login', 'logout', 'edit', 'remove', 'history', 'user', 'worlds', 'admin', 'admin/users', 'admin/worlds', 'admin/edit', 'publish'];
 routesMap = {
     'sandbox': {
         template: 'index'
@@ -71,7 +71,10 @@ routesMap = {
     'tools': {
         layout: 'plain'
     },
-    'performancetest': {
+    'performancetestJavascript': {
+        layout: 'plain'
+    },
+    'performancetestGraphics': {
         layout: 'plain'
     },
     'examples': {
@@ -139,7 +142,8 @@ routesMap = {
     },
     'avatar': {
         avatar: true,
-        requiresLogin: true
+        requiresLogin: true,
+		layout: 'plain'
     },
     'create': {
         requiresLogin: true
@@ -443,7 +447,17 @@ function prettyDate(time) {
 exports.world = function(req, res, next) {
 
     sessions.GetSessionData(req, function(sessionData) {
-        DAL.getInstance("/adl/sandbox".replace(/\//g, "_") + "_" + req.params.page + "_", function(doc) {
+
+        //account for either supplying only the 16 digit code, or the full database key
+        //also account for appPath if full key provided
+        var worldID = req.params.page;
+        if(worldID.indexOf(global.configuration.appPath.replace(/\//g,"_")) == -1)
+        {
+            worldID = "_adl_sandbox_"+ worldID + "_";
+        }
+        worldID = worldID.replace(global.configuration.appPath.replace(/\//g,"_"),"_adl_sandbox")
+        console.log(worldID);
+        DAL.getInstance(worldID, function(doc) {
             if (!doc) {
                 res.locals = {
                     sessionData: sessionData,
@@ -705,8 +719,8 @@ exports.createNew2 = function(req, res, next) {
             logger.debug(worlddata);
             if (!worlddata) {
                 require('./examples.js').getExampleMetadata(normalizedSID, function(data) {
-                    worlddata = data;
-                    if (worlddata) postWorldData();
+                    worlddata = data || {title:"",description:"",isExample:true,publishSettings:{allowAnonymous:true,persistence:false,allowTools:true,createAvatar:true,singlePlayer:true}};
+                    postWorldData();
                 });
             } else
                 postWorldData();
@@ -721,22 +735,18 @@ var self = exports;
 var cachedVWFCore = null;
 exports.getVWFCore = function() {
     if (!cachedVWFCore) {
-        cachedVWFCore = fs.readFileSync('./support/client/lib/vwf.js', 'utf8');
-        if (global.configuration.host && global.configuration.loadBalancer) //if the config contains an address for a load balancer, have the client
+        cachedVWFCore = fs.readFileSync('./support/client/lib/engine.js', 'utf8');
+        if (global.configuration.host && global.configuration.loadBalancerAddress) //if the config contains an address for a load balancer, have the client
         //look up what host to use
         {
-            cachedVWFCore = cachedVWFCore.replace('{{host}}', "this.getInstanceHost()");
-            cachedVWFCore = cachedVWFCore.replace('{{loadBalancerAddress}}', "'" + global.configuration.loadBalancer + "'");
-        } else if (global.configuration.host) //if there is no load balancer, the host is this host from the config. Note this is necessary since the CDN might
+            logger.warn("Using load balancer at " + global.configuration.loadBalancerAddress);
+            logger.warn("This host is " + global.configuration.host);
+            cachedVWFCore = cachedVWFCore.replace(/'\{\{loadBalancerAddress\}\}'/g, "'" + global.configuration.loadBalancerAddress + "'");
+        } else //if there is no load balancer, the host is this host from the config. Note this is necessary since the CDN might
         //not have our "real" hostname as the dns name, and might not proxy sockets
         {
-            cachedVWFCore = cachedVWFCore.replace('{{host}}', "'" + global.configuration.host + "'");
-            cachedVWFCore = cachedVWFCore.replace('{{loadBalancerAddress}}', "'" + global.configuration.loadBalancer + "'"); //otherwise, script syntax is invalid
-        } else {
-            //otherwise, this is a single, simple server. Look up the host from the url.
-            cachedVWFCore = cachedVWFCore.replace('{{host}}', "window.location.protocol +'//'+ window.location.host");
-            cachedVWFCore = cachedVWFCore.replace('{{loadBalancerAddress}}', "'" + global.configuration.loadBalancer + "'"); //otherwise, script syntax is invalid
-        }
+            cachedVWFCore = cachedVWFCore.replace(/'\{\{loadBalancerAddress\}\}'/g, "'undefined'"); //otherwise, script syntax is invalid
+        } 
     }
     return cachedVWFCore;
 

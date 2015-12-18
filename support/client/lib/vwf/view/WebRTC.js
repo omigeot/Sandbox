@@ -51,7 +51,7 @@ define(["module", "vwf/view", "vwf/view/rtcObject"], function(module, view, RTCO
 				$('#vidFrame' + otherClientID + ' video').attr('src', window.appPath + 'vwf/view/webrtc/avatar.png');
 				var payload = {
 					target: this.rtc[originalID].rtcTarget,
-					sender: vwf.moniker()
+					sender: Engine.moniker()
 				};
 				vwf_view.kernel.callMethod('index-vwf', 'rtcDisconnect', payload);
 				this.rtc[originalID].rtcTarget = null;
@@ -136,7 +136,10 @@ define(["module", "vwf/view", "vwf/view/rtcObject"], function(module, view, RTCO
 				this.rtc[params.target] = new RTCObject(
 					$('#vidFrame'+ToSafeID(params.target)+' video#self')[0],
 					$('#vidFrame'+ToSafeID(params.target)+' video#remote')[0],
-					this.send, null
+					this.send, null,
+					function(status){
+						$('#vidFrame'+ToSafeID(params.target)+' #connectionStatus').text( status.text ).css( 'color', status.color );
+					}
 				);
 
 				this.rtc[params.target].rtcTarget = params.target;
@@ -146,33 +149,36 @@ define(["module", "vwf/view", "vwf/view/rtcObject"], function(module, view, RTCO
 				};
 				var typeWord = this.rtc[params.target].mode.video ? 'Video' : 'Voice';
 				//	$('#vidFrame').dialog('option', 'title', typeWord+' chat with '+this.rtcTarget);
-				$('#vidFrame #messagePanel').css('z-index', -1);
+				$('#vidFrame'+ToSafeID(params.target)+' #messagePanel').css('z-index', -1);
 				//	$('#vidFrame').dialog('open');
 				
 
 				this.rtc[params.target].initialize(this.rtc[params.target].mode);
 			} else if (name == 'rtcData') {
 
-				if (vwf.moniker() == params.target) {
+				if (Engine.moniker() == params.target) {
 					//if (this.rtcTarget == null)
 					//	this.rtcTarget = params.sender;
 
 					if (!this.rtc[params.sender]) {
 
 						console.log('Unexpected RTC call, prompting to accept');
-						var clients = vwf.getProperty(vwf.application(), 'clients');
+						var clients = Engine.getProperty(Engine.application(), 'clients');
 						alertify.confirm(clients[params.sender].name + ' would like to call you. Accept?', function(ok) {
 
 							if (ok) {
 
 								
 								console.log('Call accepted');
-								$('#vidFrame #messagePanel').css('z-index', -1);
+								$('#vidFrame'+ToSafeID(params.sender)+' #messagePanel').css('z-index', -1);
 								this.createVidFrame(params.sender);
 								this.rtc[params.sender] = new RTCObject(
 									$('#vidFrame'+ToSafeID(params.sender)+' video#self')[0],
 									$('#vidFrame'+ToSafeID(params.sender)+' video#remote')[0],
-									this.send, null
+									this.send, null,
+									function(status){
+										$('#vidFrame'+ToSafeID(params.sender)+' #connectionStatus').text( status.text ).css( 'color', status.color );
+									}
 								);
 								this.rtc[params.sender].rtcTarget = params.sender;
 
@@ -180,7 +186,7 @@ define(["module", "vwf/view", "vwf/view/rtcObject"], function(module, view, RTCO
 								this.rtc[params.sender].mode = {audio: params.rtcData.mediaDescription.audio, video: !!params.rtcData.mediaDescription.video};
 								var typeWord = params.rtcData.mediaDescription.video ? 'Video' : 'Voice';
 								//	$('#vidFrame').dialog('option', 'title', typeWord+' chat with '+this.rtcTarget);
-								$('#vidFrame #messagePanel').css('z-index', 1);
+								$('#vidFrame'+ToSafeID(params.sender)+' #messagePanel').css('z-index', 1);
 								//	$('#vidFrame #message').html('Incoming '+typeWord.toLowerCase()+' call from '+this.rtcTarget);
 								//	$('#vidFrame').dialog('open');
 
@@ -190,7 +196,8 @@ define(["module", "vwf/view", "vwf/view/rtcObject"], function(module, view, RTCO
 								$('#vidFrame' + ToSafeID(params.sender)).show();
 							} else {
 								console.log('Call rejected');
-								$('#videoClose').click();
+								$('#vidFrame'+ToSafeID(params.sender)+' #videoClose').click();
+								vwf_view.kernel.callMethod('index-vwf', 'rtcDisconnect', {target: params.sender, sender: Engine.moniker()});
 							}
 
 						}.bind(this));
@@ -201,7 +208,7 @@ define(["module", "vwf/view", "vwf/view/rtcObject"], function(module, view, RTCO
 					}
 				}
 			} else if (name == 'rtcDisconnect') {
-				if (vwf.moniker() == params.target) {
+				if (Engine.moniker() == params.target) {
 					console.log('Remote disconnect, clean up');
 					//	$('#vidFrame').dialog("close");
 					$('#vidFrame' + ToSafeID(params.sender)).hide();
@@ -227,7 +234,7 @@ define(["module", "vwf/view", "vwf/view/rtcObject"], function(module, view, RTCO
 			var payload = {};
 			payload.rtcData = data;
 			payload.target = this.rtcTarget;
-			payload.sender = vwf.moniker();
+			payload.sender = Engine.moniker();
 			vwf_view.kernel.callMethod('index-vwf', 'rtcData', payload); //send
 		}
 

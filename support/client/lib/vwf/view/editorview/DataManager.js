@@ -149,24 +149,27 @@ define(function ()
 			}
 			return object;
 		}
-		this.GetNode = function (id)
+		this.callGetters = function(node)
 		{
-
-			var node = _Editor.getNode(id);
 			if (node.properties)
 			{
 				for (var i in node.properties)
 				{
-					node.properties[i] = vwf.getProperty(id, i);
+					node.properties[i] = vwf.getProperty(node.id, i);
 				}
 			}
 			if (node.children)
 			{
 				for (var i in node.children)
 				{
-					node.children[i] = this.GetNode(node.children[i].id);
+					this.callGetters(node.children[i])
 				}
 			}
+		}
+		this.GetNode = function (id)
+		{
+			var node = _Editor.getNode(id);
+			this.callGetters(node);
 			return node;
 		}
 		this.compareNode = function (node1, node2)
@@ -175,12 +178,12 @@ define(function ()
 		this.getCleanNodePrototype = function (id)
 		{
 			if (typeof id === "string") return this.DeleteIDs(this.fixExtendsAndArrays(this.GetNode(id)));
-			else return this.DeleteIDs(this.fixExtendsAndArrays(id));
+			else return this.DeleteIDs(this.fixExtendsAndArrays(JSON.parse(JSON.stringify(id))));
 		}
 		this.getSaveNodePrototype = function (id)
 		{
 			if (typeof id === "string") return this.DeleteIDs(this.fixExtendsAndArrays(this.GetNode(id)),true);
-			else return this.DeleteIDs(this.fixExtendsAndArrays(id),true);
+			else return this.DeleteIDs(this.fixExtendsAndArrays(JSON.parse(JSON.stringify(id))),true);
 		}
 		this.getSaveStateData = function()
 		{
@@ -190,7 +193,7 @@ define(function ()
 			{
 				var node = this.getSaveNodePrototype(scene.children[i].id);
 				if (node.extends != "character.vwf" && node.extends != 'http://vwf.example.com/camera.vwf') nodes.push(node);
-				if (node.extends == "character.vwf" && node.properties.ownerClientID == null) nodes.push(node);
+				
 			}
 			
 			//note: we only save the scene properteis, so that users cannot overwrite parts of the 

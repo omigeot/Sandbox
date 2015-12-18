@@ -4,6 +4,9 @@ require.config({
         "vwf": "../vwf"
     },
     shim: {
+		'vwf/view/editorview/lib/angular-resource': {
+			deps: ['vwf/view/editorview/lib/angular']
+		},
         'vwf/view/xapi/xapiwrapper': {
             deps: ['vwf/view/editorview/sha256', "vwf/view/editorview/_3DRIntegration"],
             exports: 'XAPIWrapper'
@@ -22,8 +25,12 @@ require.config({
         },
         'vwf/model/threejs/helvetiker_regular.typeface.js': {
             deps: ["vwf/model/threejs"]
+        },
+        'vwf/view/editorview/lib/html-palette':
+        {
+            deps: ['vwf/view/editorview/lib/angular'],
+            exports:"HtmlPalette"
         }
-
     },
     waitSeconds: 15
 });
@@ -36,20 +43,22 @@ define([
     // simulation to a WebGL scene manager.
     "vwf/kernel/model",
     "vwf/model/javascript",
-    "vwf/model/jiglib",
+    "ohm",
+    
     "vwf/model/threejs",
-    "vwf/model/scenejs",
+    
     "vwf/model/wires",
     "vwf/model/object",
     "vwf/model/stage/log",
     "vwf/kernel/view",
     "vwf/view/document",
+    'vwf/view/editorview/lib/angular',
     "vwf/view/EditorView",
     "vwf/view/threejs",
-    "vwf/view/googleEarth",
+   
     "vwf/utility",
     "vwf/view/WebRTC",
-    "vwf/view/audio",
+    "vwf/model/audio",
     "messageCompress",
     "vwf/view/xapi",
     "assetLoader",
@@ -76,11 +85,7 @@ define([
         // With the scripts loaded, we must initialize the framework. vwf.initialize()
         // accepts three parameters: a world specification, model configuration parameters,
         // and view configuration parameters.
-        $(document.body).append('<div id="glyphOverlay" style="display:none"/>');
-        
-        
-
-        assetLoader.load(stateData, function() {
+        assetLoader.loadList(stateData, function() {
             vwf.loadConfiguration(null, {
                 model: [],
                 view: []

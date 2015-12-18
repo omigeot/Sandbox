@@ -3,12 +3,10 @@ var outArr = [];
 module.exports = function(){ return outArr; };
 
 var tests = [
-	{ title: "Import unoptimized Collada without animation", model: "gameboard.DAE", base: globalBase + "examples/collada/"},
-	{ title: "Import optimized Collada without animation", model: "gameboard.DAE", base: globalBase + "examples/collada/"},
-	{ title: "Import unoptimized Collada with animation", model: "usmale.dae", animation: true,  i: 0},
-	{ title: "Import optimized Collada with animation", model: "usmale.dae", animation: true,    i: 1},
-	{ title: "Import 3DR JSON file", model: "house2.json", base: globalBase + "examples/3drjson/",     i: 2},
-	{ title: "Import glTF JSON file", model: "monster.json", base: globalBase + "examples/gltfAsset/", i: 3, animation: true}
+	{ title: "Import Collada without animation", model: "gameboard.DAE", base: globalBase + "examples/collada/"},
+	{ title: "Import Collada with animation", model: "usmale.dae", animation: true, i: 0},
+	{ title: "Import 3DR JSON file", model: "house2.json", base: globalBase + "examples/3drjson/", i: 1},
+	{ title: "Import glTF JSON file", model: "monster.json", base: globalBase + "examples/gltfAsset/", i: 2, animation: true}
 ];
 		
 for(var i = 0; i < tests.length; i++){
@@ -17,13 +15,13 @@ for(var i = 0; i < tests.length; i++){
 		test: 
 			function(i){
 				return function(browser, finished){
-					runAssetTest(browser, finished, tests[i]);
+					runTest(browser, finished, tests[i]);
 				}
 			}(i)
 	});
 }
 
-function runAssetTest(browser, finished, test){
+function runTest(browser, finished, test){
 	global.browser = browser;
 	var testUtils = global.testUtils;
 	var outStr = "";
@@ -32,8 +30,8 @@ function runAssetTest(browser, finished, test){
 	
 	browser.loadBlankScene();
 
-	//do not run nonexistent test when loading glTF JSON (tests[3])
-	if(i != 3){
+	//do not run nonexistent test when loading glTF JSON
+	if(i != 2){
 		loadModel("this_shouldnt_exist", test.base)
 			.pause(1000)
 			.hasViewNode("this_shouldnt_exist", function(err, exists){
@@ -47,14 +45,18 @@ function runAssetTest(browser, finished, test){
 			})
 			.click("#alertify-ok");
 	}
+	else{
+		outStr += "WARNING: glTF JSON loading does NOT test importing nonexistent files; ";
+	}
 		
-	loadModel(test.model, test.base)		
+	loadModel(test.model, test.base)	
 		.pause(6000).then(function() {
 			testUtils.assertNodeExists(test.model, function(assertStatus, msg){
 				passed = passed && !!assertStatus;
 				outStr += msg + "; ";
 			});
 		})
+		.pause(2000)
 		.getProperty(test.model, "animationLength", function(err, obj){
 			var length = obj.value;
 			
@@ -71,12 +73,13 @@ function runAssetTest(browser, finished, test){
 			passed = passed && exists;
 			outStr += test.model + ": " + exists + ", expected: true; ";
 			console.log('test finished');
+			
 			finished(passed, outStr);
 		});
 		
 	function loadModel(modelName, base){
 		return browser.nextGUID(modelName)
-			.click("#MenuCreate")
+			.click("#MenuAssets")
 			.pause(500)
 			
 			.click("#MenuCreateLoadMeshURL")

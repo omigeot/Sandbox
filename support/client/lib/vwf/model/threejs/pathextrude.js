@@ -6,6 +6,8 @@
         this.hideLine = false;
         this.axis = 'Z';
         this.pathPoints = [];
+        this.outputType = "Primitive";
+        this.inputType = "Spline";
         this.updateSelf = function() {
 
             if (this.mymesh && this.mymesh.parent)
@@ -74,7 +76,7 @@
         this.setPathPoints = function(id)
         {
         	try{
-        		this.pathPoints = vwf.callMethod(id,'getPoints');
+        		this.pathPoints = Engine.callMethod(id,'getPoints');
         	}catch(e)
         	{
         		return;

@@ -1,0 +1,24 @@
+mixin sidepanel_head
+	link(rel='stylesheet', type='text/css', href='vwf/view/editorview/css/palette.css')
+
+mixin sidepanel_body
+
+	#sidepanel(ng-controller='SidePanelController')
+		#sidetab(ng-click='isPanelOpen() ? hidePanel() : showPanel()') Editors
+
+		.main
+			include ./hierarchy
+
+			// hierarchy
+			include ./primitive
+			// material
+
+			// properties
+			include ./material
+
+			// physics
+			// players
+
+			// paintertool
+			// splinetool
+			// terraintool

@@ -8,9 +8,9 @@
 
  function findviewnode(id)
  {
-     for (var i = 0; i < vwf.views.length; i++)
+     for (var i = 0; i < Engine.views.length; i++)
      {
-         if (vwf.views[i].state && vwf.views[i].state.nodes && vwf.views[i].state.nodes[id] && vwf.views[i].state.nodes[id].threeObject) return vwf.views[i].state.nodes[id].threeObject;
+         if (Engine.views[i].state && Engine.views[i].state.nodes && Engine.views[i].state.nodes[id] && Engine.views[i].state.nodes[id].threeObject) return Engine.views[i].state.nodes[id].threeObject;
      }
      return null;
  }
@@ -152,7 +152,7 @@
          }
          this.objectFollowed = value;
          //if(this.objectFollowed)
-         //this.oldRotZ = vwf.getProperty(this.objectFollowed.id,'rotZ');
+         //this.oldRotZ = Engine.getProperty(this.objectFollowed.id,'rotZ');
      }
      this.targetUpdated = function(obj)
      {
@@ -348,11 +348,11 @@
      {
          var campos = [this.camera.position.x, this.camera.position.y, this.camera.position.z];
          var ray = this.GetWorldPickRay(parms);
-         vwf.callMethod(vwf.application(), 'getGroundPlane', []).PickPriority = 0;
+         Engine.callMethod(Engine.application(), 'getGroundPlane', []).PickPriority = 0;
          var oldintersectxy = _Editor.ThreeJSPick(campos, ray, this.PickOptions);
          if (!oldintersectxy) return; //this is just better. 
          oldintersectxy = oldintersectxy ? oldintersectxy.point : [0, 0, 0];
-         vwf.callMethod(vwf.application(), 'getGroundPlane', []).PickPriority = -1;
+         Engine.callMethod(Engine.application(), 'getGroundPlane', []).PickPriority = -1;
          var dxy2 = this.intersectLinePlane(ray, campos, [0, 0, 0], [0, 0, 1]);
          var oldintersectxy2 = MATH.addVec3(campos, MATH.scaleVec3(ray, dxy2));
          if (oldintersectxy2[2] > oldintersectxy[2]) oldintersectxy = oldintersectxy2;
@@ -535,31 +535,19 @@
          }
          if ((this.cameramode == 'Orbit' || this.cameramode == 'Free') && this.middledown == true)
          {
-             var screenmousepos = [(parms.clientX - this.rel_x * 1000) / window.screen.width, (parms.clientY - this.rel_y * 1000) / window.screen.height, 0, 1];
-             screenmousepos[0] *= 2;
-             screenmousepos[1] *= 2;
-             screenmousepos[0] -= 1;
-             screenmousepos[1] -= 1;
-             screenmousepos[1] *= -1;
-             var worldmousepos = MATH.mulMat4Vec4(MATH.inverseMat4(getViewProjection(this.camera)), screenmousepos);
-             worldmousepos[0] /= worldmousepos[3];
-             worldmousepos[1] /= worldmousepos[3];
-             worldmousepos[2] /= worldmousepos[3];
-             screenmousepos = [this.last_x, this.last_y, 0, 1];
-             screenmousepos[0] *= 2;
-             screenmousepos[1] *= 2;
-             screenmousepos[0] -= 1;
-             screenmousepos[1] -= 1;
-             screenmousepos[1] *= -1;
-             var worldmousepos2 = MATH.mulMat4Vec4(MATH.inverseMat4(getViewProjection(this.camera)), screenmousepos);
-             worldmousepos2[0] /= worldmousepos2[3];
-             worldmousepos2[1] /= worldmousepos2[3];
-             worldmousepos2[2] /= worldmousepos2[3];
-             var panfactor = 10;
+            
+
+             var up = [this.camera.matrixWorldInverse.elements[0],this.camera.matrixWorldInverse.elements[4],this.camera.matrixWorldInverse.elements[8]];
+             var side = [this.camera.matrixWorldInverse.elements[1],this.camera.matrixWorldInverse.elements[5],this.camera.matrixWorldInverse.elements[9]];
+
+             var move = MATH.addVec3(MATH.scaleVec3(up,this.rel_x),MATH.scaleVec3(side,-this.rel_y));
+
+
+             var panfactor = 1;
              if (this.cameramode == 'Free')
                  panfactor = 50;
              ////console.log(this.zoom);
-             this.center = MATH.addVec3(this.center, MATH.scaleVec3(MATH.subVec3(worldmousepos2, worldmousepos), panfactor * this.zoom));
+             this.center = MATH.addVec3(this.center, MATH.scaleVec3(move, panfactor * this.zoom));
          }
          if (this.cameramode == 'Navigate' && this.middledown == true)
          {
@@ -775,6 +763,8 @@
              // headPos.applyQuaternion(q);
              this.camera.position.add(headPos);
          }
+         this.camera.near = .01 + this.zoom/500;
+         this.camera.updateProjectionMatrix();
          this.camera.updateMatrixWorld();
          this.camera.updateMatrix();
      }
@@ -803,13 +793,15 @@
          this.center = point;
          this.objectFollowed = null;
      }
-     this.ReprojectCameraCenter = function()
+     this.ReprojectCameraCenter = function(dist)
      {
+        if(!dist)
+            dist = .4;
          var campos = [this.camera.position.x, this.camera.position.y, this.camera.position.z];
          var worldmousepos = this.GetCameraCenterRay();
-         worldmousepos = MATH.scaleVec3(worldmousepos, .4);
+         worldmousepos = MATH.scaleVec3(worldmousepos, dist);
          this.center = MATH.addVec3(worldmousepos, campos);
-         this.zoom = .4;
+         this.zoom = dist;
      }
      this.GetCameraCenterRay = function()
      {
@@ -887,6 +879,23 @@
              this.camera.position.copy(center);
          }
          this.updateCamera();
+     }
+     //zoom the camera to orbit around a given THREE.js node
+     this.zoomToThreeNode = function(node)
+     {
+        var box = node.GetBoundingBox();
+       
+        var center = [(box.max[0] + box.min[0])/2,
+        (box.max[1] + box.min[1])/2,
+        (box.max[2] + box.min[2])/2,]
+
+        if (box && box.max.indexOf(-Infinity) == -1 && box.min.indexOf(Infinity) == -1)
+            var dist = Math.max(box.max[0] - box.min[0], box.max[1] - box.min[1], box.max[2] - box.min[2]) + 2;
+        else
+            dist = 3;
+
+        this.orbitPoint(center);
+        this.zoom = dist;  
      }
  }
  define([],function()

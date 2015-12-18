@@ -2,8 +2,9 @@
 		function line(childID, childSource, childName)
 		{
 			
+			this.outputType = "Spline";
+        	this.inputType = null;
 			
-			this.EditorData = {};
 			
 			this.inherits = ['vwf/model/threejs/spline.js'];
 			//the node constructor
@@ -24,7 +25,7 @@
 			this.initializingNode = function()
 			{
 				
-				vwf.setProperty(this.ID,'points',this.points);
+				Engine.setProperty(this.ID,'points',this.points);
 				this.dirtyStack(true);
 			}
 			this.gettingProperty = function(propertyName)
@@ -36,7 +37,7 @@
 				}
 				if(propertyName == 'type')
 				{	
-					return 'Line';
+					return 'Spline';
 				}				
 				if(propertyName == 'EditorData')
 				{

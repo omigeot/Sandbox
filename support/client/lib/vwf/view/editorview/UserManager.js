@@ -13,7 +13,8 @@ define(function() {
 
     function initialize() {
         this.currentUsername = null;
-        $('#sidepanel').append("<div id='UserProfileWindow' class='ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
+        
+		$('#sidepanel .main').append("<div id='UserProfileWindow' class='ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
         $('#UserProfileWindow').append("<div id='userprofiletitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>User Profile</span></div>");
         $('#userprofiletitle').append('<a id="userprofileclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
         $("#UserProfileWindow").append("<table id='UserProfiletable' class='usertable'></table>");
@@ -45,10 +46,10 @@ define(function() {
 
 
                 if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
-                if (!$('#sidepanel').children().is(':visible')) hideSidePanel();
+                //if (!$('#sidepanel').children().is(':visible')) hideSidePanel();
             });
         });
-        $('#sidepanel').append('<div id="Players"  class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" style="border-radius: 2px;width: 100%;margin:0px;padding:0px">' + "<div id='playerstitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Players</span></div>" + '	 <div id="PlayerList"></div>' + '</div>');
+        $('#sidepanel .main').append('<div id="Players"  class="ui-accordion-content ui-helper-reset ui-corner-bottom ui-accordion-content-active" style="border-radius: 2px;width: 100%;margin:0px;padding:0px">' + "<div id='playerstitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='sidetab-editor-title ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Players</span></div>" + '	 <div id="PlayerList"></div>' + '</div>');
         
         ;
         $('#playerstitle').prepend('<div class="headericon users"  />');
@@ -61,8 +62,6 @@ define(function() {
                     _UserManager.showPlayers();
             })
 
-        $('#Players').css('border-bottom', '5px solid #444444')
-        $('#Players').css('border-left', '2px solid #444444')
         $(document.body).append('<div id="CreateProfileDialog"/>');
 
         $("#FollowUser").button({
@@ -71,7 +70,7 @@ define(function() {
         $("#FollowUser").click(function() {
             var id = '-object-Object-player-' + _UserManager.SelectedProfile.Username;
             require("vwf/view/threejs/editorCameraController").setCameraMode('Orbit');
-            require("vwf/view/threejs/editorCameraController").followObject(vwf.models[0].model.nodes[id]);
+            require("vwf/view/threejs/editorCameraController").followObject(Engine.models[0].model.nodes[id]);
         });
         $("#PrivateMessage").button({
             label: 'Private Message'
@@ -85,7 +84,7 @@ define(function() {
         });
         $("#CallUser").click(function() {
            
-            vwf.callMethod('index-vwf', 'rtcCall', {
+            Engine.callMethod('index-vwf', 'rtcCall', {
                 target: _UserManager.SelectedProfile.clientID
             });
         });
@@ -94,14 +93,14 @@ define(function() {
             label: 'Video Call'
         });
         $("#VideoCallUser").click(function() {
-            vwf.callMethod('index-vwf', 'rtcVideoCall', {
+            Engine.callMethod('index-vwf', 'rtcVideoCall', {
                 target: _UserManager.SelectedProfile.clientID
             });
         });
 
         this.GetNextAnonName = function(clients)
         {
-            return "Anonymous_" + vwf.moniker();
+            return "Anonymous_" + Engine.moniker();
         }
         $(document).on('setstatecomplete', function() {
 
@@ -118,6 +117,7 @@ define(function() {
                 needlogin = false;
 
             if (needlogin) {
+                this.installSessionHoldTimer();
                 $.ajax('/vwfDataManager.svc/logindata', {
                     cache: false,
                     async: false,
@@ -127,12 +127,8 @@ define(function() {
                         var userID = logindata.user_uid || logindata.UID;
 
 
-                        //only the first client from a given login should create the avatart
-                        if (vwf.models[0].model.nodes['character-vwf-' + userID.replace(/ /g, '-')] == undefined)
-                            this.Login(username, userID);
-                        else {
-                            alertify.alert('You are already logged into this space from another tab. This session will be an anonymous guest');
-                        }
+                        this.Login(username, userID);
+                    
 
 
                     }.bind(this),
@@ -167,16 +163,14 @@ define(function() {
                         var username = logindata.username || logindata.user_uid || logindata.UID;
                         var userID = logindata.user_uid || logindata.UID;
 
-                        var clients = vwf.getProperty(vwf.application(), 'clients');
+                        var clients = Engine.getProperty(Engine.application(), 'clients');
                         var anonName = this.GetNextAnonName(clients);
 
                         //only the first client from a given login should create the avatart
                         //this is a poor way to detect that teh user is already in the space
-                        if (vwf.models[0].model.nodes['character-vwf-' + userID.replace(/ /g, '-')] == undefined)
+                        
                             this.Login(username, userID);
-                        else {
-                             this.Login(anonName,anonName);
-                        }
+                    
 
 
                     }.bind(this),
@@ -185,7 +179,7 @@ define(function() {
                         //anonymous;
 
                         
-                        var clients = vwf.getProperty(vwf.application(), 'clients');
+                        var clients = Engine.getProperty(Engine.application(), 'clients');
                         var anonName = this.GetNextAnonName(clients);
 
                         
@@ -202,9 +196,24 @@ define(function() {
 
         }.bind(this));
         this.SelectedProfile = null;
+        this.installSessionHoldTimer = function()
+        {
+            //keep a ping to the server on a loop to keep the session alive.
+            window.setTimeout(function()
+            {
+                $.ajax('/vwfDataManager.svc/logindata', {
+                        cache: false,
+                        async: false,
+                        success: function(data, status, xhr) {
+                        },
+                        error: function(xhr, status, err) {
+                        }
+                });
+            },1000*6*3)   //every 3 minutes
+        }
         this.showProfile = function(clientID) {
 
-            var clients = vwf.getProperty(vwf.application(), 'clients');
+            var clients = Engine.getProperty(Engine.application(), 'clients');
             var profile = _DataManager.GetProfileForUser(clients[clientID].UID) || {};
             profile.clientID = clientID;
             if (!profile) return;
@@ -215,7 +224,7 @@ define(function() {
                 $('#MenuUsersicon').addClass('iconselected');
 
             });
-            showSidePanel();
+            _SidePanel.showPanel();
             this.SelectedProfile = profile;
 
             for (i in profile) {
@@ -226,7 +235,7 @@ define(function() {
             $('#CallUser').show();
             $('#FollowUser').show();
             $('#VideoCallUser').show();
-            if (clientID == vwf.moniker()) {
+            if (clientID == Engine.moniker()) {
                 $('#EditProfile').show();
                 $('#PrivateMessage').hide();
                 $('#CallUser').hide();
@@ -249,11 +258,11 @@ define(function() {
 
                     //set cameramode to avatar if an avatar is created
                     //but only if the world is playing
-                    if (vwf.getProperty(vwf.application(), 'playMode') === 'play') {
+                    if (Engine.getProperty(Engine.application(), 'playMode') === 'play') {
                         _dView.setCameraDefault();
                         clearCameraModeIcons();
                         $('#MenuCamera3RDPersonicon').addClass('iconselected');
-                        require("vwf/view/threejs/editorCameraController").getController('Orbit').followObject(vwf.models[0].model.nodes[_UserManager.GetCurrentUserID()]);
+                        require("vwf/view/threejs/editorCameraController").getController('Orbit').followObject(Engine.models[0].model.nodes[_UserManager.GetCurrentUserID()]);
                         require("vwf/view/threejs/editorCameraController").setCameraMode('3RDPerson');
                     }
                 }
@@ -266,7 +275,7 @@ define(function() {
 
             $('#StatusUserName').text(username);
             var needlogin = true;
-            var createAvatar = true;
+            
             var statedata = _DataManager.getInstanceData();
 
             //published worlds may choose to allow anonymous users
@@ -274,309 +283,39 @@ define(function() {
             if (statedata && statedata.publishSettings && (statedata.publishSettings.allowAnonymous || statedata.publishSettings.singlePlayer))
                 needlogin = false;
 
-            if (statedata && statedata.publishSettings && statedata.publishSettings.createAvatar === false)
-                createAvatar = false;
-
 
             if (this.GetCurrentUserName()) return;
             //clear this. No reason to have it saved in the dom
 
             this.currentUsername = userID;
             //only take control of hte websocket if you have to log in. Don't do this for allow anon and or singleplayer
-            if (needlogin) {
-                //take ownership of the client connection
-                var S = _DataManager.getCurrentSession();
-                var data = jQuery.ajax({
-                    type: 'GET',
-                    url: PersistanceServer + "./vwfDataManager.svc/login?S=" + S + "&CID=" + vwf.moniker(),
-                    data: null,
-                    success: null,
-                    async: false,
-                    dataType: "json"
-                });
-
-                var profile = _DataManager.GetProfileForUser(userID, true);
-                if (!profile) {
-                    alert('There is no account with that username');
-                    return;
-                }
-                if (profile.constructor == String) {
-                    alert(profile);
-                    return;
-                }
-                if (data.status != 200) {
-                    alert(data.responseText);
-                    return;
-                }
-            }
+           
             $('#MenuLogInicon').addClass('icondisabled')
             $('#MenuLogOuticon').removeClass('icondisabled');
             $('#MenuLogIn').attr('disabled', 'disabled');
             $('#MenuLogOut').removeAttr('disabled');
 
 
-            this.PlayerProto = {
-                extends: 'character.vwf',
-                source: 'usmale.dae',
-                type: 'subDriver/threejs/asset/vnd.collada+xml',
-                properties: {
-                    PlayerNumber: 1,
-                    isDynamic: true,
-                    castShadows: true,
-                    receiveShadows: true,
-                    activeCycle: [],
-                    standingOnID: null,
-                    standingOnOffset: null,
-                    ___physics_activation_state: 4,
-                    ___physics_deactivation_time: 0,
-                    ___physics_velocity_linear: [0, 0, 0],
-                    ___physics_velocity_angular: [0, 0, 0],
-                    ___physics_factor_linear: [0, 0, 0],
-                    ___physics_factor_angular: [0, 0, 0],
-                    ___physics_enabled: true,
-                    ___physics_mass: 100,
-                    transform: [
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1
-                    ],
-                },
-                events: {
-                    ShowProfile: null,
-                    Message: null
-                },
-                scripts: ["this.ShowProfile = function(){if(vwf.client() != vwf.moniker()) return; _UserManager.showProfile(this.ownerClientID)     }; \n" +
-                    "this.Message = function(){if(vwf.client() != vwf.moniker()) return; setupPmWindow(this.ownerClientID)     }"
-                ],
-                children: {
-
-                }
-            };
-
-            var collision = {
-                "extends": "box2.vwf",
-                "source": "vwf/model/threejs/box.js",
-                "type": "subDriver/threejs",
-                "properties": {
-                    "___physics_activation_state": 1,
-                    "___physics_deactivation_time": 0,
-                    "___physics_velocity_linear": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "___physics_velocity_angular": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "DisplayName": "CharacterCollision",
-                    "_length": 0.8,
-                    "height": 1.54,
-                    "isSelectable": false,
-                    "owner": userID,
-                    "transform": [
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0.8009999394416809,
-                        1
-                    ],
-                    "type": "Primitive",
-                    "width": 0.62,
-                    "visible": false,
-                    "___physics_enabled": true
-                }
-            }
-            this.PlayerProto.children[GUID()] = collision;
-            //this.PlayerProto.source = 'usmale.dae'; //profile['Avatar'];
-
-            if (!profile) profile = {};
-
-            this.PlayerProto.source = profile.avatarModel || './avatars/VWS_Business_Female1.DAE';
-
-            this.PlayerProto.properties.cycles = {
-                stand: {
-                    start: 1,
-                    length: 0,
-                    speed: 1.25,
-                    current: 0,
-                    loop: true
-                },
-                walk: {
-                    start: 6,
-                    length: 27,
-                    speed: 1.0,
-                    current: 0,
-                    loop: true
-                },
-                straferight: {
-                    start: 108,
-                    length: 16,
-                    speed: 1.5,
-                    current: 0,
-                    loop: true
-                },
-                strafeleft: {
-                    start: 124,
-                    length: 16,
-                    speed: -1.5,
-                    current: 0,
-                    loop: true
-                },
-                walkback: {
-                    start: 0,
-                    length: 30,
-                    speed: -1.25,
-                    current: 0,
-                    loop: true
-                },
-                run: {
-                    start: 70,
-                    length: 36,
-                    speed: 1.25,
-                    current: 0,
-                    loop: true
-                },
-                jump: {
-                    start: 70,
-                    length: 36,
-                    speed: 1.25,
-                    current: 0,
-                    loop: false
-                },
-                runningjump: {
-                    start: 109,
-                    length: 48,
-                    speed: 1.25,
-                    current: 0,
-                    loop: false
-                }
-            };
-
-
-            this.PlayerProto.properties.materialDef = {
-                "color": {
-                    "r": 1,
-                    "g": 1,
-                    "b": 1
-                },
-                "ambient": {
-                    "r": 1,
-                    "g": 1,
-                    "b": 1
-                },
-                "emit": {
-                    "r": 0.27058823529411763,
-                    "g": 0.2549019607843137,
-                    "b": 0.2549019607843137
-                },
-                "specularColor": {
-                    "r": 0.2,
-                    "g": 0.2,
-                    "b": 0.2
-                },
-                "specularLevel": 1,
-                "alpha": 1,
-                "shininess": 0,
-                "side": 0,
-                "reflect": 0,
-                "layers": [{
-                    "mapTo": 1,
-                    "scalex": 1,
-                    "scaley": 1,
-                    "offsetx": 0,
-                    "offsety": 0,
-                    "alpha": 1,
-                    "src": profile.avatarTexture || "./avatars/VWS_B_Female1-1.jpg",
-                    "mapInput": 0
-                }],
-                "type": "phong",
-                "depthtest": true,
-                "morphTargets": true
-            }
-
-            this.PlayerProto.properties.standing = 0;
-
-
-            if (document.Players && document.Players.indexOf(userID) != -1) {
-                alert('User is already logged into this space');
-                return;
-            }
             var newintersectxy = _LocationTools.getCurrentPlacemarkPosition() || _LocationTools.getPlacemarkPosition('Origin') || _Editor.GetInsertPoint();
-            //vwf.models[0].model.nodes['index-vwf'].orbitPoint(newintersectxy);
-            this.PlayerProto.properties.PlayerNumber = username;
-            this.PlayerProto.properties.owner = userID;
-            this.PlayerProto.properties.ownerClientID = vwf.moniker();
-            this.PlayerProto.properties.profile = profile;
-            this.PlayerProto.properties.transform[12] = newintersectxy[0];
-            this.PlayerProto.properties.transform[13] = newintersectxy[1];
-            this.PlayerProto.properties.transform[14] = newintersectxy[2];
-            this.PlayerProto.properties.scale = [profile.avatarHeight || 1.0, profile.avatarHeight || 1.0, profile.avatarHeight || 1.0];
-
+            
             require("vwf/view/threejs/editorCameraController").getController('Orbit').orbitPoint(newintersectxy);
             require("vwf/view/threejs/editorCameraController").setCameraMode('Orbit');
-            document[username + 'link'] = null;
-            //this.PlayerProto.id = "player"+username;
-            document["PlayerNumber"] = username;
-            var parms = new Array();
-            parms.push(JSON.stringify(this.PlayerProto));
-
-            //vwf_view.kernel.callMethod('index-vwf','newplayer',parms);
-
-            if (createAvatar)
-                vwf_view.kernel.createChild('index-vwf', this.currentUsername, this.PlayerProto);
-
+            
             //if no one has logged in before, this world is yours
-            if (vwf.getProperty('index-vwf', 'owner') == null) vwf.setProperty('index-vwf', 'owner', this.currentUsername);
+            if (Engine.getProperty('index-vwf', 'owner') == null) Engine.setProperty('index-vwf', 'owner', this.currentUsername);
 
             //if single player, world is yours
             if (statedata && statedata.publishSettings && statedata.publishSettings.singlePlayer)
-                vwf.setProperty('index-vwf', 'owner', this.currentUsername);
+                Engine.setProperty('index-vwf', 'owner', this.currentUsername);
 
             var parms = new Array();
             parms.push(JSON.stringify({
                 sender: '*System*',
-                text: (document.PlayerNumber + " logging on")
+                text: (this.currentUsername + " logging on")
             }));
             vwf_view.kernel.callMethod('index-vwf', 'receiveChat', parms);
         }
-        this.CreateNPC = function(filename) {
-            this.PlayerProto.source = filename;
-            var name = 'NPC' + Math.floor(Math.SecureRandom() * 1000);
-            this.PlayerProto.properties.PlayerNumber = name;
-            this.PlayerProto.properties.owner = this.currentUsername;
-            this.PlayerProto.properties.ownerClientID = null;
-            this.PlayerProto.properties.profile = null;
-            this.PlayerProto.id = "player" + name;
-            var parms = new Array();
-            parms.push(JSON.stringify(this.PlayerProto));
-            vwf_view.kernel.callMethod('index-vwf', 'newplayer', parms);
-        }
+        
         this.PlayerDeleted = function(e) {
 
             $("#" + e + "label").remove();
@@ -591,12 +330,12 @@ define(function() {
         this.getPlayers = function() {
             var playerNodes = [];
             for (var i = 0; i < this.getPlayerIDs().length; i++) {
-                playerNodes.push(vwf.models.javascript.nodes[this.getPlayerIDs()[i]]);
+                playerNodes.push(Engine.models.javascript.nodes[this.getPlayerIDs()[i]]);
 
             }
             playerNodes.sort(function(a, b) {
 
-                if (a.ownerClientID > b.ownerClientID) return 1;
+                if (a.ownerClientID[0] > b.ownerClientID[0]) return 1;
                 return -1;
             })
             return playerNodes;
@@ -608,11 +347,11 @@ define(function() {
                 this.showPlayers();
         }
         this.firedEvent = function(id, event, params) {
-            if (id == vwf.application() && event == 'clientConnected') {
+            if (id == Engine.application() && event == 'clientConnected') {
                 if ($('#PlayerList').is(':visible'))
                     this.showPlayers();
             }
-            if (id == vwf.application() && event == 'clientDisconnected') {
+            if (id == Engine.application() && event == 'clientDisconnected') {
                 if ($('#PlayerList').is(':visible'))
                     this.showPlayers();
             }
@@ -628,11 +367,9 @@ define(function() {
                     var logindata = JSON.parse(xhr.responseText);
                     var username = logindata.username;
 
-                    if (logindata.instances.indexOf(_DataManager.getCurrentSession()) != -1) {
-                        _Notifier.alert('You are already logged into this space from another tab, browser or computer. This session will be a guest.');
-                    } else {
+                
                         this.Login(username);
-                    }
+                
 
                 }.bind(this),
                 error: function(xhr, status, err) {
@@ -649,25 +386,23 @@ define(function() {
         //these three functions should be deprecated and replaced by the ClientAPI on the Scene object for access
         //from within the model.
         this.GetPlayernameForClientID = function(id) {
-            var clients = vwf.getProperty(vwf.application(), 'clients')
+            var clients = Engine.getProperty(Engine.application(), 'clients')
             if (clients && clients[id])
                 return clients[id].UID;
         }
         this.GetAvatarForClientID = function(id) {
-            for (var i in vwf.models[0].model.nodes) {
-                var node = vwf.models[0].model.nodes[i];
-                if (node.ownerClientID == id)
+            for (var i in Engine.models[0].model.nodes) {
+                var node = Engine.models[0].model.nodes[i];
+                if (node.ownerClientID && node.ownerClientID.indexOf(id)>-1)
                     return node;
             }
         }
         this.GetClientIDForPlayername = function(id) {
-            var clients = vwf.getProperty(vwf.application(), 'clients')
+            var clients = Engine.getProperty(Engine.application(), 'clients')
             for (var i in clients) {
                 if (clients[i].UID == id) return clietns[i].cid;
             }
         }
-
-        
         this.satProperty = function(id,name,val)
         {
             if(name == 'permission')
@@ -675,11 +410,11 @@ define(function() {
         }
         this.updatePermissions = function()
         {
-            var clients = vwf.getProperty(vwf.application(),'clients');
+            var clients = Engine.getProperty(Engine.application(),'clients');
             for(var id in clients)
             {
             var e = ToSafeID(id)
-            if(_PermissionsManager.getPermission(clients[id].name,vwf.application()))
+            if(_PermissionsManager.getPermission(clients[id].name,Engine.application()))
                     $("#" + e + "label .glyphicon-share").css('color','rgb(130, 184, 255)')
                 else    
                     $("#" + e + "label .glyphicon-share").css('color','')
@@ -690,8 +425,8 @@ define(function() {
             $('#playerstitle').removeClass('sidetab-editor-title-active')
             $('#PlayerList').hide('blind', function() {
                 $('#MenuUsersicon').removeClass('iconselected');
-                if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
-                if (!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible')) hideSidePanel();
+                //if ($('#sidepanel').data('jsp')) $('#sidepanel').data('jsp').reinitialise();
+                //if (!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible')) hideSidePanel();
             });
         }
         this.hidePlayers();
@@ -700,14 +435,14 @@ define(function() {
             $('#PlayerList').show('blind', function() {});
             $('#playerstitle').addClass('sidetab-editor-title-active')
             $("#PlayerList").empty();
-            var clients = vwf.getProperty(vwf.application(), 'clients');
+            var clients = Engine.getProperty(Engine.application(), 'clients');
             
             for (var i in clients) {
                 var e = ToSafeID(i);
                  var id = i;
                 var self = this;
                 (function(e,id,clients){
-                $("#PlayerList").append("<div id='" + (e + "label") + "'  class='playerlabel'><span class='playerlabelname'>" + clients[i].name + (e == vwf.moniker() ? " (me)":"") + "<div class='playerlabelID'>" + i + "</div></span></div>");
+                $("#PlayerList").append("<div id='" + (e + "label") + "'  class='playerlabel'><span class='playerlabelname'>" + clients[i].name + (e == Engine.moniker() ? " (me)":"") + "<div class='playerlabelID'>" + i + "</div></span></div>");
                 $("#" + e + "label").append("<div class='glyphicon glyphicon-comment' />");
                 $("#" + e + "label").append("<div class='glyphicon glyphicon-user' />");
                 $("#" + e + "label").append("<div class='glyphicon glyphicon-earphone' />");
@@ -724,20 +459,20 @@ define(function() {
                  })
                  $("#" + e + "label .glyphicon-facetime-video").click(function()
                  {
-                     vwf.callMethod('index-vwf', 'rtcVideoCall', {
+                     Engine.callMethod('index-vwf', 'rtcVideoCall', {
                         target: id
                     });
                  });
                  $("#" + e + "label .glyphicon-earphone").click(function()
                  {
-                     vwf.callMethod('index-vwf', 'rtcCall', {
+                     Engine.callMethod('index-vwf', 'rtcCall', {
                         target: id
                     });
                  })
 
                  function updatePermission()
                  {
-                    if(_PermissionsManager.getPermission(clients[id].name,vwf.application()))
+                    if(_PermissionsManager.getPermission(clients[id].name,Engine.application()))
                         $("#" + e + "label .glyphicon-share").css('color','rgb(130, 184, 255)')
                     else    
                         $("#" + e + "label .glyphicon-share").css('color','')
@@ -745,10 +480,10 @@ define(function() {
                  updatePermission();
                  $("#" + e + "label .glyphicon-share").click(function()
                  {
-                    if(_PermissionsManager.getPermission(clients[id].name,vwf.application()))
-                        _PermissionsManager.setPermission(clients[id].name,vwf.application(),0);
+                    if(_PermissionsManager.getPermission(clients[id].name,Engine.application()))
+                        _PermissionsManager.setPermission(clients[id].name,Engine.application(),0);
                     else
-                        _PermissionsManager.setPermission(clients[id].name,vwf.application(),1);
+                        _PermissionsManager.setPermission(clients[id].name,Engine.application(),1);
                     
                     window.setTimeout(function(){
                         updatePermission();        
@@ -762,7 +497,7 @@ define(function() {
             }
 
 
-            showSidePanel();
+            _SidePanel.showPanel();
         }
         $('#UserProfileWindow').hide();
         

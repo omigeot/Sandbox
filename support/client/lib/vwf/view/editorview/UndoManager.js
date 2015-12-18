@@ -24,7 +24,7 @@ define(function ()
 			for(var i in node.children)
 			{
 				var name1 = findid(node.children[i],name);
-				if(name1) return name1;	
+				if(name1) return name1;
 			}
 		}
 		return null;
@@ -62,7 +62,7 @@ define(function ()
 				return false;
 			for(var i = 0; i < this.selection.length; i++)
 				if(this.selection[i] != event.selection[i])
-					return false;	
+					return false;
 			return true;
 		}
 
@@ -76,7 +76,7 @@ define(function ()
 		this.uri = uri;
 		this.undo = function()
 		{
-			
+
 			var id = findid(_Editor.getNode('index-vwf'),this.name);
 			vwf_view.kernel.deleteNode(id);
 		}
@@ -105,7 +105,7 @@ define(function ()
 		this.id = id;
 		this.name = _Editor.getNode(id).name;
 		this.proto = _DataManager.getCleanNodePrototype(id);
-		this.parent = vwf.parent(id);
+		this.parent = Engine.parent(id);
 		this.undo = function()
 		{
 			vwf_view.kernel.createChild(this.parent,this.name,this.proto);
@@ -127,19 +127,26 @@ define(function ()
 			return true;
 		}
 	}
-	function SetPropertyEvent(id,property,val)
+	function SetPropertyEvent(id,property,val,oldval)
 	{
 		this.property = property;
-		this.val = JSON.parse(JSON.stringify(val || null));
+		if(val === undefined) val = null;
+		if(oldval === undefined){
+			//Other falsy values are valid JSON. Only replace undefined with null
+			oldval = Engine.getProperty(id,property);
+			if(oldval === undefined) oldval = null;
+		}
+
+		this.val = JSON.stringify(val);
 		this.id = id;
-		this.oldval = JSON.parse(JSON.stringify(vwf.getProperty(id,property) || null));
+		this.oldval = JSON.stringify(oldval);
 		this.undo = function()
 		{
-			vwf_view.kernel.setProperty(this.id,this.property,this.oldval);
+			vwf_view.kernel.setProperty(this.id,this.property,JSON.parse(this.oldval));
 		}
 		this.redo = function()
 		{
-			vwf_view.kernel.setProperty(this.id,this.property,this.val);	
+			vwf_view.kernel.setProperty(this.id,this.property,JSON.parse(this.val));
 		}
 		this.compare = function(event)
 		{
@@ -152,6 +159,66 @@ define(function ()
 			if(this.property != event.property)
 				return false;
 			return true;
+		}
+	}
+	function SetMethodEvent(id, name, newval)
+	{
+		this.id = id;
+		this.name = name;
+		this.newval = newval; // {parameters: ..., body: ...}
+		this.oldval = Engine.getMethods(id);
+
+		if(this.oldval)
+			this.oldval = this.oldval[name];
+
+		this.undo = function()
+		{
+			Engine.deleteMethod(id, name);
+			if(this.oldval){
+				Engine.createMethod(id, name, this.oldval.parameters, this.oldval.body);
+			}
+		}
+
+		this.redo = function()
+		{
+			Engine.deleteMethod(id, name);
+			if(this.newval){
+				Engine.createMethod(id, name, this.newval.parameters, this.newval.body);
+			}
+		}
+
+		this.compare = function(evt){
+			return JSON.stringify(this) === JSON.stringify(evt);
+		}
+	}
+	function SetEventEvent(id, name, newval)
+	{
+		this.id = id;
+		this.name = name;
+		this.newval = newval; // {parameters: ..., body: ...}
+		this.oldval = Engine.getEvents(id);
+
+		if(this.oldval)
+			this.oldval = this.oldval[name];
+
+		this.undo = function()
+		{
+			Engine.deleteEvent(id, name);
+			if(this.oldval){
+				Engine.createEvent(id, name, this.oldval.parameters, this.oldval.body);
+			}
+		}
+
+		this.redo = function()
+		{
+			Engine.deleteEvent(id, name);
+			if(this.newval){
+				Engine.createEvent(id, name, this.newval.parameters, this.newval.body);
+			}
+		}
+
+		this.compare = function(evt){
+			return JSON.stringify(this) === JSON.stringify(evt);
 		}
 	}
 	function CompoundEvent()
@@ -169,6 +236,11 @@ define(function ()
 		}
 		this.push = function(newEvent)
 		{
+			//shim to deal with change in the compare operator
+			if(newEvent.oldval && !(typeof newEvent.oldval == "string"))
+			{
+				newEvent.oldval = JSON.stringify(newEvent.oldval);
+			}
 			this.list.push(newEvent);
 		}
 		this.compare = function(event)
@@ -180,7 +252,7 @@ define(function ()
 			for(var i = 0; i < this.list.length; i++)
 				if(!this.list[i].compare(event.list[i]))
 					return false;
-			return true;	
+			return true;
 		}
 
 	}
@@ -188,9 +260,14 @@ define(function ()
 	{
 		this.stack = [];
 		this.head = -1;
+		this.modCb = null;
+
 		this.SetPropertyEvent = SetPropertyEvent;
+		this.SelectionEvent = SelectionEvent;
 		this.DeleteNodeEvent = DeleteNodeEvent;
 		this.CreateNodeEvent = CreateNodeEvent;
+		this.SetMethodEvent = SetMethodEvent;
+		this.SetEventEvent = SetEventEvent;
 		this.CompoundEvent = CompoundEvent;
 		this.undo = function()
 		{
@@ -198,6 +275,9 @@ define(function ()
 			if(this.head == 0) return;
 			this.stack[this.head-1].undo();
 			this.head--;
+
+			if(this.modCb)
+				this.modCb(this.stack[this.head-1], this.stack[this.head]);
 		}
 		this.redo = function()
 		{
@@ -205,6 +285,9 @@ define(function ()
 
 			this.head++;
 			this.stack[this.head-1].redo();
+
+			if(this.modCb)
+				this.modCb(this.stack[this.head-1], this.stack[this.head]);
 		}
 		this.pushEvent = function(newevent)
 		{
@@ -216,30 +299,33 @@ define(function ()
 				return;
 			}
 
-			
+
 			this.stack = this.stack.slice(0,this.head);
 
 			if(this.stack.length > 30) this.stack.shift();
-			
+
 			//don't add events that don't change anything
 			if(this.stack[this.stack.length-1] && this.stack[this.stack.length-1].compare(newevent))
 				return;
 			console.log(newevent);
 			this.stack.push(newevent);
 			this.head = this.stack.length;
+
+			if(this.modCb)
+				this.modCb(this.stack[this.head-1], this.stack[this.head]);
 		}
 		this.recordDelete = function(id)
 		{
 
-			
+
 			this.pushEvent(new DeleteNodeEvent(id));
-			
+
 		}
 		this.recordCreate = function(parent,name,proto,uri)
 		{
-			
+
 			this.pushEvent(new CreateNodeEvent(parent,name,proto,uri));
-			
+
 		}
 		this.recordSetProperty = function(id,prop,val)
 		{
@@ -271,7 +357,7 @@ define(function ()
 
 			if(newevent && !newevent.parent && newevent.list.length > 0)
 			this.pushEvent(newevent);
-			
+
 		}
 	}
 });

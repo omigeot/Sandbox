@@ -1,8 +1,8 @@
 .ddsmoothmenu{
 font: 12px 'Open Sans';
 background: #424242; /*background of menu bar (default state)*/
-width: 100%;
-
+height: 26px;
+border-bottom: 1px solid #666666;
 }
 
 .ddsmoothmenu ul{
@@ -18,6 +18,14 @@ position: relative;
 display: inline;
 float: left;
 /* font-size: 1.1em; */
+}
+
+.ddsmoothmenu li.disabled {
+	pointer-events: none;
+}
+
+.ddsmoothmenu li.disabled a {
+	color: grey;
 }
 
 /*Top level menu link items style*/
@@ -51,6 +59,11 @@ color: white;
 background: rgb(113, 157, 221); /*background of menu items during onmouseover (hover state)*/
 color: white;
 }
+
+
+.ddsmoothmenu ul li a:active{
+background-color: #7B7B7B; /*background of menu items during active (mouse down state)*/
+}
 	
 /*1st sub level menu*/
 .ddsmoothmenu ul li ul{
@@ -63,7 +76,7 @@ visibility: hidden;
 /*Sub level menu list items (undo style from Top level List Items)*/
 .ddsmoothmenu ul li ul li{
 display: list-item;
-float: none;
+//float: none;
 box-shadow: 3px 3px 5px;
 }
 

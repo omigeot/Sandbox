@@ -1,7 +1,7 @@
 function SplineTool() {
 
     var self = this;
-    $('#sidepanel').append("<div id='SplineToolGUI' class='ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
+    $('#sidepanel .main').append("<div id='SplineToolGUI' class='ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active' style='padding-bottom:5px;overflow:hidden;height:auto'></div>");
 
     $('#SplineToolGUI').append("<div id='SplineToolGUItitle' style = 'padding:3px 4px 3px 4px;font:1.5em sans-serif;font-weight: bold;' class='ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix' ><span class='ui-dialog-title' id='ui-dialog-title-Players'>Spline Tools</span></div>");
     $('#SplineToolGUI').append("<div id='SplineToolGUIEditPoints' style='width:100%'></div>");
@@ -34,18 +34,20 @@ function SplineTool() {
     });
 
 
-
     $('#SplineToolGUItitle').append('<a id="SplineToolclose" href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button" style="display: inline-block;float: right;"><span class="ui-icon ui-icon-closethick">close</span></a>');
     $('#SplineToolGUItitle').prepend('<img class="headericon" src="../vwf/view/editorview/images/icons/inventory.png" />');
-    $('#SplineToolGUI').css('border-bottom', '5px solid #444444')
-    $('#SplineToolGUI').css('border-left', '2px solid #444444')
     $('#SplineToolclose').click(function() {
         _SplineTool.hide()
     });
 
+    $('#SplineToolGUIRefine').addClass('icondisabled');
+    $('#SplineToolGUIRemove').addClass('icondisabled');
+    $('#SplineToolGUIClear').addClass('icondisabled');
+    $('#SplineToolGUIDraw').addClass('icondisabled');
+    $('#SplineToolGUISmooth').addClass('icondisabled');
+    $('#SplineToolGUIReduce').addClass('icondisabled');
 
     $('#SplineToolGUIEditPoints').click(function(e) {
-
 
 
         if (!self.active) {
@@ -68,18 +70,18 @@ function SplineTool() {
         var node = _Editor.getNode(_Editor.GetSelectedVWFID());
 
 
-
         if (_Editor.getSelectionCount() != 1) {
             _Notifier.alert('Select a single line object before using the Spline tool.');
             return;
         }
 
-        if (!node || !(vwf.getProperty(node.id, 'type') == 'Line' || vwf.getProperty(node.id, 'type') == 'Spline')) {
+        if (!node || !(Engine.getProperty(node.id, 'type') == 'Line' || Engine.getProperty(node.id, 'type') == 'Spline')) {
             _Notifier.alert('The Spline tools can only be used on a line object. The object selected cannot be edited with this tool.');
             self.deactivate();
             return;
         }
-        if (vwf.getProperty(node.id, 'type') == 'Spline') {
+        // the spline tools can only be used on a raw line, not a line type like star...
+        if (node.source != "vwf/model/threejs/line.js") {
             alertify.confirm('The Spline tools can only be used on a line object. The selected object can be converted into an editable line. This action cannot be undone. Continue?', function(e) {
                 if (!e) {
                     self.deactivate();
@@ -90,11 +92,11 @@ function SplineTool() {
                     _Editor.addTool('Spline', self);
                     _Editor.setActiveTool('Spline');
 
-                    var parent = vwf.parent(node.id);
+                    var parent = Engine.parent(node.id);
                     var name = node.name
                     var proto = _DataManager.getCleanNodePrototype(node);
                     proto.properties.owner = _UserManager.GetCurrentUserName();
-                    proto.properties.points = vwf.callMethod(_Editor.GetSelectedVWFID(), 'getPoints');
+                    proto.properties.points = Engine.callMethod(_Editor.GetSelectedVWFID(), 'getPoints');
                     proto.extends = 'line2.vwf';
                     proto.source = "vwf/model/threejs/line.js"
                     _Editor.DeleteSelection();
@@ -107,6 +109,15 @@ function SplineTool() {
             return;
         }
         $('#SplineToolGUIEditPoints').children().css('background-color', 'red');
+
+
+        $('#SplineToolGUIRefine').removeClass('icondisabled');
+        $('#SplineToolGUIRemove').removeClass('icondisabled');
+        $('#SplineToolGUIClear').removeClass('icondisabled');
+        $('#SplineToolGUIDraw').removeClass('icondisabled');
+        $('#SplineToolGUISmooth').removeClass('icondisabled');
+        $('#SplineToolGUIReduce').removeClass('icondisabled');
+
         _Editor.addTool('Spline', self);
         _Editor.setActiveTool('Spline');
 
@@ -122,8 +133,8 @@ function SplineTool() {
         _Editor.getTranslationCallback = self.getTranslation;
         _Editor.getScaleCallback = self.getScale;
         self.selectedID = _Editor.GetSelectedVWFID();
-        self.points = vwf.getProperty(self.selectedID, 'points');
-        self.transform = vwf.getProperty(self.selectedID, 'transform');
+        self.points = Engine.getProperty(self.selectedID, 'points');
+        self.transform = Engine.getProperty(self.selectedID, 'transform');
         _Editor.SetSelectMode('None');
         _Editor.updateGizmoLocation();
         self.active = true;
@@ -185,7 +196,6 @@ function SplineTool() {
             var dist = MATH.distanceVec3([vec.x, vec.y, vec.z], campos);
 
 
-
             self.display.children[i].scale.x = dist / 100;
             self.display.children[i].scale.y = dist / 100;
             self.display.children[i].scale.z = dist / 100;
@@ -215,9 +225,15 @@ function SplineTool() {
             _dScene.remove(this.display);
         _dView.unbind('prerender', self.prerender);
         self.active = false;
+        $('#SplineToolGUIRefine').addClass('icondisabled');
+        $('#SplineToolGUIRemove').addClass('icondisabled');
+        $('#SplineToolGUIClear').addClass('icondisabled');
+        $('#SplineToolGUIDraw').addClass('icondisabled');
+        $('#SplineToolGUISmooth').addClass('icondisabled');
+        $('#SplineToolGUIReduce').addClass('icondisabled');
+        _Editor.SetSelectMode('Pick');
     }
     $('#SplineToolGUIRefine').click(function(e) {
-
 
 
         if (self.mouseupCallback != self.refine) {
@@ -235,7 +251,6 @@ function SplineTool() {
     $('#SplineToolGUIDraw').click(function(e) {
 
 
-
         if (self.mouseupCallback != self.draw) {
             self.mouseupCallback = self.draw;
             self.mousedownCallback = null;
@@ -247,7 +262,6 @@ function SplineTool() {
             self.unselectAllModeButtons();
         }
     });
-
 
 
     $('#SplineToolGUISmooth').click(function(e) {
@@ -304,7 +318,6 @@ function SplineTool() {
         _Editor.updateGizmoLocation();
     });
     $('#SplineToolGUIRemove').click(function(e) {
-
 
 
         self.points.splice(self.selectedIndex, 1);
@@ -392,8 +405,9 @@ function SplineTool() {
         var ray = _Editor.GetWorldPickRay(e);
         var campos = [_Editor.findcamera().position.x, _Editor.findcamera().position.y, _Editor.findcamera().position.z];
 
+        debugger;
         var hits = _Editor.findviewnode(self.selectedID).children[0].CPUPick(campos, ray, {});
-        if (hits.length > 0) {
+        if (hits && hits.length > 0) {
             var v1 = hits[0].vertindex;
             var v2;
             var t = hits[0].t
@@ -446,7 +460,7 @@ function SplineTool() {
         var campos = [_Editor.findcamera().position.x, _Editor.findcamera().position.y, _Editor.findcamera().position.z];
         var hits = _Editor.findviewnode(self.selectedID).children[0].CPUPick(campos, ray, {});
 
-        if (hits.length > 0 && !self.mousemoved) {
+        if (hits && hits.length > 0 && !self.mousemoved) {
             self.selectedIndex = hits[0].vertindex;
 
             _Editor.updateGizmoLocation();
@@ -519,7 +533,8 @@ function SplineTool() {
         });
 
 
-        showSidePanel();
+
+        _SidePanel.showPanel();
         _SplineTool.open = true;
 
     }
@@ -530,8 +545,8 @@ function SplineTool() {
 
             if ($('#sidepanel').data('jsp'))
                 $('#sidepanel').data('jsp').reinitialise();
-            if (!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible'))
-                hideSidePanel();
+            //if (!$('#sidepanel').children('.jspContainer').children('.jspPane').children().is(':visible'))
+                //hideSidePanel();
         });
 
         var checked = ($('#SplineToolGUIActivteTool').next().attr('aria-pressed'));

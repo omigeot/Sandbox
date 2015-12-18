@@ -55,6 +55,8 @@ properties:
             this.sun.shadowDarkness = value;    
   ambientColor: 
     value: [.35, .35 , .35]
+  additionalUrlAsset: 'None'
+  additionalUrlAssetsList: ['None']
   fogColor: [1, 1, 1]
   fogNear: 100
   fogFar: 1000
@@ -62,10 +64,10 @@ properties:
   fogDensity: .005
   fogVFalloff: 1.3
   fogVFalloffStart: 0
-  skyColorBlend: 0  
+  skyColorBlend: 1  
   skyFogBlend: 0  
-  skyApexColor: [ 0 , .5 , 1.0 ]
-  skyHorizonColor: [ 0 , .5 , 1.0 ]
+  skyApexColor: [ 0.9 , 0.9 , 0.9 ]
+  skyHorizonColor: [ 0.8 , 0.8 , 0.8]
   ___physics_gravity: [ 0, 0, -9.8]
   ___physics_accuracy: 10
   ___physics_active: true
@@ -93,51 +95,7 @@ properties:
     value: white             
   owner:
   type: scene
-  clientAPI:
-    get : |
-           
-           if(this.___clientAPI) return this.___clientAPI;
-           this.___clientAPI = {};
-           this.___clientAPI.getUserNameForConnectionID = function(id)
-           {
-           	   if(!this.clients || !this.clients[id]) return null;
-           	   		return this.clients[id].name;
-           }.bind(this);
-           this.___clientAPI.getConnectionIDForUserName = function(name)
-           {
-           	   if(!this.clients) return null;
-           	   for(var i in this.clients.internal_val)
-           	   {
-           	   		if(this.clients[i].name == name)
-           	   			return i;
-           	   }
-           	   return null;
-           }.bind(this);
-           this.___clientAPI.getAvatarForUserName = function(name)
-           {
-           	  return this.findNodeByID('character-vwf-' + name);
-           }.bind(this);
-           this.___clientAPI.focus = function(cid,nodeID)
-           {
-              //did the user enter a whole node, not a node ID?
-              if(nodeID && nodeID.id)
-                nodeID = nodeID.id;
-              if(this.clients[cid])
-              {
-                 this.clients[cid].focusID = nodeID;
-              }  
-           }.bind(this);
-           this.___clientAPI.getCameraIDForClient = function(id)
-           {
-             if(!this.clients || !this.clients[id]) return null;
-                  return this.clients[id].cameraID;
-           }.bind(this);
-           this.___clientAPI.getCameraForClient = function(id)
-           {
-             if(!this.clients || !this.clients[id]) return null;
-                  return this.findNodeByID(this.clients[id].cameraID);
-           }.bind(this);
-           return this.___clientAPI;
+  ___clientAPI: true
   commsAPI:
     get: |
           var self = this;
@@ -179,6 +137,21 @@ properties:
           } 
           return this.___commsAPI;         
   EditorData:
+    additionalAssetsPreload:
+      displayname: 'Pre-Load Assets'
+      type: 'sectionTitle'
+    additionalUrlAasset:
+      displayname: Enter Asset Url
+      property: additionalUrlAsset
+      type: assetPreloaderText
+    additionalUrlAssetsList:
+      displayname: Select Assets
+      property: additionalUrlAssetsList
+      type: assetPreloaderChoice
+      labels:
+        - None
+      values:
+        - null
     fog:
       displayname: 'Fog'
       type: 'sectionTitle'
@@ -275,7 +248,6 @@ properties:
         - Morning
         - Evening
         - Morning2
-        - Storm
         - ThunderStorm
         - Night1
         - Night2
@@ -287,7 +259,6 @@ properties:
         - early_morning
         - evening  
         - morning  
-        - stormy
         - StormClouds   
         - night1
         - night2
@@ -392,14 +363,23 @@ scripts:
       
 
       
-       var ground = new THREE.Mesh(new THREE.PlaneGeometry(256,256,10,10), new THREE.MeshPhongMaterial());
+       var ground = new THREE.Mesh(new THREE.PlaneGeometry(200,200,10,10), new THREE.MeshPhongMaterial());
+       var g1 = new THREE.GridHelper(100,1);
+                    _dScene.add(g1);
+                    g1.rotation.x = Math.PI/2;
+                    g1.position.z = -.01;
+                  
+                    window._gGrid = g1;
+                    g1.updateMatrixWorld();
+       this.grid = g1;
+       g1.visible = true;             
        ground.receiveShadow = _SettingsManager.getKey('shadows');
        ground.PickPriority = -1;
-       
+       this.grid.InvisibleToCPUPick = true;
        
        var grassTex = THREE.ImageUtils.loadTexture('textures/gridnew.png');
        
-     
+      ground.visible = false;
        ground.material.map = grassTex;
         grassTex.wrapS = THREE.RepeatWrapping;
         grassTex.wrapT = THREE.RepeatWrapping;
@@ -413,6 +393,7 @@ scripts:
        
        if(this.materialDef)
        this.setTexture(this.materialDef);
+      
        var l = new THREE.DirectionalLight();
        this.sun = l;
        this.sun.name = 'Sun';
@@ -457,9 +438,10 @@ scripts:
             this.receivingCameraBroadcast = false;
         this.simTime = this.simTime +1;
     }
-        this.getSkyMat = function()
+    this.getSkyMat = function()
     {
     
+        if(!this.skycube) return null;
         return this.skycube.material;
     
     }
@@ -500,13 +482,13 @@ scripts:
     //a new client has joined the simulation
     this.clientConnected = function(id,name,UID)
     {
-    
+      
     	if(!this.clients)
     	{
     		this.clients = {}
     	}
     	if(!this.clients[id])
-    		this.clients.defineProperty(id,{cid:id,name:name,UID:UID,cameraID:null,focusID:vwf.application()});
+    		this.clients[id] = {cid:id,name:name,UID:UID,cameraID:null,focusID:vwf.application()};
       this.___physics_world_reset();  //reset the physics world when a client joins;
     }
     // a client other than this one has left
@@ -514,8 +496,8 @@ scripts:
     {
     	if(this.clients)
     	{
-    		delete this.clients.internal_val[id];
-    		this.clients = this.clients.internal_val;		
+    		delete this.clients[id];
+    		this.clients = this.clients;		
     	}
     }
     this.setClientCamera = function(id,cameraID)
@@ -679,6 +661,7 @@ scripts:
                     shadow:_SettingsManager.getKey('shadows'),
                     specularColor:{r:0.5773502691896258,g:0.5773502691896258,b:0.5773502691896258},
                     specularLevel:1,
+                    wireframe:true,
                     layers:[
                       {  alpha: 1,
                         blendMode: 0,
@@ -697,7 +680,20 @@ scripts:
     this.setTexture = function(value)
     {
              if(this.groundplane)
-              _MaterialCache.setMaterial(this.groundplane,value)       
+             {
+
+                _MaterialCache.setMaterial(this.groundplane,value)       
+                if(value && value.wireframe)
+               {
+                  this.groundplane.visible = false;
+                  this.grid.visible = true;
+               }else
+               {
+                  this.groundplane.visible = true;
+                  this.grid.visible = false;
+               }
+             }
+
     }
     
     this.deinitialize = function()

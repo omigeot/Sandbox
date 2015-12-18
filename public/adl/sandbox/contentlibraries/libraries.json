@@ -1,20 +1,35 @@
-{
-    "Demo Entities": {
+[
+	{
+		"name": "Demo Entities",
         "url": "./contentlibraries/entities.json"
     },
-    "Materials": {
+	{
+		"name": "Materials",
         "url": "./contentlibraries/materials.json"
     },
-    "Environments": {
+	{
+		"name": "Environments",
         "url": "./contentlibraries/environments.json"
     },
-    "Behaviors": {
+	{
+		"name": "Behaviors",
         "url": "./contentlibraries/behaviors.json"
     },
-    "Primitives": {
+	{
+		"name": "Primitives",
         "url": "./contentlibraries/primitives.json"
     },
-    "Cameras": {
+	{
+		"name": "Cameras",
         "url": "./contentlibraries/cameras.json"
+	},
+	{
+		"name": "Utilities",
+        "url": "./contentlibraries/utils.json"
+    },
+    {
+    	"name": "L-System generator",
+        "url": "./contentlibraries/lsystem.json"
     }
-}
+
+]

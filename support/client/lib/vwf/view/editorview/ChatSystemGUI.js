@@ -10,7 +10,7 @@ define({
 		});
 
 		function SendChatMessage() {
-			if (document.PlayerNumber == null) {
+			if (_UserManager.GetCurrentUserName() == null) {
 				_Notifier.notify('You must log in to participate');
 				return;
 			}
@@ -24,7 +24,7 @@ define({
 		}
 
 		function SendPM(text, receiver) {
-			if (document.PlayerNumber == null) {
+			if (_UserManager.GetCurrentUserName() == null) {
 				_Notifier.notify('You must log in to participate');
 				return;
 			}
@@ -175,14 +175,16 @@ define({
 			vwf.callMethod('index-vwf', 'playSound', ['./sounds/ChatDing.wav'])
 			var message = JSON.parse(e);
 			var color = 'darkred';
-			var displayNameSender = vwf.getProperty(vwf.application(), 'clients')[message.sender].name;;
+			var displayNameSender = message.sender;
+			if(vwf.getProperty(vwf.application(), 'clients')[message.sender])
+				displayNameSender = vwf.getProperty(vwf.application(), 'clients')[message.sender].name;
 			var text = replaceURLWithHTMLLinks(message.text);
 
 			if (message.sender == vwf.moniker())
 				$('#ChatLog').append('<div class="ChatFromMe"><div class="ChatFromMeLabel">' + displayNameSender + '</div><div class="ChatFromMeText">' + text + '</div></div>');
 			else
 				$('#ChatLog').append('<div class="ChatFromOther"><div class="ChatFromOtherLabel">' + displayNameSender + '</div><div class="ChatFromOtherText">' + text + '</div></div>');
-			_Notifier.notify(displayNameSender + ": " + message.text);
+			
 			$('#ChatLog').parent().animate({
 				scrollTop: $('#ChatLog').height()
 			}, "slow");

@@ -15,6 +15,7 @@ var libpath = require('path'),
     fs = require('fs'),
     url = require("url"),
     mime = require('mime'),
+	jade = require('jade'),
 
     YAML = require('js-yaml');
 var DAL = require('./DAL').DAL;
@@ -205,6 +206,46 @@ function _404(response) {
     response.write("404 Not Found\n");
     response.end();
 }
+
+var jadeCache = {};
+function ServeTemplate(req,res, filename, instanceData, url)
+{
+	if( /^jade:/.test(filename) )
+	{
+       
+		if( url.query.notools )
+			var needsTools = false;
+		else
+			needsTools = instanceData && instanceData.publishSettings ? instanceData.publishSettings.allowTools : true;
+
+		var templateFile = libpath.join(__dirname,'..','templates', filename.slice(5)+'.jade');
+
+        if(jadeCache[templateFile + needsTools])
+        {
+            res.send(jadeCache[templateFile + needsTools]);
+            return;
+        }
+
+		try {
+			var html = jade.renderFile(templateFile, {
+				filename: templateFile,
+				pretty: '\t',
+				needsTools: needsTools,
+				instanceData: {title:""}
+			});
+            jadeCache[templateFile + needsTools] = html;
+		}
+		catch(e){
+			console.error(e);
+			html = '<pre>'+e.message+'</pre>';
+		}
+		res.send(html);
+	}
+	else {
+		ServeFile(req, filename, res, URL);
+	}
+}
+
 //Parse and serve a YAML file
 function ServeYAML(filename, response, URL) {
     var tf = filename;
@@ -300,8 +341,12 @@ function routeToAPI(request, response, next) {
         //Route to DataServer
         SandboxAPI.serve(request, response);
         return;
+    }else if(URL.pathname.toLowerCase().indexOf('/datafiles/') == 0){
+         request.url=request.url.replace("/datafiles/","/vwfdatamanager.svc/datafile/");
+        SandboxAPI.serve(request, response);
+        return;
     }else
-      next();
+        next();
 
 }
 function handleRequest(request, response, next) {
@@ -489,14 +534,16 @@ function handleRequest(request, response, next) {
                     var instanceName = appname.substr(14).replace(/\//g, '_').replace(/\\/g, '_') + instance + "_";
                     DAL.getInstance(instanceName, function(data) {
                         if (data) {
-                            ServeFile(request, filename, response, URL);
+                            //ServeFile(request, filename, response, URL);
+                            ServeTemplate(request,response, 'jade:index', data, URL);
                             callback(true, true);
                             return;
                         } else {
 
-                            require('./examples.js').getExampleData(instanceName, function(data) {
+                            require('./examples.js').getExampleMetadata(instanceName, function(data) {
                                 if (data) {
-                                    ServeFile(request, filename, response, URL);
+                                    //ServeFile(request, filename, response, URL);
+                                    ServeTemplate(request,response, 'jade:index', data, URL);
                                     callback(true, true);
                                     return;
                                 } else {

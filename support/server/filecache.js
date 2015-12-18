@@ -180,8 +180,8 @@ function _FileCache() {
             callback(null);
             return;
         }
-        //Cannot have the users.db!
-        if (path.toLowerCase().indexOf('users.db') != -1) {
+        //Cannot have the users.nedb!
+        if (path.toLowerCase().indexOf('users.nedb') != -1) {
             logger.error(path + " is illegal",3);
             callback(null);
             return;
@@ -248,7 +248,7 @@ function _FileCache() {
                                         });
                                         watcher.entry = newentry;
                                         watcher.on('error', function(e) {
-                                            console.log(filename + "WATCHER ERROR", e);
+                                            console.log(path + "WATCHER ERROR", e);
                                             this.close();
                                         })
                                     }

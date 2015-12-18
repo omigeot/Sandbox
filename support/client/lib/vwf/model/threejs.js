@@ -177,6 +177,8 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
 
             if (node.initializingNode)
                 node.initializingNode();
+            if(node.threeObject)
+                node.threeObject.updateMatrixWorld(true);
         },
         // == Model API ============================================================================
 
@@ -225,14 +227,14 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
 
 
 
-
+                /* this is very old and OBE
                 cam.name = 'camera';
                 this.state.cameraInUse = cam;
                 var camType = "http://vwf.example.com/camera.vwf";
 
-                vwf.createChild(childID, "camera", {
+                Engine.createChild(childID, "camera", {
                     "extends": camType
-                });
+                });*/
             }
 
             if (!nodeID) {
@@ -378,7 +380,7 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
                     node.setAsset(scenenode);
                     node.threeObject = scenenode;
                     //we need to mark this node - because the VWF node is layered onto a GLGE node loaded from the art asset, deleteing the VWF node should not
-                    //delete the GLGE node. This should probably undo any changes made to the GLGE node by the VWF. This is tricky. I'm going to backup the matrix, and reset it
+                    //delete the GLGE node. This should probably undo any changes made to the GLGE node by the Engine. This is tricky. I'm going to backup the matrix, and reset it
                     //when deleting the VWF node.
                     if (node.threeObject) {
                         node.threeObject.initializedFromAsset = true;
@@ -413,6 +415,21 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
                 else if (isPhantomDefinition.call(this, protos)) {
 
                     node = this.state.nodes[childID] = this.subDriverFactory.createNode(childID, 'vwf/model/threejs/phantomAsset.js', childName, childType, childSource, callback);
+
+                    node.name = childName,
+                    node.ID = childID;
+                    node.parentID = nodeID;
+                    node.sourceType = childType;
+                    node.type = childExtendsID;
+                    node.sceneID = this.state.sceneRootID;
+
+                    node.threeObject = new THREE.Object3D();
+                    node.threeObject.add(node.getRoot());
+                    threeParent.add(node.threeObject);
+                } 
+                else if (isAvatarDefinition.call(this, protos)) {
+
+                    node = this.state.nodes[childID] = this.subDriverFactory.createNode(childID, 'vwf/model/threejs/avatar.js', childName, childType, childSource, callback);
 
                     node.name = childName,
                     node.ID = childID;
@@ -604,7 +621,7 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
 
             if (node && threeObject && propertyValue !== undefined) {
                 if (threeObject instanceof THREE.Object3D) {
-                    if ((propertyName == 'transform' || propertyName == 'localMatrix') && nodeID != vwf.application()) {
+                    if ((propertyName == 'transform' || propertyName == 'localMatrix') && nodeID != Engine.application()) {
 
 
                         //console.info( "setting transform of: " + nodeID + " to " + Array.prototype.slice.call( propertyValue ) );
@@ -713,7 +730,7 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
                     if (propertyName == 'isDynamic') {
                         //debugger;
 
-                        vwf.setProperty(nodeID, 'isStatic', false);
+                        Engine.setProperty(nodeID, 'isStatic', false);
                         setMeshDynamic(threeObject, propertyValue);
                     }
                     //This can be a bit confusing, as the node has a material property, and a material child node. 
@@ -1199,11 +1216,15 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
 
         ticking: function(vwfTime) {
 
+            //this takes 5% of our CPU time... do any of these nodes do anything with the tick?
+           
             for (var i in this.state.nodes) {
                 var node = this.state.nodes[i];
                 var threeObject = node.threeObject;
                 if (node.ticking)
+                {
                     node.ticking();
+                }
             }
         }
 
@@ -1248,6 +1269,16 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
         if (prototypes) {
             for (var i = 0; i < prototypes.length && !foundMaterial; i++) {
                 foundMaterial = (prototypes[i] == "phantomAsset-vwf");
+            }
+        }
+        return foundMaterial;
+    }
+
+    function isAvatarDefinition(prototypes) {
+        var foundMaterial = false;
+        if (prototypes) {
+            for (var i = 0; i < prototypes.length && !foundMaterial; i++) {
+                foundMaterial = (prototypes[i] == "character-vwf");
             }
         }
         return foundMaterial;
@@ -1311,7 +1342,7 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
     function FindChildByName(obj, childName, childType) {
 
 
-        if (obj.name == childName || obj.id == childName || obj.vwfID == childName || obj.name == 'node-' + childName) {
+        if (obj.name == childName) {
             return obj;
         } else if (obj.children && obj.children.length > 0) {
             var ret = null;
@@ -1761,7 +1792,7 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
 
         while (objectIDFound == -1 && objectToLookFor) {
             if (debug) {
-                this.logger.info("====>>>  vwf.model-MATH.mousePick: searching for: " + path(objectToLookFor));
+                this.logger.info("====>>>  Engine.model-MATH.mousePick: searching for: " + path(objectToLookFor));
             }
             jQuery.each(this.state.nodes, function(nodeID, node) {
                 if (node.threeObject == objectToLookFor && !node.MATHMaterial) {
@@ -2081,7 +2112,11 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
             if (node.inherits)
                 if (node.inherits.constructor == Array) {
                     for (var i = 0; i < node.inherits.length; i++) {
-                        var proto = this.createNode('', node.inherits[i], '');
+                        var proto = null;
+                        if(node.inheritFullBase)  //does the node do full construction for the base, or partial
+                          proto = this.createNode(childID, node.inherits[i], childName, sourceType, assetSource, asyncCallback);
+                        else
+                          proto = this.createNode('', node.inherits[i], '');
 
                         for (var j = 0; j < APINames.length; j++) {
                             var api = APINames[j];
@@ -2091,13 +2126,13 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
                                 node[capi + 'Internal'] = [];
                                 if (node[capi])
                                     node[capi + 'Internal'].push(node[capi]);
-                                node[capi] = eval("var f = function(arg0,arg1,arg2,arg3,arg4,arg5)\n" +
-                                    "{\n" +
+                                node[capi] = new Function(["arg0","arg1","arg2","arg3","arg4","arg5"],
+                                    
                                     "var ret = undefined;\n" +
                                     "for(var i =0; i < this['" + capi + 'Internal' + "'].length; i++)\n" +
                                     "	ret = ret !== undefined ? ret : (this['" + capi + 'Internal' + "'][i] && this['" + capi + 'Internal' + "'][i].call(this,arg0,arg1,arg2,arg3,arg4,arg5));\n" +
-                                    "return ret;\n" +
-                                    "}; f;"
+                                    "return ret;"
+                                    
                                 );
                                 if (!proto[api + 'Internal']) {
                                     if (proto[capi])

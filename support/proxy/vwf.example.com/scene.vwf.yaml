@@ -45,104 +45,9 @@ properties:
     set: |
       this.ambientColor = value;
     value: [ .5, .5, .5 ]
-  traceAPI:
-    get: |
-      if(!this._traceAPI)
-      {
-            Object.defineProperty(this,"_traceAPI",{enumerable:false,writable:true});
-            this._traceAPI = {};
-            var traceself = this._traceAPI;
-            this._traceAPI.___findVWFID = function(o)
-            {
-                if(!o) return null;
-                if(o.vwfID) return o.vwfID;
-                return traceself.___findVWFID(o.parent);
-            }
-            this._traceAPI.___getJSNode = function(o)
-            {
-              return vwf.models.javascript.nodes[o];
-            }
-            this._traceAPI.___filterResults = function(results)
-            {
-              if(!results) return results
-              results.node = traceself.___getJSNode(traceself.___findVWFID(results.object));
-              return results;
-            }
-            this._traceAPI.___buildOptions = function(options)
-            {
-              if(!options)
-              {
-                options = {ignore:[],filter:null}
-              }
-              for(var i =0; i < options.ignore.length; i++)
-              {
-                  if(options.ignore[i].constructor == String)
-                      options.ignore[i] = _Editor.findviewnode(options.ignore[i]);
-              }
-              options.ignore.push(_Editor.GetMoveGizmo());
-              options.ignore.push(_dSky);
-              options.oldfilter = options.filter || function(){return true};
-              
-              options.filter = function(o)
-              {
-                  var ret = true;
-                  if(options.oldfilter)
-                  {
-                     ret = options.oldfilter(traceself.___getJSNode(traceself.___findVWFID(o)))
-                  }
-                  if(o.passable) return false;
-                  return ret;
-              }
-              return options;
-            }
-            
-            this._traceAPI.rayCast = function(origin,direction,options)
-            {
-              var ret = _SceneManager.CPUPick(origin,direction,traceself.___buildOptions( options))
-              return this.___filterResults(ret);
-            }
-            this._traceAPI.sphereCast = function(origin,direction,options)
-            {
-              var ret = _SceneManager.sphereCast(origin,direction,options)
-              return this.___filterResults(ret);
-            }
-            this._traceAPI.frustCast = function(origin,direction,options)
-            {
-              var ret = _SceneManager.frustCast(origin,direction,options)
-              return this.___filterResults(ret);
-            }
-      }
-      return this._traceAPI;
-  audioAPI:
-    get: |
-          if(!this._audioAPI)
-          {
-            Object.defineProperty(this,"_audioAPI",{enumerable:false,writable:true});
-            this._audioAPI = {};
-            this._audioAPI.___self = this;
-            this._audioAPI.playSound=function(soundURL /* the url of the sound */, loop /* loop or not */, volume)
-            {
-                vwf.callMethod(this.id,'playSound',[soundURL,loop,volume])
-                
-            }
-            this._audioAPI.stopSound=function(soundURL /* the url of the sound */)
-            {
-                vwf.callMethod(this.id,'stopSound',[soundURL])
-               
-            }
-           this._audioAPI.pauseSound=function(soundURL /* the url of the sound */)
-            {
-                vwf.callMethod(this.id,'pauseSound',[soundURL])
-               
-            }
-            this._audioAPI.deleteSound=function(soundURL /* the url of the sound */)
-            {
-                vwf.callMethod(this.id,'deleteSound',[soundURL])
-                
-            }
-           }
-           return this._audioAPI;
-  createAPI:
+  ___traceAPI: true
+  ___audioAPI: true
+  ___createAPI:
     get: |
           if(!this._createAPI)
           {
@@ -205,40 +110,7 @@ scripts:
       //console.info( "WARNING: SCENE.getChild   CHILD NOT FOUND: " + childName );
       return undefined;
     }
-    this.findNode = function(displayName,node)
-    {
-      
-      if(displayName.internal_val) displayName = displayName.internal_val;
-      if(!node)
-      node = this;
-      
-      if(node && node.properties && node.properties.DisplayName == displayName)
-        return node;
-      var ret = null;  
-      for(var i =0; i <  node.children.length; i++)
-      {
-          ret = this.findNode(displayName,node.children[i]);
-          if(ret) return ret;
-      }
-      return ret;
-    }
-    this.findNodeByID = function(id,node)
-    {
-      if(!id) return null;
-      if(id.internal_val) id = id.internal_val;
-      if(!node)
-      node = this;
-      
-      if(node && node.id == id)
-        return node;
-      var ret = null;  
-      for(var i =0; i <  node.children.length; i++)
-      {
-          ret = this.findNodeByID(id,node.children[i]);
-          if(ret) return ret;
-      }
-      return ret;
-    }
+    
     this.getActiveCamera = function() {
       if ( !this.activeCameraComp ) {
         if ( this.getChild ) {
