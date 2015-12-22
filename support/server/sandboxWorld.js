@@ -875,7 +875,7 @@ function sandboxWorld(id, metadata)
             if(message.action == "createEvent")
             {
                 console.log(message);
-                this.state.createEvent(message.node,message.member,message.parameters[0][0],message.parameters[0][1]);
+                this.state.createEvent(message.node,message.member,message.parameters[0],message.parameters[1]);
             }
             if(message.action == "deleteEvent")
             {
