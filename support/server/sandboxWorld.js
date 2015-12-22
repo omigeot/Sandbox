@@ -617,15 +617,15 @@ function sandboxWorld(id, metadata)
             }
             if (this.status == STATUS.DEFAULT)
             {
-                this.requestState();
+                //this.requestState();
                 var self = this;
                 var distributeSim = function()
                 {
                     self.simulationManager.addClient(client);
-                    this.removeListener('stateSent', distributeSim);
+                    //this.removeListener('stateSent', distributeSim);
                     setupAvatar.apply(self);
                 }
-                this.on('stateSent', distributeSim)
+                //this.on('stateSent', distributeSim)
                     //loadClient.pending = true;
                 client.emit('m', this.messageCompress.pack(JSON.stringify(
                 {
@@ -633,6 +633,25 @@ function sandboxWorld(id, metadata)
                     "parameters": ["Requesting state from clients"],
                     "time": this.getStateTime
                 })));
+                console.log('sending state');
+                this.messageClient(client,
+                {
+                    "action": "setState",
+                    "parameters":
+                    {
+                        nodes: [this.state.getClientNodeDefinition("index-vwf")],
+                        kernel:
+                        {
+                            time: this.time()
+                        },
+                        annotations:
+                        {
+                            "1": "application"
+                        }
+                    },
+                    "time": self.time()
+                }, true, true);
+                distributeSim();
             }
             else
             {
@@ -643,6 +662,11 @@ function sandboxWorld(id, metadata)
     }
     this.requestState = function()
     {
+        //get the state from the in-memory representation, trigger state receive
+        var state = this.world.getClientNodeDefinition("index-vwf");
+
+        // the below code is used to prompt the existing clients for state. this is deprecated
+        /*
         var loadClient = this.getLoadClient();
         logger.info('load from client', 2);
         //  socket.pending = true;
@@ -666,6 +690,7 @@ function sandboxWorld(id, metadata)
         if (!this.requestTimer)
             this.requestTimer = new timeout(this);
         this.status = STATUS.PENDING_STATE;
+        */
     }
     this.queue = [];
     this.ready = 0;
@@ -836,6 +861,26 @@ function sandboxWorld(id, metadata)
                     cb2(internals);
                     return internals;
                 }
+            }
+            if(message.action == "createMethod")
+            {
+                console.log(message);
+                this.state.createMethod(message.node,message.member,message.parameters[0][0],message.parameters[0][1]);
+            }
+            if(message.action == "deleteMethod")
+            {
+                console.log(message);
+                this.state.deleteMethod(message.node,message.member);
+            }
+            if(message.action == "createEvent")
+            {
+                console.log(message);
+                this.state.createEvent(message.node,message.member,message.parameters[0][0],message.parameters[0][1]);
+            }
+            if(message.action == "deleteEvent")
+            {
+                console.log(message);
+                this.state.deleteEvent(message.node,message.member);
             }
             if (message.action == "setProperty" || message.action == "callMethod" || message.action == "fireEvent" ||message.action == "dispatchEvent")
             {

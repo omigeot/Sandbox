@@ -88,10 +88,22 @@ function defaultContext()
         //this is also where we should be notifiying the refelector of new methods, events, properties and nodes
 }
 //when a function is called, a context is created to observe changes. When the funtion return, we post changes to Engine.
-function executionContext(parentContext)
+function executionContext(parentContext,type,id,member)
 {
     this.touchedProperties = {};
     this.parent = parentContext;
+    this.type = type;
+    this.id = id;
+    this.member = member;
+}
+executionContext.TYPE = {
+    SET_PROPERTY:0,
+    CALL_METHOD:1,
+    FIRE_EVENT:2,
+    HANDLE_EVENT:3,
+    CREATE_CHILD:4,
+    DELETE_NODE:5,
+    TICK:6
 }
 executionContext.prototype.setProperty = function(id, name, val)
 {
@@ -907,9 +919,9 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
         {
             return this.contextStack[0];
         },
-        enterNewContext: function()
+        enterNewContext: function(id,type,member)
         {
-            this.contextStack.unshift(new executionContext(this.contextStack[0]))
+            this.contextStack.unshift(new executionContext(this.contextStack[0],id,type,member))
         },
         exitContext: function()
         {
@@ -1964,7 +1976,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             {
                 var inContext = this.contextStack.length > 1;
                 if (!inContext)
-                    this.enterNewContext();
+                    this.enterNewContext(nodeID,executionContext.TYPE.CALL_METHOD,methodName);
                 var ret = this.tryExec(node, body, methodParameters); //body.apply(node, methodParameters);
                 if (!inContext)
                     this.exitContext();
@@ -2165,7 +2177,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
 
             var inContext = this.contextStack.length > 1;
             if(!inContext)
-                this.enterNewContext();
+                this.enterNewContext(node,executionContext.TYPE.CALL_METHOD,method);
 
 			if (body && vwf.isSimulating(node.id)) {
                
@@ -2185,7 +2197,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
         {
             inTick = true;
             var now = performance.now();
-            this.enterNewContext();
+            this.enterNewContext(null,executionContext.TYPE.TICK,null);
             this.callMethodTraverse(this.nodes['index-vwf'], 'tick', []);
             this.exitContext();
             //console.log("Tick View: " + (performance.now() - now))
@@ -2224,7 +2236,7 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
 
                     var contextID = listener.context.id;
                     if(!vwf.isSimulating(contextID)) return; // be careful not to fire handlers on nodes that are simulated elsewhere
-                    jsDriverSelf.enterNewContext();
+                    jsDriverSelf.enterNewContext((listener.context || jsDriverSelf.nodes[0]).id,executionContext.TYPE.FIRE_EVENT,eventName);
                     var result = jsDriverSelf.tryExec(listener.context || jsDriverSelf.nodes[0],listener.handler,eventParameters)
                     jsDriverSelf.exitContext();
                     return handled || result === true || result === undefined; // interpret no return as "return true"

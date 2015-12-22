@@ -162,6 +162,9 @@ var simulationManager = function(world)
             delete this.observers[sandboxClient.id];
             return;
         }
+        if(!this.clients[sandboxClient.id])
+            return;
+        
         var oldNodes = this.clients[sandboxClient.id].nodesSimulating;
         delete this.clients[sandboxClient.id];
         //redistribute the nodes the client had been simulating

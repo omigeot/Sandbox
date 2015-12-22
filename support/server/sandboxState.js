@@ -581,6 +581,10 @@ var sandboxState = function(id, metadata, world)
         node = JSON.parse(JSON.stringify(node));
         this.reattachParents(this.findNode(nodeID));
         node = walk(node,nodeID);
+        if(nodeID == 'index-vwf')
+        {
+            node.patches = 'index.vwf';
+        }
         return node;
     }
     this.getAvatarForClient = function(userID)
@@ -631,6 +635,38 @@ var sandboxState = function(id, metadata, world)
                     cb('character-vwf-' + userID)
             });
         })
+    }
+    this.createMethod = function(nodeID,methodName,params,body)
+    {
+         var node = this.findNode(nodeID);
+         if(!node) return;
+         if(!node.methods)
+            node.methods = {};
+         node.methods[methodName] = {parameters:params,body:body}
+    }
+    this.deleteMethod = function(nodeID,methodName)
+    {
+         var node = this.findNode(nodeID);
+         if(!node) return;
+         if(!node.methods)
+            node.methods = {};
+         delete node.methods[methodName];
+    }
+    this.createEvent = function(nodeID,eventName,params,body)
+    {
+         var node = this.findNode(nodeID);
+         if(!node) return;
+         if(!node.events)
+            node.events = {};
+         node.events[eventName] = {parameters:params,body:body}
+    }
+    this.deleteEvent = function(nodeID,eventName)
+    {
+         var node = this.findNode(nodeID);
+         if(!node) return;
+         if(!node.events)
+            node.events = {};
+         delete node.events[eventName];
     }
     this.getID = function(name, childComponent)
     {

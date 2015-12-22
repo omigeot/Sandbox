@@ -1016,7 +1016,7 @@ define(['progressScreen'], function()
             this.enableSync = true;
             this.startSimulating = function(nodeID)
             {
-                alertify.error("Start Simulation of " + (this.getProperty(nodeID, "DisplayName") || nodeID));
+                console.log("Start Simulation of " + (this.getProperty(nodeID, "DisplayName") || nodeID));
                 var nodes = this.decendants(nodeID);
                 if (nodeID !== "index-vwf")
                     nodes.push(nodeID);
@@ -1320,7 +1320,7 @@ define(['progressScreen'], function()
                 {
                     this.message = fields;
                     // Advance the time.
-                    document.title = this.realTime();
+                    
                     if (this.now < fields.time && fields.action == "tick")
                     {
                         this.now = fields.time;
