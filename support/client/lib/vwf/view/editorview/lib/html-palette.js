@@ -1,4 +1,3 @@
-/* html-palette v1.1 - built on 2015-12-14 */
 'use strict';
 
 (function(jQuery, angular)
@@ -62,7 +61,7 @@
 		if(val.a === undefined) val.a = 1.0;
 		if(partial && partial.a !== undefined) val.a = partial.a;
 
-		if(partial.h!==undefined || partial.s!==undefined || partial.v!==undefined)
+		if(partial && (partial.h!==undefined || partial.s!==undefined || partial.v!==undefined))
 		{
 			if(partial.h !== undefined) val.h = partial.h;
 			if(partial.s !== undefined) val.s = partial.s;
@@ -78,7 +77,7 @@
 				+('00'+Math.round(val.g*255).toString(16)).slice(-2)
 				+('00'+Math.round(val.b*255).toString(16)).slice(-2)
 		}
-		else if(partial.r!==undefined || partial.g!==undefined || partial.b!==undefined)
+		else if(partial && (partial.r!==undefined || partial.g!==undefined || partial.b!==undefined))
 		{
 			if(partial.r !== undefined) val.r = partial.r;
 			if(partial.g !== undefined) val.g = partial.g;
@@ -678,18 +677,28 @@
 
 					palette.colorCallback = function(color, isAngular)
 					{
-						if($scope.color){
-							for(var i in color)
-								$scope.color[i] = color[i];
-						}
+						if($scope.color)
+						{
+							if(attrs.colorProfile === 'hex')
+								$scope.color.hex = color.hex;
 
-						if(!isAngular){
-							if(attrs.throttleApply){
-								if(throttleTimeout) $timeout.cancel(throttleTimeout);
-								throttleTimeout = $timeout($scope.$apply.bind($scope), attrs.throttleApply || 0);
+							else if(/^[rgbhsva]+$/.test(attrs.colorProfile)){
+								for(var i=0; i<attrs.colorProfile.length; i++)
+									$scope.color[attrs.colorProfile[i]] = color[attrs.colorProfile[i]];
 							}
 							else {
-								$scope.$apply();
+								for(var i in color)
+									$scope.color[i] = color[i];
+							}
+
+							if(!isAngular){
+								if(attrs.throttleApply){
+									if(throttleTimeout) $timeout.cancel(throttleTimeout);
+									throttleTimeout = $timeout($scope.$apply.bind($scope), attrs.throttleApply || 0);
+								}
+								else {
+									$scope.$apply();
+								}
 							}
 						}
 					};
