@@ -1,118 +1,157 @@
 
-function nevillesIteratedInterpolation (x, X, Y) {
+function nevillesIteratedInterpolation (x,order, X, Y) {
   var Q = [Y]
-  for (var i = 1; i < X.length; i++) {
+  for (var i = 1; i < order; i++) {
     Q.push([])
     for (var j = 1; j <= i; j++) {
       Q[j][i] = ((x-X[i-j])*Q[j-1][i] - (x-X[i])*Q[j-1][i-1])/( X[i] - X[i-j] )
     }
   }
-  return Q[j-1][i-1]
+  return Q[j-1][i-1] || 0;
 }
 
-function VectorQueue(length)
+function stepWiseInterpolation (x, X, Y,sm1) {
+   return Y[Y.length-1];
+}
+
+function runningAverageInterpolation (x, X, Y,sm1) {
+   var ret = 0;
+   for(var i = 0; i < Y.length;i++)
+   {
+   	ret += Y[i];
+   }
+   return ret/Y.length;
+}
+
+function linearExtrapolation(x,X,Y,arr)
+{
+	var len = Y.length-1;
+	var slope = (Y[len] - Y[len-1])/(X[len] - X[len-1]);
+	var dist = x - X[len];
+	return Y[len] + dist*slope;
+
+}
+
+function exponentialInterpolation (x, X, Y,sm1) {
+   var a = .5;
+   return a*(Y[0]) + (1-a)*sm1[sm1.length-1];
+}
+
+function exponentialInterpolationLinearExtrapolation (x, X, Y,sm1) {
+   var a = .5;
+   return a*(linearExtrapolation(x,X,Y,sm1)) + (1-a)*sm1[sm1.length-1];
+}
+
+function linearInterpolation(x,X,Y,sm1)
+{
+	return nevillesIteratedInterpolation(x,2,X,Y);
+}
+
+function quadInterpolation(x,X,Y,sm1)
+{
+	return nevillesIteratedInterpolation(x,3,X,Y);
+}
+var INTERP_TYPE = exponentialInterpolationLinearExtrapolation;
+function interpolate(time,xArr,yArr,sm1)
+{
+	return INTERP_TYPE(time,xArr,yArr,sm1);
+}
+
+function interpolationQueue(length,default_val)
 {
 	this.length = length
 	this.values = [];
 	this.times = [];
+	this.interpolatedValues = [];
 	for(var i = 0; i < this.length; i++)
 	{
-		this.values.push([0,0,0]);
+		this.values.push(default_val);
 		this.times.push(Engine.realTime());
+		this.interpolatedValues.push(default_val);
 	}
 }
-VectorQueue.prototype.push = function(val)
+interpolationQueue.prototype.push = function(val)
 {
     this.values.shift();
     this.times.shift();
     this.values.push(val);
     this.times.push(Engine.realTime());
 }
-VectorQueue.prototype.getIdxArray = function(idx)
+interpolationQueue.prototype.interpolate = function(time)
 {
-	var arr = [];
-	for(var i = 0; i < this.length; i++)
-	{
-		arr.push(this.values[i][idx]);
-	}
-	return arr;
+	var newVal = this._interpolate(time);
+	this.interpolatedValues.shift();
+	this.interpolatedValues.push(newVal);
+	return newVal;
 }
-VectorQueue.prototype.getXArray = function()
+
+function floatQueue(length)
 {
-	return this.getIdxArray(0);
+	interpolationQueue.call(this,length,0);
 }
-VectorQueue.prototype.getYArray = function()
+floatQueue.prototype = new interpolationQueue();
+floatQueue.prototype._interpolate = function(time)
 {
-	return this.getIdxArray(1);
+	return interpolate(time,this.times,this.values,this.interpolatedValues);
 }
-VectorQueue.prototype.getZArray = function()
+
+function VectorQueue(length)
 {
-	return this.getIdxArray(2);
+	interpolationQueue.call(this,length)
+	this.xQueue = new floatQueue(length);
+	this.yQueue = new floatQueue(length);
+	this.zQueue = new floatQueue(length);
+
 }
-VectorQueue.prototype.interpolate = function(time)
+VectorQueue.prototype = new interpolationQueue();
+VectorQueue.prototype._interpolate = function(time)
 {
-	var x = nevillesIteratedInterpolation(Engine.realTime()-.05,this.times,this.getXArray());
-	var y = nevillesIteratedInterpolation(Engine.realTime()-.05,this.times,this.getYArray());
-	var z = nevillesIteratedInterpolation(Engine.realTime()-.05,this.times,this.getZArray());
+	var x = this.xQueue.interpolate(time)
+	var y = this.yQueue.interpolate(time)
+	var z = this.zQueue.interpolate(time)
 	return [x,y,z];
+}
+VectorQueue.prototype.push = function(val)
+{
+	this.xQueue.push(val[0]);
+	this.yQueue.push(val[1]);
+	this.zQueue.push(val[2]);
 }
 
 function QuaternionQueue(length)
 {
-	this.length = length
-	this.values = [];
-	this.times = [];
-	for(var i = 0; i < this.length; i++)
-	{
-		this.values.push([0,0,0,1]);
-		this.times.push(Engine.realTime());
-	}
+	this.xQueue = new floatQueue(length);
+	this.yQueue = new floatQueue(length);
+	this.zQueue = new floatQueue(length);
+	this.wQueue = new floatQueue(length);
+	interpolationQueue.call(this,length)
+}
+QuaternionQueue.prototype = new interpolationQueue();
+QuaternionQueue.prototype._interpolate = function(time)
+{
+	var x = this.xQueue.interpolate(time)
+	var y = this.yQueue.interpolate(time)
+	var z = this.zQueue.interpolate(time)
+	var w = this.wQueue.interpolate(time)
+	return Quaternion.normalize([x,y,z,w],[]);
 }
 QuaternionQueue.prototype.push = function(val)
 {
-    this.values.pop();
-    this.times.pop();
-    this.values.unshift(val);
-    this.times.unshift(Engine.realTime());
+	this.xQueue.push(val[0]);
+	this.yQueue.push(val[1]);
+	this.zQueue.push(val[2]);
+	this.wQueue.push(val[3]);
 }
-QuaternionQueue.prototype.getIdxArray = function(idx)
-{
-	var arr = [];
-	for(var i = 0; i < this.length; i++)
-	{
-		arr.push(this.values[i][idx]);
-	}
-	return arr;
-}
-QuaternionQueue.prototype.getXArray = function()
-{
-	return this.getIdxArray(0);
-}
-QuaternionQueue.prototype.getYArray = function()
-{
-	return this.getIdxArray(1);
-}
-QuaternionQueue.prototype.getZArray = function()
-{
-	return this.getIdxArray(2);
-}
-QuaternionQueue.prototype.interpolate = function(time)
-{
-	var x = nevillesIteratedInterpolation(Engine.realTime(),this.times,this.getXArray());
-	var y = nevillesIteratedInterpolation(Engine.realTime(),this.times,this.getYArray());
-	var z = nevillesIteratedInterpolation(Engine.realTime(),this.times,this.getZArray());
-	var w = nevillesIteratedInterpolation(Engine.realTime(),this.times,this.getZArray());
-	return [x,y,z,w];
-}
+
 
 function viewInterpolationNode(id,childExtendsID,threejsNode){
 	this.id = id;
 	this.threejsNode = threejsNode;
 	this.childExtendsID = childExtendsID;
 	this.properties={};
-	this.positionQueue = new VectorQueue(3);
-	this.ScaleQueue = new VectorQueue(3);
-	this.quaternionQueue = new QuaternionQueue(3);
+	this.positionQueue = new VectorQueue(5);
+	this.scaleQueue = new VectorQueue(5);
+	this.quaternionQueue = new QuaternionQueue(5);
 	this.transformBackup = null;
 	this.animationFrameBackup = null;
 }
@@ -122,8 +161,17 @@ viewInterpolationNode.prototype.tick = function()
 }
 viewInterpolationNode.prototype.pushTransform = function(newTransform)
 {
-	var position = [newTransform[12],newTransform[13],newTransform[14]];
-	this.positionQueue.push(position);
+	var mat = new THREE.Matrix4();
+	mat.elements.set(newTransform);
+
+	var position = new THREE.Vector3();
+	var scale = new THREE.Vector3();
+	var rotation = new THREE.Quaternion();
+	mat.decompose(position,rotation,scale);
+
+	this.positionQueue.push([position.x,position.y,position.z]);
+	this.scaleQueue.push([scale.x,scale.y,scale.z]);
+	this.quaternionQueue.push([rotation.x,rotation.y,rotation.z,rotation.w]);
 	//get quat
 	//push quat
 }
@@ -143,31 +191,34 @@ viewInterpolationNode.prototype.getProperty = function(propertyName)
 
 viewInterpolationNode.prototype.interpolate = function()
 {
+
+
 	var viewnode = this.threejsNode;
 	if(!viewnode) return;
-	var position = this.positionQueue.interpolate();
 
-	if(Engine.propertyAge(this.id,'transform')* 1000 > 50)
+	if(Engine.realTime() - this.positionQueue.xQueue.times[4] > .05)
 	{
-		var newTransform = matCpy(this.getProperty('transform'));
-		var position = [newTransform[12],newTransform[13],newTransform[14]];
-		this.positionQueue.push(position);
+		this.pushTransform(matCpy(this.getProperty('transform')))
 	}
 
-	var oldTransform = matCpy(this.getProperty('transform'));
-	oldTransform[12] = position[0];
-	oldTransform[13] = position[1];
-	oldTransform[14] = position[2];
+	var position = this.positionQueue.interpolate(Engine.realTime());
+	var rotation = this.quaternionQueue.interpolate(Engine.realTime());
+	var scale = this.scaleQueue.interpolate(Engine.realTime());
+
+	var mat = new THREE.Matrix4();
+	mat.compose(new THREE.Vector3(position[0],position[1],position[2]),new THREE.Quaternion(rotation[0],rotation[1],rotation[2],rotation[3]),new THREE.Vector3(scale[0],scale[1],scale[2]))
+
+
 	if(viewnode.setTransformInternal)
 	{
-		viewnode.setTransformInternal(oldTransform,false);	
+		viewnode.setTransformInternal(mat.elements,false);	
 	}
 }
 viewInterpolationNode.prototype.restore = function()
 {
 	var viewnode = this.threejsNode;
 	if(!viewnode) return;
-	var position = this.positionQueue.interpolate();
+	
 	
 	var oldTransform = matCpy(this.getProperty('transform'));
 	if(viewnode.setTransformInternal)
