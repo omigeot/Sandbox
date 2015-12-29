@@ -38,7 +38,7 @@ function matset(newv, old) {
 
 var pfx = ["webkit", "moz", "ms", "o", ""];
 
-define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/threejs/ThermalCamEffect", "vwf/model/threejs/VRRenderer", "vwf/view/threejs/editorCameraController", "vwf/view/threejs/SandboxRenderer"], function(module, view) {
+define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/OculusRiftEffect", "vwf/model/threejs/ThermalCamEffect", "vwf/model/threejs/VRRenderer", "vwf/view/threejs/editorCameraController", "vwf/view/threejs/SandboxRenderer"], function(module, view,viewNode) {
     var stats;
     var NORMALRENDER = 0;
     var STEREORENDER = 1;
@@ -457,149 +457,17 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
                 }
             }
         },
-        resetInterpolation: function()
-        {
-        	var gizmoHead = _Editor.GetMoveGizmo().getGizmoHead();
-            if (gizmoHead.matrix)
-            {
-                this.gizmoLastTickTransform = this.gizmoThisTickTransform;
-                this.gizmoThisTickTransform = gizmoHead.matrix.clone();
-            }
-
-            var keys = Object.keys(this.nodes);
-
-            var EngineTime = Engine.time();
-            for (var j = 0; j < keys.length; j++)
-            {
-                var i = keys[j];
-                var thisNode = this.nodes[i];
-                var stateNode = this.state.nodes[i];
-                //don't do interpolation for static objects
-                if (thisNode.isStatic) continue;
-                if (thisNode.lastTransformStep + 1 < EngineTime)
-                {
-                    thisNode.lastTickTransform = null;
-                    thisNode.lastFrameInterp = null;
-                    thisNode.thisTickTransform = null;
-                }
-                else if (stateNode && stateNode.gettingProperty)
-                {
-                    thisNode.lastTickTransform = matset(thisNode.lastTickTransform, thisNode.thisTickTransform);
-                    thisNode.thisTickTransform = matset(thisNode.thisTickTransform, stateNode.gettingProperty('transform'));
-                }
-                if (stateNode && stateNode.gettingProperty)
-                {
-                    if (thisNode.lastAnimationStep + 1 < EngineTime)
-                    {
-                        thisNode.lastAnimationFrame = null;
-                        thisNode.thisAnimationFrame = null;
-                    }
-                    else
-                    {
-                        thisNode.lastAnimationFrame = thisNode.thisAnimationFrame;
-                        thisNode.thisAnimationFrame = stateNode.gettingProperty('animationFrame');
-                    }
-
-                }
-                if (window._Editor && thisNode && window._Editor.isSelected(i))
-                {
-                    thisNode.lastAnimationFrame = null;
-                    thisNode.thisAnimationFrame = null;
-                    thisNode.lastTickTransform = null;
-                    thisNode.lastFrameInterp = null;
-                    thisNode.thisTickTransform = null;
-                }
-            }
-
-
-        },
-        interpolatOneNode:function(i,lerpStep,step)
-        {
-
-
-             //don't do interpolation for static objects
-                if (this.nodes[i].isStatic) return;
-
-                var interp = null;
-                var last = this.nodes[i].lastTickTransform;
-                var now = this.nodes[i].thisTickTransform;
-                if (last && now) {
-
-                    interp = matset(interp, last);
-                    interp = this.matrixLerp(last, now, step, interp);
-
-                    this.nodes[i].currentTickTransform = matset(this.nodes[i].currentTickTransform, this.state.nodes[i].gettingProperty('transform'));
-                    if (this.state.nodes[i].setTransformInternal) {
-
-
-                        if (this.nodes[i].lastFrameInterp)
-                            interp = this.matrixLerp(this.nodes[i].lastFrameInterp, now, lerpStep, interp);
-                        this.state.nodes[i].setTransformInternal(interp, false);
-                        this.nodes[i].lastFrameInterp = matset(this.nodes[i].lastFrameInterp || [], interp);
-                    }
-
-
-                }
-
-                var lastF = this.nodes[i].lastAnimationFrame;
-                var nowF = this.nodes[i].thisAnimationFrame;
-                if (lastF && nowF && Math.abs(nowF - lastF) < 3) {
-
-                    var interpA = 0;
-
-
-                    interpA = this.lerp(lastF, nowF, step);
-
-
-                    this.nodes[i].currentAnimationFrame = this.state.nodes[i].gettingProperty('animationFrame');
-                    if (this.state.nodes[i].setAnimationFrameInternal) {
-                        if (this.state.nodes[i].lastAnimationInterp)
-                            interpA = this.lerp(this.state.nodes[i].lastAnimationInterp, nowF, lerpStep);
-                        
-                        this.state.nodes[i].backupTransforms(this.nodes[i].currentAnimationFrame);
-                        this.state.nodes[i].setAnimationFrameInternal(interpA, false);
-                        this.state.nodes[i].lastAnimationInterp = interpA || 0;
-                    }
-
-
-                } else if (this.state.nodes[i]) {
-                    this.state.nodes[i].lastAnimationInterp = null;
-                }
-
-        },
+        
         setInterpolatedTransforms: function(deltaTime) {
-
-
-            //deltaTime = Math.min(deltaTime,this.realTickDif)
-            this.tickTime += deltaTime || 0;
-
-
-            var hit = 0;
-            while (this.tickTime > 50) {
-                hit++;
-                this.tickTime -= 50;
-            }
-            var step = (this.tickTime) / (50);
-            if (hit === 1) {
-
-
-                this.resetInterpolation();
-
-
-            }
-
-            var lerpStep = Math.min(1, .2 * (deltaTime / 16.6)); //the slower the frames ,the more we have to move per frame. Should feel the same at 60 0r 20
-            var keys = Object.keys(this.nodes);
-            
+  			
+  			var keys = Object.keys(this.nodes);
             for (var j = 0; j < keys.length; j++) {
                 var i = keys[j];
-
-                this.interpolatOneNode(i,lerpStep,step);
-
-
+                var node = this.nodes[i];
+                if(!node) return;
+                node.interpolate();
             }
             _dScene.updateMatrixWorld();
-
         },
         windowResized: function() {
             //called on window resize by windowresize.js
@@ -614,38 +482,12 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
         },
         restoreTransforms: function() {
 
-            /*if (this.currentGizmoTransform) {
-                _Editor.GetMoveGizmo().parent.matrix = this.currentGizmoTransform;
-                _Editor.GetMoveGizmo().parent.updateMatrixWorld(true);
-            }*/
-
             var keys = Object.keys(this.nodes);
-
             for (var j = 0; j < keys.length; j++) {
                 var i = keys[j];
-                //don't do interpolation for static objects
-                if (this.nodes[i].isStatic) continue;
-
-                var now = this.nodes[i].currentTickTransform;
-                this.nodes[i].currentTickTransform = null;
-                if (now) {
-
-                    if (this.state.nodes[i].setTransformInternal)
-                        this.state.nodes[i].setTransformInternal(now, false);
-                }
-
-                now = this.nodes[i].currentAnimationFrame;
-                this.nodes[i].currentAnimationFrame = null;
-                if (now != null) {
-                    if (this.state.nodes[i].setAnimationFrameInternal)
-                    {
-                        
-                        //this.state.nodes[i].restoreTransforms();
-                        this.state.nodes[i].setAnimationFrameInternal(now, false);
-                    }
-
-                }
-
+                var node = this.nodes[i];
+                if(!node) return;
+                node.restore();
             }
             _dScene.updateMatrixWorld();
         },
@@ -672,6 +514,13 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
             //so, here's what we'll do. Since the sim state cannot advance until tick, we will update on tick. 
             //but, ticks aren't fired when the scene in paused. In that case, we'll do it every frame.
             _SceneManager.update();
+            var keys = Object.keys(this.nodes);
+            for (var j = 0; j < keys.length; j++) {
+                var i = keys[j];
+                var node = this.nodes[i];
+                if(!node) return;
+                node.tick();
+            }
         },
         deletedNode: function(childID) {
             delete this.nodes[childID];
@@ -686,13 +535,15 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
             childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
 
             if (childID != 'http-vwf-example-com-camera-vwf-camera')
-                this.nodes[childID] = {
+                this.nodes[childID] = new viewNode(childID,childExtendsID,this.state.nodes[childID]);
+
+            /*{
                     id: childID,
                     extends: childExtendsID,
                     properties: {},
                     lastTransformStep: 0,
                     lastAnimationStep: 0
-                };
+                };*/
 
             //man VWF makes this stuff so hard. Why must we deal with this? Who though that a game engine needed prototypical inheritance?
             //why must every driver deal with this crap? The design of this thing is ridiculous.
@@ -924,13 +775,10 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
             if (!node) return;
 
             var value = undefined;
-            if (this.nodes[nodeID])
-                this.nodes[nodeID].properties[propertyName] = propertyValue;
+            if (this.nodes)
+                this.nodes[nodeID].setProperty(propertyName, propertyValue);
 
-            if (propertyName == 'transform')
-                this.nodes[nodeID].lastTransformStep = Engine.time();
-            if (propertyName == 'animationFrame')
-                this.nodes[nodeID].lastAnimationStep = Engine.time();
+            
 
             node[propertyName] = propertyValue;
 
@@ -1338,6 +1186,7 @@ define(["module", "vwf/view", "vwf/model/threejs/OculusRiftEffect", "vwf/model/t
 
             requestAnimFrame(renderScene);
             _PerformanceManager.preFrame();
+            
             //lets not render when the quere is not ready. This prevents rendering of meshes that must have their children
             //loaded before they can render
             if (!window._dRenderer) {
