@@ -120,28 +120,24 @@ VectorQueue.prototype.push = function(val)
 
 function QuaternionQueue(length)
 {
-	this.xQueue = new floatQueue(length);
-	this.yQueue = new floatQueue(length);
-	this.zQueue = new floatQueue(length);
-	this.wQueue = new floatQueue(length);
 	interpolationQueue.call(this,length)
 }
 QuaternionQueue.prototype = new interpolationQueue();
 QuaternionQueue.prototype._interpolate = function(time)
 {
-	var x = this.xQueue.interpolate(time)
-	var y = this.yQueue.interpolate(time)
-	var z = this.zQueue.interpolate(time)
-	var w = this.wQueue.interpolate(time)
-	return Quaternion.normalize([x,y,z,w],[]);
+	var Y = this.values;
+	var X = this.times;
+	var x = time;
+	var len = Y.length-1;
+
+	var slope = Quaternion.scale(Quaternion.add(Y[len],Quaternion.negate(Y[len-1],[]),[]),1/(X[len] - X[len-1]),[]); //(Y[len] - Y[len-1])/(X[len] - X[len-1]);
+	var dist = x - X[len];
+	var extrapolated = Quaternion.add( Y[len] , Quaternion.scale(slope,dist,[]),[]);
+
+	var ret = Quaternion.slerp(this.interpolatedValues[len] || [0,0,0,1],extrapolated,.9,[]);
+	return Quaternion.normalize(ret,[]);
 }
-QuaternionQueue.prototype.push = function(val)
-{
-	this.xQueue.push(val[0]);
-	this.yQueue.push(val[1]);
-	this.zQueue.push(val[2]);
-	this.wQueue.push(val[3]);
-}
+
 
 
 function viewInterpolationNode(id,childExtendsID,threejsNode){
