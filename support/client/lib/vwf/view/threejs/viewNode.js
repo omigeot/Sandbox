@@ -192,6 +192,9 @@ viewInterpolationNode.prototype.interpolate = function()
 	var viewnode = this.threejsNode;
 	if(!viewnode) return;
 
+	if(_Editor.isSelected(this.id))
+		return;
+
 	if(Engine.realTime() - this.positionQueue.xQueue.times[4] > .05)
 	{
 		this.pushTransform(matCpy(this.getProperty('transform')))
