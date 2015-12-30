@@ -1478,6 +1478,7 @@ define(['progressScreen'], function()
                         Engine.nodesCoSimulating.shift();
                     });
                     Engine.callMethod(Engine.application(), 'ready', []);
+                    if(socket) socket.event(socket.EVENTS.READY)
                     queue.resume();
                     callback_async && callback_async();
                 });

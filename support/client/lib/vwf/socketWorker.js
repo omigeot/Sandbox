@@ -178,4 +178,8 @@ onmessage = function(e)
 		socketBytesSent += 34 + getUTF8Length(message.message);
 		socket.emit('m',message.message)
 	}
+	if (message.type == EVENT)
+	{
+		socket.emit(message.event.name,message.event.params);
+	}
 }

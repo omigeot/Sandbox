@@ -120,7 +120,7 @@ VectorQueue.prototype.push = function(val)
 
 function QuaternionQueue(length)
 {
-	interpolationQueue.call(this,length)
+	interpolationQueue.call(this,length,[0,0,1,0]);
 }
 QuaternionQueue.prototype = new interpolationQueue();
 QuaternionQueue.prototype._interpolate = function(time)

@@ -107,7 +107,15 @@ var simulationManager = function(world)
         }
     }.bind(this);
     this.postLearnedMappingsHandle = setInterval(this.postLearnedMappings, 1000);
+    //defer the simulation assignment until the client loads the state
     this.addClient = function(sandboxClient)
+    {
+        var self = this;
+        sandboxClient.on('ready',function(){
+            self.addClient_internal(sandboxClient);
+        })
+    }
+    this.addClient_internal = function(sandboxClient)
     {
         console.log("simulationManager.addClient " + sandboxClient.id )
         var newClient = new simClient(sandboxClient, this);

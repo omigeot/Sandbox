@@ -91,6 +91,12 @@ var sandboxClient = function(socket)
         if (self.world)
             self.world.disconnect(self);
     });
+    //the client signals the server when it has finished loading the state. The simulation manager does not distribute to the client until the client reports ready
+    socket.on('clientReady', function()
+    {
+        console.log('client is ready');
+        self.trigger("ready");
+    });
 
 }
 
