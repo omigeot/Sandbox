@@ -1775,6 +1775,7 @@ THREE.Bone.prototype.buildSelectionHandles = function() {
         dist = dist2;
     }
 
+ //Can we find some better way to do intersections with skinned meshes?
     this.debugDist = dist;
 
     var d = this.debugDist;
@@ -1819,9 +1820,11 @@ THREE.SkinnedMesh.prototype.GetBoundingBox = function(local) {
 }
 
 THREE.Bone.prototype.GetBoundingBox = function(local) {
+    /*
     if (!this.debug) {
         this.buildSelectionHandles();
     }
+    */
     return THREE.Object3D.prototype.GetBoundingBox.call(this, local);
 }
 THREE.Object3D.prototype.getBoundingBox = THREE.Object3D.prototype.GetBoundingBox;
