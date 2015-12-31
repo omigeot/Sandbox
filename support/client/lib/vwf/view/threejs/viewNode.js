@@ -41,8 +41,12 @@ function exponentialInterpolation(x, X, Y, sm1)
 	return a * (Y[0]) + (1 - a) * sm1[sm1.length - 1];
 }
 
+var DISCONTINUITY_THRESHOLD = 2;
 function exponentialInterpolationLinearExtrapolation(x, X, Y, sm1)
 {
+	var len = Y.length -1;
+	if(Math.abs(Y[len] - Y[len-1]) > DISCONTINUITY_THRESHOLD)
+		return Y[len];
 	var a = .5;
 	return a * (linearExtrapolation(x, X, Y, sm1)) + (1 - a) * sm1[sm1.length - 1];
 }
