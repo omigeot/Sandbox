@@ -43,6 +43,7 @@
         
         this.backupTransforms =function(time)
         {
+            if(this.backupTime == time) return;
             this.backupTime = time;
             var skins = this.getSkin(this.getRoot(),this.getRoot());
             for (var i = 0; i < skins.length; i++) {
