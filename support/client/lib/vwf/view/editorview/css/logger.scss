@@ -1,0 +1,22 @@
+.logger
+{
+	
+	background: #444;
+	
+	.loggerLog {
+		    color: white;
+    		font-family: sans-serif;
+	}
+}
+
+.loggerLog::before {
+    content: "Log: ";
+    Width: 10em;
+    color: lightGreen;
+}
+
+.loggerWarn::before {
+    content: "Warn: ";
+    Width: 10em;
+    color: lightOrange;
+}

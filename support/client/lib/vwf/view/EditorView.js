@@ -21,6 +21,7 @@ define([
 	"vwf/view/editorview/lib/alertify.js-0.3.9/src/alertify",
 	"vwf/view/editorview/angular-app",
 	"vwf/view/editorview/Menubar",
+    "vwf/view/editorview/log",
 
 	// other things that need to be loaded first
 	"touch.js",
@@ -53,7 +54,7 @@ define([
 	"vwf/view/editorview/JSONPrompt",
      "vwf/view/localization/translate"
 	//"vwf/view/editorview/panelEditor",
-], function(module, version, view, alertify, angular_app, Menubar) {
+], function(module, version, view, alertify, angular_app, Menubar,log) {
     return view.load(module, {
         // == Module Definition ====================================================================
         needTools: function()
@@ -66,6 +67,8 @@ define([
         },
         initialize: function() {
             window._EditorView = this;
+            //intialize the logger interface
+            log.initialize();
             if (!window._EditorInitialized) {
 
 				$(document).keydown(function(e){

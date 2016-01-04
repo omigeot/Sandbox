@@ -1,0 +1,21 @@
+<html>
+<head>
+<script type="text/javascript">
+Math.SecureRandom = Math.random;
+</script>
+<link rel="stylesheet" type="text/css" href="./vwfdatamanager.svc/geteditorcss">
+<script type="text/javascript" src="./lib/jquery-2.0.3.min.js"></script>
+	<script type="text/javascript">
+	window.log = function(text)
+	{
+		$('#logMain').append("<div class='loggerLog' >" + text +"</div>");
+	}
+	</script>
+</head>
+
+<body class="logger">
+	<div id="logMain">
+	</div>
+</body>
+
+</html>
