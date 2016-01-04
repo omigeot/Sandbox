@@ -30,6 +30,10 @@ function runningAverageInterpolation(x, X, Y, sm1)
 function linearExtrapolation(x, X, Y, arr)
 {
 	var len = Y.length - 1;
+	if((X[len] - X[len - 1]) == 0)
+	{
+		return Y[len];
+	}
 	var slope = (Y[len] - Y[len - 1]) / (X[len] - X[len - 1]);
 	var dist = x - X[len];
 	return Y[len] + dist * slope;
@@ -37,8 +41,10 @@ function linearExtrapolation(x, X, Y, arr)
 
 function exponentialInterpolation(x, X, Y, sm1)
 {
-	var a = .5;
-	return a * (Y[0]) + (1 - a) * sm1[sm1.length - 1];
+	var len = Y.length -1;
+	var a = .1;
+	
+	return a * (Y[len]) + (1 - a) * sm1[sm1.length - 1];
 }
 
 var DISCONTINUITY_THRESHOLD = 2;
@@ -62,18 +68,22 @@ function quadInterpolation(x, X, Y, sm1)
 }
 var INTERP_TYPE = exponentialInterpolationLinearExtrapolation;
 
-function interpolate(time, xArr, yArr, sm1)
+function interpolate(time, xArr, yArr, sm1,id)
 {
-	return INTERP_TYPE(time, xArr, yArr, sm1);
+	if(Engine.isSimulating(id))
+	 	return exponentialInterpolationLinearExtrapolation(time, xArr, yArr, sm1);
+	else
+	 	return exponentialInterpolation(time, xArr, yArr, sm1); 
 }
 
-function interpolationQueue(length, default_val)
+function interpolationQueue(length, default_val,id)
 {
 	this.length = length
 	this.values = [];
 	this.times = [];
 	this.interpolatedValues = [];
 	this.setCount = 0;
+	this.id = id;
 	for (var i = 0; i < this.length; i++)
 	{
 		this.values.push(default_val);
@@ -86,7 +96,7 @@ interpolationQueue.prototype.push = function(val)
 	this.values.shift();
 	this.times.shift();
 	this.values.push(val);
-	this.times.push(Engine.realTime());
+	this.times.push(performance.now());
 	this.setCount++;
 }
 interpolationQueue.prototype.interpolate = function(time)
@@ -99,22 +109,22 @@ interpolationQueue.prototype.interpolate = function(time)
 	return newVal;
 }
 
-function floatQueue(length)
+function floatQueue(length,id)
 {
-	interpolationQueue.call(this, length, 0);
+	interpolationQueue.call(this, length, 0,id);
 }
 floatQueue.prototype = new interpolationQueue();
 floatQueue.prototype._interpolate = function(time)
 {
-	return interpolate(time, this.times, this.values, this.interpolatedValues);
+	return interpolate(time, this.times, this.values, this.interpolatedValues,this.id);
 }
 
-function VectorQueue(length)
+function VectorQueue(length,id)
 {
-	interpolationQueue.call(this, length, [0, 0, 0])
-	this.xQueue = new floatQueue(length);
-	this.yQueue = new floatQueue(length);
-	this.zQueue = new floatQueue(length);
+	interpolationQueue.call(this, length, [0, 0, 0],id)
+	this.xQueue = new floatQueue(length,id);
+	this.yQueue = new floatQueue(length,id);
+	this.zQueue = new floatQueue(length,id);
 }
 VectorQueue.prototype = new interpolationQueue();
 VectorQueue.prototype._interpolate = function(time)
@@ -132,9 +142,9 @@ VectorQueue.prototype.push = function(val)
 	this.setCount++;
 }
 
-function QuaternionQueue(length)
+function QuaternionQueue(length,id)
 {
-	interpolationQueue.call(this, length, [0, 0, 1, 0]);
+	interpolationQueue.call(this, length, [0, 0, 1, 0],id);
 }
 QuaternionQueue.prototype = new interpolationQueue();
 QuaternionQueue.prototype._interpolate = function(time)
@@ -156,13 +166,22 @@ function viewInterpolationNode(id, childExtendsID, threejsNode)
 	this.threejsNode = threejsNode;
 	this.childExtendsID = childExtendsID;
 	this.properties = {};
-	this.positionQueue = new VectorQueue(5);
-	this.scaleQueue = new VectorQueue(5);
-	this.quaternionQueue = new QuaternionQueue(5);
-	this.animationFrameQueue = new floatQueue(5);
+	this.positionQueue = new VectorQueue(5,id);
+	this.scaleQueue = new VectorQueue(5,id);
+	this.quaternionQueue = new QuaternionQueue(5,id);
+	this.animationFrameQueue = new floatQueue(5,id);
 	this.enabled = true;
 }
-viewInterpolationNode.prototype.tick = function() {}
+viewInterpolationNode.prototype.tick = function() {
+	if (Engine.getPropertyFast(Engine.application(),'playMode') == 'play' && Engine.isSimulating(this.id))
+	{
+	var viewnode = this.threejsNode;
+	if (!viewnode) return;
+	this.pushTransform(matCpy(this.getProperty('transform')));
+	this.animationFrameQueue.push(this.getProperty('animationFrame'));
+	}
+
+}
 viewInterpolationNode.prototype.pushTransform = function(newTransform)
 {
 	var mat = new THREE.Matrix4();
@@ -179,17 +198,22 @@ viewInterpolationNode.prototype.pushTransform = function(newTransform)
 }
 viewInterpolationNode.prototype.setProperty = function(propertyName, propertyValue)
 {
+
+	if (propertyName == 'playMode')
+	{
+		this.properties[propertyName] = propertyValue;
+	}
 	if (propertyName == 'transform')
 	{
 		this.properties[propertyName] = matCpy(propertyValue);
-		if (Engine.realTime() - this.positionQueue.xQueue.times[4] > .04)
-			this.pushTransform(matCpy(propertyValue));
+		if(!Engine.isSimulating(this.id))
+		{
+			this.pushTransform(matCpy(this.getProperty('transform')))
+		}
 	}
 	if (propertyName == 'animationFrame')
 	{
 		this.properties[propertyName] = propertyValue;
-		if (Engine.realTime() - this.animationFrameQueue.times[4] > .04)
-			this.animationFrameQueue.push(propertyValue);
 	}
 }
 viewInterpolationNode.prototype.getProperty = function(propertyName)
@@ -203,15 +227,16 @@ viewInterpolationNode.prototype.interpolate = function()
 	if (!viewnode) return;
 	//	if(_Editor.isSelected(this.id))
 	//		return;
-	if (Engine.realTime() - this.positionQueue.xQueue.times[4] > .05)
+	if (Engine.isSimulating(this.id) && (Engine.getPropertyFast(Engine.application(),'playMode') != 'play' && performance.now() - this.positionQueue.xQueue.times[4] > .05))
 	{
 		this.pushTransform(matCpy(this.getProperty('transform')))
 	}
+
 	if (viewnode.setTransformInternal)
 	{
-		var position = this.positionQueue.interpolate(Engine.realTime());
-		var rotation = this.quaternionQueue.interpolate(Engine.realTime());
-		var scale = this.scaleQueue.interpolate(Engine.realTime());
+		var position = this.positionQueue.interpolate(performance.now());
+		var rotation = this.quaternionQueue.interpolate(performance.now());
+		var scale = this.scaleQueue.interpolate(performance.now());
 		var mat = new THREE.Matrix4();
 		mat.compose(new THREE.Vector3(position[0], position[1], position[2]), new THREE.Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]), new THREE.Vector3(scale[0], scale[1], scale[2]))
 		viewnode.setTransformInternal(mat.elements, false);
@@ -220,7 +245,7 @@ viewInterpolationNode.prototype.interpolate = function()
 	{
 		//so, given that we don't have to have determinism, do we really need to backup and restore?
 		//viewnode.backupTransforms(this.getProperty('animationFrame'));
-		viewnode.setAnimationFrameInternal(this.animationFrameQueue.interpolate(Engine.realTime()),false);
+		viewnode.setAnimationFrameInternal(this.animationFrameQueue.interpolate(performance.now()),false);
 	}
 }
 viewInterpolationNode.prototype.restore = function()
