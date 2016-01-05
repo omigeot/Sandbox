@@ -8,23 +8,44 @@ Math.SecureRandom = Math.random;
 	<script type="text/javascript">
 
 	var paused = false;
+	var commandBuffer = [];
+	commandPointer = 0;
+	function commandup()
+	{
+		commandPointer++;
+		if(commandPointer > commandBuffer.length -1)
+			commandPointer--;
+		$('#consoleInput').val(commandBuffer[commandPointer]);
+	}
+	function commanddown()
+	{
+		commandPointer--;
+		if(commandPointer < 0)
+			commandPointer = 0;
+		$('#consoleInput').val(commandBuffer[commandPointer]);
+	}
 	function prepString(text)
 	{
+		if(text == undefined)
+			return "undefined";
 		if (text.constructor == String)
 			return text;
 		if (text.constructor == Number)
 			return text;
 		if (text.constructor == Boolean)
 			return text;
-		if (text.constructor == window.opener.Array)
+		if (text.constructor == window.opener.Array || text.constructor == Array)
 		{
 			var ret = "";
 			for (var i in text)
 				ret += prepString(text[i]) + ", ";
 			return ret;
 		}
-		if (text.constructor == window.opener.Object)
+		if (text.constructor == window.opener.Object || text.constructor == Object)
 			return JSON.stringify(text, 2);
+		if (text.constructor == window.opener.Function || text.constructor == Function)
+			return text.toString()
+		return text;
 	}
 	var logType = ["log", "info", "warn", "error", "debug"];
 	for (var i in logType)
@@ -40,11 +61,41 @@ Math.SecureRandom = Math.random;
 			}
 		})()
 	}
+	function evaluate(text)
+	{
+		if(commandBuffer[commandBuffer.length -1] !== text)
+			commandBuffer.push(text);	
+		commandPointer = commandBuffer.length ;
+		try{
+			window.info(window.opener.eval(text));
+		}
+		catch(e)
+		{
+			window.error(e);
+		}
+		
+	}
 	$(window).ready(function()
 	{
 		$('#logClear').click(function()
 		{
 			$('#logMain').html("");
+		})
+		$('#consoleInput').keyup(function(e)
+		{
+			if(e.keyCode == 13)
+			{
+				evaluate($('#consoleInput').val());
+				$('#consoleInput').val("");
+			}
+			if(e.keyCode == 38)
+			{
+				commanddown();
+			}
+			if(e.keyCode == 40)
+			{
+				commandup();
+			}
 		})
 		$('#logPause').click(function()
 		{
@@ -63,9 +114,10 @@ Math.SecureRandom = Math.random;
 </head>
 
 <body class="logger">
-	<div id="logMeun"><div id="logClear" class="logButton">Clear</div><div id="logPause" class="logButton">Pause</div></div></div>
+	<div id="logMenu"><div id="logClear" class="logButton">Clear</div><div id="logPause" class="logButton">Pause</div></div></div>
 	<div id="logMain">
 	</div>
+	<div id="logConsole"><input type='text' id="consoleInput" class="logButton"></input></div></div>
 </body>
 
 </html>
