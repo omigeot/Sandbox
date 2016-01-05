@@ -88,7 +88,7 @@ function defaultContext()
         //this is also where we should be notifiying the refelector of new methods, events, properties and nodes
 }
 //when a function is called, a context is created to observe changes. When the funtion return, we post changes to Engine.
-function executionContext(parentContext,type,id,member)
+function executionContext(parentContext,id,type,member)
 {
     this.touchedProperties = {};
     this.parent = parentContext;
