@@ -56,7 +56,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			MenuManageAssets: function(e){
 				$('#manageAssetsDialog').dialog('open');
 			},
-
+			MenuConsole:function(e)
+			{
+				logger.open();
+			},
 			MenuAssetsSaveAsEntity: function(e){
 				manageAssets.uploadSelectedEntity();
 				$('#manageAssetsDialog').dialog('open');

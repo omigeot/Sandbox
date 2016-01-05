@@ -2,21 +2,73 @@
 {
 	
 	background: #444;
-	
-	.loggerLog {
-		    color: white;
-    		font-family: sans-serif;
-	}
+	font-family: monospace;
+    font-size:12px;
+    margin:0px;
+    color: white;
+	.logButton
+    {
+        display: inline-block;
+        margin: .2em;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    .logButton:hover
+    {
+        color:blue;
+    }
+    .logButton:active
+    {
+        color:lightblue;
+    }
 }
 
-.loggerLog::before {
+#logMain {
+    div {
+        border-bottom: 1px solid #4a4a4a;
+    }
+    div:hover {
+            background:black;
+            
+    }
+    position: ABSOLUTE;
+    top: 2em;
+    height: calc(100% - 2em);
+    display: block;
+    overflow: scroll;
+    width: 100%;
+}
+.loggerlog::before {
     content: "Log: ";
-    Width: 10em;
+    width: 4em;
     color: lightGreen;
+    display: inline-block;
 }
 
-.loggerWarn::before {
+.loggerwarn::before {
     content: "Warn: ";
-    Width: 10em;
-    color: lightOrange;
+    width: 4em;
+    color: orange;
+    display: inline-block;
+}
+
+.loggererror::before {
+    content: "Error: ";
+    width: 4em;
+    color: red;
+    display: inline-block;
+}
+
+.loggerinfo::before {
+    content: "Info: ";
+    width: 4em;
+    color: grey;
+    display: inline-block;
+}
+
+.loggerdebug::before {
+    content: "Debug: ";
+    width: 4em;
+    color: blue;
+    display: inline-block;
 }
