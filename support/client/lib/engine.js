@@ -16,7 +16,7 @@
 /// page's JavaScript environment. The vwf module self-creates its own instance when loaded and
 /// attaches to the global window object as window.Engine. Nothing else should affect the global
 /// environment.
-define(['progressScreen','vwfDataManager.svc/configuration'], function(progress, configuration)
+define(['progressScreen'], function(progress)
 {
     var jQuery = $;
     (function(window)
@@ -33,7 +33,7 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
             /// @name module:Engine.configuration
             /// 
             /// @private
-            this.configuration = configuration; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference  // TODO: assign here after converting Engine.js to a RequireJS module and listing "vwf/configuration" as a dependency
+            this.configuration = {}; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference  // TODO: assign here after converting Engine.js to a RequireJS module and listing "vwf/configuration" as a dependency
             /// The kernel logger.
             /// 
             /// @name module:Engine.logger
@@ -208,7 +208,6 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
             /// @name module:vwf~vwf
             var vwf = this;
             // Store the jQuery module for reuse
-         
             var application;
             // == Public functions =====================================================================
             // -- loadConfiguration ---------------------------------------------------------------------------
@@ -216,50 +215,54 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
             // require.ready() or jQuery(document).ready() to call loadConfiguration() once the page has
             // loaded. loadConfiguration() accepts three parameters.
             // 
-            this.loadConfiguration = function( callback )
-            {
-                var requireDependancies = ["domReady", "vwf/socket", "vwf/configuration", "vwf/kernel/model", "vwf/model/javascript", "vwf/model/ammojs", "vwf/model/threejs", "vwf/model/object", "vwf/model/stage/log", "vwf/kernel/view", "vwf/view/document", "vwf/view/threejs", "vwf/utility", "ohm", "vwf/model/ammo.js/ammo", "vwf/view/editorview/ObjectPools", "/socket.io/socket.io.js", "vwf/view/EditorView", "vwf/view/WebRTC", "vwf/model/audio", "messageCompress", "vwf/view/xapi"];
-                var models = [
-                    "vwf/model/javascript",
-                    "vwf/model/ammojs",
-                    "vwf/model/wires",
-                    "vwf/model/threejs",
-                    "vwf/model/jqueryui",
-                    "ohm",
-                    "vwf/model/audio",
-                    "vwf/model/object",
-                ];
-                var views = [
-                    "vwf/view/threejs",
-                    "vwf/view/document",
-                    "vwf/view/EditorView",
-                    "vwf/view/WebRTC",
-                    "vwf/view/xapi",
-                    "vwf/view/jqueryui",
-                ];
-                if (this.configuration && this.configuration.drivers && this.configuration.drivers.model)
+            this.loadConfiguration = function(callback)
                 {
-                    models = models.concat(this.configuration.drivers.model);
-                    requireDependancies = requireDependancies.concat(this.configuration.drivers.model)
-                }
-                if (this.configuration && this.configuration.drivers && this.configuration.drivers.views)
-                {
-                    views = views.concat(this.configuration.drivers.view)
-                    requireDependancies = requireDependancies.concat(this.configuration.drivers.view)
-                }
-                    require(requireDependancies, function(ready)
+                    $.getJSON('vwfDataManager.svc/configuration').success(function(configuration)
                     {
-                        ready(function()
+                        this.configuration = $.extend(this.configuration,configuration);
+                        var requireDependancies = ["domReady", "vwf/socket", "vwf/configuration", "vwf/kernel/model", "vwf/model/javascript", "vwf/model/ammojs", "vwf/model/threejs", "vwf/model/object", "vwf/model/stage/log", "vwf/kernel/view", "vwf/view/document", "vwf/view/threejs", "vwf/utility", "ohm", "vwf/model/ammo.js/ammo", "vwf/view/editorview/ObjectPools", "/socket.io/socket.io.js", "vwf/view/EditorView", "vwf/view/WebRTC", "vwf/model/audio", "messageCompress", "vwf/view/xapi"];
+                        var models = [
+                            "vwf/model/javascript",
+                            "vwf/model/ammojs",
+                            "vwf/model/wires",
+                            "vwf/model/threejs",
+                            "vwf/model/jqueryui",
+                            "ohm",
+                            "vwf/model/audio",
+                            "vwf/model/object",
+                        ];
+                        var views = [
+                            "vwf/view/threejs",
+                            "vwf/view/document",
+                            "vwf/view/EditorView",
+                            "vwf/view/WebRTC",
+                            "vwf/view/xapi",
+                            "vwf/view/jqueryui",
+                        ];
+                        if (this.configuration && this.configuration.drivers && this.configuration.drivers.model)
                         {
-                            // With the scripts loaded, we must initialize the framework. Engine.initialize()
-                            // accepts three parameters: a world specification, model configuration parameters,
-                            // and view configuration parameters.
-                            // These are the view configurations. They use the same format as the model
-                            // configurations.
-                            Engine.initialize(application, models, views, callback);
+                            models = models.concat(this.configuration.drivers.model);
+                            requireDependancies = requireDependancies.concat(this.configuration.drivers.model)
+                        }
+                        if (this.configuration && this.configuration.drivers && this.configuration.drivers.views)
+                        {
+                            views = views.concat(this.configuration.drivers.view)
+                            requireDependancies = requireDependancies.concat(this.configuration.drivers.view)
+                        }
+                        require(requireDependancies, function(ready)
+                        {
+                            ready(function()
+                            {
+                                // With the scripts loaded, we must initialize the framework. Engine.initialize()
+                                // accepts three parameters: a world specification, model configuration parameters,
+                                // and view configuration parameters.
+                                // These are the view configurations. They use the same format as the model
+                                // configurations.
+                                Engine.initialize(application, models, views, callback);
+                            });
                         });
-                    });
-            }
+                    }.bind(this));
+                }
                 // -- ready --------------------------------------------------------------------------------
             this.generateTick = function()
             {
@@ -325,7 +328,7 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
                 var application;
                 // Load the runtime configuration. We start with the factory defaults. The reflector may
                 // provide additional settings when we connect.
-                jQuery.extend(this.configuration,require("vwf/configuration").active); // "active" updates in place and changes don't invalidate the reference
+                jQuery.extend(this.configuration, require("vwf/configuration").active); // "active" updates in place and changes don't invalidate the reference
                 // Create the logger.
                 this.logger = require("logger").for("vwf", this); // TODO: for( "vwf", ... ), and update existing calls
                 // Parse the function parameters. If the first parameter is not an array, then treat it
@@ -469,7 +472,6 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
                     }
                 }, this);
                 // Test for ECMAScript 5
-                
                 // Load the application.
                 this.ready(application);
             };
@@ -477,7 +479,7 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
             /// @name module:Engine.ready
             this.getInstanceHost = function()
             {
-        var loadBalancerAddress = '{{loadBalancerAddress}}';
+                var loadBalancerAddress = '{{loadBalancerAddress}}';
                 var instance = window.location.pathname;
                 var instanceHost = $.ajax(
                 {
@@ -501,13 +503,11 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
                         window.location.pathname.lastIndexOf("/"));
                     var protocol = window.location.protocol;
                     var host = window.location.protocol + '//' + window.location.host;
-            var loadBalancerAddress = '{{loadBalancerAddress}}';
-            
-            if(loadBalancerAddress !== "undefined")
-            {
-                host = this.getInstanceHost();
-            }
-
+                    var loadBalancerAddress = '{{loadBalancerAddress}}';
+                    if (loadBalancerAddress !== "undefined")
+                    {
+                        host = this.getInstanceHost();
+                    }
                     var socketProxy = require('vwf/socket')
                     if (window.location.protocol === "https:")
                     {
@@ -661,7 +661,7 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
                 var time = when > 0 ? // absolute (+) or relative (-)
                     Math.max(this.realTime(), when) :
                     this.realTime()
-                // Attach the current simulation time and pack the message as an array of the arguments.
+                    // Attach the current simulation time and pack the message as an array of the arguments.
                 var fields = {
                     time: time,
                     node: nodeID,
@@ -682,14 +682,16 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
                             fields.client = this.moniker_; // stamp with the originating client like the reflector does
                             fields.origin = "reflector";
                             //must be careful here to be async, otherwise code is sometimes synchronous and sometimes not
-                            (function(fields){window.setImmediate(function()
+                            (function(fields)
                             {
-                                this.localReentryStack++
-                                    queue.insert(fields);
-                                if (this.localReentryStack > 2)
-                                    this.localReentryStack--;
-                            })})(fields);
-                            
+                                window.setImmediate(function()
+                                {
+                                    this.localReentryStack++
+                                        queue.insert(fields);
+                                    if (this.localReentryStack > 2)
+                                        this.localReentryStack--;
+                                })
+                            })(fields);
                         }
                     }
                     socket.send(fields);
@@ -840,7 +842,7 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
                         if (this.isSimulating(nodeID)) continue;
                         for (var i in state[nodeID])
                         {
-                            if(this.messageTime() >= this.propertyTime(nodeID,i) )
+                            if (this.messageTime() >= this.propertyTime(nodeID, i))
                                 this.setPropertyFast(nodeID, i, state[nodeID][i]);
                         }
                     }
@@ -960,13 +962,11 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
                     alertify.log(parameters[0]);
                 }
                 var args = [];
-
                 //dont take outdated property updates
-                if(actionName == "setProperty" && this.propertyTime(nodeID,memberName) >= this.messageTime())
+                if (actionName == "setProperty" && this.propertyTime(nodeID, memberName) >= this.messageTime())
                 {
                     return;
                 }
-
                 if (nodeID || nodeID === 0) args.push(nodeID);
                 if (memberName) args.push(memberName);
                 if (parameters) args = args.concat(parameters); // flatten
@@ -1007,56 +1007,55 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
             };
             this.propertyTimeReset = function()
             {
-                 this._propertySetTimes = {}; 
+                this._propertySetTimes = {};
             }
-            this.propertyTime = function(nodeID,propertyName)
+            this.propertyTime = function(nodeID, propertyName)
             {
-                return this._propertySetTimes[nodeID+propertyName] || 0;
+                return this._propertySetTimes[nodeID + propertyName] || 0;
             }
-            this.propertyAge = function(nodeID,propertyName)
+            this.propertyAge = function(nodeID, propertyName)
             {
-                return this.realTime() - this.propertyTime(nodeID,propertyName);
+                return this.realTime() - this.propertyTime(nodeID, propertyName);
             }
-            this.markAllPropsCurrent = function(nodeID,propertyName)
+            this.markAllPropsCurrent = function(nodeID, propertyName)
             {
                 var t = this.realTime() + 1;
-                for(var i in this._propertySetTimes)
-                    this._propertySetTimes[i]= t;
+                for (var i in this._propertySetTimes)
+                    this._propertySetTimes[i] = t;
             }
             this.messageTime = function()
-            {
-                if(!this.message)
-                    return Infinity;
-                else return this.message.time;
-            }
-            // -- dispatch -----------------------------------------------------------------------------
-            /// Dispatch incoming messages waiting in the queue. "currentTime" specifies the current
-            /// simulation time that we should advance to and was taken from the time stamp of the last
-            /// message received from the reflector.
-            /// 
-            /// @name module:Engine.dispatch
+                {
+                    if (!this.message)
+                        return Infinity;
+                    else return this.message.time;
+                }
+                // -- dispatch -----------------------------------------------------------------------------
+                /// Dispatch incoming messages waiting in the queue. "currentTime" specifies the current
+                /// simulation time that we should advance to and was taken from the time stamp of the last
+                /// message received from the reflector.
+                /// 
+                /// @name module:Engine.dispatch
             this.lastTick = 0;
             this._propertySetTimes = {};
             this._lastRealTime = 0;
-                this.dispatch = function()
+            this.dispatch = function()
+            {
+                // Handle messages until we empty the queue or reach the new current time. For each,
+                // remove the message and perform the action. The simulation time is advanced to the
+                // message time as each one is processed.
+                var fields;
+                // Actions may use receive's ready function to suspend the queue for asynchronous
+                // operations, and to resume it when the operation is complete.
+                while (fields = /* assignment! */ queue.pull())
                 {
-                    // Handle messages until we empty the queue or reach the new current time. For each,
-                    // remove the message and perform the action. The simulation time is advanced to the
-                    // message time as each one is processed.
-                    var fields;
-                    // Actions may use receive's ready function to suspend the queue for asynchronous
-                    // operations, and to resume it when the operation is complete.
-                    while (fields = /* assignment! */ queue.pull())
-                    {
-                        // Advance time to the message time.s
-                        this.processMessage(fields);
-                    }
-                };
+                    // Advance time to the message time.s
+                    this.processMessage(fields);
+                }
+            };
             this.processMessage = function(fields)
                 {
                     this.message = fields;
                     // Advance the time.
-                    
                     if (this.now < fields.time && fields.action == "tick")
                     {
                         this.now = fields.time;
@@ -1180,7 +1179,6 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
                     nodeIndex++;
                 }, function(err) /* async */
                 {
-                  
                     // Clear the message queue, except for reflector messages that arrived after the
                     // current action.
                     queue.filter(function(fields)
@@ -1214,7 +1212,7 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
                         Engine.nodesCoSimulating.shift();
                     });
                     Engine.callMethod(Engine.application(), 'ready', []);
-                    if(socket) socket.event(socket.EVENTS.READY)
+                    if (socket) socket.event(socket.EVENTS.READY)
                     queue.resume();
                     callback_async && callback_async();
                 });
@@ -1481,7 +1479,6 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
             {
                 if (!nodes.existing[nodeID]) return;
                 this.logger.debuggx("deleteNode", nodeID);
-
                 //collect children and stop simulating
                 Engine.stopSimulating(nodeID);
                 // Remove the entry in the components list if this was the root of a component loaded
@@ -1511,15 +1508,12 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
                 {
                     applicationID = undefined;
                 }
-                
-
                 //remove the timing info for the properties
-                for(var i in this._propertySetTimes)
+                for (var i in this._propertySetTimes)
                 {
-                    if(i.indexOf(nodeID) == 0)
+                    if (i.indexOf(nodeID) == 0)
                         delete this._propertySetTimes[i];
                 }
-
                 this.views.forEach(function(view)
                 {
                     view.deletedNode && view.deletedNode(nodeID);
@@ -2140,7 +2134,7 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
             this.createChild = function(nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ )
             {
                 Engine.createDepth++;
-    progressScreen.startCreateNode(nodeID || childName);
+                progressScreen.startCreateNode(nodeID || childName);
                 this.logger.debuggx("createChild", function()
                 {
                     return [nodeID, childName, JSON.stringify(loggableComponent(childComponent)), childURI];
@@ -2215,7 +2209,7 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
                     node.children = newChildren;
                     return node;*/
                 }
-    if(nodeID !== 0 && childComponent) //careful not to scrub out protos
+                if (nodeID !== 0 && childComponent) //careful not to scrub out protos
                     childComponent = cleanChildComponent(childComponent)
                 if (!childComponent)
                 {
@@ -3065,19 +3059,15 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
             /// @see {@link module:vwf/api/kernel.setProperty}
             this.setProperty = function(nodeID, propertyName, propertyValue)
             {
-
                 this.logger.debuggx("setProperty", function()
                 {
                     return [nodeID, propertyName, JSON.stringify(loggableValue(propertyValue))];
                 });
                 var node = nodes.existing[nodeID];
                 if (!node) return;
-                
-                
                 // Record calls into this function by nodeID and propertyName so that models may call
                 // back here (directly or indirectly) to delegate responses further down the chain
                 // without causing infinite recursion.
-
                 var entrants = this.setProperty.entrants;
                 var entry = entrants[nodeID + '-' + propertyName] ||
                 {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
@@ -3215,7 +3205,7 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
                 }
                 //external setProperty events should not color the sent prop as updated, because all clients will have received
                 //the message
-                if(!this.message || (this.message.action != 'setProperty' && this.message.member != propertyName)) 
+                if (!this.message || (this.message.action != 'setProperty' && this.message.member != propertyName))
                     this.propertyUpdated(nodeID, propertyName, propertyValue);
                 this.logger.debugu();
                 Engine._propertySetTimes[nodeID + propertyName] = Engine.messageTime();
@@ -3252,7 +3242,6 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
             this.setPropertyFast = function(nodeID, propertyName, propertyValue)
                 {
                     var answer = undefined;
-                    
                     for (var i = 0; i < this.models.length; i++)
                     {
                         if (!this.setPropertyFastEntrants[nodeID + propertyName + i])
@@ -3273,7 +3262,7 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
                         }
                     }
                     this.propertyUpdated(nodeID, propertyName, answer || propertyValue);
-                    this._propertySetTimes[nodeID+propertyName] = Engine.messageTime();
+                    this._propertySetTimes[nodeID + propertyName] = Engine.messageTime();
                     return answer;
                 },
                 this.getProperty = function(nodeID, propertyName, ignorePrototype, testDelegation)
@@ -3634,7 +3623,7 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
             };
             this.realTime = function()
             {
-                return this.now + (performance.now() - this._lastRealTime)/1000.0;
+                return this.now + (performance.now() - this._lastRealTime) / 1000.0;
             };
             // -- client -------------------------------------------------------------------------------
             /// The moniker of the client responsible for the current action. Will be falsy for actions
@@ -5334,7 +5323,7 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
                 /// @returns {Object|undefined} The next message if available, otherwise undefined.
                 pull: function()
                 {
-                    if (this.suspension == 0 && this.queue.length > 0 )
+                    if (this.suspension == 0 && this.queue.length > 0)
                     {
                         return this.queue.shift();
                     }

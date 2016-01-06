@@ -1540,11 +1540,11 @@ function serve(request, response)
 						UpdatePassword(URL, response);
 					}
 					break;
-				case "configuration.js":
+				case "configuration":
 					{ 
 						//eventually should read some configuration data from the DB.
 						//possilby merge this with world setting information
-						respond(response, 200, "define([],{});");
+						ServeJSON({}, response, URL);
 					}
 					break;	
 				case "forgotpassword":

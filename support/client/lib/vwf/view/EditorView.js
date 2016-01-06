@@ -52,7 +52,8 @@ define([
 	"vwf/view/editorview/PhysicsEditor",
 	"vwf/view/editorview/PerformanceManager",
 	"vwf/view/editorview/JSONPrompt",
-     "vwf/view/localization/translate"
+     "vwf/view/localization/translate",
+     "vwf/view/editorview/lib/beautify.module.js"
 	//"vwf/view/editorview/panelEditor",
 ], function(module, version, view, alertify, angular_app, Menubar,log) {
     return view.load(module, {
@@ -130,7 +131,7 @@ define([
                     $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/SplineTool.js"></script>');
                     $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/TerrainTool.js"></script>');
                     $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/lib/jquery.qtip-1.0.0-rc3.min.js"></script>');
-                    $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/lib/beautify.module.js"></script>');
+                    
                 }
                 $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/sha256.js"></script>');
                 $(document.head).append('<script type="text/javascript" src="vwf/view/editorview/lib/jquery.ui.touch-punch.min.js"></script>');
