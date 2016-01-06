@@ -36,7 +36,7 @@ define(function ()
 
 		this.oldSelection = [];
 		for(var i =0; i < _Editor.getSelectionCount(); i++)
-			this.oldSelection.push(_Editor.GetSelectedVWFNode(i).id);
+			this.oldSelection.push(_Editor.GetSelectedVWFID(i));
 		this.selection = [];
 		for(var i =0; i < selectionSet.length; i++)
 			if(selectionSet[i])
