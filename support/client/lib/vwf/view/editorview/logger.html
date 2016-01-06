@@ -42,7 +42,7 @@ Math.SecureRandom = Math.random;
 			return ret;
 		}
 		if (text.constructor == window.opener.Object || text.constructor == Object)
-			return JSON.stringify(text, 2);
+			return JSON.stringify(text, null,2);
 		if (text.constructor == window.opener.Function || text.constructor == Function)
 			return text.toString()
 		return text;

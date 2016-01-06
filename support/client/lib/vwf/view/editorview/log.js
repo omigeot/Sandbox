@@ -49,9 +49,18 @@ define(
 					var func = logType[i];
 					self[func] = function(text)
 					{
+
 						if (self.checkWindow())
 						{
-							self.popup[func](text);
+							if(arguments.length ==1 )
+								self.popup[func](text);
+							else
+							{
+								var arr = [];
+								for(var i in arguments)
+									arr.push(arguments[i])
+								self.popup[func](arr);
+							}
 						}
 					}
 				})()
