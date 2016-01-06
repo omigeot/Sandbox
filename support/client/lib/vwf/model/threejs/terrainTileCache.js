@@ -365,6 +365,7 @@ function TileCache() {
 
 
         "   gl_FragColor = ambient * diffuse + diffuse * vec4(light.xyz,1.0);\n" +
+      
         "gl_FragColor.a = 1.0;\n" +
         "#ifdef USE_FOG\n" +
 
