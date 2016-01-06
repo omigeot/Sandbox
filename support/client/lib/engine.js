@@ -950,10 +950,15 @@ define(['progressScreen'], function()
                             fields.time = Engine.realTime();
                             fields.client = this.moniker_; // stamp with the originating client like the reflector does
                             fields.origin = "reflector";
-                            this.localReentryStack++
-                                queue.insert(fields);
-                            if (this.localReentryStack > 2)
-                                this.localReentryStack--;
+                            //must be careful here to be async, otherwise code is sometimes synchronous and sometimes not
+                            (function(fields){window.setImmediate(function()
+                            {
+                                this.localReentryStack++
+                                    queue.insert(fields);
+                                if (this.localReentryStack > 2)
+                                    this.localReentryStack--;
+                            })})(fields);
+                            
                         }
                     }
                     socket.send(fields);
