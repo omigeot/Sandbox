@@ -208,7 +208,7 @@ define(['progressScreen','vwfDataManager.svc/configuration'], function(progress,
             /// @name module:vwf~vwf
             var vwf = this;
             // Store the jQuery module for reuse
-            var jQuery;
+         
             var application;
             // == Public functions =====================================================================
             // -- loadConfiguration ---------------------------------------------------------------------------
