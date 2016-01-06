@@ -16,8 +16,9 @@
 /// page's JavaScript environment. The vwf module self-creates its own instance when loaded and
 /// attaches to the global window object as window.Engine. Nothing else should affect the global
 /// environment.
-define(['progressScreen'], function()
+define(['progressScreen','vwfDataManager.svc/configuration'], function(progress, configuration)
 {
+    var jQuery = $;
     (function(window)
     {
         window.console && console.debug && console.debug("loading vwf");
@@ -32,7 +33,7 @@ define(['progressScreen'], function()
             /// @name module:Engine.configuration
             /// 
             /// @private
-            this.configuration = undefined; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference  // TODO: assign here after converting Engine.js to a RequireJS module and listing "vwf/configuration" as a dependency
+            this.configuration = configuration; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference  // TODO: assign here after converting Engine.js to a RequireJS module and listing "vwf/configuration" as a dependency
             /// The kernel logger.
             /// 
             /// @name module:Engine.logger
@@ -215,297 +216,50 @@ define(['progressScreen'], function()
             // require.ready() or jQuery(document).ready() to call loadConfiguration() once the page has
             // loaded. loadConfiguration() accepts three parameters.
             // 
-            // A component specification identifies the application to be loaded. modelInitializers and 
-            // viewInitializers identify the model and view libraries that were parsed out of the URL that 
-            // should be attached to the simulation. Each is specified as an object with each library 
-            // name as a property of the object with any arguments as the value of the property.
-            // Arguments may be specified as an array [1], as a single value if there is only one [2], or as 
-            // undefined if there are none[3].
-            // 
-            //     [1] Engine.loadConfiguration( ..., { "vwf/model/glge": [ "#scene, "second param" ] }, { ... } )
-            //     [2] Engine.loadConfiguration( ..., { "vwf/model/glge": "#scene" }, { ... } )
-            //     [3] Engine.loadConfiguration( ..., { "vwf/model/javascript": undefined }, { ... } )
-            this.loadConfiguration = function( /* [ componentURI|componentObject ] { modelInitializers }{ viewInitializers } */ )
+            this.loadConfiguration = function( callback )
+            {
+                var requireDependancies = ["domReady", "vwf/socket", "vwf/configuration", "vwf/kernel/model", "vwf/model/javascript", "vwf/model/ammojs", "vwf/model/threejs", "vwf/model/object", "vwf/model/stage/log", "vwf/kernel/view", "vwf/view/document", "vwf/view/threejs", "vwf/utility", "ohm", "vwf/model/ammo.js/ammo", "vwf/view/editorview/ObjectPools", "/socket.io/socket.io.js", "vwf/view/EditorView", "vwf/view/WebRTC", "vwf/model/audio", "messageCompress", "vwf/view/xapi"];
+                var models = [
+                    "vwf/model/javascript",
+                    "vwf/model/ammojs",
+                    "vwf/model/wires",
+                    "vwf/model/threejs",
+                    "vwf/model/jqueryui",
+                    "ohm",
+                    "vwf/model/audio",
+                    "vwf/model/object",
+                ];
+                var views = [
+                    "vwf/view/threejs",
+                    "vwf/view/document",
+                    "vwf/view/EditorView",
+                    "vwf/view/WebRTC",
+                    "vwf/view/xapi",
+                    "vwf/view/jqueryui",
+                ];
+                if (this.configuration && this.configuration.drivers && this.configuration.drivers.model)
                 {
-                    var args = Array.prototype.slice.call(arguments);
-                    if (typeof args[0] != "object" || !(args[0] instanceof Array))
+                    models = models.concat(this.configuration.drivers.model);
+                    requireDependancies = requireDependancies.concat(this.configuration.drivers.model)
+                }
+                if (this.configuration && this.configuration.drivers && this.configuration.drivers.views)
+                {
+                    views = views.concat(this.configuration.drivers.view)
+                    requireDependancies = requireDependancies.concat(this.configuration.drivers.view)
+                }
+                    require(requireDependancies, function(ready)
                     {
-                        application = args.shift();
-                    }
-                    var userLibraries = args.shift() ||
-                    {};
-                    var callback = args.shift();
-                    jQuery = $;
-                    var requireArray = [
-                { library: "domReady", active: true },
-                { library: "vwf/socket", active: true },
-                { library: "vwf/configuration", active: true },
-                { library: "vwf/kernel/model", active: true },
-                { library: "vwf/model/javascript", active: true },
-                { library: "vwf/model/ammojs", linkedLibraries: ["vwf/model/ammo.js/ammo"], active: false },
-         
-                { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three.js.r68", "vwf/model/threejs/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
-          
-                { library: "vwf/model/object", active: true },
-                { library: "vwf/model/stage/log", active: true },
-                { library: "vwf/kernel/view", active: true },
-                { library: "vwf/view/document", active: true },
-                { library: "vwf/view/editor", active: false },
-          
-                { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
-                { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
-          
-                { library: "vwf/utility", active: true },
-          
-                { library: "ohm", active: true },
-              
-                { library: "vwf/model/ammo.js/ammo", active: true },
-                { library: "vwf/view/webrtc/adapter", active: false },
-            
-
-
-                { library: "vwf/view/editorview/ObjectPools", active: true },
-                { library: "/socket.io/socket.io.js", active: true },
-                { library: "vwf/view/EditorView", active: true },
-                { library: "vwf/view/WebRTC", active: true },
-                { library: "vwf/model/audio", active: true },
-                { library: "messageCompress", active: true },
-                { library: "vwf/view/xapi", active: true }
-
-            ];
-
-                    var initializers = {
-                        model: [
-                    { library: "vwf/model/javascript", active: true },
-                    { library: "vwf/model/ammojs", active: true },
-                    { library: "vwf/model/glge", active: false },
-                    { library: "vwf/model/threejs", active: true },
-                    { library: "vwf/model/cesium", active: false },
-                    { library: "ohm", active: true },
-                    { library: "vwf/model/object", active: true },
-                    { library: "vwf/model/wires", active: true },
-                    { library: "vwf/model/jqueryui", active: true },
-                    { library: "vwf/model/audio", active: true },
-                ],
-                        view: [
+                        ready(function()
                         {
-                            library: "vwf/view/glge",
-                            parameters:
-                            {
-                                "application-root": "#vwf-root"
-                            },
-                            active: false
-                        },
-                        {
-                            library: "vwf/view/threejs",
-                            parameters:
-                            {
-                                "application-root": "#vwf-root"
-                            },
-                            active: true
-                        },
-                        {
-                            library: "vwf/view/document",
-                            active: true
-                        },
-                        {
-                            library: "vwf/view/editor",
-                            active: false
-                        },
-                        {
-                            library: "vwf/view/lesson",
-                            active: false
-                        },
-                        {
-                            library: "vwf/view/google-earth",
-                            active: false
-                        },
-                        {
-                            library: "vwf/view/cesium",
-                            active: false
-                        },
-                        {
-                            library: "vwf/view/webrtc",
-                            active: false
-                        },
-                        {
-                            library: "vwf/view/EditorView",
-                            active: true
-                        },
-                        {
-                            library: "vwf/view/WebRTC",
-                            active: true
-                        },
-                        {
-                            library: "vwf/view/xapi",
-                            active: true
-                        },
-                        {
-                            library: "vwf/view/jqueryui",
-                            active: true
-                        }, ]
-                    };
-                    mapLibraryName(requireArray);
-                    mapLibraryName(initializers["model"]);
-                    mapLibraryName(initializers["view"]);
-
-                    function mapLibraryName(array)
-                    {
-                        for (var i = 0; i < array.length; i++)
-                        {
-                            array[array[i].library] = array[i];
-                        }
-                    }
-
-                    function getActiveLibraries(libraryList, includeParameters)
-                    {
-                        var activeLibraryList = [];
-                        for (var i = 0; i < libraryList.length; i++)
-                        {
-                            if (libraryList[i].active)
-                            {
-                                if (includeParameters)
-                                {
-                                    var activeLibrary = {};
-                                    activeLibrary[libraryList[i].library] = libraryList[i].parameters;
-                                    activeLibraryList.push(activeLibrary);
-                                }
-                                else
-                                {
-                                    activeLibraryList.push(libraryList[i].library);
-                                }
-                            }
-                        }
-                        return activeLibraryList;
-                    }
-                    jQuery.getJSON("admin/config", function(configLibraries)
-                    {
-                        if (configLibraries && typeof configLibraries == "object")
-                        {
-                            Object.keys(configLibraries).forEach(function(libraryType)
-                            {
-                                if (libraryType == 'info' && configLibraries[libraryType]["title"])
-                                {
-                                    jQuery('title').html(configLibraries[libraryType]["title"]);
-                                }
-                                if (!userLibraries[libraryType])
-                                {
-                                    userLibraries[libraryType] = {};
-                                }
-                                // Merge libraries from config file and URL together. Check for incompatible
-                                // libraries, and disable them.
-                                Object.keys(configLibraries[libraryType]).forEach(function(libraryName)
-                                {
-                                    var disabled = false;
-                                    if (requireArray[libraryName] && requireArray[libraryName].disabledBy)
-                                    {
-                                        for (var i = 0; i < requireArray[libraryName].disabledBy.length; i++)
-                                        {
-                                            Object.keys(userLibraries).forEach(function(userLibraryType)
-                                            {
-                                                Object.keys(userLibraries[userLibraryType]).forEach(function(userLibraryName)
-                                                {
-                                                    if (requireArray[libraryName].disabledBy[i] == userLibraryName)
-                                                    {
-                                                        disabled = true;
-                                                    }
-                                                })
-                                            })
-                                        }
-                                    }
-                                    if (!disabled)
-                                    {
-                                        if (userLibraries[libraryType][libraryName] == undefined)
-                                        {
-                                            userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];
-                                        }
-                                        else if (typeof userLibraries[libraryType][libraryName] == "object" && typeof configLibraries[libraryType][libraryName] == "object")
-                                        {
-                                            userLibraries[libraryType][libraryName] = jQuery.extend(
-                                            {}, configLibraries[libraryType][libraryName], userLibraries[libraryType][libraryName]);
-                                        }
-                                    }
-                                });
-                            });
-                        }
-                    }).always(function(jqXHR, textStatus)
-                    {
-                        Object.keys(userLibraries).forEach(function(libraryType)
-                        {
-                            if (initializers[libraryType])
-                            {
-                                Object.keys(userLibraries[libraryType]).forEach(function(libraryName)
-                                {
-                                    if (requireArray[libraryName])
-                                    {
-                                        requireArray[libraryName].active = true;
-                                        initializers[libraryType][libraryName].active = true;
-                                        if (userLibraries[libraryType][libraryName] && userLibraries[libraryType][libraryName] != "")
-                                        {
-                                            if (typeof initializers[libraryType][libraryName].parameters == "object")
-                                            {
-                                                initializers[libraryType][libraryName].parameters = jQuery.extend(
-                                                    {}, initializers[libraryType][libraryName].parameters,
-                                                    userLibraries[libraryType][libraryName]);
-                                            }
-                                            else
-                                            {
-                                                initializers[libraryType][libraryName].parameters = userLibraries[libraryType][libraryName];
-                                            }
-                                        }
-                                        if (requireArray[libraryName].linkedLibraries)
-                                        {
-                                            for (var i = 0; i < requireArray[libraryName].linkedLibraries.length; i++)
-                                            {
-                                                requireArray[requireArray[libraryName].linkedLibraries[i]].active = true;
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                        // Load default renderer if no other librarys specified
-                        if (Object.keys(userLibraries["model"]).length == 0 && Object.keys(userLibraries["view"]).length == 0)
-                        {
-                            requireArray["vwf/model/threejs"].active = true;
-                            requireArray["vwf/model/ammojs"].active = true;
-                            requireArray["vwf/view/threejs"].active = true;
-                            initializers["model"]["vwf/model/threejs"].active = true;
-                            initializers["view"]["vwf/view/threejs"].active = true;
-                        }
-                        var requireConfig = {};
-                        require(requireConfig, getActiveLibraries(requireArray, false), function(ready)
-                        {
-                            ready(function()
-                            {
-                                // With the scripts loaded, we must initialize the framework. Engine.initialize()
-                                // accepts three parameters: a world specification, model configuration parameters,
-                                // and view configuration parameters.
-                                var models = [
-                                    "vwf/model/javascript",
-                                    "vwf/model/ammojs",
-                                    "vwf/model/wires",
-                                    "vwf/model/threejs",
-                                    "vwf/model/jqueryui",
-                        "ohm",
-                                    "vwf/model/audio",
-                                    "vwf/model/object",
-                                ];
-                                // These are the view configurations. They use the same format as the model
-                                // configurations.
-                                var views = [
-                                    "vwf/view/threejs",
-                                    "vwf/view/document",
-                                    "vwf/view/EditorView",
-                                    "vwf/view/WebRTC",
-                                    "vwf/view/xapi",
-                                    "vwf/view/jqueryui",
-                                ];
-                                Engine.initialize(application, models, views, callback);
-                            });
+                            // With the scripts loaded, we must initialize the framework. Engine.initialize()
+                            // accepts three parameters: a world specification, model configuration parameters,
+                            // and view configuration parameters.
+                            // These are the view configurations. They use the same format as the model
+                            // configurations.
+                            Engine.initialize(application, models, views, callback);
                         });
                     });
-                }
+            }
                 // -- ready --------------------------------------------------------------------------------
             this.generateTick = function()
             {
@@ -571,7 +325,7 @@ define(['progressScreen'], function()
                 var application;
                 // Load the runtime configuration. We start with the factory defaults. The reflector may
                 // provide additional settings when we connect.
-                this.configuration = require("vwf/configuration").active; // "active" updates in place and changes don't invalidate the reference
+                jQuery.extend(this.configuration,require("vwf/configuration").active); // "active" updates in place and changes don't invalidate the reference
                 // Create the logger.
                 this.logger = require("logger").for("vwf", this); // TODO: for( "vwf", ... ), and update existing calls
                 // Parse the function parameters. If the first parameter is not an array, then treat it
@@ -715,30 +469,7 @@ define(['progressScreen'], function()
                     }
                 }, this);
                 // Test for ECMAScript 5
-                if (!(function()
-                    {
-                        return !this
-                    })())
-                {
-                    compatibilityStatus.compatible = false;
-                    jQuery.extend(compatibilityStatus.errors,
-                    {
-                        "ES5": "This browser is not compatible. VWF requires ECMAScript 5."
-                    });
-                }
-                // Test for WebSockets
-                //  if( window.io && !io.Transport.websocket.check() )
-                {
-                    compatibilityStatus.compatible = false;
-                    jQuery.extend(compatibilityStatus.errors,
-                    {
-                        "WS": "This browser is not compatible. VWF requires WebSockets."
-                    });
-                }
-                if (callback)
-                {
-                    callback(compatibilityStatus);
-                }
+                
                 // Load the application.
                 this.ready(application);
             };
