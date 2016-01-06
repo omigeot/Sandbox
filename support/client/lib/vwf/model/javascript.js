@@ -1434,8 +1434,9 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             var pendingIdx = this.pendingDelete.indexOf(nodeID);
             if(pendingIdx !== -1)
                 this.pendingDelete.splice(pendingIdx,1);
-            //this.callMethodTraverse(this.nodes['index-vwf'],'deletingNode',[nodeID]);
+            
             var node = child.parent;
+            //update the map of displaynames
             if (child.parent && child.parent.__children_by_name)
             {
                 var oldname = Engine.getProperty(nodeID, 'DisplayName');
@@ -1443,11 +1444,14 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
             }
             if (node)
             {
+                //recursively delete children NOTE: doesn't the engine already issue commands for recursive delete?
                 if (child.children)
                     for (var i = 0; i < child.children.length; i++)
                     {
                         this.deletingNode(child.children[i].id);
                     }
+                
+                //update the children array    
                 var index = node.children.indexOf(child);
                 if (index >= 0)
                 {
@@ -1460,11 +1464,27 @@ define(["module", "vwf/model", "vwf/utility"], function(module, model, utility)
                 }
                 child.parent = undefined;
             }
+            //call the deinit function
             var scriptText = "this.deinitialize && this.deinitialize()";
             if(child.private.bodies["deinitialize"])
             {
                 this.tryCallMethod(child,child.private.bodies["deinitialize"],"deinitialize",[])
             }
+
+            //unbind all even handlers whose context is this node
+            //NOTE: this needs an acceleration structure at some point
+            for(var i in this.nodes)
+            {
+                var nodei = this.nodes[i];
+                for(var j in nodei.private.listeners)
+                {
+                    var eventj = nodei.private.listeners[j];
+                    for (var k in eventj)
+                        if(eventj[k].context.id == nodeID)
+                            eventj.splice(k,1);
+                }
+            }
+
             delete this.nodes[nodeID];
         },
         // -- addingChild --------------------------------------------------------------------------
