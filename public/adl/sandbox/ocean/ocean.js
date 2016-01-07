@@ -29,7 +29,7 @@
         this.directionVariation = 1.3;
         this.amplitude = 5;
         this.amplitudeVariation = 3;
-        this.waveNum = 100;
+        this.waveNum = 20;
         this.resolution = 50;
         this.waterHeight = 20;
         this.timers = [];
