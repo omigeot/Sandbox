@@ -176,7 +176,7 @@ viewInterpolationNode.prototype.tick = function() {
 	if (Engine.getPropertyFast(Engine.application(),'playMode') == 'play' && Engine.isSimulating(this.id))
 	{
 	var viewnode = this.threejsNode;
-	if (!viewnode) return;
+	if (!viewnode || !viewnode.setAnimationFrameInternal) return;
 	this.pushTransform(matCpy(this.getProperty('transform')));
 	this.animationFrameQueue.push(this.getProperty('animationFrame'));
 	}
@@ -227,13 +227,15 @@ viewInterpolationNode.prototype.interpolate = function()
 	if (!viewnode) return;
 	//	if(_Editor.isSelected(this.id))
 	//		return;
-	if (Engine.isSimulating(this.id) && (Engine.getPropertyFast(Engine.application(),'playMode') != 'play' && performance.now() - this.positionQueue.xQueue.times[4] > .05))
-	{
-		this.pushTransform(matCpy(this.getProperty('transform')))
-	}
+	
 
 	if (viewnode.setTransformInternal)
 	{
+		if (Engine.isSimulating(this.id) && (Engine.getPropertyFast(Engine.application(),'playMode') != 'play' && performance.now() - this.positionQueue.xQueue.times[4] > .05))
+		{
+			this.pushTransform(matCpy(this.getProperty('transform')))
+		}
+
 		var position = this.positionQueue.interpolate(performance.now());
 		var rotation = this.quaternionQueue.interpolate(performance.now());
 		var scale = this.scaleQueue.interpolate(performance.now());
@@ -253,9 +255,10 @@ viewInterpolationNode.prototype.restore = function()
 	if(!this.enabled) return;
 	var viewnode = this.threejsNode;
 	if (!viewnode) return;
-	var oldTransform = matCpy(this.getProperty('transform'));
+	
 	if (viewnode.setTransformInternal)
 	{
+		var oldTransform = matCpy(this.getProperty('transform'));
 		viewnode.setTransformInternal(oldTransform, false);
 	}
 	if(viewnode.setAnimationFrameInternal)
