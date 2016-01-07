@@ -121,11 +121,11 @@ void main() {
                   float st = t;
 
                   float w = W[i];
-                  float q = S[i];
+                  float q = 3.0 ;
                   float Ai = A[i] * smoothstep(1.0, 0.0, pow(camDist, 1.3) / (uHalfGrid * L[i]));
 
                   if (Ai < .001) continue;
-                  vec2 xy = vec2(x , y);
+                  vec2 xy = vec2(x , y/2.0);
 
                   float Qi = Q[i]; // *numWaves?
                   float xi = Qi * Ai * D[i].x * cos( dot(w * D[i], xy) + q * st);
