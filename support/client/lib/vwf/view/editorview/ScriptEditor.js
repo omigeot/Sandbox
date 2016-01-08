@@ -1,6 +1,6 @@
 'use strict';
 
-define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager', './ScriptEditorAutocomplete','vwf/view/editorview/lib/ace/ace.js'], function(app)
+define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager', './ScriptEditorAutocomplete','./lib/ace/ace.js'], function(app)
 {
 	//$(document.head).append('<script src="../vwf/view/editorview/lib/ace/ace.js" type="text/javascript" charset="utf-8"></script>');
 

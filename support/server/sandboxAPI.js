@@ -1540,6 +1540,13 @@ function serve(request, response)
 						UpdatePassword(URL, response);
 					}
 					break;
+				case "configuration":
+					{ 
+						//eventually should read some configuration data from the DB.
+						//possilby merge this with world setting information
+						ServeJSON({}, response, URL);
+					}
+					break;	
 				case "forgotpassword":
 					{
 						passwordUtils.ResetPassword(UID, response);

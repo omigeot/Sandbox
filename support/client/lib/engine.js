@@ -16,8 +16,9 @@
 /// page's JavaScript environment. The vwf module self-creates its own instance when loaded and
 /// attaches to the global window object as window.Engine. Nothing else should affect the global
 /// environment.
-define(['progressScreen'], function()
+define(['progressScreen'], function(progress)
 {
+    var jQuery = $;
     (function(window)
     {
         window.console && console.debug && console.debug("loading vwf");
@@ -32,7 +33,7 @@ define(['progressScreen'], function()
             /// @name module:Engine.configuration
             /// 
             /// @private
-            this.configuration = undefined; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference  // TODO: assign here after converting Engine.js to a RequireJS module and listing "vwf/configuration" as a dependency
+            this.configuration = {}; // require( "vwf/configuration" ).active; // "active" updates in place and changes don't invalidate the reference  // TODO: assign here after converting Engine.js to a RequireJS module and listing "vwf/configuration" as a dependency
             /// The kernel logger.
             /// 
             /// @name module:Engine.logger
@@ -207,7 +208,6 @@ define(['progressScreen'], function()
             /// @name module:vwf~vwf
             var vwf = this;
             // Store the jQuery module for reuse
-            var jQuery;
             var application;
             // == Public functions =====================================================================
             // -- loadConfiguration ---------------------------------------------------------------------------
@@ -215,296 +215,53 @@ define(['progressScreen'], function()
             // require.ready() or jQuery(document).ready() to call loadConfiguration() once the page has
             // loaded. loadConfiguration() accepts three parameters.
             // 
-            // A component specification identifies the application to be loaded. modelInitializers and 
-            // viewInitializers identify the model and view libraries that were parsed out of the URL that 
-            // should be attached to the simulation. Each is specified as an object with each library 
-            // name as a property of the object with any arguments as the value of the property.
-            // Arguments may be specified as an array [1], as a single value if there is only one [2], or as 
-            // undefined if there are none[3].
-            // 
-            //     [1] Engine.loadConfiguration( ..., { "vwf/model/glge": [ "#scene, "second param" ] }, { ... } )
-            //     [2] Engine.loadConfiguration( ..., { "vwf/model/glge": "#scene" }, { ... } )
-            //     [3] Engine.loadConfiguration( ..., { "vwf/model/javascript": undefined }, { ... } )
-            this.loadConfiguration = function( /* [ componentURI|componentObject ] { modelInitializers }{ viewInitializers } */ )
+            this.loadConfiguration = function(callback)
                 {
-                    var args = Array.prototype.slice.call(arguments);
-                    if (typeof args[0] != "object" || !(args[0] instanceof Array))
+                    $.getJSON('vwfDataManager.svc/configuration').success(function(configuration)
                     {
-                        application = args.shift();
-                    }
-                    var userLibraries = args.shift() ||
-                    {};
-                    var callback = args.shift();
-                    jQuery = $;
-                    var requireArray = [
-                { library: "domReady", active: true },
-                { library: "vwf/socket", active: true },
-                { library: "vwf/configuration", active: true },
-                { library: "vwf/kernel/model", active: true },
-                { library: "vwf/model/javascript", active: true },
-                { library: "vwf/model/ammojs", linkedLibraries: ["vwf/model/ammo.js/ammo"], active: false },
-         
-                { library: "vwf/model/threejs", linkedLibraries: ["vwf/model/threejs/three.js.r68", "vwf/model/threejs/ColladaLoader"], disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
-          
-                { library: "vwf/model/object", active: true },
-                { library: "vwf/model/stage/log", active: true },
-                { library: "vwf/kernel/view", active: true },
-                { library: "vwf/view/document", active: true },
-                { library: "vwf/view/editor", active: false },
-          
-                { library: "vwf/view/threejs", disabledBy: ["vwf/model/glge", "vwf/view/glge"], active: false },
-                { library: "vwf/view/webrtc", linkedLibraries: ["vwf/view/webrtc/adapter"],  active: false },
-          
-                { library: "vwf/utility", active: true },
-          
-                { library: "ohm", active: true },
-              
-                { library: "vwf/model/ammo.js/ammo", active: true },
-                { library: "vwf/view/webrtc/adapter", active: false },
-            
-
-
-                { library: "vwf/view/editorview/ObjectPools", active: true },
-                { library: "/socket.io/socket.io.js", active: true },
-                { library: "vwf/view/EditorView", active: true },
-                { library: "vwf/view/WebRTC", active: true },
-                { library: "vwf/model/audio", active: true },
-                { library: "messageCompress", active: true },
-                { library: "vwf/view/xapi", active: true }
-
-            ];
-
-                    var initializers = {
-                        model: [
-                    { library: "vwf/model/javascript", active: true },
-                    { library: "vwf/model/ammojs", active: true },
-                    { library: "vwf/model/glge", active: false },
-                    { library: "vwf/model/threejs", active: true },
-                    { library: "vwf/model/cesium", active: false },
-                    { library: "ohm", active: true },
-                    { library: "vwf/model/object", active: true },
-                    { library: "vwf/model/wires", active: true },
-                    { library: "vwf/model/jqueryui", active: true },
-                    { library: "vwf/model/audio", active: true },
-                ],
-                        view: [
+                        this.configuration = $.extend(this.configuration,configuration);
+                        var requireDependancies = ["domReady", "vwf/socket", "vwf/configuration", "vwf/kernel/model", "vwf/model/javascript", "vwf/model/ammojs", "vwf/model/threejs", "vwf/model/object", "vwf/model/stage/log", "vwf/kernel/view", "vwf/view/document", "vwf/view/threejs", "vwf/utility", "ohm", "vwf/model/ammo.js/ammo", "vwf/view/editorview/ObjectPools", "/socket.io/socket.io.js", "vwf/view/EditorView", "vwf/view/WebRTC", "vwf/model/audio", "messageCompress", "vwf/view/xapi"];
+                        var models = [
+                            "vwf/model/javascript",
+                            "vwf/model/ammojs",
+                            "vwf/model/wires",
+                            "vwf/model/threejs",
+                            "vwf/model/jqueryui",
+                            "ohm",
+                            "vwf/model/audio",
+                            "vwf/model/object",
+                        ];
+                        var views = [
+                            "vwf/view/threejs",
+                            "vwf/view/document",
+                            "vwf/view/EditorView",
+                            "vwf/view/WebRTC",
+                            "vwf/view/xapi",
+                            "vwf/view/jqueryui",
+                        ];
+                        if (this.configuration && this.configuration.drivers && this.configuration.drivers.model)
                         {
-                            library: "vwf/view/glge",
-                            parameters:
-                            {
-                                "application-root": "#vwf-root"
-                            },
-                            active: false
-                        },
-                        {
-                            library: "vwf/view/threejs",
-                            parameters:
-                            {
-                                "application-root": "#vwf-root"
-                            },
-                            active: true
-                        },
-                        {
-                            library: "vwf/view/document",
-                            active: true
-                        },
-                        {
-                            library: "vwf/view/editor",
-                            active: false
-                        },
-                        {
-                            library: "vwf/view/lesson",
-                            active: false
-                        },
-                        {
-                            library: "vwf/view/google-earth",
-                            active: false
-                        },
-                        {
-                            library: "vwf/view/cesium",
-                            active: false
-                        },
-                        {
-                            library: "vwf/view/webrtc",
-                            active: false
-                        },
-                        {
-                            library: "vwf/view/EditorView",
-                            active: true
-                        },
-                        {
-                            library: "vwf/view/WebRTC",
-                            active: true
-                        },
-                        {
-                            library: "vwf/view/xapi",
-                            active: true
-                        },
-                        {
-                            library: "vwf/view/jqueryui",
-                            active: true
-                        }, ]
-                    };
-                    mapLibraryName(requireArray);
-                    mapLibraryName(initializers["model"]);
-                    mapLibraryName(initializers["view"]);
-
-                    function mapLibraryName(array)
-                    {
-                        for (var i = 0; i < array.length; i++)
-                        {
-                            array[array[i].library] = array[i];
+                            models = models.concat(this.configuration.drivers.model);
+                            requireDependancies = requireDependancies.concat(this.configuration.drivers.model)
                         }
-                    }
-
-                    function getActiveLibraries(libraryList, includeParameters)
-                    {
-                        var activeLibraryList = [];
-                        for (var i = 0; i < libraryList.length; i++)
+                        if (this.configuration && this.configuration.drivers && this.configuration.drivers.views)
                         {
-                            if (libraryList[i].active)
-                            {
-                                if (includeParameters)
-                                {
-                                    var activeLibrary = {};
-                                    activeLibrary[libraryList[i].library] = libraryList[i].parameters;
-                                    activeLibraryList.push(activeLibrary);
-                                }
-                                else
-                                {
-                                    activeLibraryList.push(libraryList[i].library);
-                                }
-                            }
+                            views = views.concat(this.configuration.drivers.view)
+                            requireDependancies = requireDependancies.concat(this.configuration.drivers.view)
                         }
-                        return activeLibraryList;
-                    }
-                    jQuery.getJSON("admin/config", function(configLibraries)
-                    {
-                        if (configLibraries && typeof configLibraries == "object")
-                        {
-                            Object.keys(configLibraries).forEach(function(libraryType)
-                            {
-                                if (libraryType == 'info' && configLibraries[libraryType]["title"])
-                                {
-                                    jQuery('title').html(configLibraries[libraryType]["title"]);
-                                }
-                                if (!userLibraries[libraryType])
-                                {
-                                    userLibraries[libraryType] = {};
-                                }
-                                // Merge libraries from config file and URL together. Check for incompatible
-                                // libraries, and disable them.
-                                Object.keys(configLibraries[libraryType]).forEach(function(libraryName)
-                                {
-                                    var disabled = false;
-                                    if (requireArray[libraryName] && requireArray[libraryName].disabledBy)
-                                    {
-                                        for (var i = 0; i < requireArray[libraryName].disabledBy.length; i++)
-                                        {
-                                            Object.keys(userLibraries).forEach(function(userLibraryType)
-                                            {
-                                                Object.keys(userLibraries[userLibraryType]).forEach(function(userLibraryName)
-                                                {
-                                                    if (requireArray[libraryName].disabledBy[i] == userLibraryName)
-                                                    {
-                                                        disabled = true;
-                                                    }
-                                                })
-                                            })
-                                        }
-                                    }
-                                    if (!disabled)
-                                    {
-                                        if (userLibraries[libraryType][libraryName] == undefined)
-                                        {
-                                            userLibraries[libraryType][libraryName] = configLibraries[libraryType][libraryName];
-                                        }
-                                        else if (typeof userLibraries[libraryType][libraryName] == "object" && typeof configLibraries[libraryType][libraryName] == "object")
-                                        {
-                                            userLibraries[libraryType][libraryName] = jQuery.extend(
-                                            {}, configLibraries[libraryType][libraryName], userLibraries[libraryType][libraryName]);
-                                        }
-                                    }
-                                });
-                            });
-                        }
-                    }).always(function(jqXHR, textStatus)
-                    {
-                        Object.keys(userLibraries).forEach(function(libraryType)
-                        {
-                            if (initializers[libraryType])
-                            {
-                                Object.keys(userLibraries[libraryType]).forEach(function(libraryName)
-                                {
-                                    if (requireArray[libraryName])
-                                    {
-                                        requireArray[libraryName].active = true;
-                                        initializers[libraryType][libraryName].active = true;
-                                        if (userLibraries[libraryType][libraryName] && userLibraries[libraryType][libraryName] != "")
-                                        {
-                                            if (typeof initializers[libraryType][libraryName].parameters == "object")
-                                            {
-                                                initializers[libraryType][libraryName].parameters = jQuery.extend(
-                                                    {}, initializers[libraryType][libraryName].parameters,
-                                                    userLibraries[libraryType][libraryName]);
-                                            }
-                                            else
-                                            {
-                                                initializers[libraryType][libraryName].parameters = userLibraries[libraryType][libraryName];
-                                            }
-                                        }
-                                        if (requireArray[libraryName].linkedLibraries)
-                                        {
-                                            for (var i = 0; i < requireArray[libraryName].linkedLibraries.length; i++)
-                                            {
-                                                requireArray[requireArray[libraryName].linkedLibraries[i]].active = true;
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                        // Load default renderer if no other librarys specified
-                        if (Object.keys(userLibraries["model"]).length == 0 && Object.keys(userLibraries["view"]).length == 0)
-                        {
-                            requireArray["vwf/model/threejs"].active = true;
-                            requireArray["vwf/model/ammojs"].active = true;
-                            requireArray["vwf/view/threejs"].active = true;
-                            initializers["model"]["vwf/model/threejs"].active = true;
-                            initializers["view"]["vwf/view/threejs"].active = true;
-                        }
-                        var requireConfig = {};
-                        require(requireConfig, getActiveLibraries(requireArray, false), function(ready)
+                        require(requireDependancies, function(ready)
                         {
                             ready(function()
                             {
                                 // With the scripts loaded, we must initialize the framework. Engine.initialize()
                                 // accepts three parameters: a world specification, model configuration parameters,
                                 // and view configuration parameters.
-                                var models = [
-                                    "vwf/model/javascript",
-                                    "vwf/model/ammojs",
-                                    "vwf/model/wires",
-                                    "vwf/model/threejs",
-                                    "vwf/model/jqueryui",
-                        "ohm",
-                                    "vwf/model/audio",
-                                    "vwf/model/object",
-                                ];
                                 // These are the view configurations. They use the same format as the model
                                 // configurations.
-                                var views = [
-                                    "vwf/view/threejs",
-                                    "vwf/view/document",
-                                    "vwf/view/EditorView",
-                                    "vwf/view/WebRTC",
-                                    "vwf/view/xapi",
-                                    "vwf/view/jqueryui",
-                                ];
                                 Engine.initialize(application, models, views, callback);
                             });
                         });
-                    });
+                    }.bind(this));
                 }
                 // -- ready --------------------------------------------------------------------------------
             this.generateTick = function()
@@ -571,7 +328,7 @@ define(['progressScreen'], function()
                 var application;
                 // Load the runtime configuration. We start with the factory defaults. The reflector may
                 // provide additional settings when we connect.
-                this.configuration = require("vwf/configuration").active; // "active" updates in place and changes don't invalidate the reference
+                jQuery.extend(this.configuration, require("vwf/configuration").active); // "active" updates in place and changes don't invalidate the reference
                 // Create the logger.
                 this.logger = require("logger").for("vwf", this); // TODO: for( "vwf", ... ), and update existing calls
                 // Parse the function parameters. If the first parameter is not an array, then treat it
@@ -715,30 +472,6 @@ define(['progressScreen'], function()
                     }
                 }, this);
                 // Test for ECMAScript 5
-                if (!(function()
-                    {
-                        return !this
-                    })())
-                {
-                    compatibilityStatus.compatible = false;
-                    jQuery.extend(compatibilityStatus.errors,
-                    {
-                        "ES5": "This browser is not compatible. VWF requires ECMAScript 5."
-                    });
-                }
-                // Test for WebSockets
-                //  if( window.io && !io.Transport.websocket.check() )
-                {
-                    compatibilityStatus.compatible = false;
-                    jQuery.extend(compatibilityStatus.errors,
-                    {
-                        "WS": "This browser is not compatible. VWF requires WebSockets."
-                    });
-                }
-                if (callback)
-                {
-                    callback(compatibilityStatus);
-                }
                 // Load the application.
                 this.ready(application);
             };
@@ -746,7 +479,7 @@ define(['progressScreen'], function()
             /// @name module:Engine.ready
             this.getInstanceHost = function()
             {
-        var loadBalancerAddress = '{{loadBalancerAddress}}';
+                var loadBalancerAddress = '{{loadBalancerAddress}}';
                 var instance = window.location.pathname;
                 var instanceHost = $.ajax(
                 {
@@ -770,13 +503,11 @@ define(['progressScreen'], function()
                         window.location.pathname.lastIndexOf("/"));
                     var protocol = window.location.protocol;
                     var host = window.location.protocol + '//' + window.location.host;
-            var loadBalancerAddress = '{{loadBalancerAddress}}';
-            
-            if(loadBalancerAddress !== "undefined")
-            {
-                host = this.getInstanceHost();
-            }
-
+                    var loadBalancerAddress = '{{loadBalancerAddress}}';
+                    if (loadBalancerAddress !== "undefined")
+                    {
+                        host = this.getInstanceHost();
+                    }
                     var socketProxy = require('vwf/socket')
                     if (window.location.protocol === "https:")
                     {
@@ -930,7 +661,7 @@ define(['progressScreen'], function()
                 var time = when > 0 ? // absolute (+) or relative (-)
                     Math.max(this.realTime(), when) :
                     this.realTime()
-                // Attach the current simulation time and pack the message as an array of the arguments.
+                    // Attach the current simulation time and pack the message as an array of the arguments.
                 var fields = {
                     time: time,
                     node: nodeID,
@@ -951,14 +682,16 @@ define(['progressScreen'], function()
                             fields.client = this.moniker_; // stamp with the originating client like the reflector does
                             fields.origin = "reflector";
                             //must be careful here to be async, otherwise code is sometimes synchronous and sometimes not
-                            (function(fields){window.setImmediate(function()
+                            (function(fields)
                             {
-                                this.localReentryStack++
-                                    queue.insert(fields);
-                                if (this.localReentryStack > 2)
-                                    this.localReentryStack--;
-                            })})(fields);
-                            
+                                window.setImmediate(function()
+                                {
+                                    this.localReentryStack++
+                                        queue.insert(fields);
+                                    if (this.localReentryStack > 2)
+                                        this.localReentryStack--;
+                                })
+                            })(fields);
                         }
                     }
                     socket.send(fields);
@@ -1109,7 +842,7 @@ define(['progressScreen'], function()
                         if (this.isSimulating(nodeID)) continue;
                         for (var i in state[nodeID])
                         {
-                            if(this.messageTime() >= this.propertyTime(nodeID,i) )
+                            if (this.messageTime() >= this.propertyTime(nodeID, i))
                                 this.setPropertyFast(nodeID, i, state[nodeID][i]);
                         }
                     }
@@ -1229,13 +962,11 @@ define(['progressScreen'], function()
                     alertify.log(parameters[0]);
                 }
                 var args = [];
-
                 //dont take outdated property updates
-                if(actionName == "setProperty" && this.propertyTime(nodeID,memberName) >= this.messageTime())
+                if (actionName == "setProperty" && this.propertyTime(nodeID, memberName) >= this.messageTime())
                 {
                     return;
                 }
-
                 if (nodeID || nodeID === 0) args.push(nodeID);
                 if (memberName) args.push(memberName);
                 if (parameters) args = args.concat(parameters); // flatten
@@ -1276,56 +1007,55 @@ define(['progressScreen'], function()
             };
             this.propertyTimeReset = function()
             {
-                 this._propertySetTimes = {}; 
+                this._propertySetTimes = {};
             }
-            this.propertyTime = function(nodeID,propertyName)
+            this.propertyTime = function(nodeID, propertyName)
             {
-                return this._propertySetTimes[nodeID+propertyName] || 0;
+                return this._propertySetTimes[nodeID + propertyName] || 0;
             }
-            this.propertyAge = function(nodeID,propertyName)
+            this.propertyAge = function(nodeID, propertyName)
             {
-                return this.realTime() - this.propertyTime(nodeID,propertyName);
+                return this.realTime() - this.propertyTime(nodeID, propertyName);
             }
-            this.markAllPropsCurrent = function(nodeID,propertyName)
+            this.markAllPropsCurrent = function(nodeID, propertyName)
             {
                 var t = this.realTime() + 1;
-                for(var i in this._propertySetTimes)
-                    this._propertySetTimes[i]= t;
+                for (var i in this._propertySetTimes)
+                    this._propertySetTimes[i] = t;
             }
             this.messageTime = function()
-            {
-                if(!this.message)
-                    return Infinity;
-                else return this.message.time;
-            }
-            // -- dispatch -----------------------------------------------------------------------------
-            /// Dispatch incoming messages waiting in the queue. "currentTime" specifies the current
-            /// simulation time that we should advance to and was taken from the time stamp of the last
-            /// message received from the reflector.
-            /// 
-            /// @name module:Engine.dispatch
+                {
+                    if (!this.message)
+                        return Infinity;
+                    else return this.message.time;
+                }
+                // -- dispatch -----------------------------------------------------------------------------
+                /// Dispatch incoming messages waiting in the queue. "currentTime" specifies the current
+                /// simulation time that we should advance to and was taken from the time stamp of the last
+                /// message received from the reflector.
+                /// 
+                /// @name module:Engine.dispatch
             this.lastTick = 0;
             this._propertySetTimes = {};
             this._lastRealTime = 0;
-                this.dispatch = function()
+            this.dispatch = function()
+            {
+                // Handle messages until we empty the queue or reach the new current time. For each,
+                // remove the message and perform the action. The simulation time is advanced to the
+                // message time as each one is processed.
+                var fields;
+                // Actions may use receive's ready function to suspend the queue for asynchronous
+                // operations, and to resume it when the operation is complete.
+                while (fields = /* assignment! */ queue.pull())
                 {
-                    // Handle messages until we empty the queue or reach the new current time. For each,
-                    // remove the message and perform the action. The simulation time is advanced to the
-                    // message time as each one is processed.
-                    var fields;
-                    // Actions may use receive's ready function to suspend the queue for asynchronous
-                    // operations, and to resume it when the operation is complete.
-                    while (fields = /* assignment! */ queue.pull())
-                    {
-                        // Advance time to the message time.s
-                        this.processMessage(fields);
-                    }
-                };
+                    // Advance time to the message time.s
+                    this.processMessage(fields);
+                }
+            };
             this.processMessage = function(fields)
                 {
                     this.message = fields;
                     // Advance the time.
-                    
                     if (this.now < fields.time && fields.action == "tick")
                     {
                         this.now = fields.time;
@@ -1449,7 +1179,6 @@ define(['progressScreen'], function()
                     nodeIndex++;
                 }, function(err) /* async */
                 {
-                  
                     // Clear the message queue, except for reflector messages that arrived after the
                     // current action.
                     queue.filter(function(fields)
@@ -1483,7 +1212,7 @@ define(['progressScreen'], function()
                         Engine.nodesCoSimulating.shift();
                     });
                     Engine.callMethod(Engine.application(), 'ready', []);
-                    if(socket) socket.event(socket.EVENTS.READY)
+                    if (socket) socket.event(socket.EVENTS.READY)
                     queue.resume();
                     callback_async && callback_async();
                 });
@@ -1750,7 +1479,6 @@ define(['progressScreen'], function()
             {
                 if (!nodes.existing[nodeID]) return;
                 this.logger.debuggx("deleteNode", nodeID);
-
                 //collect children and stop simulating
                 Engine.stopSimulating(nodeID);
                 // Remove the entry in the components list if this was the root of a component loaded
@@ -1780,15 +1508,12 @@ define(['progressScreen'], function()
                 {
                     applicationID = undefined;
                 }
-                
-
                 //remove the timing info for the properties
-                for(var i in this._propertySetTimes)
+                for (var i in this._propertySetTimes)
                 {
-                    if(i.indexOf(nodeID) == 0)
+                    if (i.indexOf(nodeID) == 0)
                         delete this._propertySetTimes[i];
                 }
-
                 this.views.forEach(function(view)
                 {
                     view.deletedNode && view.deletedNode(nodeID);
@@ -2409,7 +2134,7 @@ define(['progressScreen'], function()
             this.createChild = function(nodeID, childName, childComponent, childURI, callback_async /* ( childID ) */ )
             {
                 Engine.createDepth++;
-    progressScreen.startCreateNode(nodeID || childName);
+                progressScreen.startCreateNode(nodeID || childName);
                 this.logger.debuggx("createChild", function()
                 {
                     return [nodeID, childName, JSON.stringify(loggableComponent(childComponent)), childURI];
@@ -2484,7 +2209,7 @@ define(['progressScreen'], function()
                     node.children = newChildren;
                     return node;*/
                 }
-    if(nodeID !== 0 && childComponent) //careful not to scrub out protos
+                if (nodeID !== 0 && childComponent) //careful not to scrub out protos
                     childComponent = cleanChildComponent(childComponent)
                 if (!childComponent)
                 {
@@ -3334,19 +3059,15 @@ define(['progressScreen'], function()
             /// @see {@link module:vwf/api/kernel.setProperty}
             this.setProperty = function(nodeID, propertyName, propertyValue)
             {
-
                 this.logger.debuggx("setProperty", function()
                 {
                     return [nodeID, propertyName, JSON.stringify(loggableValue(propertyValue))];
                 });
                 var node = nodes.existing[nodeID];
                 if (!node) return;
-                
-                
                 // Record calls into this function by nodeID and propertyName so that models may call
                 // back here (directly or indirectly) to delegate responses further down the chain
                 // without causing infinite recursion.
-
                 var entrants = this.setProperty.entrants;
                 var entry = entrants[nodeID + '-' + propertyName] ||
                 {}; // the most recent call, if any  // TODO: need unique nodeID+propertyName hash
@@ -3484,7 +3205,7 @@ define(['progressScreen'], function()
                 }
                 //external setProperty events should not color the sent prop as updated, because all clients will have received
                 //the message
-                if(!this.message || (this.message.action != 'setProperty' && this.message.member != propertyName)) 
+                if (!this.message || (this.message.action != 'setProperty' && this.message.member != propertyName))
                     this.propertyUpdated(nodeID, propertyName, propertyValue);
                 this.logger.debugu();
                 Engine._propertySetTimes[nodeID + propertyName] = Engine.messageTime();
@@ -3521,7 +3242,6 @@ define(['progressScreen'], function()
             this.setPropertyFast = function(nodeID, propertyName, propertyValue)
                 {
                     var answer = undefined;
-                    
                     for (var i = 0; i < this.models.length; i++)
                     {
                         if (!this.setPropertyFastEntrants[nodeID + propertyName + i])
@@ -3542,7 +3262,7 @@ define(['progressScreen'], function()
                         }
                     }
                     this.propertyUpdated(nodeID, propertyName, answer || propertyValue);
-                    this._propertySetTimes[nodeID+propertyName] = Engine.messageTime();
+                    this._propertySetTimes[nodeID + propertyName] = Engine.messageTime();
                     return answer;
                 },
                 this.getProperty = function(nodeID, propertyName, ignorePrototype, testDelegation)
@@ -3903,7 +3623,7 @@ define(['progressScreen'], function()
             };
             this.realTime = function()
             {
-                return this.now + (performance.now() - this._lastRealTime)/1000.0;
+                return this.now + (performance.now() - this._lastRealTime) / 1000.0;
             };
             // -- client -------------------------------------------------------------------------------
             /// The moniker of the client responsible for the current action. Will be falsy for actions
@@ -5603,7 +5323,7 @@ define(['progressScreen'], function()
                 /// @returns {Object|undefined} The next message if available, otherwise undefined.
                 pull: function()
                 {
-                    if (this.suspension == 0 && this.queue.length > 0 )
+                    if (this.suspension == 0 && this.queue.length > 0)
                     {
                         return this.queue.shift();
                     }
