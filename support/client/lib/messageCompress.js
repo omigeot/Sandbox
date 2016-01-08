@@ -1175,7 +1175,7 @@ function messageCompress()
 try
 {
     // on client via requrie we just return a new instance
-    define(messageCompress());
+    define("messageCompress",messageCompress());
 }
 catch (e)
 {}
