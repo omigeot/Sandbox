@@ -139,24 +139,7 @@
      }
      this.followObject = function(value)
      {
-         if (this.objectFollowed)
-         {
-             if (this.objectFollowed.updateCallbacks)
-             {
-                 this.objectFollowed.updateCallbacks.splice(this.followcallbacknum, 1);
-             }
-         }
-         if (value)
-         {
-             if (value.updateCallbacks)
-             {
-                 value.updateCallbacks.push(this.updateCamera.bind(this));
-                 this.followcallbacknum = value.updateCallbacks.length;
-             }
-         }
-         this.objectFollowed = value;
-         //if(this.objectFollowed)
-         //this.oldRotZ = Engine.getProperty(this.objectFollowed.id,'rotZ');
+     
      }
      this.targetUpdated = function(obj)
      {
@@ -528,12 +511,7 @@
          }
          if ((this.rightdown == true && this.middledown == false))
          {
-             if (this.objectFollowed)
-             {
-                 var rz = this.lastRotZ || 0;
-                 this.lastRotZ = (rz + (this.rel_x * 5 || 0)) || 0;
-                 vwf_view.kernel.setProperty(this.objectFollowed.id, 'rotZ', this.lastRotZ);
-             }
+             
              this.x_rot += this.rel_x;
              this.y_rot += this.rel_y;
          }
@@ -623,16 +601,7 @@
          if(!this.active) return
          if (!_dView.inDefaultCamera()) return;
          this.keyboardControl();
-         try
-         {
-             if (this.objectFollowed != null)
-                 this.targetUpdated(this.objectFollowed);
-         }
-         catch (e)
-         {
-             this.objectFollowed = null;
-             console.error(e)
-         }
+         
          if (this.cameramode == 'None' || this.cameramode == 'DeviceOrientation')
          {
              return;
@@ -681,71 +650,8 @@
              this.camera.position.z = tfinalpos[2];
              this.camera.lookAt(TempVec3(this.last_center));
          }
-         else if (this.cameramode == 'FirstPerson')
-         {
-             try
-             {
-                 //this.oldRotZ var xmatrix = MATH.angleAxis(this.x_rot*10,[0,0,1]);
-                 var rotation = this.objectFollowed.rotation;
-                 var offset = this.objectFollowed.transformAPI.localToGlobalRotation([0, 1.5, .5]);
-                 offset = MATH.scaleVec3(offset, 1 / MATH.lengthVec3(offset));
-                 var side = MATH.crossVec3([0, 0, 1], offset);
-                 if (this.last_y_rot < .479) this.last_y_rot = .479;
-                 if (this.last_y_rot > .783) this.last_y_rot = .783;
-                 var crossmatrix = MATH.angleAxis(this.last_y_rot * 10, side);
-                 var stage2offset = MATH.mulMat4Vec3(crossmatrix, offset);
-                 stage2offset = MATH.scaleVec3(stage2offset, 1 / MATH.lengthVec3(stage2offset));
-                 var finaloffset = MATH.scaleVec3(stage2offset, this.last_zoom);
-                 if (this.last_center[2] < .05)
-                     this.last_center[2] = .05;
-                 var finalpos = MATH.addVec3(finaloffset, this.last_center);
-                 //this.camera.translation = finalpos;
-                 this.camera.position.x = finalpos[0];
-                 this.camera.position.y = finalpos[1];
-                 this.camera.position.z = finalpos[2];
-                 this.camera.lookAt(TempVec3(this.last_center));
-                 this.camera.updateProjectionMatrix(true);
-                 this.zoom = .0001;
-             }
-             catch (e)
-             {
-                 console.error(e);
-             }
-         }
-         else if (this.cameramode == '3RDPerson')
-         {
-             try
-             {
-                 var offset = this.objectFollowed.transformAPI.localToGlobalRotation([0, 1.5, .5]);
-                 var finaldist = MATH.lengthVec3(offset);
-                 offset = MATH.scaleVec3(offset, 1 / finaldist);
-                 var start = MATH.addVec3(this.last_center, MATH.scaleVec3(offset, .3));
-                 var oldpickstate = findviewnode(this.objectFollowed.id).PickPriority;
-                 var hit = _Editor.ThreeJSPick(start, MATH.scaleVec3(offset, 1),
-                 {
-                     filter: function(o)
-                     {
-                         if (o instanceof THREE.Line) return false;
-                         return !(o.isAvatar === true || o.passable === true)
-                     }
-                 });
-                 if (hit)
-                 {
-                     finaldist = Math.min(finaldist, hit.distance - .2);
-                 }
-                 findviewnode(this.objectFollowed.id).PickPriority = oldpickstate;
-                 offset = MATH.scaleVec3(offset, finaldist);
-                 var finalpos = MATH.addVec3(offset, start);
-                 this.camera.position.x = finalpos[0];
-                 this.camera.position.y = finalpos[1];
-                 this.camera.position.z = finalpos[2];
-                 this.camera.lookAt(TempVec3(this.last_center));
-             }
-             catch (e)
-             {
-                 console.error(e)
-             }
-         }
+         
+         
          this.callUpdateCallbacks();
          this.camera.updateMatrixWorld();
          this.camera.updateMatrix();
@@ -807,7 +713,7 @@
          //this.offset = diff;
          this.zoom = length;
          this.center = point;
-         this.objectFollowed = null;
+         
      }
      this.ReprojectCameraCenter = function(dist)
      {
