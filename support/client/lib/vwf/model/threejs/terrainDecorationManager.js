@@ -9,8 +9,8 @@
         this.grassMeshes = [];
         this.wind = true;
         this.dim = 8;
-        this.tileW = 12;
-        this.grassDensity = 3;
+        this.tileW = 24;
+        this.grassDensity = .3;
         this.grassWidth = 1.5;
         this.grassHeight = 1;
         this.queues = {};
@@ -314,7 +314,7 @@
                         "wind = (wind + 1.0) / 4.0;\n" +
                         "    gl_Position = modMat * vec4( position.xy + wind * uv.y,position.z+z, 1.0 );\n" +
                  //   /*debug render target*/    "    gl_Position = modelMatrix * vec4( position,1.0);\n"+
-                        "    ar = length(gl_Position.xyz - cameraPosition)/50.0;\n" +
+                        "    ar = length(gl_Position.xyz - cameraPosition)/20.0;\n" +
                     //"    gl_Position.z = z;"+
                     "    vFogPosition = gl_Position.xyz;\n" + 
                     "    gl_Position = viewMatrix * gl_Position;\n" +

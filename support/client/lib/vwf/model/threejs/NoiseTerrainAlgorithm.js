@@ -61,7 +61,7 @@ function NoiseTerrainAlgorithm()
 		"vec4 getGrassDensity(vec3 o, vec3 n, vec2 p) {return vec4(1.0,1.0,1.0,1.0);}" +
 		"vec4 getMix(vec3 norm)" +
 		"{"+
-		"float side = min(1.0,pow(1.0-abs(dot(norm,(vec4(0.0,0.0,1.0,0.0)).xyz)),3.0) * 10.0);\n"+
+		"float side = min(1.0,pow(1.0-abs(dot(norm,(vec4(0.0,0.0,1.0,0.0)).xyz)),2.0) * 10.0);\n"+
 			"float bottom = 1.0-smoothstep(-20.0,60.0,npos.z);\n"+
 			"float top = clamp(0.0,1.0,(smoothstep(100.0,140.0,npos.z)));\n"+
 			"float middle = clamp(0.0,1.0,(1.0 - bottom - top));\n"+
@@ -109,8 +109,12 @@ function NoiseTerrainAlgorithm()
 		 z += this.SimplexNoise.noise2D((vert.x)/100,(vert.y)/100) * 15.0;
 //		 z += this.SimplexNoise.noise2D((vert.x)/20,(vert.y)/20) * 11.5;
 	//	 z += this.SimplexNoise.noise2D((vert.x)/5,(vert.y)/5) * 1.25;
-		  
-		return z/5 + 1.5;
+		
+		z -= Math.sqrt(vert.x * vert.x + vert.y * vert.y)/ 20;
+		z = z/5 - 1.5;
+		if(z < 1)
+			z = 1;
+		return z;
 	}
 }
 //@ sourceURL=threejs.terrain.NoiseTerrainAlgorithm

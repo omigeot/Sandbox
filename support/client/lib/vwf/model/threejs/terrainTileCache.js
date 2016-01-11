@@ -331,11 +331,21 @@ function TileCache() {
         "gl_FragColor.a = 1.0;\n" +
         "#ifdef USE_FOG\n" +
 
+        "#ifdef FOG_EXP2\n" + 
+            "#if MAX_DIR_LIGHTS > 0\n"+
+                "gl_FragColor.xyz = aerialPerspective(gl_FragColor.xyz, distance(vFogPosition,cameraPosition),cameraPosition.xzy, normalize(vFogPosition-cameraPosition).xzy);\n" +
+            "#endif\n" +
+        "#else\n"+
 
-        //"gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );\n"+
+
+
+            "float depth = gl_FragCoord.z / gl_FragCoord.w;\n"+
+            "float fogFactor = smoothstep( fogNear, fogFar, depth );\n"+
+            "gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );\n"+
 
         //"gl_FragColor.xyz = nn;\n"+
-        "gl_FragColor.xyz = aerialPerspective(gl_FragColor.xyz, distance(vFogPosition,cameraPosition),cameraPosition.xzy, normalize(vFogPosition-cameraPosition).xzy);\n" +
+        
+        "#endif\n" +
         "#endif\n" +
         //"gl_FragColor = vec4(nn.rgb,1.0);\n"+
         "}\n";

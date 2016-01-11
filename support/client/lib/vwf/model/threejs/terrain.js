@@ -4,11 +4,11 @@
             window._dTerrain = this;
 
             var self = this;
-            var totalmintilesize = 32;
+            var totalmintilesize = 64;
             var tileres = 16;
             var minTileSize = totalmintilesize;
-            var maxTileSize = 512;
-            var worldExtents = 512;
+            var maxTileSize = 1024;
+            var worldExtents = 1024;
             var updateEvery = 30;
 
 
