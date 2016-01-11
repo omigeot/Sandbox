@@ -111,12 +111,6 @@ var simulationManager = function(world)
     this.addClient = function(sandboxClient)
     {
         var self = this;
-        sandboxClient.on('ready',function(){
-            self.addClient_internal(sandboxClient);
-        })
-    }
-    this.addClient_internal = function(sandboxClient)
-    {
         console.log("simulationManager.addClient " + sandboxClient.id )
         var newClient = new simClient(sandboxClient, this);
         if (sandboxClient.isAnonymous() && !this.world.state.metadata.publishSettings.allowAnonymous)
@@ -128,6 +122,13 @@ var simulationManager = function(world)
         //must add to list to get proper average load, then remove so we don't keep distributing
         //nodes from new client to new client
         this.clients[sandboxClient.id] = newClient;
+        sandboxClient.on('ready',function(){
+            self.distributeToClient(sandboxClient,newClient);
+        })
+    }
+    this.distributeToClient = function(sandboxClient,newClient)
+    {
+       
         if (this.clientCount() == 1) // a new client joined, who is logged in , and all others are observers
         {
             //this.startScene();
@@ -249,6 +250,7 @@ var simulationManager = function(world)
         var rootID = this.world.state.ancestors(nodeid)[1];
         if (!rootID)
         {
+            console.log(this.clients);
             this.clients[creatingClient.id].startSimulatingNode(nodeid);
             //console.log(creatingClient.id + " start simulation " + nodeid);
         }
