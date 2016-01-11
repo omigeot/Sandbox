@@ -107,10 +107,10 @@ function NoiseTerrainAlgorithm()
 		z += this.SimplexNoise.noise2D((vert.x)/5000,(vert.y)/5000) * 50;
 		z += this.SimplexNoise.noise2D((vert.x)/500,(vert.y)/500) * 10;
 		 z += this.SimplexNoise.noise2D((vert.x)/100,(vert.y)/100) * 15.0;
-		 z += this.SimplexNoise.noise2D((vert.x)/20,(vert.y)/20) * 11.5;
-		 z += this.SimplexNoise.noise2D((vert.x)/5,(vert.y)/5) * 1.25;
+//		 z += this.SimplexNoise.noise2D((vert.x)/20,(vert.y)/20) * 11.5;
+	//	 z += this.SimplexNoise.noise2D((vert.x)/5,(vert.y)/5) * 1.25;
 		  
-		return z/20 + 1.5;
+		return z/5 + 1.5;
 	}
 }
 //@ sourceURL=threejs.terrain.NoiseTerrainAlgorithm

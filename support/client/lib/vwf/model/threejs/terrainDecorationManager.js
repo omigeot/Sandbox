@@ -9,7 +9,7 @@
         this.grassMeshes = [];
         this.wind = true;
         this.dim = 8;
-        this.tileW = 32;
+        this.tileW = 12;
         this.grassDensity = 3;
         this.grassWidth = 1.5;
         this.grassHeight = 1;
@@ -345,7 +345,7 @@
                         "lowp float density =  gb.g;" +
                         "if ( color1.a * density < alphaTest ) discard;\n" +
                         //"for ( int i = 0; i < 4; i++) for(int j = 0; j < 4; j++){ if(int(mod(gl_FragCoord.x + rand, 4.0)) == i) if(int(mod(gl_FragCoord.y+ rand, 4.0)) == j) color1.a = max(0.0,thresholdMatrix[i][j]);} " +
-                    " if(random(gl_FragCoord.xy * vec2(rand,-rand) + progtc) > color1.a) discard;"    +  
+                   // " if(random(gl_FragCoord.xy * vec2(rand,-rand) + progtc) > color1.a) discard;"    +  
                     "if ( color1.a  < 0.1 * ar*ar) discard;\n" +
                   //  "color1.r = abs(mod(gl_FragCoord.x, 4.0)); color1.g =0.0;color1.b=0.0;"+
                     //"color1.a =  1.0 ;"+
