@@ -56,10 +56,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			MenuManageAssets: function(e){
 				$('#manageAssetsDialog').dialog('open');
 			},
-			MenuConsole:function(e)
-			{
-				logger.open();
-			},
+
 			MenuAssetsSaveAsEntity: function(e){
 				manageAssets.uploadSelectedEntity();
 				$('#manageAssetsDialog').dialog('open');
@@ -172,15 +169,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 			},
 
-			MenuLogOut: function(e) {
-				if ($('#MenuLogOut').attr('disabled') == 'disabled') return;
-
-				var path = window.location.pathname;
-
-				if(path.indexOf('example_blank') > 0) window.location = '/adl/sandbox/demos';
-				else if(path.indexOf('example_') > 0) window.location = '/adl/sandbox/examples';
-				else window.location = path.replace('/sandbox/', '/sandbox/world/');
-			},
+			
 			MenuSelectPick: function(e) {
 				_Editor.SetSelectMode('Pick');
 			},
@@ -294,7 +283,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			},
 			MenuLatencyTest: function(e) {
 				var e = {};
-				e.time = performance.now();
+				e.time = new Date();
 				vwf_view.kernel.callMethod('index-vwf', 'latencyTest', [e]);
 			},
 			ResetTransforms: function(e) {
@@ -705,9 +694,6 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			},
 			MenuCreateTSection: function(e) {
 				_Editor.CreatePrim('tsection', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
-			},
-			MenuCreateTurtle: function(e) {
-				_Editor.CreateTurtle('turtle', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
 			MenuCreateTerrain: function(e) {
 				if (!window._dTerrain)
