@@ -438,10 +438,14 @@ var sandboxState = function(id, metadata, world)
     }
     this.deletedNode = function(id, parent)
     {
+        logger.warn("deleting " + id);
+
         var node = this.findNode(id);
         if (!node) return;
         if (!parent) parent = node.parent;
+
         if (!parent) return;
+        
         if (parent.children)
         {
             for (var i in parent.children)
@@ -449,6 +453,7 @@ var sandboxState = function(id, metadata, world)
                 if (i == id)
                 {
                     delete parent.children[i];
+                    logger.warn("deleted " + id);
                     return
                 }
             }
@@ -542,15 +547,6 @@ var sandboxState = function(id, metadata, world)
     {
         var self = this;
 
-        var removeParents = function(node)
-        {
-            delete node.parent;    
-            for (var i in node.children)
-            {
-                removeParents(node.children[i])
-            }
-        }
-
         var walk = function(node)
         {
             delete node.parent;
@@ -576,16 +572,24 @@ var sandboxState = function(id, metadata, world)
             }
             return node;
         }
-        var node = this.findNode(nodeID);
-        removeParents(node);
-        node = JSON.parse(JSON.stringify(node));
-        this.reattachParents(this.findNode(nodeID));
+        var node = this.duplicateNode(this.findNode(nodeID));
         node = walk(node,nodeID);
         if(nodeID == 'index-vwf')
         {
             node.patches = 'index.vwf';
         }
         return node;
+    }
+    this.duplicateNode = function(node)
+    {
+        //get around the issue with stringifying a circular structure due to the parents property
+        node = JSON.parse(JSON.stringify(node,function(k,v){
+            if(k == "parent")
+                return undefined;
+            else
+                return v;
+        }));
+         return node;
     }
     this.getAvatarForClient = function(userID)
     {
