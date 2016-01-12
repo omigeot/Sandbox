@@ -43,7 +43,8 @@ function exponentialInterpolation(x, X, Y, sm1)
 {
 	var len = Y.length -1;
 	var a = .1;
-	
+	if(Math.abs(Y[len] - Y[len-1]) > DISCONTINUITY_THRESHOLD)
+		return Y[len];
 	return a * (Y[len]) + (1 - a) * sm1[sm1.length - 1];
 }
 
@@ -208,12 +209,16 @@ viewInterpolationNode.prototype.setProperty = function(propertyName, propertyVal
 		this.properties[propertyName] = matCpy(propertyValue);
 		if(!Engine.isSimulating(this.id))
 		{
-			this.pushTransform(matCpy(this.getProperty('transform')))
+			this.pushTransform( matCpy(propertyValue));
 		}
 	}
 	if (propertyName == 'animationFrame')
 	{
 		this.properties[propertyName] = propertyValue;
+		if(!Engine.isSimulating(this.id))
+		{
+			this.animationFrameQueue.push(propertyValue)
+		}
 	}
 }
 viewInterpolationNode.prototype.getProperty = function(propertyName)
@@ -247,6 +252,12 @@ viewInterpolationNode.prototype.interpolate = function()
 	{
 		//so, given that we don't have to have determinism, do we really need to backup and restore?
 		//viewnode.backupTransforms(this.getProperty('animationFrame'));
+	
+		if (Engine.isSimulating(this.id) && (Engine.getPropertyFast(Engine.application(),'playMode') != 'play' && performance.now() - this.positionQueue.xQueue.times[4] > .05))
+		{
+			this.animationFrameQueue.push(this.getProperty('animationFrame'));
+		}
+
 		viewnode.setAnimationFrameInternal(this.animationFrameQueue.interpolate(performance.now()),false);
 	}
 }
