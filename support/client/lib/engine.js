@@ -707,9 +707,16 @@ define(['progressScreen'], function(progress)
                     //the data traveled over the reflector
                     fields = JSON.parse(JSON.stringify(fields));
                     //must be careful that we do this actually async, or logic that expects async operation will fail
-                    this.localReentryStack++
-                        queue.insert(fields);;
-                    this.localReentryStack--;
+                    (function(fields)
+                    {
+                        window.setImmediate(function()
+                        {
+                            this.localReentryStack++
+                                queue.insert(fields);
+                            if (this.localReentryStack > 2)
+                                this.localReentryStack--;
+                        })
+                    })(fields);
                 }
                 this.logger.debugu();
             };
