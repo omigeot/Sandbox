@@ -458,22 +458,25 @@ define(["module", "vwf/model", "vwf/utility","vwf/model/javascript/clientAPI","v
         //so the user should not really call the APIs directly, but instead use these getters
         hookUpAPIs: function(node)
         {
+            var id = node.id;
+            if(this.isBehavior(node))
+                id = Engine.parent(node.id);
             if ("___transformAPI" in node)
             {
-                node.transformAPI = new APIModules.transformAPI(node.id);
+                node.transformAPI = new APIModules.transformAPI(id);
             }
             if ("___audioAPI" in node)
             {
 
-               node.audioAPI = new APIModules.audioAPI(node.id);
+               node.audioAPI = new APIModules.audioAPI(id);
             }
             if ("___physicsAPI" in node)
             {
-                node.physicsAPI = new APIModules.physicsAPI(node.id);
+                node.physicsAPI = new APIModules.physicsAPI(id);
             }
             if (node.hasOwnProperty("___clientAPI"))
             {
-                node.clientAPI = new APIModules.clientAPI(node.id);
+                node.clientAPI = new APIModules.clientAPI(id);
             }
             if (node.hasOwnProperty("___commsAPI"))
             {
@@ -481,7 +484,7 @@ define(["module", "vwf/model", "vwf/utility","vwf/model/javascript/clientAPI","v
                 { // TODO: only define on shared "node" prototype?
                     get: function()
                     {
-                        return Engine.models.javascript.gettingProperty(this.id, "___commsAPI")
+                        return Engine.models.javascript.gettingProperty(id, "___commsAPI")
                     },
                     enumerable: true,
                 });
@@ -492,14 +495,14 @@ define(["module", "vwf/model", "vwf/utility","vwf/model/javascript/clientAPI","v
                 { // TODO: only define on shared "node" prototype?
                     get: function()
                     {
-                        return Engine.models.javascript.gettingProperty(this.id, "___xAPI")
+                        return Engine.models.javascript.gettingProperty(id, "___xAPI")
                     },
                     enumerable: true,
                 });
             }
             if (node["___traceAPI"])
             {
-                node.traceAPI = new APIModules.traceAPI(node.id);
+                node.traceAPI = new APIModules.traceAPI(id);
             }
             if(node.id == Engine.application())
             {
@@ -797,13 +800,13 @@ define(["module", "vwf/model", "vwf/utility","vwf/model/javascript/clientAPI","v
                 return;
             }
 
-            
+            /* //this is starting to look like a bad idea - we should only do alias property names in the scripting APIs, not the engine
             if(this.isBehavior(node))
             {
                 var parent = this.nodes[vwf.parent(nodeID)];
                 if(parent[propertyName] !== undefined)
                     return vwf.setProperty(parent.id,propertyName,propertyValue);
-            }
+            }*/
 
             var setter = node.private.setters && node.private.setters[propertyName];
             if (setter && setter !== true)
@@ -833,12 +836,14 @@ define(["module", "vwf/model", "vwf/utility","vwf/model/javascript/clientAPI","v
         {
             if (this.disabled) return;
             var node = this.nodes[nodeID];
+            
+            /*
             if(this.isBehavior(node))
             {
                 var parent = this.nodes[vwf.parent(nodeID)];
                 if(parent[propertyName] !== undefined)
                     return vwf.getProperty(parent.id,propertyName,propertyValue);
-            }
+            }*/
             if (!node) return undefined;
             var getter = node.private.getters && node.private.getters[propertyName];
             if (getter && getter !== true)
