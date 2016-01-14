@@ -56,15 +56,6 @@ require.config({
             deps: ['vwf/view/editorview/sha256', "vwf/view/editorview/_3DRIntegration"],
             exports: 'XAPIWrapper'
         },
-        'vwf/model/threejs/_THREERayTracer': {
-            deps: ["vwf/model/threejs",'vwf/model/threejs/MATH']
-        },
-        'vwf/model/threejs/MATH': {
-            deps: ["vwf/model/threejs"]
-        },
-        'vwf/model/threejs/scenemanager': {
-            deps: ['vwf/model/threejs/_THREERayTracer']
-        },
         'vwf/model/threejs/GeometryExporter': {
             deps: ["vwf/model/threejs"]
         },
@@ -111,7 +102,8 @@ if (!window.jQuery) {
     //so, if window.jQuery is defined, then we don't need to worry about the other libs - they are already loaded. Just fire the startup.
     require(["./enginebuild.js","boot"], function(engine,boot) {
         //note that the boot module returns a function that does all the VWF setup
-        startup(boot);
+        setupLocalization();
+        promptTest(boot);
     })
 }
 
