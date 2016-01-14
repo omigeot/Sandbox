@@ -30,7 +30,7 @@ function runningAverageInterpolation(x, X, Y, sm1)
 function linearExtrapolation(x, X, Y, arr)
 {
 	var len = Y.length - 1;
-	if((X[len] - X[len - 1]) == 0)
+	if ((X[len] - X[len - 1]) == 0)
 	{
 		return Y[len];
 	}
@@ -41,18 +41,18 @@ function linearExtrapolation(x, X, Y, arr)
 
 function exponentialInterpolation(x, X, Y, sm1)
 {
-	var len = Y.length -1;
+	var len = Y.length - 1;
 	var a = .1;
-	if(Math.abs(Y[len] - Y[len-1]) > DISCONTINUITY_THRESHOLD)
+	if (Math.abs(Y[len] - Y[len - 1]) > DISCONTINUITY_THRESHOLD)
 		return Y[len];
 	return a * (Y[len]) + (1 - a) * sm1[sm1.length - 1];
 }
-
 var DISCONTINUITY_THRESHOLD = 2;
+
 function exponentialInterpolationLinearExtrapolation(x, X, Y, sm1)
 {
-	var len = Y.length -1;
-	if(Math.abs(Y[len] - Y[len-1]) > DISCONTINUITY_THRESHOLD)
+	var len = Y.length - 1;
+	if (Math.abs(Y[len] - Y[len - 1]) > DISCONTINUITY_THRESHOLD)
 		return Y[len];
 	var a = .5;
 	return a * (linearExtrapolation(x, X, Y, sm1)) + (1 - a) * sm1[sm1.length - 1];
@@ -69,15 +69,15 @@ function quadInterpolation(x, X, Y, sm1)
 }
 var INTERP_TYPE = exponentialInterpolationLinearExtrapolation;
 
-function interpolate(time, xArr, yArr, sm1,id)
+function interpolate(time, xArr, yArr, sm1, id)
 {
-	if(Engine.isSimulating(id))
-	 	return exponentialInterpolationLinearExtrapolation(time, xArr, yArr, sm1);
+	if (Engine.isSimulating(id))
+		return exponentialInterpolationLinearExtrapolation(time, xArr, yArr, sm1);
 	else
-	 	return exponentialInterpolation(time, xArr, yArr, sm1); 
+		return exponentialInterpolation(time, xArr, yArr, sm1);
 }
 
-function interpolationQueue(length, default_val,id)
+function interpolationQueue(length, default_val, id)
 {
 	this.length = length
 	this.values = [];
@@ -110,22 +110,22 @@ interpolationQueue.prototype.interpolate = function(time)
 	return newVal;
 }
 
-function floatQueue(length,id)
+function floatQueue(length, id)
 {
-	interpolationQueue.call(this, length, 0,id);
+	interpolationQueue.call(this, length, 0, id);
 }
 floatQueue.prototype = new interpolationQueue();
 floatQueue.prototype._interpolate = function(time)
 {
-	return interpolate(time, this.times, this.values, this.interpolatedValues,this.id);
+	return interpolate(time, this.times, this.values, this.interpolatedValues, this.id);
 }
 
-function VectorQueue(length,id)
+function VectorQueue(length, id)
 {
-	interpolationQueue.call(this, length, [0, 0, 0],id)
-	this.xQueue = new floatQueue(length,id);
-	this.yQueue = new floatQueue(length,id);
-	this.zQueue = new floatQueue(length,id);
+	interpolationQueue.call(this, length, [0, 0, 0], id)
+	this.xQueue = new floatQueue(length, id);
+	this.yQueue = new floatQueue(length, id);
+	this.zQueue = new floatQueue(length, id);
 }
 VectorQueue.prototype = new interpolationQueue();
 VectorQueue.prototype._interpolate = function(time)
@@ -143,9 +143,9 @@ VectorQueue.prototype.push = function(val)
 	this.setCount++;
 }
 
-function QuaternionQueue(length,id)
+function QuaternionQueue(length, id)
 {
-	interpolationQueue.call(this, length, [0, 0, 1, 0],id);
+	interpolationQueue.call(this, length, [0, 0, 1, 0], id);
 }
 QuaternionQueue.prototype = new interpolationQueue();
 QuaternionQueue.prototype._interpolate = function(time)
@@ -167,21 +167,23 @@ function viewInterpolationNode(id, childExtendsID, threejsNode)
 	this.threejsNode = threejsNode;
 	this.childExtendsID = childExtendsID;
 	this.properties = {};
-	this.positionQueue = new VectorQueue(5,id);
-	this.scaleQueue = new VectorQueue(5,id);
-	this.quaternionQueue = new QuaternionQueue(5,id);
-	this.animationFrameQueue = new floatQueue(5,id);
+	this.positionQueue = new VectorQueue(5, id);
+	this.scaleQueue = new VectorQueue(5, id);
+	this.quaternionQueue = new QuaternionQueue(5, id);
+	this.animationFrameQueue = new floatQueue(5, id);
 	this.enabled = true;
 }
-viewInterpolationNode.prototype.tick = function() {
-	if (Engine.getPropertyFast(Engine.application(),'playMode') == 'play' && Engine.isSimulating(this.id))
+viewInterpolationNode.prototype.tick = function()
+{
+	if (Engine.getPropertyFast(Engine.application(), 'playMode') == 'play' && Engine.isSimulating(this.id))
 	{
-	var viewnode = this.threejsNode;
-	if (!viewnode || !viewnode.setAnimationFrameInternal) return;
-	this.pushTransform(matCpy(this.getProperty('transform')));
-	this.animationFrameQueue.push(this.getProperty('animationFrame'));
+		var viewnode = this.threejsNode;
+		if (!viewnode) return;
+		if (viewnode.setTransformInternal)
+			this.pushTransform(matCpy(this.getProperty('transform')));
+		if (viewnode.setAnimationFrameInternal)
+			this.animationFrameQueue.push(this.getProperty('animationFrame'));
 	}
-
 }
 viewInterpolationNode.prototype.pushTransform = function(newTransform)
 {
@@ -199,7 +201,6 @@ viewInterpolationNode.prototype.pushTransform = function(newTransform)
 }
 viewInterpolationNode.prototype.setProperty = function(propertyName, propertyValue)
 {
-
 	if (propertyName == 'playMode')
 	{
 		this.properties[propertyName] = propertyValue;
@@ -207,15 +208,15 @@ viewInterpolationNode.prototype.setProperty = function(propertyName, propertyVal
 	if (propertyName == 'transform')
 	{
 		this.properties[propertyName] = matCpy(propertyValue);
-		if(!Engine.isSimulating(this.id))
+		if (!Engine.isSimulating(this.id))
 		{
-			this.pushTransform( matCpy(propertyValue));
+			this.pushTransform(matCpy(propertyValue));
 		}
 	}
 	if (propertyName == 'animationFrame')
 	{
 		this.properties[propertyName] = propertyValue;
-		if(!Engine.isSimulating(this.id))
+		if (!Engine.isSimulating(this.id))
 		{
 			this.animationFrameQueue.push(propertyValue)
 		}
@@ -227,20 +228,17 @@ viewInterpolationNode.prototype.getProperty = function(propertyName)
 }
 viewInterpolationNode.prototype.interpolate = function()
 {
-	if(!this.enabled) return;
+	if (!this.enabled) return;
 	var viewnode = this.threejsNode;
 	if (!viewnode) return;
 	//	if(_Editor.isSelected(this.id))
 	//		return;
-	
-
 	if (viewnode.setTransformInternal)
 	{
-		if (Engine.isSimulating(this.id) && (Engine.getPropertyFast(Engine.application(),'playMode') != 'play' && performance.now() - this.positionQueue.xQueue.times[4] > .05))
+		if (Engine.isSimulating(this.id) && (Engine.getPropertyFast(Engine.application(), 'playMode') != 'play' && performance.now() - this.positionQueue.xQueue.times[4] > .05))
 		{
 			this.pushTransform(matCpy(this.getProperty('transform')))
 		}
-
 		var position = this.positionQueue.interpolate(performance.now());
 		var rotation = this.quaternionQueue.interpolate(performance.now());
 		var scale = this.scaleQueue.interpolate(performance.now());
@@ -248,31 +246,28 @@ viewInterpolationNode.prototype.interpolate = function()
 		mat.compose(new THREE.Vector3(position[0], position[1], position[2]), new THREE.Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]), new THREE.Vector3(scale[0], scale[1], scale[2]))
 		viewnode.setTransformInternal(mat.elements, false);
 	}
-	if(viewnode.setAnimationFrameInternal)
+	if (viewnode.setAnimationFrameInternal)
 	{
 		//so, given that we don't have to have determinism, do we really need to backup and restore?
 		//viewnode.backupTransforms(this.getProperty('animationFrame'));
-	
-		if (Engine.isSimulating(this.id) && (Engine.getPropertyFast(Engine.application(),'playMode') != 'play' && performance.now() - this.positionQueue.xQueue.times[4] > .05))
+		if (Engine.isSimulating(this.id) && (Engine.getPropertyFast(Engine.application(), 'playMode') != 'play' && performance.now() - this.positionQueue.xQueue.times[4] > .05))
 		{
 			this.animationFrameQueue.push(this.getProperty('animationFrame'));
 		}
-
-		viewnode.setAnimationFrameInternal(this.animationFrameQueue.interpolate(performance.now()),false);
+		viewnode.setAnimationFrameInternal(this.animationFrameQueue.interpolate(performance.now()), false);
 	}
 }
 viewInterpolationNode.prototype.restore = function()
 {
-	if(!this.enabled) return;
+	if (!this.enabled) return;
 	var viewnode = this.threejsNode;
 	if (!viewnode) return;
-	
 	if (viewnode.setTransformInternal)
 	{
 		var oldTransform = matCpy(this.getProperty('transform'));
 		viewnode.setTransformInternal(oldTransform, false);
 	}
-	if(viewnode.setAnimationFrameInternal)
+	if (viewnode.setAnimationFrameInternal)
 	{
 		//so, given that we don't have to have determinism, do we really need to backup and restore?
 		//viewnode.setAnimationFrameInternal(this.getProperty('animationFrame'),false);
