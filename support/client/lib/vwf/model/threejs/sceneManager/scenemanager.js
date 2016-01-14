@@ -1,5 +1,6 @@
-"use strict";
 
+define(['vwf/model/threejs/_THREERayTracer'],function()
+{
 
 var sceneManagerRegionRecycleList = [];
 function releaseSceneManagerNode(node)
@@ -89,6 +90,7 @@ THREE.Object3D.prototype._dynamic = false;
 
 function SceneManager(scene) {
     this.defaultPickOptions = new THREE.CPUPickOptions();
+    window._SceneManager = this;
 }
 
 function GetAllLeafMeshes(threeObject, list) {
@@ -1546,7 +1548,7 @@ SceneManagerRegion.prototype.testBoundsSphere = BoundingBoxRTAS.prototype.inters
 SceneManagerRegion.prototype.intersect = BoundingBoxRTAS.prototype.intersect;
 SceneManagerRegion.prototype.testBoundsFrustrum = BoundingBoxRTAS.prototype.intersectFrustrum;
 
-window._SceneManager = new SceneManager();
+
 
 
 
@@ -2043,5 +2045,7 @@ THREE.RenderBatchManager.prototype.deinitialize = function(child) {
 
 
 
+    return SceneManager;
+})
 //return _SceneManager;
 //});
