@@ -1416,7 +1416,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                   g: 0,
                   b: 0
               },
-              reflect: 0.8,
+              reflect: 0.0,
               shadeless: false,
               shadow: true,
               specularColor: {
@@ -1487,7 +1487,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                         g: 0,
                         b: 0
                     },
-                    reflect: 0.8,
+                    reflect: 0.0,
                     shadeless: false,
                     shadow: true,
                     specularColor: {
@@ -1708,7 +1708,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                 //this is so we can paste a group in a way that makes sense
                 if (t.properties && t.properties.transform) {
                     var tpos = new THREE.Vector3();
-                    tpos.setFromMatrixPosition(MoveGizmo.parent.matrixWorld);
+                    tpos.setFromMatrixPosition(MoveGizmo.getGizmoBody().matrixWorld);
                     originalGizmoPos = [tpos.x, tpos.y, tpos.z];
                     var gizoffset = MATH.subVec3(this.getTranslationCallback(tocopy[i].id), originalGizmoPos);
                     t.properties.transform[12] = gizoffset[0];
