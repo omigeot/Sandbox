@@ -10,15 +10,7 @@ require.config({
             deps: ['vwf/view/editorview/sha256', "vwf/view/editorview/_3DRIntegration"],
             exports: 'XAPIWrapper'
         },
-        'vwf/model/threejs/_THREERayTracer': {
-            deps: ["vwf/model/threejs",'vwf/model/threejs/MATH']
-        },
-        'vwf/model/threejs/MATH': {
-            deps: ["vwf/model/threejs"]
-        },
-        'vwf/model/threejs/scenemanager': {
-            deps: ['vwf/model/threejs/_THREERayTracer']
-        },
+        
         'vwf/model/threejs/GeometryExporter': {
             deps: ["vwf/model/threejs"]
         },
@@ -66,7 +58,7 @@ define([
     "SettingsManager",
     'vwf/model/threejs/MATH',
     'vwf/model/threejs/_THREERayTracer',
-    'vwf/model/threejs/scenemanager',
+    
     'vwf/model/threejs/GeometryExporter',
     'vwf/model/threejs/helvetiker_regular.typeface.js'
 

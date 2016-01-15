@@ -724,8 +724,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			MenuAssets3DRUpload: function(e) {
 				_ModelLibrary.showUpload();
 			},
-
-
+			MenuConsole:function()
+			{
+				logger.open();
+			},
 			MenuUndo: function(e) {
 				_UndoManager.undo();
 			},

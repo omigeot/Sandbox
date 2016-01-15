@@ -47,8 +47,8 @@ function exponentialInterpolation(x, X, Y, sm1)
 		return Y[len];
 	return a * (Y[len]) + (1 - a) * sm1[sm1.length - 1];
 }
-
 var DISCONTINUITY_THRESHOLD = 2;
+
 function exponentialInterpolationLinearExtrapolation(x, X, Y, sm1)
 {
 	var len = Y.length -1;
@@ -175,15 +175,17 @@ function viewInterpolationNode(id, childExtendsID, threejsNode)
 	this.totalTime = 0;
 	this.lastTime = 0;
 }
-viewInterpolationNode.prototype.tick = function() {
+viewInterpolationNode.prototype.tick = function()
+{
 	if (Engine.getPropertyFast(Engine.application(),'playMode') == 'play' && Engine.isSimulating(this.id))
 	{
 	var viewnode = this.threejsNode;
-	if (!viewnode || !viewnode.setAnimationFrameInternal) return;
+		if (!viewnode) return;
+		if (viewnode.setTransformInternal)
 	this.pushTransform(matCpy(this.getProperty('transform')));
+		if (viewnode.setAnimationFrameInternal)
 	this.animationFrameQueue.push(this.getProperty('animationFrame'));
 	}
-
 }
 viewInterpolationNode.prototype.pushTransform = function(newTransform)
 {
@@ -201,7 +203,6 @@ viewInterpolationNode.prototype.pushTransform = function(newTransform)
 }
 viewInterpolationNode.prototype.setProperty = function(propertyName, propertyValue)
 {
-
 	if (propertyName == 'playMode')
 	{
 		this.properties[propertyName] = propertyValue;
@@ -243,15 +244,12 @@ viewInterpolationNode.prototype.interpolate = function()
 			if (!viewnode) return;
 			//	if(_Editor.isSelected(this.id))
 			//		return;
-			
-
 			if (viewnode.setTransformInternal)
 			{
 				if (Engine.isSimulating(this.id) && (Engine.getPropertyFast(Engine.application(),'playMode') != 'play' && performance.now() - this.positionQueue.xQueue.times[4] > .05))
 				{
 					this.pushTransform(matCpy(this.getProperty('transform')))
 				}
-
 				var position = this.positionQueue.interpolate(performance.now());
 				var rotation = this.quaternionQueue.interpolate(performance.now());
 				var scale = this.scaleQueue.interpolate(performance.now());
@@ -263,12 +261,10 @@ viewInterpolationNode.prototype.interpolate = function()
 			{
 				//so, given that we don't have to have determinism, do we really need to backup and restore?
 				//viewnode.backupTransforms(this.getProperty('animationFrame'));
-			
 				if (Engine.isSimulating(this.id) && (Engine.getPropertyFast(Engine.application(),'playMode') != 'play' && performance.now() - this.positionQueue.xQueue.times[4] > .05))
 				{
 					this.animationFrameQueue.push(this.getProperty('animationFrame'));
 				}
-
 				viewnode.setAnimationFrameInternal(this.animationFrameQueue.interpolate(performance.now()),false);
 			}
 		}
@@ -278,7 +274,6 @@ viewInterpolationNode.prototype.restore = function()
 	if(!this.enabled) return;
 	var viewnode = this.threejsNode;
 	if (!viewnode) return;
-	
 	if (viewnode.setTransformInternal)
 	{
 		var oldTransform = matCpy(this.getProperty('transform'));

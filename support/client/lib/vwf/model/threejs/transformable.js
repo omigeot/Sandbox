@@ -1,5 +1,20 @@
 "use strict";
 
+    function findAllMeshes(threeObject, list) {
+
+        if (!threeObject) return;
+        if (!list) list = [];
+        if (threeObject instanceof THREE.Mesh)
+            list.push(threeObject);
+        if (threeObject.children) {
+            for (var i = 0; i < threeObject.children.length; i++) {
+                findAllMeshes(threeObject.children[i], list);
+            }
+        }
+        return list;
+    }
+
+
 function getAllDrawables(threeObject, list) {
 
     if (!threeObject) return;
@@ -246,4 +261,4 @@ function getAllDrawables(threeObject, list) {
     }
 })();
 
-//@ sourceURL=threejs.subdriver.tramsformable
+//@ sourceURL=threejs.subdriver.transformable

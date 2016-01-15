@@ -30,17 +30,17 @@ function messageCompress()
             }
             if (typeof message == "string")
             {
-                if(this.enc_mappings[message])
-                return this.enc_mappings[message]
+                if (this.enc_mappings[message])
+                    return this.enc_mappings[message]
                 else
                 {
-                    if(message.length > 5 && message.length < 25 && message.indexOf('\n') == -1)
-                       {
-                             this.learnedMappings[message] = '';
-                             console.log('learning mapping for ' + message);
-                       }
+                    if (message.length > 5 && message.length < 25 && message.indexOf('\n') == -1)
+                    {
+                        this.learnedMappings[message] = '';
+                        console.log('learning mapping for ' + message);
+                    }
                     return message;
-                } 
+                }
             }
             if (typeof message == "boolean" || typeof message == "string" || typeof message == "number" || message === null || message === undefined)
                 return message;
@@ -107,14 +107,10 @@ function messageCompress()
                 return message;
             if (!this.initialized)
                 this.initialize();
-
             this.learnedMappings = {};
-            message = this.encode(message);    
-
+            message = this.encode(message);
             this.postLearnedMappings(this.learnedMappings);
             this.learnedMappings = {};
-
-            
             packed = JSON.stringify(message);
             //packed = packed.replace(/\\\"/g,String.fromCharCode(1))
             return packed;
@@ -128,101 +124,100 @@ function messageCompress()
                 this.initialize();
             //message = message.replace(new RegExp(String.fromCharCode(1),'g'),"\"")
             message = JSON.parse(message);
-        
             message = this.decode(message);
-           
             return message;
         },
-        isServer : false,
-        setServer: function(world) {
+        isServer: false,
+        setServer: function(world)
+        {
             this.world = world;
             this.isServer = true;
         },
-        applyLearnedMappings:function(mapping)
+        applyLearnedMappings: function(mapping)
         {
-             if (!this.initialized)
+            if (!this.initialized)
                 this.initialize();
-            for(var i in mapping)
+            for (var i in mapping)
             {
-                this.addMapping(i,mapping[i]);
+                this.addMapping(i, mapping[i]);
             }
         },
-        learnedMappingsTotal:{},
-        postLearnedMappings:function(mapping)
+        learnedMappingsTotal:
+        {},
+        postLearnedMappings: function(mapping)
         {
-            if(!this.isServer) return;
-            if(Object.keys(mapping).length == 0) return;
-            for(var i in mapping)
+            if (!this.isServer) return;
+            if (Object.keys(mapping).length == 0) return;
+            for (var i in mapping)
             {
                 mapping[i] = this.addMapping(i);
-                if(this.learnedMappingsTotal[i])
+                if (this.learnedMappingsTotal[i])
                 {
-                 //   console.log('*** compression table duplicate ***')
-                  //  console.log(i)
+                    //   console.log('*** compression table duplicate ***')
+                    //  console.log(i)
                 }
                 this.learnedMappingsTotal[i] = mapping[i];
-               // console.log("mapping " + mapping[i] + " to " + i)
+                // console.log("mapping " + mapping[i] + " to " + i)
             }
-            for(var i in this.world.clients)
+            for (var i in this.world.clients)
             {
-                this.world.clients[i].emit('compress',mapping);
+                this.world.clients[i].emit('compress', mapping);
             }
-
         },
-        sendFullLearnedTable:function(client)
+        sendFullLearnedTable: function(client)
         {
-          //  console.log(this.learnedMappingsTotal);
-            client.emit('compress',this.learnedMappingsTotal);
+            //  console.log(this.learnedMappingsTotal);
+            client.emit('compress', this.learnedMappingsTotal);
         },
         initialized: false,
         initialize: function()
         {
             var self = this;
-          /*   this.addSpecialCase("transform", function(val)
-                 {
-                     var t = new Float32Array(16);
-                     for (var i = 0; i < 16; i++)
-                         t[i] = val[i]
-                     var data = self.compress(String.fromCharCode.apply(null, new Uint8Array(t.buffer)));
+            /*   this.addSpecialCase("transform", function(val)
+                   {
+                       var t = new Float32Array(16);
+                       for (var i = 0; i < 16; i++)
+                           t[i] = val[i]
+                       var data = self.compress(String.fromCharCode.apply(null, new Uint8Array(t.buffer)));
 
-                     return data
-                 },
-                 function(val)
-                 {
-                     var t = new Uint8Array(16*4);
-                     val = self.decompress(val);
+                       return data
+                   },
+                   function(val)
+                   {
+                       var t = new Uint8Array(16*4);
+                       val = self.decompress(val);
 
-                     for(var i = 0; i < val.length; i++)
-                         t[i] = val.charCodeAt(i);
+                       for(var i = 0; i < val.length; i++)
+                           t[i] = val.charCodeAt(i);
 
-                     t = new Float32Array(t.buffer);
-                     var ret = [];
-                     for (var i = 0; i < 16; i++)
-                         ret[i] = t[i];
+                       t = new Float32Array(t.buffer);
+                       var ret = [];
+                       for (var i = 0; i < 16; i++)
+                           ret[i] = t[i];
 
-                     return ret;
-                 });
-             
-             this.addSpecialCase("scripts", function(val)
-                 {
-                     var data = self.compress(JSON.stringify(val));
-                     return data
-                 },
-                 function(val)
-                 {
-                     val = self.decompress(val);
-                     return val;
-                 });
-             //this.addSpecialCase("character-vwf-cosmos3d", function(val)
-             //    {
-             //        var data = self.compress(JSON.stringify(val));
-             //        return data
-             //    },
-             //    function(val)
-             //    {
-             //        val = self.decompress(val);
-             //        return val;
-             //    });*/
+                       return ret;
+                   });
+               
+               this.addSpecialCase("scripts", function(val)
+                   {
+                       var data = self.compress(JSON.stringify(val));
+                       return data
+                   },
+                   function(val)
+                   {
+                       val = self.decompress(val);
+                       return val;
+                   });
+               //this.addSpecialCase("character-vwf-cosmos3d", function(val)
+               //    {
+               //        var data = self.compress(JSON.stringify(val));
+               //        return data
+               //    },
+               //    function(val)
+               //    {
+               //        val = self.decompress(val);
+               //        return val;
+               //    });*/
             this.addMapping("tick");
             this.addMapping("eventData");
             this.addMapping("eventNodeData");
@@ -587,7 +582,7 @@ function messageCompress()
             this.specialCaseEncode[key] = encode;
             this.specialCaseDecode[key] = decode;
         },
-        addMapping: function(from,forcekey)
+        addMapping: function(from, forcekey)
         {
             var key = forcekey || String.fromCharCode(this.tableSize + 128)
             this.dnc_mappings[key] = from
@@ -1170,12 +1165,10 @@ function messageCompress()
     };
     return messageCompress_body;
 }
-
-
 try
 {
     // on client via requrie we just return a new instance
-    define("messageCompress",messageCompress());
+    window && define("messageCompress", messageCompress());
 }
 catch (e)
 {}
@@ -1183,8 +1176,15 @@ try
 {
     //server side we export the constructor, since each world will need one
     exports.messageCompress = messageCompress;
-    global.btoa = require("btoa");
-    global.atob = require("atob");
+    try
+    {   //this can be very tricky, becasuse an exception with these modules looks like we're in the browser 
+        global.btoa = require("btoa");
+        global.atob = require("atob");
+    }
+    catch (e)
+    {
+        console.log(e)
+    }
 }
 catch (e)
 {
