@@ -189,7 +189,11 @@ MyRTC.prototype.disconnect = function()
 		this.peerConn = null;
 	}
 	if( this.localStream ){
-		this.localStream.stop();
+
+		//this.localStream.stop(); deprecated in chrome 45
+		var tracks =  this.localStream.getTracks();
+		for(var i =0; i < tracks.length; i++)
+			tracks[i].stop();
 		this.localStream = null;
 	}
 	this.initialized = false;
@@ -257,6 +261,7 @@ MyRTC.prototype.receiveMessage = function( msg )
 	else if( msg.type == 'answer' )
 	{
 		// set remote description
+		
 		this.peerConn.setRemoteDescription(
 			new this.RTCSessionDescription(msg), 
 			
@@ -270,7 +275,7 @@ MyRTC.prototype.receiveMessage = function( msg )
 			function(error){
 				console.error('Failed to set remote description from answer', error);
 				this.setStatus( this.statusText.error );
-			}
+			}.bind(this)
 		);
 	}
 	else if( msg.type == 'candidate' ){

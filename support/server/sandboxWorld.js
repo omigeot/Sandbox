@@ -825,7 +825,7 @@ function sandboxWorld(id, metadata)
                 // route messages by the 'target' param, verifying 'sender' param
                 if (rtcMessages.slice(2)
                     .indexOf(message.member) != -1 &&
-                    params.sender == socket.id
+                    params.sender == sendingclient.id
                 )
                 {
                     var client = self.clients[params.target];
