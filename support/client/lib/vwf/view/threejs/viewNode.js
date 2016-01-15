@@ -172,6 +172,8 @@ function viewInterpolationNode(id, childExtendsID, threejsNode)
 	this.quaternionQueue = new QuaternionQueue(5,id);
 	this.animationFrameQueue = new floatQueue(5,id);
 	this.enabled = true;
+	this.totalTime = 0;
+	this.lastTime = 0;
 }
 viewInterpolationNode.prototype.tick = function() {
 	if (Engine.getPropertyFast(Engine.application(),'playMode') == 'play' && Engine.isSimulating(this.id))
@@ -227,39 +229,49 @@ viewInterpolationNode.prototype.getProperty = function(propertyName)
 }
 viewInterpolationNode.prototype.interpolate = function()
 {
-	if(!this.enabled) return;
-	var viewnode = this.threejsNode;
-	if (!viewnode) return;
-	//	if(_Editor.isSelected(this.id))
-	//		return;
-	
 
-	if (viewnode.setTransformInternal)
-	{
-		if (Engine.isSimulating(this.id) && (Engine.getPropertyFast(Engine.application(),'playMode') != 'play' && performance.now() - this.positionQueue.xQueue.times[4] > .05))
-		{
-			this.pushTransform(matCpy(this.getProperty('transform')))
+
+	  //framerate independant smoothing
+         var now = performance.now();
+         this.totalTime += now - (this.lastTime ? this.lastTime : now);
+         this.lastTime = now;
+         while(this.totalTime > 0)
+         {
+            this.totalTime -= 16;
+			if(!this.enabled) return;
+			var viewnode = this.threejsNode;
+			if (!viewnode) return;
+			//	if(_Editor.isSelected(this.id))
+			//		return;
+			
+
+			if (viewnode.setTransformInternal)
+			{
+				if (Engine.isSimulating(this.id) && (Engine.getPropertyFast(Engine.application(),'playMode') != 'play' && performance.now() - this.positionQueue.xQueue.times[4] > .05))
+				{
+					this.pushTransform(matCpy(this.getProperty('transform')))
+				}
+
+				var position = this.positionQueue.interpolate(performance.now());
+				var rotation = this.quaternionQueue.interpolate(performance.now());
+				var scale = this.scaleQueue.interpolate(performance.now());
+				var mat = new THREE.Matrix4();
+				mat.compose(new THREE.Vector3(position[0], position[1], position[2]), new THREE.Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]), new THREE.Vector3(scale[0], scale[1], scale[2]))
+				viewnode.setTransformInternal(mat.elements, false);
+			}
+			if(viewnode.setAnimationFrameInternal)
+			{
+				//so, given that we don't have to have determinism, do we really need to backup and restore?
+				//viewnode.backupTransforms(this.getProperty('animationFrame'));
+			
+				if (Engine.isSimulating(this.id) && (Engine.getPropertyFast(Engine.application(),'playMode') != 'play' && performance.now() - this.positionQueue.xQueue.times[4] > .05))
+				{
+					this.animationFrameQueue.push(this.getProperty('animationFrame'));
+				}
+
+				viewnode.setAnimationFrameInternal(this.animationFrameQueue.interpolate(performance.now()),false);
+			}
 		}
-
-		var position = this.positionQueue.interpolate(performance.now());
-		var rotation = this.quaternionQueue.interpolate(performance.now());
-		var scale = this.scaleQueue.interpolate(performance.now());
-		var mat = new THREE.Matrix4();
-		mat.compose(new THREE.Vector3(position[0], position[1], position[2]), new THREE.Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]), new THREE.Vector3(scale[0], scale[1], scale[2]))
-		viewnode.setTransformInternal(mat.elements, false);
-	}
-	if(viewnode.setAnimationFrameInternal)
-	{
-		//so, given that we don't have to have determinism, do we really need to backup and restore?
-		//viewnode.backupTransforms(this.getProperty('animationFrame'));
-	
-		if (Engine.isSimulating(this.id) && (Engine.getPropertyFast(Engine.application(),'playMode') != 'play' && performance.now() - this.positionQueue.xQueue.times[4] > .05))
-		{
-			this.animationFrameQueue.push(this.getProperty('animationFrame'));
-		}
-
-		viewnode.setAnimationFrameInternal(this.animationFrameQueue.interpolate(performance.now()),false);
-	}
 }
 viewInterpolationNode.prototype.restore = function()
 {
