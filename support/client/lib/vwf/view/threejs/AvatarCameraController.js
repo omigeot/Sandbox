@@ -178,9 +178,18 @@ var AvatarCameraController = function()
             this.zoom = .05;
         }
     }
+    this.totalTime = 0;
     this.prerender = function()
     {
-        this.updateCamera();
+        //framerate independant smoothing
+         var now = performance.now();
+         this.totalTime += now - (this.lastTime ? this.lastTime : now);
+         this.lastTime = now;
+         while(this.totalTime > 0)
+         {
+            this.totalTime -= 16;
+            this.updateCamera();
+        }
     }
 }
 define([], function()

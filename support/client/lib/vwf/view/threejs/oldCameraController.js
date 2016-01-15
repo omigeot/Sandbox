@@ -784,23 +784,31 @@
              this.cameramode = 'FirstPerson';
          }
      }
+     this.totalTime = 0;
      this.prerender = function()
      {
-         if (this.cameramode == 'Fly')
+         var now = performance.now();
+         this.totalTime += now - (this.lastTime ? this.lastTime : now);
+         this.lastTime = now;
+         while(this.totalTime > 0)
          {
-             var dist = window.deltaTime / (this.flyspeed * 30.0);
-             var forward = new THREE.Vector3(0, 0, -1);
-             var center = new THREE.Vector3(0, 0, 0);
-             var cam = this.camera;
-             forward.applyMatrix4(cam.matrixWorld);
-             center.applyMatrix4(cam.matrixWorld);
-             var offset = forward.sub(center);
-             offset.setLength(.400 + dist);
-             center.add(offset);
-             this.center = [center.x, center.y, center.z];
-             this.camera.position.copy(center);
-         }
-         this.updateCamera();
+            this.totalTime -= 16;
+             if (this.cameramode == 'Fly')
+             {
+                 var dist = window.deltaTime / (this.flyspeed * 30.0);
+                 var forward = new THREE.Vector3(0, 0, -1);
+                 var center = new THREE.Vector3(0, 0, 0);
+                 var cam = this.camera;
+                 forward.applyMatrix4(cam.matrixWorld);
+                 center.applyMatrix4(cam.matrixWorld);
+                 var offset = forward.sub(center);
+                 offset.setLength(.400 + dist);
+                 center.add(offset);
+                 this.center = [center.x, center.y, center.z];
+                 this.camera.position.copy(center);
+             }
+             this.updateCamera();
+        }
      }
      //zoom the camera to orbit around a given THREE.js node
      this.zoomToThreeNode = function(node)
