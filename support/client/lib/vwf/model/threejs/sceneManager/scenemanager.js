@@ -19,7 +19,7 @@ THREE.Object3D.prototype._dynamic = false;
 
 function SceneManager(scene) {
     this.defaultPickOptions = new THREE.CPUPickOptions();
-    window._SceneManager = this;
+    
 }
 
 function GetAllLeafMeshes(threeObject, list) {
@@ -893,7 +893,7 @@ SceneManager.prototype.removeChild = function(c) {
 
 
 
-
+    window._SceneManager = new SceneManager();
     return SceneManager;
 })
 //return _SceneManager;

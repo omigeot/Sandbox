@@ -143,7 +143,7 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
             var protos = getPrototypes.call(this, kernel, childExtendsID);
             if (isSceneDefinition.call(this, protos) && childID == this.state.sceneRootID) {
                 var sceneNode = CreateThreeJSSceneNode(nodeID, childID, childExtendsID);
-                window._SceneManager = new SceneManager();
+                //window._SceneManager = new SceneManager();
                 _SceneManager.initialize(sceneNode.threeScene);
                 this.state.scenes[childID] = sceneNode;
 
