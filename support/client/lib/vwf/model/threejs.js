@@ -142,33 +142,12 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
 
             var protos = getPrototypes.call(this, kernel, childExtendsID);
             if (isSceneDefinition.call(this, protos) && childID == this.state.sceneRootID) {
-                var sceneNode = CreateThreeJSSceneNode(nodeID, childID, childExtendsID);
+                var sceneNode = CreateThreeJSSceneNode.call(this,nodeID, childID, childExtendsID);
                 //window._SceneManager = new SceneManager();
                 _SceneManager.initialize(sceneNode.threeScene);
                 this.state.scenes[childID] = sceneNode;
 
-                var cam = CreateThreeCamera();
-                sceneNode.camera.threeJScameras[sceneNode.camera.defaultCamID] = cam;
-                sceneNode.camera.ID = sceneNode.camera.defaultCamID;
-
-                var ambient = new THREE.AmbientLight();
-                ambient.color.r = .5;
-                ambient.color.g = .5;
-                ambient.color.b = .5;
-                sceneNode.threeScene.add(ambient);
-                sceneNode.threeScene.add(cam);
-
-
-
-
-                /* this is very old and OBE
-                cam.name = 'camera';
-                this.state.cameraInUse = cam;
-                var camType = "http://vwf.example.com/camera.vwf";
-
-                Engine.createChild(childID, "camera", {
-                    "extends": camType
-                });*/
+                
             }
 
             if (!nodeID) {
@@ -1254,22 +1233,9 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
     }
 
     function CreateThreeJSSceneNode(parentID, thisID, extendsID) {
-        var node = {};
-        node.camera = {};
-        node.camera.ID = undefined;
-        node.camera.defaultCamID = "http-vwf-example-com-camera-vwf-camera";
-        node.camera.threeJScameras = {};
-        node.ID = thisID;
+        var node = this.subDriverFactory.createNode(thisID, 'vwf/model/threejs/scene.js', vwf.application(), extendsID, null, null);
         node.parentID = parentID;
         node.type = extendsID;
-        node.viewInited = false;
-        node.modelInited = false;
-        node.threeScene = new THREE.Scene();
-        node.threeScene.autoUpdate = false;
-        node.pendingLoads = 0;
-        node.srcAssetObjects = [];
-        node.delayedProperties = {};
-
         return node;
     }
     //changing this function significantly from the GLGE code. Will search heirarchy down until encountering a matching chile
