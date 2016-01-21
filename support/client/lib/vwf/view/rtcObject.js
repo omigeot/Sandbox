@@ -361,10 +361,10 @@ MyRTC.prototype.makeOffer = function()
 	this.peerConn.createOffer(
 		bind_safetydance( this, function(desc){
 			// firefox doesn't like using crypto; force it
-			if( desc.sdp.indexOf('a=crypto') == -1 ){
-				var inline = 'a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890abc\r\nc=IN';
-				desc.sdp = desc.sdp.replace(/c=IN/g, inline);
-			}
+			//if( desc.sdp.indexOf('a=crypto') == -1 ){
+			//	var inline = 'a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890abc\r\nc=IN';
+			//	desc.sdp = desc.sdp.replace(/c=IN/g, inline);
+			//}
 			console.log('Making an offer:', desc);
 			this.peerConn.setLocalDescription(desc);
 			this.sendMessage(desc);
