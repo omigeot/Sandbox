@@ -1,4 +1,4 @@
-define(['vwf/model/threejs/_THREERayTracer'], function()
+define(['vwf/model/threejs/sceneManager/_THREERayTracer'], function()
 {
     function SceneManagerRegion(min, max, depth, scene, order)
     {

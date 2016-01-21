@@ -57,7 +57,7 @@ define([
     "vwf/view/jqueryui",
     "SettingsManager",
     'vwf/model/threejs/MATH',
-    'vwf/model/threejs/_THREERayTracer',
+    'vwf/model/threejs/sceneManager/_THREERayTracer',
     
     'vwf/model/threejs/GeometryExporter',
     'vwf/model/threejs/helvetiker_regular.typeface.js'

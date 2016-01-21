@@ -1,5 +1,5 @@
 
-define(['vwf/model/threejs/_THREERayTracer','vwf/model/threejs/sceneManager/sceneManagerRegion','vwf/model/threejs/sceneManager/renderBatchManager'],function(tracer,SceneManagerRegion)
+define(['vwf/model/threejs/sceneManager/_THREERayTracer','vwf/model/threejs/sceneManager/sceneManagerRegion','vwf/model/threejs/sceneManager/renderBatchManager'],function(tracer,SceneManagerRegion)
 {
 
 
