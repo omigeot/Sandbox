@@ -475,34 +475,17 @@ scripts:
     this.clientConnected = function(id,name,UID)
     {
       
-    	if(!this.clients)
-    	{
-    		this.clients = {}
-    	}
-    	if(!this.clients[id])
-    		this.clients[id] = {cid:id,name:name,UID:UID,cameraID:null,focusID:vwf.application()};
+    	
      
     }
     // a client other than this one has left
     this.clientDisconnected = function(id,name,UID)
     {
-    	if(this.clients)
-    	{
-    		delete this.clients[id];
-    		this.clients = this.clients;		
-    	}
+    
     }
     this.setClientCamera = function(id,cameraID)
     {
-        if(!this.clients)
-        {
-          this.clients = {}
-        }
-        if(this.clients[id])
-        {
-          this.clients[id].cameraID = cameraID;
-          this.clientCameraChanged(id,cameraID);
-        }
+        
     }
     this.CreatePlane = function(width,height)
     {

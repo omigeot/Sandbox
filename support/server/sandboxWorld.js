@@ -378,22 +378,53 @@ function sandboxWorld(id, metadata)
     }
     this.messageConnection = function(id, name, UID)
     {
+        //update the state to reflect the server side tracking of client data
+
+        var clients = this.state.getProperty('index-vwf',"clients");
+        if(!clients) clients = {};
+        clients[id] = {cid:id,name:name,UID:UID,cameraID:null,focusID:'index-vwf'};
+        this.state.satProperty('index-vwf','clients',clients);
+
+        var setMessage = {
+            "action": "setProperty",
+            "member": "clients",
+            "parameters":[clients],
+            node: "index-vwf",
+            "time": this.time() + .1
+        };
+
         var joinMessage = {
             "action": "fireEvent",
             "parameters": ["clientConnected", [id, name, UID]],
             node: "index-vwf",
             "time": this.time()
         };
+        this.messageClients(setMessage);
+        console.log(setMessage);
         this.messageClients(joinMessage);
     }
     this.messageDisconnection = function(id, name, UID)
     {
+        var clients = this.state.getProperty('index-vwf',"clients");
+        if(!clients) clients = {};
+        delete clients[id];
+        this.state.satProperty('index-vwf','clients',clients);
+
+        var setMessage = {
+            "action": "setProperty",
+            "member": "clients",
+            "parameters":[clients],
+            node: "index-vwf",
+            "time": this.time() + .1
+        };
+
         var joinMessage = {
             "action": "fireEvent",
             "parameters": ["clientDisconnected", [id, name, UID]],
             node: "index-vwf",
             "time": this.time()
         };
+        this.messageClients(setMessage);
         this.messageClients(joinMessage);
     }
     this.GetNextAnonName = function(socket)
