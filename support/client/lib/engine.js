@@ -780,20 +780,20 @@ define(['progressScreen','nodeParser'], function(progress,nodeParser)
             this.startCoSimulating = function(nodeID)
             {
                 if (!nodes.existing[nodeID]) return;
-                var nodes = this.decendants(nodeID);
+                var decendants = this.decendants(nodeID);
                 this.stopSimulating(nodeID);
                 if (nodeID !== "index-vwf")
-                    nodes.push(nodeID);
-                for (var i = 0; i < nodes.length; i++)
+                    decendants.push(nodeID);
+                for (var i = 0; i < decendants.length; i++)
                 {
-                    if (this.nodesCoSimulating.indexOf(nodes[i]) == -1)
+                    if (this.nodesCoSimulating.indexOf(decendants[i]) == -1)
                     {
-                        this.nodesCoSimulating.push(nodes[i]);
-                        this.nodesCoSimulatingNames[nodes[i]] = true;
-                        this.propertyDataUpdates[nodes[i]] = {};
+                        this.nodesCoSimulating.push(decendants[i]);
+                        this.nodesCoSimulatingNames[decendants[i]] = true;
+                        this.propertyDataUpdates[decendants[i]] = {};
                     }
-                    this.callMethod(this.application(), "startSimulatingNode", nodes[i])
-                    this.lastPropertyDataUpdates[nodes[i]] = {};
+                    this.callMethod(this.application(), "startSimulatingNode", decendants[i])
+                    this.lastPropertyDataUpdates[decendants[i]] = {};
                 }
             }
             this.stopSimulating = function(nodeID)
@@ -815,8 +815,13 @@ define(['progressScreen','nodeParser'], function(progress,nodeParser)
             }
             this.isSimulating = function(nodeID)
             {
+
                 if (socket === null) ///we are in offline mode
                     return true;
+
+               
+                
+
                 return nodeID == "index-vwf" ||
                     (this.nodesCoSimulating.indexOf(nodeID) !== -1) || (this.nodesSimulating.indexOf(nodeID) !== -1)
             }
