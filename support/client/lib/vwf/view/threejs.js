@@ -535,7 +535,7 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
             childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
 
             if (childID != 'http-vwf-example-com-camera-vwf-camera')
-                this.nodes[childID] = new viewNode(childID,childExtendsID,this.state.nodes[childID]);
+                this.nodes[childID] = new viewNode(childID,childExtendsID,this.state.nodes[childID],Engine.isSimulating(childID));
 
             /*{
                     id: childID,
@@ -731,6 +731,14 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
                 if (Engine.moniker() == args[0]) {
                     this.setCamera_internal(args[1]);
                 }
+            }
+            if (method == 'startSimulatingNode') {
+               if(this.nodes[args])
+                 this.nodes[args].setSim(true);
+            }
+            if (method == 'stopSimulatingNode') {
+               if(this.nodes[args])
+                 this.nodes[args].setSim(false);
             }
             if (id == Engine.application() && method == 'cameraShareInfo') {
                 if (this.receiveSharedCamera) {
