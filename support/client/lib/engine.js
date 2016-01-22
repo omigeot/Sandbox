@@ -16,7 +16,7 @@
 /// page's JavaScript environment. The vwf module self-creates its own instance when loaded and
 /// attaches to the global window object as window.Engine. Nothing else should affect the global
 /// environment.
-define(['progressScreen'], function(progress)
+define(['progressScreen','nodeParser'], function(progress,nodeParser)
 {
     var jQuery = $;
     (function(window)
@@ -3944,15 +3944,21 @@ define(['progressScreen'], function(progress)
                     jQuery.ajax(
                     {
                         url: remappedURI(nodeURI),
-                        dataType: "jsonp",
-                        success: function(nodeDescriptor) /* async */
+                        dataType: "text",
+                        success: function(data,xhr) /* async */
                         {
+                            
                             progressScreen.stopCreateNode(nodeURI);
-                            callback_async(nodeDescriptor);
+                            callback_async((new nodeParser()).parse(data));
                             queue.resume("after loading " + nodeURI); // resume the queue; may invoke dispatch(), so call last before returning to the host
                         },
-                        // error: function() {  // TODO
-                        // },
+                        error: function() { 
+
+                            progressScreen.stopCreateNode(nodeURI);
+                            console.error('error loading ' + nodeURI);
+                            callback_async({});
+                            queue.resume("after loading " + nodeURI); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                         },
                     });
                 }
             };
