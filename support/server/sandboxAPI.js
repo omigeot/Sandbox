@@ -5,7 +5,8 @@ var libpath = require('path'),
 	mime = require('mime'),
 	sio = require('socket.io'),
 	YAML = require('js-yaml'),
-	sass = require('node-sass');
+	sass = require('node-sass'),
+	async = require('async');
 
 require('./hash.js');
 var _3DR_proxy = require('./3dr_proxy.js');
@@ -1758,12 +1759,33 @@ function serve(request, response)
 					break;
 				case "textures":
 					{
+						function getFiles(url, callback)
+						{
+							fs.readdir(url, function(err, files){
+								if(err && err.code === 'ENOTDIR' && /\.(?:bmp|jpg|png|gif|dds|tiff)$/.test(url)){
+									callback(url);
+								}
+								else if(!err)
+								{
+									var ret = {name: url, contents: []};
+									async.each(files,
+										function(item, cb){
+											
+										},
+										function(err){
+											
+										}
+									);
+								}
+							});
+						}
+
 						if (global.textures)
 						{
 							ServeJSON(global.textures, response, URL);
 							return;
 						}
-						fs.readdir(basedir + "Textures" + libpath.sep, function(err, files)
+						/*fs.readdir(basedir + "Textures" + libpath.sep, function(err, files)
 						{
 							RecurseDirs(basedir + "Textures" + libpath.sep, "", files);
 							files.sort(function(a, b)
@@ -1782,7 +1804,7 @@ function serve(request, response)
 								.replace(/\/\//g, '/');
 							global.textures = o;
 							ServeJSON(o, response, URL);
-						});
+						});*/
 					}
 					break;
 				case "globalassets":
