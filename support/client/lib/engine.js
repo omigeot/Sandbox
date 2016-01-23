@@ -16,6 +16,7 @@
 /// page's JavaScript environment. The vwf module self-creates its own instance when loaded and
 /// attaches to the global window object as window.Engine. Nothing else should affect the global
 /// environment.
+"use strict";
 define(['progressScreen','nodeParser'], function(progress,nodeParser)
 {
     var jQuery = $;
@@ -686,10 +687,10 @@ define(['progressScreen','nodeParser'], function(progress,nodeParser)
                             {
                                 window.setImmediate(function()
                                 {
-                                    this.localReentryStack++
+                                    Engine.localReentryStack++
                                         queue.insert(fields);
-                                    if (this.localReentryStack > 2)
-                                        this.localReentryStack--;
+                                    if (Engine.localReentryStack > 2)
+                                        Engine.localReentryStack--;
                                 })
                             })(fields);
                         }
@@ -1066,6 +1067,8 @@ define(['progressScreen','nodeParser'], function(progress,nodeParser)
             };
             this.processMessage = function(fields)
                 {
+                     if(fields.rnd)
+                        console.log(fields.rnd);
                     this.message = fields;
                     // Advance the time.
                     if (this.now < fields.time && fields.action == "tick")
@@ -3250,18 +3253,20 @@ define(['progressScreen','nodeParser'], function(progress,nodeParser)
                 }
                 return answer;
             }
-            this.setPropertyFastEntrants = [];
+            this.setPropertyFastEntrants = {};
             this.setPropertyFast = function(nodeID, propertyName, propertyValue)
                 {
                     var answer = undefined;
                     for (var i = 0; i < this.models.length; i++)
                     {
-                        if (!this.setPropertyFastEntrants[nodeID + propertyName + i])
-                            if (this.models[i].settingProperty)
+                        var propID = nodeID + propertyName + i;
+                        var model = this.models[i];
+                        if (!this.setPropertyFastEntrants[propID])
+                            if (model.settingProperty)
                             {
-                                this.setPropertyFastEntrants[nodeID + propertyName + i] = true;
-                                var ret = this.models[i].settingProperty(nodeID, propertyName, propertyValue)
-                                delete this.setPropertyFastEntrants[nodeID + propertyName + i];
+                                this.setPropertyFastEntrants[propID] = true;
+                                var ret = model.settingProperty(nodeID, propertyName, propertyValue)
+                                this.setPropertyFastEntrants[propID] = false;
                                 if (ret !== undefined)
                                     answer = ret;
                             }
