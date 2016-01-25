@@ -1086,6 +1086,8 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
 
             self.trigger('prerender', vpargs);
             self.updateGlyphs(null, vp, wh, ww);
+            if(window._SceneManager)
+                _SceneManager.preRender(cam);
             var keys = Object.keys(Engine.models[0].model.nodes);
             for (var j = 0; j < keys.length; j++) {
                 var i = keys[j];
@@ -1323,6 +1325,8 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
                 self.trigger('glyphRender', vpargs);
             }
 
+             if(window._SceneManager)
+                _SceneManager.postRender();
 
             if (stats.domElement.style.display == 'block')
                 stats.update();

@@ -19,7 +19,7 @@ THREE.Object3D.prototype._dynamic = false;
 
 function SceneManager(scene) {
     this.defaultPickOptions = new THREE.CPUPickOptions();
-    
+    this.cullList = [];
 }
 
 function GetAllLeafMeshes(threeObject, list) {
@@ -33,6 +33,79 @@ function GetAllLeafMeshes(threeObject, list) {
             GetAllLeafMeshes(threeObject.children[i], list);
         }
     }
+}
+
+SceneManager.prototype.traverse = function(cb,node)
+{
+    if(!node)
+        node = this.root;
+    if(cb.call(this,node)) //CB must return true to keep walking down
+    {
+        for(var i in node.childRegions)
+        {
+            this.traverse(cb,node.childRegions[i]);
+        }
+    }
+}
+SceneManager.prototype.preRender = function(camera)
+{
+    
+    var cameraPos = [camera.matrixWorld.elements[12],camera.matrixWorld.elements[13],camera.matrixWorld.elements[14]]
+    var cullDistance = 300;
+    //do culling, LOD work
+    this.traverse(function(region)
+    {
+        var cullDistance = region.r * 2;
+        cullDistance *= 30;
+        if (MATH.distanceVec3(region.c, cameraPos) > cullDistance)
+        {
+            //traverse this region, hide everything
+            this.traverse(function(region){
+                for (var i in region.childObjects)
+                {
+                    var o = region.childObjects[i];
+                    if(o.visible && o.frustumCulled)
+                    {
+                        o.visible = false;
+                        this.cullList.push(o);
+                    }
+                }   
+                return true; 
+            },region)
+            //dont continue traversing this region - we've already marked all children hidden
+            return false;
+        }
+        //test each child in this region, traverse children
+        for (var i in region.childObjects)
+        {
+            var o = region.childObjects[i];
+            if (!o.boundsCache)
+                o.boundsCache = o.GetBoundingBox(true).transformBy(o.getModelMatrix(tempmat));
+            if(o.visible && o.frustumCulled)
+            {
+                var cullDistance = MATH.distanceVec3(o.boundsCache.min,o.boundsCache.max);
+                cullDistance *= 30;
+                var objectCenter = [o.matrixWorld.elements[12], o.matrixWorld.elements[13], o.matrixWorld.elements[14]];
+                if (MATH.distanceVec3(MATH.addVec3(objectCenter,o.boundsCache.center), cameraPos) > cullDistance)
+                {
+                    o.visible = false;
+                    this.cullList.push(o);
+                }
+            }
+           
+        }
+        //traverse the children of this node
+        return true;
+    });
+}
+SceneManager.prototype.postRender = function()
+{
+    //undo culling.
+    for(var i =0; i < this.cullList.length; i++)
+    {
+        this.cullList[i].visible = true;
+    }
+    this.cullList.length = 0;
 }
 SceneManager.prototype.forceBatchAll = function() {
 
