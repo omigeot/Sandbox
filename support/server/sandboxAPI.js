@@ -1763,19 +1763,22 @@ function serve(request, response)
 						{
 							fs.readdir(url, function(err, files){
 								if(err && err.code === 'ENOTDIR' && /\.(?:bmp|jpg|png|gif|dds|tiff)$/.test(url)){
-									callback(url);
+									callback(null, url);
 								}
 								else if(!err)
 								{
 									var ret = {name: url, contents: []};
-									async.each(files,
-										function(item, cb){
-											
-										},
-										function(err){
-											
-										}
+									for(var i=0; i<files.length; i++)
+										getFiles(libpath.join(url, files[i]), function(err, item){
+											if(!err){
+												ret.contents.push(item);
+											}
+										});
 									);
+									callback(null, ret);
+								}
+								else {
+									callback(err);
 								}
 							});
 						}
