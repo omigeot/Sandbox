@@ -22,6 +22,8 @@ function SceneManager(scene) {
     this.cullList = [];
 }
 
+SceneManager.cullScale = 30;
+
 function GetAllLeafMeshes(threeObject, list) {
     if (threeObject instanceof THREE.Mesh || threeObject instanceof THREE.Line) {
         if (!(threeObject instanceof THREE.SkinnedMesh))
@@ -49,14 +51,14 @@ SceneManager.prototype.traverse = function(cb,node)
 }
 SceneManager.prototype.preRender = function(camera)
 {
-    
+    var fov_adj = camera.fov/60;
     var cameraPos = [camera.matrixWorld.elements[12],camera.matrixWorld.elements[13],camera.matrixWorld.elements[14]]
-    var cullDistance = 300;
     //do culling, LOD work
     this.traverse(function(region)
     {
         var cullDistance = region.r * 2;
-        cullDistance *= 30;
+        cullDistance *= SceneManager.cullScale;
+        cullDistance *= fov_adj;
         if (MATH.distanceVec3(region.c, cameraPos) > cullDistance)
         {
             //traverse this region, hide everything
@@ -84,7 +86,8 @@ SceneManager.prototype.preRender = function(camera)
             if(o.visible && o.frustumCulled)
             {
                 var cullDistance = MATH.distanceVec3(o.boundsCache.min,o.boundsCache.max);
-                cullDistance *= 30;
+                cullDistance *= SceneManager.cullScale;
+                cullDistance *= fov_adj;
                 var objectCenter = [o.matrixWorld.elements[12], o.matrixWorld.elements[13], o.matrixWorld.elements[14]];
                 if (MATH.distanceVec3(MATH.addVec3(objectCenter,o.boundsCache.center), cameraPos) > cullDistance)
                 {
