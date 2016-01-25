@@ -240,6 +240,9 @@ viewInterpolationNode.prototype.getProperty = function(propertyName)
 {
 	return this.properties[propertyName];
 }
+var tempvec1 = new THREE.Vector3();
+var tempvec2 = new THREE.Vector3();
+var tempquat = new THREE.Quaternion();
 viewInterpolationNode.prototype.interpolate = function(now, playmode)
 {
 	//framerate independant smoothing
@@ -251,14 +254,17 @@ viewInterpolationNode.prototype.interpolate = function(now, playmode)
 	if (!viewnode) return;
 	var simulating = this.isSimulating();
 	var queuetime = this.positionQueue.xQueue.times[4];
+
+	var sti = viewnode.setTransformInternal;
+	var qt = simulating && (playmode != 'play' && now - queuetime > .05);
 	while (this.totalTime > 0)
 	{
 		this.totalTime -= 16;
 		//	if(_Editor.isSelected(this.id))
 		//		return;
-		if (viewnode.setTransformInternal)
+		if (sti)
 		{
-			if (simulating && (playmode != 'play' && now - queuetime > .05))
+			if (qt)
 			{
 				var oldTransform = this.getProperty('transform');
 				if (oldTransform)
@@ -270,14 +276,14 @@ viewInterpolationNode.prototype.interpolate = function(now, playmode)
 			var position = this.positionQueue.interpolate(now, simulating);
 			var rotation = this.quaternionQueue.interpolate(now, simulating);
 			var scale = this.scaleQueue.interpolate(now, simulating);
-			this.tempmat.compose(new THREE.Vector3(position[0], position[1], position[2]), new THREE.Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]), new THREE.Vector3(scale[0], scale[1], scale[2]))
+			this.tempmat.compose(tempvec1.set(position[0], position[1], position[2]), tempquat.set(rotation[0], rotation[1], rotation[2], rotation[3]), tempvec2.set(scale[0], scale[1], scale[2]))
 			viewnode.setTransformInternal(this.tempmat.elements, false);
 		}
 		if (viewnode.setAnimationFrameInternal)
 		{
 			//so, given that we don't have to have determinism, do we really need to backup and restore?
 			//viewnode.backupTransforms(this.getProperty('animationFrame'));
-			if (simulating && (playmode != 'play' && now - queuetime > .05))
+			if (qt)
 			{
 				this.animationFrameQueue.push(this.getProperty('animationFrame'));
 			}
