@@ -173,12 +173,14 @@ function viewInterpolationNode(id, childExtendsID, threejsNode, sim)
 	this.id = id;
 	this.threejsNode = threejsNode;
 	this.childExtendsID = childExtendsID;
+	this.extends = childExtendsID;
 	this.properties = {};
 	this.positionQueue = new VectorQueue(5, id);
 	this.scaleQueue = new VectorQueue(5, id);
 	this.quaternionQueue = new QuaternionQueue(5, id);
 	this.animationFrameQueue = new floatQueue(5, id);
 	this.enabled = true;
+	this.lastUpdate = performance.now();
 	this.totalTime = 0;
 	this.lastTime = 0;
 	this.simulating = sim;
@@ -195,6 +197,9 @@ viewInterpolationNode.prototype.setSim = function(v)
 }
 viewInterpolationNode.prototype.tick = function()
 {
+	
+	if(this.enabled == false)
+		return;
 	if (Engine.getPropertyFast(Engine.application(), 'playMode') == 'play' && this.isSimulating())
 	{
 		var viewnode = this.threejsNode;
@@ -253,6 +258,8 @@ viewInterpolationNode.prototype.setProperty = function(propertyName, propertyVal
 	if (propertyName == 'transform' && propertyValue)
 	{
 		this.properties[propertyName] = matCpy(propertyValue);
+		this.enabled = true;
+		this.lastUpdate = performance.now();
 		if (!this.isSimulating())
 		{
 			this.pushTransform(matCpy(propertyValue));
@@ -279,6 +286,9 @@ viewInterpolationNode.prototype.getProperty = function(propertyName)
 viewInterpolationNode.prototype.interpolate = function(now, playmode)
 {
 	//framerate independant smoothing
+	
+	if(performance.now() - this.lastUpdate > 1500)
+		this.enabled = false;
 	
 	this.totalTime += now - (this.lastTime ? this.lastTime : now);
 	this.lastTime = now;
