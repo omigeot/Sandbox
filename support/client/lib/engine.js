@@ -17,7 +17,7 @@
 /// attaches to the global window object as window.Engine. Nothing else should affect the global
 /// environment.
 "use strict";
-define(['progressScreen','nodeParser'], function(progress,nodeParser)
+define(['progressScreen','nodeParser','vwf/utility/eventSource'], function(progress,nodeParser,eventSource)
 {
     var jQuery = $;
     (function(window)
@@ -26,6 +26,7 @@ define(['progressScreen','nodeParser'], function(progress,nodeParser)
         var progressScreen = require('progressScreen');
         window.vwf = window.Engine = new function()
         {
+            eventSource.call(this,'Engine');
             window.console && console.debug && console.debug("creating vwf");
             // == Public variables =====================================================================
             /// The runtime environment (production, development, testing) and other configuration
@@ -1109,6 +1110,7 @@ define(['progressScreen','nodeParser'], function(progress,nodeParser)
             this.tick = function()
             {
                 // Call ticking() on each model.
+                this.trigger('tickStart');
                 if (this.getPropertyFast(vwf.application(), 'playMode') == 'play')
                 {
                     for(var i =0; i < this.models.length; i++)
@@ -1138,6 +1140,7 @@ define(['progressScreen','nodeParser'], function(progress,nodeParser)
                     }
                 }
                 this.tickCount++;
+                this.trigger('tickEnd');
                 this.postSimulationStateUpdates(this.tickCount % 20 != 0 ? ['transform', 'animationFrame', 'visible'] : null);
             };
             // -- setState -----------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 
-define(['vwf/model/threejs/sceneManager/_THREERayTracer','vwf/model/threejs/sceneManager/sceneManagerRegion','vwf/model/threejs/sceneManager/renderBatchManager'],function(tracer,SceneManagerRegion)
+define(['vwf/model/threejs/sceneManager/_THREERayTracer','vwf/model/threejs/sceneManager/sceneManagerRegion','vwf/model/threejs/sceneManager/renderBatchManager','vwf/utility/eventSource'],function(tracer,SceneManagerRegion,batchManager,eventSource)
 {
 
 
@@ -20,6 +20,7 @@ THREE.Object3D.prototype._dynamic = false;
 function SceneManager(scene) {
     this.defaultPickOptions = new THREE.CPUPickOptions();
     this.cullList = [];
+    eventSource.call(this,'SceneManager');
 }
 
 SceneManager.cullScale = 30;
@@ -49,8 +50,10 @@ SceneManager.prototype.traverse = function(cb,node)
         }
     }
 }
+SceneManager.tempmat = new THREE.Matrix4();
 SceneManager.prototype.preRender = function(camera)
 {
+    this.trigger('cullStart');
     var fov_adj = camera.fov/60;
     var cameraPos = [camera.matrixWorld.elements[12],camera.matrixWorld.elements[13],camera.matrixWorld.elements[14]]
     //do culling, LOD work
@@ -82,7 +85,7 @@ SceneManager.prototype.preRender = function(camera)
         {
             var o = region.childObjects[i];
             if (!o.boundsCache)
-                o.boundsCache = o.GetBoundingBox(true).transformBy(o.getModelMatrix(tempmat));
+                o.boundsCache = o.GetBoundingBox(true).transformBy(o.getModelMatrix(SceneManager.tempmat));
             if(o.visible && o.frustumCulled)
             {
                 var cullDistance = MATH.distanceVec3(o.boundsCache.min,o.boundsCache.max);
@@ -100,6 +103,7 @@ SceneManager.prototype.preRender = function(camera)
         //traverse the children of this node
         return true;
     });
+    this.trigger('cullEnd');
 }
 SceneManager.prototype.postRender = function()
 {
