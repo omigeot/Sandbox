@@ -19,6 +19,7 @@
 			padding: 6px 8px;
 			border: outset $border 1px;
 			margin: 0 8px;
+			@include flex-shrink(0);
 
 			&:first-child {
 				margin-left: 0;
@@ -47,6 +48,12 @@
 		.button {
 			border-radius: 3px;
 
+		}
+
+		.breadcrumbs {
+			overflow: hidden;
+			@include justify-content(flex-end);
+			margin-right: 8px;
 		}
 
 		.crumb

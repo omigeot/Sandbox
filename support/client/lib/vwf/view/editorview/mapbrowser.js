@@ -19,11 +19,12 @@ define(['./angular-app', './manageAssets'], function(app)
 			autoOpen: true,
 			modal: false,
 			height: 400,
-			width: 600
+			width: 600,
+			minWidth: 283
 		});
 
 
-		$scope.breadcrumbs = ['jungle_1','jungle'];
+		$scope.breadcrumbs = ['jungle_1','jungle','asdf','jklk','Dust In The Wind'];
 		$scope.view = 'thumbs'; // or 'list'
 	}]);
 
