@@ -238,7 +238,8 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 				console.log('Texture browser is unavailable');
 			}*/
 			browseTextures(function(url){
-				$scope.materialDef.layers[index].src = url;
+				if(url)
+					$scope.materialDef.layers[index].src = url;
 			});
 		}
 

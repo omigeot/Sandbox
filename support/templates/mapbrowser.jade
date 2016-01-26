@@ -4,3 +4,25 @@ mixin mapbrowser_head
 mixin mapbrowser_body
 
 	#MapBrowser(ng-controller='MapBrowserController')
+
+		.toolbar
+
+			.buttongroup
+				.button.back(title='Up one level')
+					.glyphicon.glyphicon-arrow-up
+
+				.crumb.first(title='Texture root')
+					.glyphicon.glyphicon-home
+				.crumb(ng-repeat='crumb in breadcrumbs track by $index', ng-class='{last: $last, active: $last}', title='{{crumb}}') {{crumb}}
+
+			.buttongroup
+				.button.search(title='Search')
+					.glyphicon.glyphicon-search
+
+				.crumb.first.tiles(title='Thumbnails', ng-class='{active: view === "thumbs"}', ng-click='view = "thumbs"')
+					.glyphicon.glyphicon-th-large
+				.crumb.last.list(title='List', ng-class='{active: view === "list"}', ng-click='view = "list"')
+					.glyphicon.glyphicon-th-list
+
+		.folderview
+			

@@ -1,0 +1,66 @@
+@import 'polyfill';
+
+#MapBrowser
+{
+	padding: 8px 6px;
+
+	.toolbar
+	{
+		@include display-flex();
+		@include justify-content(space-between);
+
+		.button, .crumb
+		{
+			$lightside: #383838;
+			$darkside: #272727;
+			$border: #525252;
+
+			box-sizing: border-box;
+			padding: 6px 8px;
+			border: outset $border 1px;
+			margin: 0 8px;
+
+			&:first-child {
+				margin-left: 0;
+			}
+			&:last-child {
+				margin-right: 0;
+			}
+
+			background-image: linear-gradient(to bottom, $lightside, $darkside);
+
+			&:hover {
+				background-image: none;
+				background-color: #333;
+			}
+
+			&.active {
+				background-image: linear-gradient(to top, $lightside, $darkside);
+				border-style: inset;
+			}
+		}
+
+		.buttongroup {
+			@include display-flex();
+		}
+
+		.button {
+			border-radius: 3px;
+
+		}
+
+		.crumb
+		{
+			margin: 0 -1px;
+
+			&.first {
+				border-top-left-radius: 3px;
+				border-bottom-left-radius: 3px;
+			}
+			&.last {
+				border-top-right-radius: 3px;
+				border-bottom-right-radius: 3px;
+			}
+		}
+	}
+}

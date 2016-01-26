@@ -4,7 +4,7 @@ define(['./angular-app', './manageAssets'], function(app)
 {
 	var textureCallback = null;
 
-	app.controller('MapBrowserController', ['$scope', function($scope)
+	app.controller('MapBrowserController', ['$scope','AssetDataManager', function($scope, UserAssets)
 	{
 		$('#MapBrowser').dialog({
 			title: 'Map Browser',
@@ -16,11 +16,15 @@ define(['./angular-app', './manageAssets'], function(app)
 				effect: "fade",
 				duration: 300
 			},
-			autoOpen: false,
-			modal: true,
-			maxHeight: 600,
-			height: 600
+			autoOpen: true,
+			modal: false,
+			height: 400,
+			width: 600
 		});
+
+
+		$scope.breadcrumbs = ['jungle_1','jungle'];
+		$scope.view = 'thumbs'; // or 'list'
 	}]);
 
 
