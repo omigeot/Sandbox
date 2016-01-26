@@ -1759,26 +1759,39 @@ function serve(request, response)
 					break;
 				case "textures":
 					{
+						// enumerate folder contents recursively
 						function getFiles(path, callback)
 						{
-							fs.readdir(path, function(err, files){
+							// get direct dir contents
+							fs.readdir(path, function(err, files)
+							{
+								// if it's actually a texture, return
 								if(err && err.code === 'ENOTDIR' && /\.(?:bmp|jpg|png|gif|dds|tiff)$/.test(path)){
 									callback(null, libpath.basename(path));
 								}
+								// if it's some other error, return
 								else if(err){
 									callback(err);
 								}
+								// if it's a dir
 								else
 								{
 									var ret = {name: libpath.basename(path), contents: []};
-									var childrenFinished = 0;
-									for(var i=0; i<files.length; i++){
-										getFiles(libpath.join(path, files[i]), function(err, item){
+									var childrenFinished = 0; // keep track of how many children are still pending
+
+									// loop over children
+									for(var i=0; i<files.length; i++)
+									{
+										// recurse
+										getFiles(libpath.join(path, files[i]), function(err, item)
+										{
+											// fail silently, append result to parent otherwise
 											if(!err){
 												ret.contents.push(item);
 											}
-											childrenFinished++;
-											if(childrenFinished === files.length)
+
+											// call callback when last child finishes
+											if(++childrenFinished === files.length)
 												callback(null, ret);
 										});
 									}
@@ -1798,8 +1811,8 @@ function serve(request, response)
 									console.error(err);
 								}
 								else {
-									global.textures = files;
-									ServeJSON(files, response, URL);
+									global.textures = files.contents;
+									ServeJSON(files.contents, response, URL);
 								}
 							});
 						}
