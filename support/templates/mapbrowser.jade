@@ -8,13 +8,16 @@ mixin mapbrowser_body
 		.toolbar
 
 			.buttongroup(style='min-width: 175px;')
-				.button.back(title='Up one level')
-					.glyphicon.glyphicon-arrow-up
+				.button.back(title='Up one level', ng-click='breadcrumbs.splice(-1, 1)')
+					.glyphicon.glyphicon-arrow-left
 
 				.buttongroup.breadcrumbs
-					.crumb.first(title='Texture root')
+					.crumb.first(title='Texture home', ng-click='breadcrumbs = []'
+						ng-class='{active: !breadcrumbs.length}')
 						.glyphicon.glyphicon-home
-					.crumb(ng-repeat='crumb in breadcrumbs track by $index', ng-class='{last: $last, active: $last}', title='{{crumb}}') {{crumb}}
+					.crumb(ng-repeat='crumb in breadcrumbs track by $index', title='{{crumb}}'
+						ng-class='{last: $last, active: $last}', ng-click='breadcrumbs.splice($index+1, breadcrumbs.length)')
+						| {{crumb}}
 
 			.buttongroup
 				.button.search(title='Search')
@@ -25,5 +28,10 @@ mixin mapbrowser_body
 				.crumb.last.list(title='List', ng-class='{active: view === "list"}', ng-click='view = "list"')
 					.glyphicon.glyphicon-th-list
 
-		.folderview
-			
+
+		.folderview(ng-class='{thumbs: view === "thumbs", list: view === "list"}')
+
+			.viewitem(ng-repeat='item in followPath(breadcrumbs)')
+				.thumb
+					.glyphicon.glyphicon-folder-open.fakethumb(ng-show='item.name && item.contents')
+					img(ng-hide='item.name && item.contents', ng-src='./vwfdatamanager.svc/texturethumbnail?UID={{getUID(item, breadcrumbs)}}')
