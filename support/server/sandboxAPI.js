@@ -1759,26 +1759,29 @@ function serve(request, response)
 					break;
 				case "textures":
 					{
-						function getFiles(url, callback)
+						function getFiles(path, callback)
 						{
-							fs.readdir(url, function(err, files){
-								if(err && err.code === 'ENOTDIR' && /\.(?:bmp|jpg|png|gif|dds|tiff)$/.test(url)){
-									callback(null, url);
+							fs.readdir(path, function(err, files){
+								if(err && err.code === 'ENOTDIR' && /\.(?:bmp|jpg|png|gif|dds|tiff)$/.test(path)){
+									callback(null, libpath.basename(path));
 								}
-								else if(!err)
+								else if(err){
+									callback(err);
+								}
+								else
 								{
-									var ret = {name: url, contents: []};
-									for(var i=0; i<files.length; i++)
-										getFiles(libpath.join(url, files[i]), function(err, item){
+									var ret = {name: libpath.basename(path), contents: []};
+									var childrenFinished = 0;
+									for(var i=0; i<files.length; i++){
+										getFiles(libpath.join(path, files[i]), function(err, item){
 											if(!err){
 												ret.contents.push(item);
 											}
+											childrenFinished++;
+											if(childrenFinished === files.length)
+												callback(null, ret);
 										});
-									);
-									callback(null, ret);
-								}
-								else {
-									callback(err);
+									}
 								}
 							});
 						}
@@ -1786,28 +1789,21 @@ function serve(request, response)
 						if (global.textures)
 						{
 							ServeJSON(global.textures, response, URL);
-							return;
 						}
-						/*fs.readdir(basedir + "Textures" + libpath.sep, function(err, files)
+						else
 						{
-							RecurseDirs(basedir + "Textures" + libpath.sep, "", files);
-							files.sort(function(a, b)
+							getFiles( libpath.join(basedir, 'Textures'), function(err, files)
 							{
-								if (typeof a == "string" && typeof b == "string") return (a < b ? -1 : 1);
-								if (typeof a == "object" && typeof b == "string") return 1;
-								if (typeof a == "string" && typeof b == "object") return -1;
-								return -1;
+								if(err){
+									console.error(err);
+								}
+								else {
+									global.textures = files;
+									ServeJSON(files, response, URL);
+								}
 							});
-							var o = {};
-							o.GetTexturesResult = JSON.stringify(
-								{
-									root: files
-								})
-								.replace(/\\\\/g, "\\")
-								.replace(/\/\//g, '/');
-							global.textures = o;
-							ServeJSON(o, response, URL);
-						});*/
+						}
+
 					}
 					break;
 				case "globalassets":
