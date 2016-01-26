@@ -38,7 +38,7 @@ function matset(newv, old) {
 
 var pfx = ["webkit", "moz", "ms", "o", ""];
 
-define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/OculusRiftEffect", "vwf/model/threejs/ThermalCamEffect", "vwf/model/threejs/VRRenderer", "vwf/view/threejs/editorCameraController", "vwf/view/threejs/SandboxRenderer"], function(module, view,viewNode) {
+define(["module", "vwf/view",'vwf/utility/eventSource',"vwf/view/threejs/viewNode", "vwf/model/threejs/OculusRiftEffect", "vwf/model/threejs/ThermalCamEffect", "vwf/model/threejs/VRRenderer", "vwf/view/threejs/editorCameraController", "vwf/view/threejs/SandboxRenderer"], function(module, view,eventSource,viewNode) {
     var stats;
     var NORMALRENDER = 0;
     var STEREORENDER = 1;
@@ -207,13 +207,13 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
         },
         updateGlyphs: function(e, viewprojection, wh, ww) {
 
-            if(Engine.getProperty(Engine.application(),'playMode') == 'play') return;
+            if(Engine.getPropertyFast(Engine.application(),'playMode') == 'play') return;
             for (var i = 0; i < this.glyphs.length; i++) {
-                if (Engine.getProperty(this.glyphs[i], 'showGlyph') == false) continue;
+                if (Engine.getPropertyFast(this.glyphs[i], 'showGlyph') == false) continue;
                 var div = $('#glyph' + ToSafeID(this.glyphs[i]))[0];
                 if (!div) continue;
 
-                var trans = Engine.getProperty(this.glyphs[i], 'worldTransform');
+                var trans = Engine.getPropertyFast(this.glyphs[i], 'worldTransform');
 
                 var pos = [trans[12], trans[13], trans[14], 1];
 
@@ -271,6 +271,8 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
         },
         initialize: function(rootSelector) {
 
+            
+            eventSource.call(this,'View');
             this.initHMD();
 
             rootSelector = {
@@ -460,14 +462,18 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
         
         setInterpolatedTransforms: function(deltaTime) {
   			
+            this.trigger('interpStart');
   			var keys = Object.keys(this.nodes);
+            var now = performance.now();
+            var playmode = Engine.getPropertyFast(Engine.application(),'playmode');
             for (var j = 0; j < keys.length; j++) {
                 var i = keys[j];
                 var node = this.nodes[i];
-                if(!node) return;
-                node.interpolate();
+                if(!node) continue;
+                node.interpolate(now,playmode);
             }
             _dScene.updateMatrixWorld();
+            this.trigger('interpEnd');
         },
         windowResized: function() {
             //called on window resize by windowresize.js
@@ -482,6 +488,7 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
         },
         restoreTransforms: function() {
 
+            this.trigger('interpRestoreStart');
             var keys = Object.keys(this.nodes);
             for (var j = 0; j < keys.length; j++) {
                 var i = keys[j];
@@ -490,6 +497,7 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
                 node.restore();
             }
             _dScene.updateMatrixWorld();
+            this.trigger('interpRestoreEnd');
         },
         setRenderModeStereo: function() {
             this.renderMode = STEREORENDER;
@@ -535,7 +543,7 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
             childSource, childType, childURI, childName, callback /* ( ready ) */ ) {
 
             if (childID != 'http-vwf-example-com-camera-vwf-camera')
-                this.nodes[childID] = new viewNode(childID,childExtendsID,this.state.nodes[childID]);
+                this.nodes[childID] = new viewNode(childID,childExtendsID,this.state.nodes[childID],Engine.isSimulating(childID));
 
             /*{
                     id: childID,
@@ -732,6 +740,14 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
                     this.setCamera_internal(args[1]);
                 }
             }
+            if (method == 'startSimulatingNode') {
+               if(this.nodes[args])
+                 this.nodes[args].setSim(true);
+            }
+            if (method == 'stopSimulatingNode') {
+               if(this.nodes[args])
+                 this.nodes[args].setSim(false);
+            }
             if (id == Engine.application() && method == 'cameraShareInfo') {
                 if (this.receiveSharedCamera) {
                     this.setCamera();
@@ -827,41 +843,7 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
                     this.renderTargetPasses.splice(i, 1);
             }
         },
-        trigger: function(name, args) {
-            if (!this.args)
-                this.args = [null];
-            for (var i = 0; i < args.length; i++)
-                this.args[i + 1] = args[i];
-
-            var queue = this.events[name];
-            if (!queue) return;
-            for (var i = 0; i < queue.length; i++) {
-                this.events[name][i].apply(this, this.args);
-            }
-
-        },
-        bind: function(name, func) {
-
-            if (!this.events)
-                this.events = {};
-            if (!this.events[name])
-                this.events[name] = [];
-            this.events[name].push(func);
-            return this.events[name].length - 1;
-        },
-        unbind: function(name, func) {
-
-            var queue = this.events[name];
-            if (!queue) return;
-
-            if (func instanceof Number)
-                queue.splice(func, 1);
-            else {
-                func = queue.indexOf(func);
-                if (func != -1)
-                    queue.splice(func, 1);
-            }
-        }
+        
 
 
         // -- gotProperty ------------------------------------------------------------------------------
@@ -1015,7 +997,7 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
             }
             //so, here's what we'll do. Since the sim state cannot advance until tick, we will update on tick. 
             //but, ticks aren't fired when the scene in paused. In that case, we'll do it every frame.
-            var currentState = Engine.getProperty(Engine.application(), 'playMode');
+            var currentState = Engine.getPropertyFast(Engine.application(), 'playMode');
             if (currentState === 'stop') _SceneManager.update();
 
 
@@ -1076,6 +1058,8 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
 
             self.trigger('prerender', vpargs);
             self.updateGlyphs(null, vp, wh, ww);
+            if(window._SceneManager)
+                _SceneManager.preRender(cam);
             var keys = Object.keys(Engine.models[0].model.nodes);
             for (var j = 0; j < keys.length; j++) {
                 var i = keys[j];
@@ -1260,7 +1244,7 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
             }
 
 
-            if (self.selection && Engine.getProperty(self.selection.id, 'type') == 'Camera' && self.cameraID != self.selection.id) {
+            if (self.selection && Engine.getPropertyFast(self.selection.id, 'type') == 'Camera' && self.cameraID != self.selection.id) {
                 var selnode = _Editor.findviewnode(self.selection.id);
                 if (selnode) {
                     selcam = selnode.children[0];
@@ -1313,6 +1297,8 @@ define(["module", "vwf/view","vwf/view/threejs/viewNode", "vwf/model/threejs/Ocu
                 self.trigger('glyphRender', vpargs);
             }
 
+             if(window._SceneManager)
+                _SceneManager.postRender();
 
             if (stats.domElement.style.display == 'block')
                 stats.update();

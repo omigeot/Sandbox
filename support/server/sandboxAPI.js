@@ -1856,25 +1856,38 @@ function serve(request, response)
 					break;
 				case "geteditorcss":
 					{
-						sass.render({
-							file: libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/Editorview.scss'),
-							includePaths: [libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/')],
-							sourceComments: true,
-							functions: {
-								'getImgPath()': function(){
-									return new sass.types.String('../vwf/view/editorview');
+						var sass = null;
+						try{
+							sass = require('node-sass');
+						}catch(e)
+						{
+							console.warn("sass not installed, serving locally");
+						}
+						
+						if(sass)
+						{
+							sass.render({
+								file: libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/Editorview.scss'),
+								includePaths: [libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/')],
+								sourceComments: true,
+								functions: {
+									'getImgPath()': function(){
+										return new sass.types.String('../vwf/view/editorview');
+									}
 								}
-							}
-						}, function(err,result){
-							if(err){
-								logger.error('Error compiling sass:', err);
-								response.sendStatus(500);
-							}
-							else {
-								response.set('Content-Type', 'text/css');
-								response.send(result.css);
-							}
-						});
+							}, function(err,result){
+								if(err){
+									logger.error('Error compiling sass:', err);
+									response.sendStatus(500);
+								}
+								else {
+									response.set('Content-Type', 'text/css');
+									response.send(result.css);
+								}
+							});
+						}else{
+							FileCache.ServeFile(request,libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/built.css'),response,URL)
+						}
 					}
 					break;
 				default:

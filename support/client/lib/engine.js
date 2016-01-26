@@ -16,7 +16,8 @@
 /// page's JavaScript environment. The vwf module self-creates its own instance when loaded and
 /// attaches to the global window object as window.Engine. Nothing else should affect the global
 /// environment.
-define(['progressScreen'], function(progress)
+"use strict";
+define(['progressScreen','nodeParser','vwf/utility/eventSource'], function(progress,nodeParser,eventSource)
 {
     var jQuery = $;
     (function(window)
@@ -25,6 +26,7 @@ define(['progressScreen'], function(progress)
         var progressScreen = require('progressScreen');
         window.vwf = window.Engine = new function()
         {
+            eventSource.call(this,'Engine');
             window.console && console.debug && console.debug("creating vwf");
             // == Public variables =====================================================================
             /// The runtime environment (production, development, testing) and other configuration
@@ -686,10 +688,10 @@ define(['progressScreen'], function(progress)
                             {
                                 window.setImmediate(function()
                                 {
-                                    this.localReentryStack++
+                                    Engine.localReentryStack++
                                         queue.insert(fields);
-                                    if (this.localReentryStack > 2)
-                                        this.localReentryStack--;
+                                    if (Engine.localReentryStack > 2)
+                                        Engine.localReentryStack--;
                                 })
                             })(fields);
                         }
@@ -711,10 +713,10 @@ define(['progressScreen'], function(progress)
                     {
                         window.setImmediate(function()
                         {
-                            this.localReentryStack++
+                            Engine.localReentryStack++
                                 queue.insert(fields);
-                            if (this.localReentryStack > 2)
-                                this.localReentryStack--;
+                            if (Engine.localReentryStack > 2)
+                                Engine.localReentryStack--;
                         })
                     })(fields);
                 }
@@ -780,20 +782,20 @@ define(['progressScreen'], function(progress)
             this.startCoSimulating = function(nodeID)
             {
                 if (!nodes.existing[nodeID]) return;
-                var nodes = this.decendants(nodeID);
+                var decendants = this.decendants(nodeID);
                 this.stopSimulating(nodeID);
                 if (nodeID !== "index-vwf")
-                    nodes.push(nodeID);
-                for (var i = 0; i < nodes.length; i++)
+                    decendants.push(nodeID);
+                for (var i = 0; i < decendants.length; i++)
                 {
-                    if (this.nodesCoSimulating.indexOf(nodes[i]) == -1)
+                    if (this.nodesCoSimulating.indexOf(decendants[i]) == -1)
                     {
-                        this.nodesCoSimulating.push(nodes[i]);
-                        this.nodesCoSimulatingNames[nodes[i]] = true;
-                        this.propertyDataUpdates[nodes[i]] = {};
+                        this.nodesCoSimulating.push(decendants[i]);
+                        this.nodesCoSimulatingNames[decendants[i]] = true;
+                        this.propertyDataUpdates[decendants[i]] = {};
                     }
-                    this.callMethod(this.application(), "startSimulatingNode", nodes[i])
-                    this.lastPropertyDataUpdates[nodes[i]] = {};
+                    this.callMethod(this.application(), "startSimulatingNode", decendants[i])
+                    this.lastPropertyDataUpdates[decendants[i]] = {};
                 }
             }
             this.stopSimulating = function(nodeID)
@@ -815,8 +817,13 @@ define(['progressScreen'], function(progress)
             }
             this.isSimulating = function(nodeID)
             {
+
                 if (socket === null) ///we are in offline mode
                     return true;
+
+               
+                
+
                 return nodeID == "index-vwf" ||
                     (this.nodesCoSimulating.indexOf(nodeID) !== -1) || (this.nodesSimulating.indexOf(nodeID) !== -1)
             }
@@ -1061,6 +1068,8 @@ define(['progressScreen'], function(progress)
             };
             this.processMessage = function(fields)
                 {
+                     if(fields.rnd)
+                        console.log(fields.rnd);
                     this.message = fields;
                     // Advance the time.
                     if (this.now < fields.time && fields.action == "tick")
@@ -1101,10 +1110,12 @@ define(['progressScreen'], function(progress)
             this.tick = function()
             {
                 // Call ticking() on each model.
-                if (this.getProperty(vwf.application(), 'playMode') == 'play')
+                this.trigger('tickStart');
+                if (this.getPropertyFast(vwf.application(), 'playMode') == 'play')
                 {
-                    this.models.forEach(function(model)
+                    for(var i =0; i < this.models.length; i++)
                     {
+                        var model = this.models[i];
                         try
                         {
                             model.ticking && model.ticking(this.now); // TODO: maintain a list of tickable models and only call those
@@ -1113,14 +1124,11 @@ define(['progressScreen'], function(progress)
                         {
                             console.error(e)
                         }
-                    }, this);
-                    // Call tick() on each tickable node.
-                    //    this.tickable.nodeIDs.forEach( function( nodeID ) {
-                    //        this.callMethod( nodeID, "tick", [ this.now ] );
-                    //    }, this );
-                    // Call ticked() on each view.
-                    this.views.forEach(function(view)
+                    }
+                    
+                    for(var i =0; i < this.views.length; i++)
                     {
+                        var view = this.views[i];
                         try
                         {
                             view.ticked && view.ticked(this.now); // TODO: maintain a list of tickable views and only call those
@@ -1129,9 +1137,10 @@ define(['progressScreen'], function(progress)
                         {
                             console.error(e);
                         }
-                    }, this);
+                    }
                 }
                 this.tickCount++;
+                this.trigger('tickEnd');
                 this.postSimulationStateUpdates(this.tickCount % 20 != 0 ? ['transform', 'animationFrame', 'visible'] : null);
             };
             // -- setState -----------------------------------------------------------------------------
@@ -3245,18 +3254,20 @@ define(['progressScreen'], function(progress)
                 }
                 return answer;
             }
-            this.setPropertyFastEntrants = [];
+            this.setPropertyFastEntrants = {};
             this.setPropertyFast = function(nodeID, propertyName, propertyValue)
                 {
                     var answer = undefined;
                     for (var i = 0; i < this.models.length; i++)
                     {
-                        if (!this.setPropertyFastEntrants[nodeID + propertyName + i])
-                            if (this.models[i].settingProperty)
+                        var propID = nodeID + propertyName + i;
+                        var model = this.models[i];
+                        if (!this.setPropertyFastEntrants[propID])
+                            if (model.settingProperty)
                             {
-                                this.setPropertyFastEntrants[nodeID + propertyName + i] = true;
-                                var ret = this.models[i].settingProperty(nodeID, propertyName, propertyValue)
-                                delete this.setPropertyFastEntrants[nodeID + propertyName + i];
+                                this.setPropertyFastEntrants[propID] = true;
+                                var ret = model.settingProperty(nodeID, propertyName, propertyValue)
+                                this.setPropertyFastEntrants[propID] = false;
                                 if (ret !== undefined)
                                     answer = ret;
                             }
@@ -3944,15 +3955,21 @@ define(['progressScreen'], function(progress)
                     jQuery.ajax(
                     {
                         url: remappedURI(nodeURI),
-                        dataType: "jsonp",
-                        success: function(nodeDescriptor) /* async */
+                        dataType: "text",
+                        success: function(data,xhr) /* async */
                         {
+                            
                             progressScreen.stopCreateNode(nodeURI);
-                            callback_async(nodeDescriptor);
+                            callback_async((new nodeParser()).parse(data));
                             queue.resume("after loading " + nodeURI); // resume the queue; may invoke dispatch(), so call last before returning to the host
                         },
-                        // error: function() {  // TODO
-                        // },
+                        error: function() { 
+
+                            progressScreen.stopCreateNode(nodeURI);
+                            console.error('error loading ' + nodeURI);
+                            callback_async({});
+                            queue.resume("after loading " + nodeURI); // resume the queue; may invoke dispatch(), so call last before returning to the host
+                         },
                     });
                 }
             };

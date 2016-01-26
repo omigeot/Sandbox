@@ -15,7 +15,7 @@ jQuery.extend(
     }
 });
 define([
-	"module", "version", "vwf/view",
+	"module", "version", "vwf/view",'vwf/utility/eventSource',
 
 	// dependencies
 	"vwf/view/editorview/lib/alertify.js-0.3.9/src/alertify",
@@ -55,7 +55,7 @@ define([
      "vwf/view/localization/translate",
      "vwf/view/editorview/lib/beautify.module.js"
 	//"vwf/view/editorview/panelEditor",
-], function(module, version, view, alertify, angular_app, Menubar,log) {
+], function(module, version, view,eventSource, alertify, angular_app, Menubar,log) {
     return view.load(module, {
         // == Module Definition ====================================================================
         needTools: function()
@@ -68,6 +68,7 @@ define([
         },
         initialize: function() {
             window._EditorView = this;
+            eventSource.call(this,'EditorView');
             //intialize the logger interface
             log.initialize();
             if (!window._EditorInitialized) {
@@ -196,6 +197,7 @@ define([
         // send the VWF events down to all registered objects
         viewAPINotify: function(functionName, data)
         {
+
             //only pass messages to the editor components if the world is stopped, or if the messages are necessary to handle the play pause logic
             if (Engine.models.object.gettingProperty(Engine.application(), 'playMode') !== 'play'||
                 data[1] =='playMode' ||data[1] =='playBackup' || data[1] == 'restoreState' || data[1] == 'postWorldRestore' || data[1] == 'preWorldPlay'
@@ -206,7 +208,12 @@ define([
                     var manager = this.managers[i];
                     if (manager[functionName])
                     {
+                        try{
                         manager[functionName].apply(manager, data)
+                        }catch(e)
+                        {
+                            console.error('error processing view api message ' + functionName)
+                        }
                     }
                 }
             }
