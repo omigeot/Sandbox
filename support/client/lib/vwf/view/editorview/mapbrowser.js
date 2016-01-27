@@ -6,19 +6,19 @@ define(['./angular-app', './manageAssets'], function(app)
 	{
 		var data = [];
 
-		function isObject(x){
+		function isFolder(x){
 			return x.name && x.contents;
 		}
 
 		function azFolderFile(a, b)
 		{
-			if( isObject(a) && isObject(b) ){
+			if( isFolder(a) === isFolder(b) ){
 				return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
 			}
-			else if( isObject(a) && !isObject(b) ){
+			else if( isFolder(a) && !isFolder(b) ){
 				return -1;
 			}
-			else if( !isObject(a) && isObject(b) ){
+			else if( !isFolder(a) && isFolder(b) ){
 				return 1;
 			}
 			else {

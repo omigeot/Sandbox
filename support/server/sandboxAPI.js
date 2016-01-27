@@ -6,7 +6,8 @@ var libpath = require('path'),
 	sio = require('socket.io'),
 	YAML = require('js-yaml'),
 	sass = require('node-sass'),
-	async = require('async');
+	async = require('async'),
+	imgSize = require('image-size');
 
 require('./hash.js');
 var _3DR_proxy = require('./3dr_proxy.js');
@@ -1767,7 +1768,14 @@ function serve(request, response)
 							{
 								// if it's actually a texture, return
 								if(err && err.code === 'ENOTDIR' && /\.(?:bmp|jpg|png|gif|dds|tiff)$/.test(path)){
-									callback(null, libpath.basename(path));
+									imgSize(path, function(err, dimensions){
+										var ret = {name: libpath.basename(path)};
+										if(!err && dimensions){
+											ret.width = dimensions.width;
+											ret.height = dimensions.height;
+										}
+										callback(null, ret);
+									});
 								}
 								// if it's some other error, return
 								else if(err){

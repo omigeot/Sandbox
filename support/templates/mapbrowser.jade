@@ -33,5 +33,7 @@ mixin mapbrowser_body
 
 			.viewitem(ng-repeat='item in followPath(breadcrumbs)')
 				.thumb
-					.glyphicon.glyphicon-folder-open.fakethumb(ng-show='item.name && item.contents')
-					img(ng-hide='item.name && item.contents', ng-src='./vwfdatamanager.svc/texturethumbnail?UID={{getUID(item, breadcrumbs)}}')
+					.glyphicon.glyphicon-folder-open.fakethumb(ng-show='item.contents')
+					img(ng-hide='item.contents', ng-src='./vwfdatamanager.svc/texturethumbnail?UID={{getUID(item.name, breadcrumbs)}}')
+				.nameplate {{item.name}}
+					span.size(ng-hide='item.contents')  ({{item.width || '?'}}x{{item.height || '?'}})
