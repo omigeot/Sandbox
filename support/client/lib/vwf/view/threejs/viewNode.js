@@ -258,7 +258,7 @@ viewInterpolationNode.prototype.setProperty = function(propertyName, propertyVal
 	if (propertyName == 'transform' && propertyValue)
 	{
 		this.properties[propertyName] = matCpy(propertyValue);
-		this.enabled = true;
+		//this.enabled = true;
 		this.lastUpdate = performance.now();
 		if (!this.isSimulating())
 		{
@@ -287,12 +287,12 @@ viewInterpolationNode.prototype.interpolate = function(now, playmode)
 {
 	//framerate independant smoothing
 	
-	if(performance.now() - this.lastUpdate > 1500)
-		this.enabled = false;
+	//if(performance.now() - this.lastUpdate > 1500)
+		//this.enabled = false;
 	
 	this.totalTime += now - (this.lastTime ? this.lastTime : now);
 	this.lastTime = now;
-	if (!this.enabled) return;
+	//if (!this.enabled) return;
 	var viewnode = this.threejsNode;
 	if (!viewnode) return;
 	var simulating = this.isSimulating();
@@ -340,7 +340,7 @@ viewInterpolationNode.tempquat = new THREE.Quaternion();
 viewInterpolationNode.tempmat = new THREE.Matrix4();
 viewInterpolationNode.prototype.restore = function()
 {
-	if (!this.enabled) return;
+	//if (!this.enabled) return;
 	var viewnode = this.threejsNode;
 	if (!viewnode) return;
 	if (viewnode.setTransformInternal)
