@@ -30,6 +30,9 @@ define(['./angular-app', './manageAssets'], function(app)
 				effect: "fade",
 				duration: 300
 			},
+			close: function(evt,ui){
+				textureCallback = null;
+			},
 			autoOpen: true,
 			modal: false,
 			height: 400,
@@ -75,7 +78,19 @@ define(['./angular-app', './manageAssets'], function(app)
 			}
 			else if(textureCallback){
 				textureCallback(item.url);
+				$('#MapBrowser').dialog('close');
 			}
+		}
+
+		$scope.loadByURL = function()
+		{
+			alertify.prompt('Enter the URL to a texture. The texture must be WebGL compatable and served from a domain that supports CORS', function(ok, url) {
+				if(ok && textureCallback){
+					textureCallback(url);
+					$scope.$apply();
+					$('#MapBrowser').dialog('close');
+				}
+			});
 		}
 	}]);
 

@@ -20,7 +20,7 @@ mixin mapbrowser_body
 						| {{crumb}}
 
 			.buttongroup
-				.button.addByUrl(title='By URL')
+				.button.addByUrl(title='By URL', ng-click='loadByURL()')
 					.glyphicon.glyphicon-plus
 				.button.search(title='Search')
 					.glyphicon.glyphicon-search

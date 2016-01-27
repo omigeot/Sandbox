@@ -93,6 +93,10 @@
 		{
 			cursor: pointer;
 
+			&:hover {
+				background-color: #445D80;
+			}
+
 			.thumb
 			{
 				@include display-flex();
@@ -121,12 +125,12 @@
 
 		.viewitem
 		{
-			width: 100px;
+			width: 80px;
 			padding: 5px;
 
 			.thumb {
-				width: 100px;
-				height: 100px;
+				width: 80px;
+				height: 80px;
 			}
 
 			.nameplate {
@@ -134,9 +138,6 @@
 				overflow-wrap: break-word;
 			}
 
-			&:hover {
-				background-color: #445D80;
-			}
 		}
 	}
 
