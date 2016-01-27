@@ -12,7 +12,7 @@ mixin mapbrowser_body
 					.glyphicon.glyphicon-arrow-left
 
 				.buttongroup.breadcrumbs
-					.crumb.first(title='Texture home', ng-click='breadcrumbs = []'
+					.crumb.first(title='Home', ng-click='breadcrumbs = []'
 						ng-class='{active: !breadcrumbs.length}')
 						.glyphicon.glyphicon-home
 					.crumb(ng-repeat='crumb in breadcrumbs track by $index', title='{{crumb}}'
@@ -20,20 +20,22 @@ mixin mapbrowser_body
 						| {{crumb}}
 
 			.buttongroup
+				.button.addByUrl(title='By URL')
+					.glyphicon.glyphicon-plus
 				.button.search(title='Search')
 					.glyphicon.glyphicon-search
 
-				.crumb.first.tiles(title='Thumbnails', ng-class='{active: view === "thumbs"}', ng-click='view = "thumbs"')
+				.crumb.first.tiles(title='Thumbnails', ng-class='{active: view === "thumbnails"}', ng-click='view = "thumbnails"')
 					.glyphicon.glyphicon-th-large
 				.crumb.last.list(title='List', ng-class='{active: view === "list"}', ng-click='view = "list"')
 					.glyphicon.glyphicon-th-list
 
 
-		.folderview(ng-class='{thumbs: view === "thumbs", list: view === "list"}')
+		.folderview(ng-class='{thumbnails: view === "thumbnails", list: view === "list"}')
 
-			.viewitem(ng-repeat='item in followPath(breadcrumbs)')
+			.viewitem(ng-repeat='item in followPath(breadcrumbs)', ng-click='itemClicked(item, breadcrumbs)')
 				.thumb
 					.glyphicon.glyphicon-folder-open.fakethumb(ng-show='item.contents')
-					img(ng-hide='item.contents', ng-src='./vwfdatamanager.svc/texturethumbnail?UID={{getUID(item.name, breadcrumbs)}}')
+					img(ng-if='!item.contents', ng-src='./vwfdatamanager.svc/texturethumbnail?UID={{getUID(item.name, breadcrumbs)}}')
 				.nameplate {{item.name}}
 					span.size(ng-hide='item.contents')  ({{item.width || '?'}}x{{item.height || '?'}})

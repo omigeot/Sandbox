@@ -1760,6 +1760,27 @@ function serve(request, response)
 					break;
 				case "textures":
 					{
+						// sort function
+						function azFolderFile(a, b)
+						{
+							function isFolder(x){
+								return !!x.name && !!x.contents;
+							}
+
+							if( isFolder(a) === isFolder(b) ){
+								return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
+							}
+							else if( isFolder(a) && !isFolder(b) ){
+								return -1;
+							}
+							else if( !isFolder(a) && isFolder(b) ){
+								return 1;
+							}
+							else {
+								return 0;
+							}
+						}
+
 						// enumerate folder contents recursively
 						function getFiles(path, callback)
 						{
@@ -1768,8 +1789,13 @@ function serve(request, response)
 							{
 								// if it's actually a texture, return
 								if(err && err.code === 'ENOTDIR' && /\.(?:bmp|jpg|png|gif|dds|tiff)$/.test(path)){
-									imgSize(path, function(err, dimensions){
-										var ret = {name: libpath.basename(path)};
+									imgSize(path, function(err, dimensions)
+									{
+										var ret = {
+											name: libpath.basename(path),
+											url: './vwfdatamanager.svc/texture?UID='+libpath.relative(libpath.join(basedir, 'Textures'), path)
+										};
+
 										if(!err && dimensions){
 											ret.width = dimensions.width;
 											ret.height = dimensions.height;
@@ -1799,8 +1825,10 @@ function serve(request, response)
 											}
 
 											// call callback when last child finishes
-											if(++childrenFinished === files.length)
+											if(++childrenFinished === files.length){
+												ret.contents.sort(azFolderFile);
 												callback(null, ret);
+											}
 										});
 									}
 								}

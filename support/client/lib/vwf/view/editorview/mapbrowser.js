@@ -6,30 +6,9 @@ define(['./angular-app', './manageAssets'], function(app)
 	{
 		var data = [];
 
-		function isFolder(x){
-			return x.name && x.contents;
-		}
-
-		function azFolderFile(a, b)
-		{
-			if( isFolder(a) === isFolder(b) ){
-				return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
-			}
-			else if( isFolder(a) && !isFolder(b) ){
-				return -1;
-			}
-			else if( !isFolder(a) && isFolder(b) ){
-				return 1;
-			}
-			else {
-				return a.toLowerCase() < b.toLowerCase() ? -1 : 1;
-			}
-		}
-
 		$http.get('./vwfdatamanager.svc/textures', {}).then(
 			function success(response){
 				data.push.apply(data, response.data);
-				data.sort(azFolderFile);
 			},
 			function error(response){}
 		);
@@ -55,7 +34,7 @@ define(['./angular-app', './manageAssets'], function(app)
 			modal: false,
 			height: 400,
 			width: 600,
-			minWidth: 283
+			minWidth: 315
 		});
 
 		$scope.home = [
@@ -64,11 +43,8 @@ define(['./angular-app', './manageAssets'], function(app)
 			{name: 'Server', contents: TexList}
 		];
 
-		//$scope.serverTex = TexList;
-		//$scope.assets = UserAssets;
-
 		$scope.breadcrumbs = ['Server'];
-		$scope.view = 'thumbs'; // or 'list'
+		$scope.view = 'thumbnails'; // or 'list'
 
 		$scope.followPath = function(crumbs, folder)
 		{
@@ -89,6 +65,17 @@ define(['./angular-app', './manageAssets'], function(app)
 		$scope.getUID = function(item, crumbs)
 		{
 			return crumbs.slice(1).join('/') + '/' + item;
+		}
+
+		$scope.itemClicked = function(item, crumbs)
+		{
+			if(item.contents){
+				crumbs.push(item.name);
+				$('#MapBrowser .folderview')[0].scrollTop = 0;
+			}
+			else if(textureCallback){
+				textureCallback(item.url);
+			}
 		}
 	}]);
 
