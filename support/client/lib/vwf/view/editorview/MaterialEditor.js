@@ -224,19 +224,6 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 		// open the texture browser, and apply the selection to the layer at the given index
 		$scope.browseForTexture = function(index)
 		{
-			/*if( window._MapBrowser ){
-				window._MapBrowser.setTexturePickedCallback(function(url){
-					$scope.materialDef.layers[index].src = url;
-					$scope.$apply();
-
-					window._MapBrowser.hide();
-				});
-
-				window._MapBrowser.show();
-			}
-			else {
-				console.log('Texture browser is unavailable');
-			}*/
 			browseTextures(function(url){
 				if(url)
 					$scope.materialDef.layers[index].src = url;
