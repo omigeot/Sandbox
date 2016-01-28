@@ -181,7 +181,7 @@ function DBstateToVWFDef(state, instanceData, cb)
                 }
                 //don't allow the clients to persist between a save/load cycle
                 blankscene.properties['clients'] = null;
-                if (instanceData && instanceData.publishSettings && instanceData.publishSettings.allowTools == false)
+                if (instanceData && instanceData.publishSettings && instanceData.publishSettings.startPaused == false)
                 {
                     blankscene.properties['playMode'] = 'play';
                 }
