@@ -33,9 +33,9 @@ mixin mapbrowser_body
 
 		.folderview(ng-class='{thumbnails: view === "thumbnails", list: view === "list"}')
 
-			.viewitem(ng-repeat='item in followPath(breadcrumbs)', ng-click='itemClicked(item, breadcrumbs)')
+			.viewitem(ng-repeat='item in followPath(breadcrumbs)', ng-click='itemClicked(item, breadcrumbs)', title='{{item.url}}')
 				.thumb
 					.glyphicon.glyphicon-folder-open.fakethumb(ng-show='item.contents')
 					img(ng-if='!item.contents', ng-src='./vwfdatamanager.svc/texturethumbnail?UID={{getUID(item.name, breadcrumbs)}}')
 				.nameplate {{item.name}}
-					span.size(ng-hide='item.contents')  ({{item.width || '?'}}x{{item.height || '?'}})
+					span.size(ng-show='item.width && item.height')  ({{item.width}}x{{item.height}})

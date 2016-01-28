@@ -33,12 +33,40 @@ define(['./angular-app', './manageAssets'], function(app)
 			close: function(evt,ui){
 				textureCallback = null;
 			},
-			autoOpen: true,
+			open: function(evt,ui){
+				getSceneTextures();
+			},
+			autoOpen: false,
 			modal: false,
 			height: 400,
 			width: 600,
 			minWidth: 315
 		});
+
+		function getSceneTextures()
+		{
+			$scope.home[1].contents = [];
+
+			function getTexWithUrl(url, arr)
+			{
+				if(!arr) arr = $scope.home;
+
+				var deepsearch = null;
+				for(var i=arr.length-1; i >= 0; i--){
+					if(arr[i].url === url)
+						return arr[i];
+					else if(arr[i].contents && (deepsearch = getTexWithUrl(url, arr[i].contents)))
+						return deepsearch;
+				}
+				return null;
+			}
+
+			$scope.home[1].contents = _SceneManager.GetLoadedTextures().map(
+				function(url){
+					return getTexWithUrl(url) || {url: url, name: /[^\/]+$/.exec(url)[0]};
+				}
+			);
+		}
 
 		$scope.home = [
 			{name: 'My Assets', contents: []},
