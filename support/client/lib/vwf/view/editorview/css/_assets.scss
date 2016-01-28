@@ -117,14 +117,14 @@
 
 	#propertyBrowser
 	{
-		margin-left: 2px;
+		margin: 0 8px;
 
 		.scrollArea
 		{
 			overflow: auto;
 
 			& > * {
-				margin: 2px 0;
+				margin: 4px 0;
 			}
 		}
 
@@ -151,6 +151,7 @@
 		{
 			&.seclabel {
 				text-align: center;
+				margin: 0;
 			}
 
 			&.fixed-height

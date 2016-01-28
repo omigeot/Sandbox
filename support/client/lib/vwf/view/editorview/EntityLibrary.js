@@ -136,7 +136,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 				{
 					name: "My Textures",
 					filter: function(asset){
-						return /^image\//.test(asset.type) && asset.isTexture;
+						return /^image\//.test(asset.type); // && asset.isTexture;
 					},
 					entityType: 'texture'
 				},
