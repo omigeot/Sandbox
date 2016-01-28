@@ -2,13 +2,94 @@
 
 define(['./angular-app', './manageAssets'], function(app)
 {
+	function SortedList(sampler){
+		this._sampler = sampler || function(x){ return x; };
+		this.length = 0;
+	}
+
+	SortedList.prototype.insert = function(x)
+	{
+		var s = this._sampler;
+		if(this.length === 0){
+			Array.prototype.push.call(this, x);
+		}
+		else
+		{
+			var fIndex = this.length/2;
+			var pow = 1;
+			do
+			{
+				pow++;
+				var mid = Math.floor(fIndex);
+
+				if( s(x) < s(this[mid]) )
+				{
+					if( !this[mid-1] || s(x) >= s(this[mid-1]) ){
+						Array.prototype.splice.call(this, mid, 0, x);
+						return this;
+					}
+					else {
+						fIndex -= this.length / Math.pow(2, pow);
+					}
+				}
+				else
+				{
+					if( !this[mid+1] || s(x) <= s(this[mid+1]) ){
+						Array.prototype.splice.call(this, mid+1, 0, x);
+						return this;
+					}
+					else {
+						fIndex += this.length / Math.pow(2, pow);
+					}
+				}
+			}
+			while(pow <= Math.ceil( Math.log2(this.length) )+1);
+
+			throw 'Binary search exhausted!';
+		}
+	}
+
 	app.service('TextureDataManager', ['$http', function($http)
 	{
-		var data = [];
+		var data = {server: [], assets: []};
+
+		Object.defineProperty(data, 'refresh', {
+			enumerable: false,
+			writable: false,
+			value: function(cb)
+			{
+				$http.get('/sas/assets/by-meta/all-of'+
+					'?user_name=' + encodeURIComponent(_UserManager.GetCurrentUserName())+
+					//'&isTexture=true'+
+					'&returns=id,name,width,height,thumbnail',
+					{}
+				).then(
+					function success(res)
+					{
+						data.assets = new SortedList(function(x){
+							return x.name.toLowerCase();
+						});
+
+						var list = res.data.matches
+						for(var i in list){
+							list[i].url = '/sas/assets/'+i;
+							if(list[i].thumbnail)
+								list[i].thumbnail = '/sas/assets/'+ list[i].thumbnail.slice(6);
+							data.assets.insert(list[i]);
+						}
+
+						cb();
+					},
+					function error(res){
+						cb();
+					}
+				);
+			}
+		});
 
 		$http.get('./vwfdatamanager.svc/textures', {}).then(
 			function success(response){
-				data.push.apply(data, response.data);
+				data.server.push.apply(data.server, response.data);
 			},
 			function error(response){}
 		);
@@ -18,7 +99,7 @@ define(['./angular-app', './manageAssets'], function(app)
 
 	var textureCallback = null;
 
-	app.controller('MapBrowserController', ['$scope','AssetDataManager','TextureDataManager', function($scope, UserAssets, TexList)
+	app.controller('MapBrowserController', ['$scope','TextureDataManager', function($scope, TexList)
 	{
 		$('#MapBrowser').dialog({
 			title: 'Map Browser',
@@ -34,7 +115,10 @@ define(['./angular-app', './manageAssets'], function(app)
 				textureCallback = null;
 			},
 			open: function(evt,ui){
-				getSceneTextures();
+				TexList.refresh(function(){
+					$scope.home[0].contents = TexList.assets;
+					getSceneTextures();
+				});
 			},
 			autoOpen: false,
 			modal: false,
@@ -71,7 +155,7 @@ define(['./angular-app', './manageAssets'], function(app)
 		$scope.home = [
 			{name: 'My Assets', contents: []},
 			{name: 'Scene', contents: []},
-			{name: 'Server', contents: TexList}
+			{name: 'Server', contents: TexList.server}
 		];
 
 		$scope.breadcrumbs = ['Server'];
@@ -93,10 +177,10 @@ define(['./angular-app', './manageAssets'], function(app)
 			}
 		};
 
-		$scope.getUID = function(item, crumbs)
+		/*$scope.getUID = function(item, crumbs)
 		{
 			return crumbs.slice(1).join('/') + '/' + item;
-		}
+		}*/
 
 		$scope.itemClicked = function(item, crumbs)
 		{

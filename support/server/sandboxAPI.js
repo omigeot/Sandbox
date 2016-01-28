@@ -1788,19 +1788,38 @@ function serve(request, response)
 							fs.readdir(path, function(err, files)
 							{
 								// if it's actually a texture, return
-								if(err && err.code === 'ENOTDIR' && /\.(?:bmp|jpg|png|gif|dds|tiff)$/.test(path)){
+								if(err && err.code === 'ENOTDIR' && /\.(?:bmp|jpg|png|gif|dds|tiff)$/.test(path))
+								{
+									var UID = libpath.relative(libpath.join(basedir, 'Textures'), path);
+									var ret = {
+										name: libpath.basename(path),
+										url: './vwfdatamanager.svc/texture?UID='+UID
+									};
+
+									fs.stat( libpath.join(basedir,'Thumbnails',UID), function(err){
+										if(!err){
+											ret.thumbnail = './vwfdatamanager.svc/texturethumbnail?UID='+UID;
+										}
+										else {
+											ret.thumbnail = null;
+										}
+
+										if(ret.width !== undefined && ret.height !== undefined)
+											callback(null, ret);
+									});
+
 									imgSize(path, function(err, dimensions)
 									{
-										var ret = {
-											name: libpath.basename(path),
-											url: './vwfdatamanager.svc/texture?UID='+libpath.relative(libpath.join(basedir, 'Textures'), path)
-										};
-
 										if(!err && dimensions){
 											ret.width = dimensions.width;
 											ret.height = dimensions.height;
 										}
-										callback(null, ret);
+										else {
+											ret.width = ret.height = null;
+										}
+
+										if(ret.thumbnail !== undefined)
+											callback(null, ret);
 									});
 								}
 								// if it's some other error, return
