@@ -2,8 +2,7 @@
 
 define(['./angular-app', './manageAssets'], function(app)
 {
-	app.directive('redirectScroll', function()
-	{
+	app.directive('redirectScroll', function(){
 		return {
 			scope: {
 				'redirectScroll': '='
@@ -64,6 +63,13 @@ define(['./angular-app', './manageAssets'], function(app)
 			while(pow <= Math.ceil( Math.log2(this.length) )+1);
 
 			throw 'Binary search exhausted!';
+		}
+	}
+
+	SortedList.prototype.concat = function(list)
+	{
+		for(var i=0; i<list.length; i++){
+			this.insert(list[i]);
 		}
 	}
 
@@ -179,6 +185,7 @@ define(['./angular-app', './manageAssets'], function(app)
 
 		$scope.breadcrumbs = ['Server'];
 		$scope.view = 'list'; // or 'list'
+		$scope.searchTerms = '';
 
 		$scope.followPath = function(crumbs, folder)
 		{
@@ -219,21 +226,70 @@ define(['./angular-app', './manageAssets'], function(app)
 			});
 		}
 
-		$scope.toggleSearchbox = function()
+		$scope.toggleSearchbox = function(state)
 		{
 			var searchbox = $('#MapBrowser input.searchbox');
-			if( !searchbox.hasClass('visible') ){
-				searchbox.addClass('visible');
+			var searchbutton = $('#MapBrowser .button.search');
+			if( state === undefined ){
+				state = !searchbox.hasClass('visible');
+			}
+
+			if(state){
+				searchbox.addClass('visible').select();
+				searchbutton.addClass('active');
 				searchbox.focus();
 			}
 			else {
 				searchbox.removeClass('visible');
+				searchbutton.removeClass('active');
 			}
 		}
 
-		$scope.hideOnEscape = function(evt){
-			console.log(evt);
-			evt.stopPropagation();
+		$scope.handleSearchInput = function(evt)
+		{
+			var KEY_ESC = 27, KEY_RETURN = 13;
+			evt.stopImmediatePropagation();
+			if(evt.which === KEY_ESC){
+				$scope.toggleSearchbox(false);
+			}
+			else if(evt.which === KEY_RETURN)
+			{
+				var terms = evt.currentTarget.value;
+				var resultsName = 'Search results for "'+terms+'"';
+
+				if($scope.home.length < 4){
+					$scope.home.push({
+						name: resultsName,
+						contents: getSearchResults(terms, $scope.home.slice(0,3))
+					});
+				}
+				else {
+					$scope.home[3] = {
+						name: resultsName,
+						contents: getSearchResults(terms, $scope.home.slice(0,3))
+					};
+				}
+				$scope.breadcrumbs = [resultsName];
+				$scope.toggleSearchbox(false);
+			}
+		}
+
+		function getSearchResults(terms, folder)
+		{
+			var regex = new RegExp(terms, 'i');
+			var ret = new SortedList(function(x){ return x.name; });
+
+			for(var i=0; i<folder.length; i++){
+				// add matching textures
+				if(folder[i].url && regex.test(folder[i].name)){
+					ret.insert(folder[i]);
+				}
+				else if(folder[i].contents){
+					ret.concat( getSearchResults(terms, folder[i].contents) );
+				}
+			}
+
+			return ret;
 		}
 	}]);
 

@@ -24,7 +24,7 @@ mixin mapbrowser_body
 					.glyphicon.glyphicon-plus
 				.button.search(title='Search', ng-click='toggleSearchbox()')
 					.glyphicon.glyphicon-search
-				input.searchbox(type='text', ng-keypress='hideOnEscape($event)')
+				input.searchbox(type='text', ng-keyup='handleSearchInput($event)')
 
 				.crumb.first.tiles(title='Thumbnails', ng-class='{active: view === "thumbnails"}', ng-click='view = "thumbnails"')
 					.glyphicon.glyphicon-th-large
