@@ -470,7 +470,7 @@ exports.world = function(req, res, next) {
                 res.redirect(global.appPath);
                 return;
             }
-            var instance = global.instances ? global.instances.get("/adl/sandbox" + "/" + req.params.page + "/") : false;
+            var instance = global.instances ? global.instances.get(worldID) : false;
             var anonymous = [];
             var users = [];
 
@@ -510,10 +510,18 @@ exports.world = function(req, res, next) {
     });
 };
 
+function NotHidden(inst){
+
+    if(inst.publishSettings !== undefined)
+       if(inst.publishSettings !== null) 
+            if(inst.publishSettings.hidden)
+            return false
+    return true
+};
+
 function ShowSearchPage(mode, req, res, next) {
     sessions.GetSessionData(req, function(sessionData) {
         function foundStates(allinstances) {
-
 
             var results = [];
 
@@ -534,7 +542,8 @@ function ShowSearchPage(mode, req, res, next) {
                     inst.id = i;
                     inst.shortid = i.substr("/adl/sandbox".length + 1, 16);
                     if (global.instances) {
-                        if (global.instances.get(i.replace(/_/g, "/")))
+                        if (global.instances.get(i))
+                            if (NotHidden(inst))
                             results.push(inst);
                     }
                 }
@@ -550,7 +559,8 @@ function ShowSearchPage(mode, req, res, next) {
                     inst.id = i;
                     inst.shortid = i.substr("/adl/sandbox".length + 1, 16);
                     if (inst.title.toLowerCase().indexOf(search) != -1 || inst.description.toLowerCase().indexOf(search) != -1 || inst.owner.toLowerCase().indexOf(search) != -1 || inst.shortid.toLowerCase().indexOf(search) != -1)
-                        results.push(inst);
+                        if (NotHidden(inst))
+                            results.push(inst);
                 }
                 results.sort(function(a, b) {
                     return Date.parse(b.created || b.lastUpdate) - Date.parse(a.created || a.lastUpdate);
@@ -570,6 +580,24 @@ function ShowSearchPage(mode, req, res, next) {
                     return Date.parse(b.created || b.lastUpdate) - Date.parse(a.created || a.lastUpdate);
                 });
             }
+
+
+            if (mode == 'hidden' && sessionData) {
+            if (sessionData.UID == 'admin') {
+                for (var i in allinstances) {
+                    var inst = allinstances[i];
+                    if (!inst) continue;
+                    inst.id = i;
+                    inst.shortid = i.substr("/adl/sandbox".length + 1, 16)
+                    if (NotHidden(inst) == false)
+                        results.push(inst);
+                }
+                results.sort(function(a, b) {
+                    return Date.parse(b.created || b.lastUpdate) - Date.parse(a.created || a.lastUpdate);
+                });
+            }
+            }
+
             if (mode == 'featured') {
                 for (var i in allinstances) {
                     var inst = allinstances[i];
@@ -577,7 +605,8 @@ function ShowSearchPage(mode, req, res, next) {
                     inst.id = i;
                     inst.shortid = i.substr("/adl/sandbox".length + 1, 16)
                     if (inst.featured)
-                        results.push(inst);
+                        if (NotHidden(inst))
+                            results.push(inst);
                 }
                 results.sort(function(a, b) {
                     return Date.parse(b.created || b.lastUpdate) - Date.parse(a.created || a.lastUpdate);
@@ -590,7 +619,8 @@ function ShowSearchPage(mode, req, res, next) {
                     if (!inst) continue;
                     inst.id = i;
                     inst.shortid = i.substr("/adl/sandbox".length + 1, 16)
-                    results.push(inst);
+                    if (NotHidden(inst))
+                        results.push(inst);
                 }
                 results.sort(function(a, b) {
                     return Date.parse(b.created || b.lastUpdate) - Date.parse(a.created || a.lastUpdate);
@@ -602,7 +632,8 @@ function ShowSearchPage(mode, req, res, next) {
                     if (!inst) continue;
                     inst.id = i;
                     inst.shortid = i.substr("/adl/sandbox".length + 1, 16)
-                    results.push(inst);
+                    if (NotHidden(inst))
+                        results.push(inst);
                 }
                 results.sort(function(a, b) {
                     return Date.parse(b.created || b.lastUpdate) - Date.parse(a.created || a.lastUpdate);
@@ -665,6 +696,8 @@ function ShowSearchPage(mode, req, res, next) {
             DAL.getStates(foundStates)
         if (mode == "my")
             DAL.searchStatesByUser(sessionData.UID, foundStates)
+        if (mode == "hidden")
+            DAL.getStates(foundStates)
         if (mode == "search")
             DAL.searchStates(search, foundStates)
     })
@@ -684,6 +717,9 @@ exports.allWorlds = function(req, res, next) {
 };
 exports.myWorlds = function(req, res, next) {
     ShowSearchPage('my', req, res, next);
+};
+exports.hidden = function(req, res, next) {
+    ShowSearchPage('hidden', req, res, next);
 };
 exports.featuredWorlds = function(req, res, next) {
     ShowSearchPage('featured', req, res, next);
