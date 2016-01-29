@@ -133,6 +133,13 @@
 			margin: 2px 0;
 		}
 
+		.texnotice {
+			background-color: #7D1E1E;
+			&.istex {
+				background-color: forestgreen;
+			}
+		}
+
 		input[type=text], textarea
 		{
 			&:not([disabled]) {
@@ -181,6 +188,9 @@
 			p#filename
 			{
 				font-size: 16px;
+				overflow-wrap: break-word;
+				max-width: 90%;
+				text-align: center;
 			}
 
 			input#fileInput

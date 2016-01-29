@@ -144,7 +144,7 @@ define(['./angular-app', './manageAssets'], function(app)
 					getSceneTextures();
 				});
 			},
-			autoOpen: true,
+			autoOpen: false,
 			modal: false,
 			height: 400,
 			width: 600,
