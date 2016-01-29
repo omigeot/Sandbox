@@ -9,7 +9,7 @@ mixin mapbrowser_body
 
 			.buttongroup(style='min-width: 175px;')
 				.button.back(title='Up one level', ng-click='breadcrumbs.splice(-1, 1)')
-					.glyphicon.glyphicon-level-up
+					.glyphicon.glyphicon-arrow-left
 
 				.buttongroup.breadcrumbs
 					.crumb.first(title='Home', ng-click='breadcrumbs = []'
@@ -31,7 +31,7 @@ mixin mapbrowser_body
 					.glyphicon.glyphicon-th-list
 
 
-		.folderview(ng-class='{thumbnails: view === "thumbnails", list: view === "list"}')
+		.folderview(ng-class='{thumbnails: view === "thumbnails", list: view === "list"}', adl-wheel='folderViewScroll(event)')
 
 			.viewitem(ng-repeat='item in followPath(breadcrumbs)', ng-click='itemClicked(item, breadcrumbs)', title='{{item.url}}')
 				.thumb

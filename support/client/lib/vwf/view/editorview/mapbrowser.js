@@ -120,7 +120,7 @@ define(['./angular-app', './manageAssets'], function(app)
 					getSceneTextures();
 				});
 			},
-			autoOpen: false,
+			autoOpen: true,
 			modal: false,
 			height: 400,
 			width: 600,
@@ -159,7 +159,7 @@ define(['./angular-app', './manageAssets'], function(app)
 		];
 
 		$scope.breadcrumbs = ['Server'];
-		$scope.view = 'thumbnails'; // or 'list'
+		$scope.view = 'list'; // or 'list'
 
 		$scope.followPath = function(crumbs, folder)
 		{
@@ -203,6 +203,11 @@ define(['./angular-app', './manageAssets'], function(app)
 					$('#MapBrowser').dialog('close');
 				}
 			});
+		}
+
+		$scope.folderViewScroll = function(evt)
+		{
+			
 		}
 	}]);
 
