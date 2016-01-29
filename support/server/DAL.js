@@ -482,8 +482,8 @@ function normalizePublishSettings(doc)
             if (doc.publishSettings.startPaused === undefined)
                 doc.publishSettings.startPaused = true;
 
-            if (doc.publishSettings.SinglePlayer === undefined)
-                doc.publishSettings.SinglePlayer = false;
+            if (doc.publishSettings.singlePlayer === undefined)
+                doc.publishSettings.singlePlayer = false;
 
             if (doc.publishSettings.camera === undefined)
                 doc.publishSettings.camera = null;

@@ -49,6 +49,17 @@ color: lightgray;
 <script type="text/javascript">
 	var sid = '{{sid}}'; 
 	var lastActiveCamera = "";
+
+	function getCameraList()
+	{
+		var data = $.ajax(root + '/vwfDataManager.svc/cameras?SID=' + sid, {
+			cache: false,
+			async:false
+		});
+		data = data.responseJSON || [];
+		data.unshift({id: "", name: "Editor Camera"});
+		return data;
+	}	
 	
 
 	function setting(key,description,defaultval,disabledVal,disabledBy)
@@ -109,12 +120,55 @@ color: lightgray;
 			}	
 			$(this.input).click(function()
 			{
+				this.value = !this.value;
+				this.settings[this.key] = this.value;
 				this.dirty();
 			}.bind(this))
 		}
 		this.val = function()
 		{
 			return $(this.input).prop('checked') == true;
+		}
+	}
+	function choiceSetting(key,description,defaultval,disabledVal,disabledBy,choices)
+	{
+		setting.call(this,key,description,defaultval,disabledVal,disabledBy);
+		this.choices = choices;
+		this.render = function(div)
+		{
+			if(this.div)
+				$(this.div).remove();
+
+			this.div = $("<div></div>").appendTo(div);
+			if(this.disabled())
+			{
+				this.value = this.disabledVal;
+				this.settings[this.key] = this.disabledVal;
+				$(this.div).prop('disabled',true);
+				$(this.div).css('opacity',.35);
+				$(this.div).css('pointer-events','none');
+			}
+			$(this.div).append("</br><div>"+this.description+"</div>")
+			this.input = $("<select></select>").appendTo(this.div);
+			for(var i in this.choices)
+			{
+				$('<option value="'+this.choices[i].id+'">' + this.choices[i].name +'</option>').appendTo(this.input);
+			}
+			
+			$(this.input).val(this.value);
+
+			$(this.input).change(function()
+			{
+				this.value = this.val();
+				this.settings[this.key] = this.value;
+				this.dirty();
+			}.bind(this))	
+			
+			
+		}
+		this.val = function()
+		{
+			return $(this.input).children("option:selected").prop('value');
 		}
 	}
 
@@ -160,10 +214,12 @@ color: lightgray;
 	settingsList.push(new boolSetting('allowTools',"Allow Tools",true,false,[]));
 	settingsList.push(new boolSetting('createAvatar',"Create Avatars",true,false,[]));
 	settingsList.push(new boolSetting('persistence',"Enable Persistance",true,false,[settingsList["singlePlayer"]]));
-	settingsList.push(new boolSetting('allowAnonymous',"Allow Anonymous",false,false,[settingsList["singlePlayer"]]));
+	settingsList.push(new boolSetting('allowAnonymous',"Allow Anonymous",false,true,[settingsList["singlePlayer"]]));
 	settingsList.push(new boolSetting('allowPlayPause',"Allow Play, Pause and Stop editing commands",true,false,[]));
 	settingsList.push(new boolSetting('startPaused',"Start the world in the stopped state",true,false,[not(settingsList["allowPlayPause"])]));
+	settingsList.push(new choiceSetting('camera',"Choose the default camera",true,false,[],getCameraList()));
 
+	var stateData;
 	$(document).ready(function()
 	{
 		
@@ -172,53 +228,11 @@ color: lightgray;
 			cache:false,
 			success:function(data,status,xhr)
 			{
-				var data = JSON.parse(xhr.responseText);
+				stateData = JSON.parse(xhr.responseText).publishSettings;
 				
-				rebuildSettings(data.publishSettings);
+				rebuildSettings(stateData);
 
 
-				/*
-				$('#txtInstanceName').val(data.title);
-				$('#worldtitle').text(data.title);
-				$('#txtInstanceDescription').val(data.description);
-				if(data.publishSettings)
-				{
-
-					$('#txtInstanceDescription').prop('disabled', false);
-					$('#chkSinglePlayer').prop('disabled', false);
-					$('#chkAllowTools').prop('disabled', false);
-					$('#chkAllowAnonymous').prop('disabled', false);
-					$('#chkCreateAvatar').prop('disabled', false);
-
-					
-
-					if(data.publishSettings.persistence)
-						$('#chkPersistence')[0].checked = true;
-					if(data.publishSettings.allowAnonymous)
-						$('#chkAllowAnonymous')[0].checked = true;
-					if(data.publishSettings.allowTools)
-						$('#chkAllowTools')[0].checked = true;
-					if(data.publishSettings.singlePlayer)
-						$('#chkSinglePlayer')[0].checked = true;
-					if(data.publishSettings.createAvatar)
-						$('#chkCreateAvatar')[0].checked = true;
-					if(data.publishSettings.camera)
-					{
-						lastActiveCamera = data.publishSettings.camera;
-						$('#txtCamera').val(lastActiveCamera);
-					}
-
-				   var checked = $('#chkSinglePlayer')[0].checked;
-				   if(checked)
-				   {
-				   	 $('#chkAllowAnonymous')[0].checked = true;
-				   	  $('#chkAllowAnonymous').prop('disabled', true);
-				   	  $('#chkPersistence')[0].checked = false;
-				   	  $('#chkPersistence').prop('disabled', true);
-				   }
-
-	
-				}*/
 			},
 			error:function(xhr,status,err)
 			{
@@ -226,97 +240,46 @@ color: lightgray;
 			}
 		});
 
-		// query cameras in the scene
-		vwfPortalModel.cameraList = ko.observableArray();
-		$.ajax(root + '/vwfDataManager.svc/cameras?SID=' + sid, {
-			cache: false,
-			success: function(data,status,xhr){
-				data.unshift({id: "", name: "Editor Camera"});
-				vwfPortalModel.cameraList(data);
-				$('#txtCamera').val(lastActiveCamera);
-			},
-			error: function(status,xhr,err){
-				$('#error').text("Error: " + xhr.responseText);
-				vwfPortalModel.cameraList([{id: "", name: "Editor Camera"}]);
-			}
-		});
-
-		/*
-
-		$('#txtInstanceName').prop('disabled', true);
-		$('#txtInstanceDescription').prop('disabled', true);
-		$('#chkDefaultCamera').prop('disabled', true);
-		$('#chkSinglePlayer').prop('disabled', true);
-		$('#chkAllowTools').prop('disabled', true);
-		$('#chkAllowAnonymous').prop('disabled', true);
-		$('#chkCreateAvatar').prop('disabled', true);
-
-		$('#chkSinglePlayer').click(
-		 function(e){
-		   var checked = ($(this).is(':checked'));
-		   if(checked)
-		   {
-		   	 $('#chkAllowAnonymous')[0].checked = true;
-		   	  $('#chkAllowAnonymous').prop('disabled', true);
-		   	  $('#chkPersistence')[0].checked = false;
-		   	  $('#chkPersistence').prop('disabled', true);
-		   }else
-		   {
-  			$('#chkAllowAnonymous').prop('disabled', false);
-  			$('#chkPersistence').prop('disabled', false);
-
-		   }
-		 }
-		);
-
-		ko.applyBindings(vwfPortalModel);*/
-	});	
-	function redirect()
-	{
-		window.location = root + '/world/' + sid.substr(sid.length-17, 16);
-	}
+		
 	
-	vwfPortalModel.handleEditButton = function(o, e){
-	
-		/*
-		var name = $('#txtInstanceName').val();
-		var des = $('#txtInstanceDescription').val();
-		
-		var statedata = {};
-
-		
-
-			statedata.title = name;
-			statedata.description = des;
-			statedata.SinglePlayer = $('#chkSinglePlayer')[0].checked;
-			statedata.camera = $('#txtCamera').val();
-			statedata.allowAnonymous = $('#chkAllowAnonymous')[0].checked;
-			statedata.createAvatar = $('#chkCreateAvatar')[0].checked;
-			statedata.allowTools = $('#chkAllowTools')[0].checked;
-			statedata.persistence = $('#chkPersistence')[0].checked;
-			statedata.allowPlayPause = $('#allowPlayPause')[0].checked;
-			statedata.startWorldPaused = $('#allowPlayPause')[0].checked;
-		
-		
-		jQuery.ajax(
+		function redirect()
 		{
-			type: 'POST',
-			url: root + '/vwfDataManager.svc/publish?SID='+sid,
-			data: JSON.stringify(statedata),
-			contentType: statedata ? "application/json; charset=utf-8" : "application/text; charset=utf-8",
-			success:function(data,status,xhr)
+			window.location = root + '/world/' + sid.substr(sid.length-17, 16);
+		}
+	
+		function handleEditButton (o, e){
+		
+			
+			
+			
+			jQuery.ajax(
 			{
-				redirect();
-			},
-			error:function(xhr,status,err)
-			{
-				
-				$('#error').text("Error: " + xhr.responseText);
-			},
-			dataType: "text"
-		});	
-		*/
-	};
+				type: 'POST',
+				url: root + '/vwfDataManager.svc/publish?SID='+sid,
+				data: JSON.stringify(stateData),
+				contentType: stateData ? "application/json; charset=utf-8" : "application/text; charset=utf-8",
+				success:function(data,status,xhr)
+				{
+					redirect();
+				},
+				error:function(xhr,status,err)
+				{
+					
+					$('#error').text("Error: " + xhr.responseText);
+				},
+				dataType: "text"
+			});	
+			
+			
+		}
+
+		$('#submit').click(function()
+		{
+			handleEditButton();
+		})
+	});	
+
+
 
 </script>
 
@@ -332,14 +295,17 @@ color: lightgray;
 			</div>
 
 
-		<form id='form' data-bind="submit:handleEditButton" >
+		<form id="form">
 
+			<legend> <span id="worldtitle"></span> World Settings</legend>
 			<fieldset style="width: 75%;text-align: left;margin-left: auto;margin-right: auto;">
-				<legend> <span id="worldtitle"></span> settings</legend>
+				
 
 			
-				<input type="submit" class='btn btn-default' style="margin-top:7px;"  value="Save"/>
+				
 			</fieldset>
+			<legend> </legend>
+			<input id="submit" type="button" class='btn btn-default' style="margin-top:7px;"  value="Save"/>
 		</form>
 	</div>
 </div>

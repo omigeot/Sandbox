@@ -872,15 +872,17 @@ function Publish(URL, SID, publishdata, response)
 		var publishSettings = null;
 		//The settings  for the published state. 
 		//have to handle these in the client side code, with some enforcement at the server
-		logger.debug(publishdata, 2);
+		logger.info(publishdata, 2);
 		if (publishdata)
 		{
-			var singlePlayer = publishdata.SinglePlayer;
+			var singlePlayer = publishdata.singlePlayer;
 			var camera = publishdata.camera;
 			var allowAnonymous = publishdata.allowAnonymous;
 			var createAvatar = publishdata.createAvatar;
 			var allowTools = publishdata.allowTools;
 			var persistence = publishdata.persistence;
+			var startPaused = publishdata.startPaused;
+			var allowPlayPause = publishdata.allowPlayPause;
 			publishSettings = {
 				singlePlayer: singlePlayer,
 				camera: camera,
@@ -888,6 +890,8 @@ function Publish(URL, SID, publishdata, response)
 				createAvatar: createAvatar,
 				allowTools: allowTools,
 				persistence: persistence,
+				allowPlayPause:allowPlayPause,
+				startPaused:startPaused
 			};
 		}
 		require('./reflector.js').closeInstance(SID);
@@ -910,8 +914,10 @@ function Publish(URL, SID, publishdata, response)
 				}
 				if (publishdata)
 				{
-					statedata.title = publishdata.title;
-					statedata.description = publishdata.description;
+					if(publishdata.title)
+						statedata.title = publishdata.title;
+					if(publishdata.description)
+						statedata.description = publishdata.description;
 					//Should not need to check permission again
 					DAL.updateInstance(newId, statedata, function()
 					{
