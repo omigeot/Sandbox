@@ -22,13 +22,15 @@ mixin mapbrowser_body
 			.buttongroup
 				.button.addByUrl(title='By URL', ng-click='loadByURL()')
 					.glyphicon.glyphicon-plus
-				.button.search(title='Search')
+				.button.search(title='Search', ng-click='toggleSearchbox()')
 					.glyphicon.glyphicon-search
+				input.searchbox(type='text', ng-keypress='hideOnEscape($event)')
 
 				.crumb.first.tiles(title='Thumbnails', ng-class='{active: view === "thumbnails"}', ng-click='view = "thumbnails"')
 					.glyphicon.glyphicon-th-large
 				.crumb.last.list(title='List', ng-class='{active: view === "list"}', ng-click='view = "list"')
 					.glyphicon.glyphicon-th-list
+
 
 
 		.folderview(ng-class='{thumbnails: view === "thumbnails", list: view === "list"}', redirect-scroll='view === "list"')

@@ -142,7 +142,8 @@ define(['./angular-app', './manageAssets'], function(app)
 			modal: false,
 			height: 400,
 			width: 600,
-			minWidth: 315
+			minWidth: 315,
+			closeOnEscape: false
 		});
 
 		function getSceneTextures()
@@ -216,6 +217,23 @@ define(['./angular-app', './manageAssets'], function(app)
 					$('#MapBrowser').dialog('close');
 				}
 			});
+		}
+
+		$scope.toggleSearchbox = function()
+		{
+			var searchbox = $('#MapBrowser input.searchbox');
+			if( !searchbox.hasClass('visible') ){
+				searchbox.addClass('visible');
+				searchbox.focus();
+			}
+			else {
+				searchbox.removeClass('visible');
+			}
+		}
+
+		$scope.hideOnEscape = function(evt){
+			console.log(evt);
+			evt.stopPropagation();
 		}
 	}]);
 

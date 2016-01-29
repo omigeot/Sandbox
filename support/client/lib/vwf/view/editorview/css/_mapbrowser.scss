@@ -77,6 +77,22 @@
 				border-bottom-right-radius: 3px;
 			}
 		}
+
+		input.searchbox
+		{
+			position: absolute;
+			right: 0px;
+			top: 45px;
+			opacity: 0.9;
+			color: black;
+			z-index: 1;
+			border-width: 2px;
+			display: none;
+
+			&.visible {
+				display: block;
+			}
+		}
 	}
 
 	// these styles always apply regardless of view mode
