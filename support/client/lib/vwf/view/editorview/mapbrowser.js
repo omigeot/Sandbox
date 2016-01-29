@@ -2,6 +2,24 @@
 
 define(['./angular-app', './manageAssets'], function(app)
 {
+	app.directive('redirectScroll', function()
+	{
+		return {
+			scope: {
+				'redirectScroll': '='
+			},
+			link: function($scope, elem, attrs)
+			{
+				$(elem).on('wheel', function(evt){
+					if($scope.redirectScroll){
+						evt.preventDefault();
+						elem[0].scrollLeft += evt.originalEvent.deltaY;
+					}
+				});
+			}
+		};
+	});
+
 	function SortedList(sampler){
 		this._sampler = sampler || function(x){ return x; };
 		this.length = 0;
@@ -177,11 +195,6 @@ define(['./angular-app', './manageAssets'], function(app)
 			}
 		};
 
-		/*$scope.getUID = function(item, crumbs)
-		{
-			return crumbs.slice(1).join('/') + '/' + item;
-		}*/
-
 		$scope.itemClicked = function(item, crumbs)
 		{
 			if(item.contents){
@@ -203,11 +216,6 @@ define(['./angular-app', './manageAssets'], function(app)
 					$('#MapBrowser').dialog('close');
 				}
 			});
-		}
-
-		$scope.folderViewScroll = function(evt)
-		{
-			
 		}
 	}]);
 

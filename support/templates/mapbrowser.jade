@@ -31,7 +31,7 @@ mixin mapbrowser_body
 					.glyphicon.glyphicon-th-list
 
 
-		.folderview(ng-class='{thumbnails: view === "thumbnails", list: view === "list"}', adl-wheel='folderViewScroll(event)')
+		.folderview(ng-class='{thumbnails: view === "thumbnails", list: view === "list"}', redirect-scroll='view === "list"')
 
 			.viewitem(ng-repeat='item in followPath(breadcrumbs)', ng-click='itemClicked(item, breadcrumbs)', title='{{item.url}}')
 				.thumb
