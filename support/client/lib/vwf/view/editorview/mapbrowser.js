@@ -84,7 +84,7 @@ define(['./angular-app', './manageAssets'], function(app)
 			{
 				$http.get('/sas/assets/by-meta/all-of'+
 					'?user_name=' + encodeURIComponent(_UserManager.GetCurrentUserName())+
-					//'&isTexture=true'+
+					'&isTexture=true'+
 					'&returns=id,name,width,height,thumbnail',
 					{}
 				).then(
