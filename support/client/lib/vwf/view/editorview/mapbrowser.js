@@ -183,8 +183,8 @@ define(['./angular-app', './manageAssets'], function(app)
 			{name: 'Server', contents: TexList.server}
 		];
 
-		$scope.breadcrumbs = ['Server'];
-		$scope.view = 'list'; // or 'list'
+		$scope.breadcrumbs = [];
+		$scope.view = 'thumbnails'; // or 'list'
 		$scope.searchTerms = '';
 
 		$scope.followPath = function(crumbs, folder)
