@@ -137,6 +137,7 @@
 		@include display-flex();
 		@include flex-wrap(wrap);
 		@include align-items(flex-start);
+		align-content: flex-start;
 		padding: 0 5px;
 		box-sizing: border-box;
 
