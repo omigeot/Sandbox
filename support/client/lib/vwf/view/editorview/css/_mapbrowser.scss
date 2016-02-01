@@ -14,6 +14,7 @@
 	{
 		@include display-flex();
 		@include justify-content(space-between);
+		@include flex-shrink(0);
 		margin-bottom: 8px;
 
 		.button, .crumb
@@ -98,8 +99,9 @@
 	// these styles always apply regardless of view mode
 	.folderview
 	{
-		width: 100%;
-		height: 100%;
+		/*width: 100%;
+		height: 100%;*/
+		@include flex-grow(1);
 		background-color: #1b1b1b;
 		border: outset $border 1px;
 		overflow: auto;
@@ -135,6 +137,7 @@
 		@include display-flex();
 		@include flex-wrap(wrap);
 		@include align-items(flex-start);
+		align-content: flex-start;
 		padding: 0 5px;
 		box-sizing: border-box;
 
