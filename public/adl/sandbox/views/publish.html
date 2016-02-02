@@ -24,6 +24,13 @@ background: white;
 font-weight: bold;
 color: lightgray;
 }
+.explanation
+{
+    color: grey;
+    border-left: 5px solid lightgray;
+    padding-left: 2em;
+    background: #eee;
+}
 
 @media (max-width: 607px){
 			.searchresult{
@@ -61,7 +68,16 @@ color: lightgray;
 		return data;
 	}	
 	
-
+	var explanations = {
+		singlePlayer:"Each user will have an independant session of the world. This settings is not compatible with perisitance or access control. The world will allow anonymous users.",
+		allowTools:"The editing user interface will be available. Ability to actually use the tools depends on whether or not the user is logged in and the Allow Anonymous settings.",
+		createAvatar:"An avatar will be created to represent each user who logs in.",
+		perisitance:"The world will be saved to the database whenever anyone joins or leaves, when the 'save now' button is clicked in the editor interface, or every few minutes. If this is disabled, no method can save the current state, and the world will reset to the last saved state when the last client disconnects.",
+		allowAnonymous:"Anonymous users will be able to edit the world with the editor tools if they are available, the anonymous users will have an avatar, and be able to interact with any game logic.",
+		hidden:"This world will be hidden from search results.",
+		allowPlayPause:"The world will be able to play and pause. Stopping the world will reset it to the last state created by the editor tools. This is only available if the editor tools are enabled. When disabled, the world will be editable while playing, and function more like a virtual world, and less like a game editor.",
+		startPaused:"The world will start in the paused state. If the tools are enabled and allowPlayPause is enabled, this is always true."
+	}
 	function setting(key,description,defaultval,disabledVal,disabledBy)
 	{
 		this.key = key;
@@ -77,6 +93,13 @@ color: lightgray;
 		this.render = function(div)
 		{
 			
+		}
+		this.renderExplanation = function(div)
+		{
+			//this.explanation = $("<div class='explanation'></div>").appendTo(div);
+			//$(this.explanation).text(explanations[this.key]);
+			$(div).prop('title',explanations[this.key])
+			$(div).tooltip({ track: true});
 		}
 		this.val = function()
 		{
@@ -104,7 +127,8 @@ color: lightgray;
 			if(this.div)
 				$(this.div).remove();
 
-			this.div = $("<div></div>").appendTo(div);
+			this.div = $("<div ></div>").appendTo(div);
+			this.renderExplanation(this.div);
 			if(this.disabled())
 			{
 				this.value = this.disabledVal;
@@ -211,12 +235,13 @@ color: lightgray;
 		}
 	}
 
-	settingsList.push(new boolSetting('singlePlayer',"Single Player",true,false,[]));
+	settingsList.push(new boolSetting('singlePlayer',"Single player",true,false,[]));
 	settingsList.push(new boolSetting('allowTools',"Allow Tools",true,false,[]));
 	settingsList.push(new boolSetting('createAvatar',"Create Avatars",true,false,[]));
 	settingsList.push(new boolSetting('persistence',"Enable Persistance",true,false,[settingsList["singlePlayer"]]));
 	settingsList.push(new boolSetting('allowAnonymous',"Allow Anonymous",false,true,[settingsList["singlePlayer"]]));
-	settingsList.push(new boolSetting('allowPlayPause',"Allow Play, Pause and Stop editing commands",true,false,[]));
+	settingsList.push(new boolSetting('hidden',"Hide in search results",false,false,[]));
+	settingsList.push(new boolSetting('allowPlayPause',"Allow Play, Pause and Stop editing commands",true,false,[not(settingsList.allowTools)]));
 	settingsList.push(new boolSetting('startPaused',"Start the world in the stopped state",true,false,[not(settingsList["allowPlayPause"])]));
 	settingsList.push(new choiceSetting('camera',"Choose the default camera",true,false,[],getCameraList()));
 
@@ -232,6 +257,7 @@ color: lightgray;
 				stateData = JSON.parse(xhr.responseText).publishSettings;
 				
 				rebuildSettings(stateData);
+				center();
 
 
 			},
