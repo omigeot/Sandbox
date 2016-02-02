@@ -494,6 +494,9 @@ function normalizePublishSettings(doc)
             if (doc.publishSettings.allowTools === undefined)
                 doc.publishSettings.allowTools = true;
 
+            if (doc.publishSettings.hidden === undefined)
+                doc.publishSettings.hidden = false;
+
             if (doc.publishSettings.persistence === undefined)
                 doc.publishSettings.persistence = true;
     return doc;        

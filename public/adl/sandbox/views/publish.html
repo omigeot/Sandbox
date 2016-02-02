@@ -138,6 +138,7 @@ color: lightgray;
 		{
 			if(this.div)
 				$(this.div).remove();
+					$('#chkHidden').prop('disabled', false);
 
 			this.div = $("<div></div>").appendTo(div);
 			if(this.disabled())
@@ -241,6 +242,7 @@ color: lightgray;
 		});
 
 		
+		$('#chkHidden').prop('disabled', true);
 	
 		function redirect()
 		{
