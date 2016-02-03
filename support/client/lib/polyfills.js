@@ -439,6 +439,14 @@ var fills = {
                 return Date.now() - nowOffset;
             }
         }
+        if (!window.performance.memory)
+        {
+           
+                window.performance.memory = {};
+                window.performance.memory.usedJSHeapSize = 0;
+                window.performance.memory.jsHeapSizeLimit = 0;
+                window.performance.memory.totalJSHeapSize = 0;
+        }
     },
     localStorage: function()
     {
