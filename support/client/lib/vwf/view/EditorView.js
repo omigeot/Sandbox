@@ -21,6 +21,7 @@ define([
 	"vwf/view/editorview/lib/alertify.js-0.3.9/src/alertify",
 	"vwf/view/editorview/angular-app",
 	"vwf/view/editorview/Menubar",
+    "vwf/view/editorview/avatarTools",
     "vwf/view/editorview/log",
 
 	// other things that need to be loaded first
@@ -55,7 +56,7 @@ define([
      "vwf/view/localization/translate",
      "vwf/view/editorview/lib/beautify.module.js"
 	//"vwf/view/editorview/panelEditor",
-], function(module, version, view,eventSource, alertify, angular_app, Menubar,log) {
+], function(module, version, view,eventSource, alertify, angular_app, Menubar,avatarTools,log) {
     return view.load(module, {
         // == Module Definition ====================================================================
         needTools: function()
@@ -119,6 +120,7 @@ define([
                     this.addManager(_WireEditor);
                     this.addManager(_Publisher);
                     this.addManager(_PhysicsEditor);
+                    window.avatarTools = avatarTools;
                 }
                 window._LocationTools = require("vwf/view/editorview/LocationTools").getSingleton();
                 window._UserManager = require("vwf/view/editorview/UserManager").getSingleton();

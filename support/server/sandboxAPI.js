@@ -1287,7 +1287,35 @@ function setState(URL, data, response)
 	});
 }
 
-
+function postAvatar(URL,body,response)
+{
+	if (!URL.loginData)
+	{
+		respond(response, 401, 'Anonymous users cannot post avatars');
+		return;
+	}
+	
+	var newDef = JSON.parse(body);
+	
+	DAL.updateUser(URL.loginData.UID,{avatarDef:newDef},function()
+    {
+        console.log('Avatar saved');
+        respond(response, 200, 'OK');
+        for(var i in global.instances.instances)
+        {
+        	
+        	for(var j in global.instances.instances[i].clients)
+        	{
+        		var client  = global.instances.instances[i].clients[j];
+        		
+        		if(client.loginData.UID == URL.loginData.UID)
+        		{
+        			client.trigger("avatarUpdated");
+        		}
+        	}
+        }
+    })
+}
 function setStateData(URL, data, response)
 {
 	if (!URL.loginData)
@@ -2037,6 +2065,11 @@ function serve(request, response)
 						Publish(URL, SID, body, response);
 					}
 					break;
+				case "avatar":
+					{
+						postAvatar(URL, body, response);
+					}
+					break;	
 				case "3drupload":
 					{
 						_3DR_proxy.proxyUpload(request, response, URL);

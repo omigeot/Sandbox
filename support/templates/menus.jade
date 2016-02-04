@@ -341,6 +341,10 @@ mixin menus_body
 						li: a#MenuAssets3DRBrowse(title="Search for and import remote assets from the 3D Repository", ng-click='lookUpHandler($event)')
 							.glyphicon.glyphicon-tree-deciduous
 							| Browse 3D Repository
+				li(ng-show='selection && loggedIn') 
+					a#MenuSetAvatar(title="Update your avatar record to be this entity", ng-click='lookUpHandler($event)')
+						.glyphicon.glyphicon-cloud-download
+						| Set Selection as Avatar			
 
 		li
 			a#MenuTools Tools

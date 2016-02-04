@@ -93,7 +93,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			},
 
 
-
+			MenuSetAvatar:function(e)
+			{
+				avatarTools.postAvatarDefinition()
+			},
 			SetThumbnail: function(e) {
 				window.setThumbnail(false);
 			},
