@@ -21,11 +21,11 @@ mixin menus_body
 					a#SetThumbnail(title="Take a screenshot and designate it as the public thumbnail", ng-click='lookUpHandler($event)')
 						.glyphicon.glyphicon-picture
 						| Set World Thumbnail
-				li(ng-class='{"disabled": isExample || !userIsOwner}')
+				li(ng-class='{"disabled": allowPlayPause && (isExample || !userIsOwner)}')
 					a#TestSettings(title="Change the publish settings of this world", ng-click='lookUpHandler($event)')
 						.glyphicon.glyphicon-globe
 						| World Settings (ctrl+9)
-				li(ng-class='{"disabled": worldIsNotLaunchable}')
+				li(ng-class='{"disabled": worldIsNotLaunchable && allowPlayPause}')
 					a#TestLaunch(title="Load the world as if it were published", ng-click='lookUpHandler($event)')
 						.glyphicon.glyphicon-play
 						| Play World (ctrl+0)

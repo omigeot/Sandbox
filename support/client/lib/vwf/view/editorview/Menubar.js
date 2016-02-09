@@ -39,6 +39,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			$scope.worldIsNotLaunchable = !($scope.worldIsPersistent && $scope.userIsOwner) || $scope.worldIsSinglePlayer || $scope.isExample;
 			$scope.worldHasTerrain = !!window._dTerrain;
 			$scope.hasContinuesFlag = /[?&]allowContinues/.test(window.location.search);
+			$scope.allowPlayPause = instanceData.allowPlayPause;
 
 			//console.log('UserIsOwner:', $scope.userIsOwner);
 		});
@@ -887,10 +888,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			},
 
 			TestSettings: function(e) {
+				if(window._Publisher)
 				_Publisher.show();
 			},
 
 			TestLaunch: function(e) {
+				if(window._Publisher)
 				_Publisher.testPublish();
 			},
 			MenuViewTabletDemo: function(e) {
