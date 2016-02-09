@@ -731,6 +731,13 @@ var sandboxState = function(id, metadata, world)
 
             }
         }
+        if(id == 'index-vwf' && name == "setClientCamera")
+        {
+            var clients = this.getProperty(id,"clients");
+            if(clients && clients[args[0][0]])
+                clients[args[0][0]].cameraID = args[0][1];
+            console.log(clients,args);
+        }
     }
     this.simulationStateUpdate = function(updates)
     {
