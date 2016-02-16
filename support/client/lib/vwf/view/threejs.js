@@ -1923,24 +1923,22 @@ define(["module", "vwf/view",'vwf/utility/eventSource',"vwf/view/threejs/viewNod
         };
         window.document.getElementById('index-vwf').onblur = function() {
 
-            for (var i in sceneView.keyStates.keysDown) {
-
-                var key = sceneView.keyStates.keysDown[i];
-                delete sceneView.keyStates.keysDown[i];
-                sceneView.keyStates.keysUp[key.key] = key;
-                sceneView.keyStates.key = key;
-                if (sceneNode) sceneView.kernel.dispatchEvent(getClientFocusNode(Engine.moniker()), "keyUp", [sceneView.keyStates]);
-            }
             var sceneNode = sceneView.state.scenes[sceneView.state.sceneRootID];
             if (sceneNode) {
-                //var params = JSON.stringify( sceneView.keyStates );
+                for (var i in sceneView.keyStates.keysDown) {
 
+                    var key = sceneView.keyStates.keysDown[i];
+                    delete sceneView.keyStates.keysDown[i];
+                    sceneView.keyStates.keysUp[key.key] = key;
+                    sceneView.keyStates.key = key;
+                    if (sceneNode) sceneView.kernel.dispatchEvent(getClientFocusNode(Engine.moniker()), "keyUp", [sceneView.keyStates]);
+                }
+               
+                for (var i in sceneView.keyStates.keysUp) {
 
-            }
-            for (var i in sceneView.keyStates.keysUp) {
+                    delete sceneView.keyStates.keysUp[i];
 
-                delete sceneView.keyStates.keysUp[i];
-
+                }
             }
 
         }
