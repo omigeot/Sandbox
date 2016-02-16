@@ -114,7 +114,7 @@ SceneManager.prototype.preRender = function(camera)
                 cullDistance *= SceneManager.cullScale;
                 cullDistance *= fov_adj;
                 var objectCenter = [o.matrixWorld.elements[12], o.matrixWorld.elements[13], o.matrixWorld.elements[14]];
-                if (MATH.distanceVec3(MATH.addVec3(objectCenter,o.boundsCache.center), cameraPos) > cullDistance)
+                if (MATH.distanceVec3(o.boundsCache.center, cameraPos) > cullDistance)
                 {
                     o.visible = false;
                     this.cullList.push(o);
