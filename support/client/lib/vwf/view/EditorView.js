@@ -21,6 +21,7 @@ define([
 	"vwf/view/editorview/lib/alertify.js-0.3.9/src/alertify",
 	"vwf/view/editorview/angular-app",
 	"vwf/view/editorview/Menubar",
+    "vwf/view/editorview/avatarTools",
 
 	// other things that need to be loaded first
 	"touch.js",
@@ -52,7 +53,7 @@ define([
 	"vwf/view/editorview/PerformanceManager",
 	"vwf/view/editorview/JSONPrompt"
 	//"vwf/view/editorview/panelEditor",
-], function(module, version, view, alertify, angular_app, Menubar) {
+], function(module, version, view, alertify, angular_app, Menubar,avatarTools) {
     return view.load(module, {
         // == Module Definition ====================================================================
         needTools: function()
@@ -113,6 +114,7 @@ define([
                     this.addManager(_WireEditor);
                     this.addManager(_Publisher);
                     this.addManager(_PhysicsEditor);
+                    window.avatarTools = avatarTools;
                 }
                 window._LocationTools = require("vwf/view/editorview/LocationTools").getSingleton();
                 window._UserManager = require("vwf/view/editorview/UserManager").getSingleton();

@@ -21,7 +21,7 @@ properties:
   motionStack: 
   activeCycle: 
   standingOnID: 
-  standingOnOffset: 
+  standingOnOffset: 0
   ___physics_activation_state: 4
   ___physics_deactivation_time: 0
   ___physics_velocity_linear: [ 0, 0, 0 ]
@@ -32,6 +32,8 @@ properties:
   ___physics_mass: 158.5
   animationPaused: false
   jumpcounter: 0
+  originalvelocity: 
+  standing: 0
 methods:
   tick:
   attached:
