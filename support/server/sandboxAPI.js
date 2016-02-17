@@ -5,7 +5,7 @@ var libpath = require('path'),
 	mime = require('mime'),
 	sio = require('socket.io'),
 	YAML = require('js-yaml'),
-	sass = require('node-sass'),
+	
 	async = require('async'),
 	imgSize = require('image-size');
 
