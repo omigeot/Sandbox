@@ -155,8 +155,7 @@ function startVWF() {
                 datapath = libpath.resolve(datapath,'.');
                 global.datapath = datapath;
                 global.configuration.datapath = datapath;
-                console.log(datapath);
-                logger.initFileOutput(datapath);
+               
 
                 p = process.argv.indexOf('-ls');
                 global.latencySim = p >= 0 ? parseInt(process.argv[p + 1]) : (global.configuration.latencySim ? global.configuration.latencySim : 0);
@@ -700,7 +699,13 @@ function startVWF() {
                 logger.info('DAL Startup');
                 DAL.startup(cb);
             },
+            function startLogging(cb)
+            {
+                logger.initFileOutput(global.configuration.datapath);
+                cb();
+            },
             function setSession(cb) {
+                
                 logger.info('Session Startup');
                 require('./sessions.js').sessionStartup(cb);
             },
