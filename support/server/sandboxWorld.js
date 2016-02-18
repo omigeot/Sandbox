@@ -870,7 +870,7 @@ function sandboxWorld(id, metadata)
                         "node": 'index-vwf',
                         member: 'PeerSelection',
                         parameters: [
-                            []
+                            [[]]
                         ],
                         "time": this.time,
                         client: client.id
