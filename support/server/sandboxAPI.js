@@ -1433,7 +1433,7 @@ function getState(SID, cb)
 		{
 			if (exists)
 			{
-				fs.readFile(statefile, 'utf8', function(err, file)
+				fs.readFile(statefile, 'binary', function(err, file)
 				{
 					var data;
 					try
