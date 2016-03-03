@@ -699,7 +699,7 @@ function ShowSearchPage(mode, req, res, next) {
             if(sessionData)
                 DAL.searchStatesByUser(sessionData.UID, foundStates)
             else
-                foundStates([]);
+                res.redirect("/");
         }
         if (mode == "hidden")
             DAL.getStates(foundStates)
