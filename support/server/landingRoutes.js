@@ -695,7 +695,12 @@ function ShowSearchPage(mode, req, res, next) {
         if (mode == "all" || mode == "new" || mode == "active")
             DAL.getStates(foundStates)
         if (mode == "my")
-            DAL.searchStatesByUser(sessionData.UID, foundStates)
+        {
+            if(sessionData)
+                DAL.searchStatesByUser(sessionData.UID, foundStates)
+            else
+                foundStates([]);
+        }
         if (mode == "hidden")
             DAL.getStates(foundStates)
         if (mode == "search")
