@@ -290,6 +290,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             $('#ContextMenuName').html((dispName || vwfnode || "{none selected}").escape());
             $('#ContextMenuName').attr('VWFID', vwfnode);
             $('#ContextMenu').show();
+            _RenderManager.flashHilight(findviewnode(vwfnode));
             $('#ContextMenu').css('z-index', '1000000');
             $('#ContextMenu').css('left', e.clientX + 'px');
             $('#ContextMenu').css('top', e.clientY + 'px');
@@ -3011,12 +3012,12 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
         }
         this.disableDueToWorldState =function()
         {
-            if(_DataManager.getInstanceData().publishSettings.allowPlayPause)
+            if(_DataManager.getInstanceData().publishSettings.allowPlayPause == true || _DataManager.getInstanceData().publishSettings.allowPlayPause == undefined)
             {
                 if (Engine.getProperty(Engine.application(), 'playMode') == 'play')
                     return true;
             }
-            false;
+            return false;
         }
         this.mouseup = function(e) {
             if (!toolsOpen()) return;
