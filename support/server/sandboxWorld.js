@@ -855,8 +855,9 @@ function sandboxWorld(id, metadata)
                 //send the message to the sender and to the receiver
                 if (textmessage.receiver)
                     self.clients[textmessage.receiver].emit('m', self.messageCompress.pack(message));
-                if (textmessage.sender)
-                    self.clients[textmessage.sender].emit('m', self.messageCompress.pack(message));
+              //this is no longer necessary, because the client predicts its own response
+              //  if (textmessage.sender)
+                //    self.clients[textmessage.sender].emit('m', self.messageCompress.pack(message));
                 internals.doReflect = false;
                 cb2(internals);
                 return internals;
