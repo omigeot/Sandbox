@@ -514,7 +514,7 @@ function NotHidden(inst){
 
     if(inst.publishSettings !== undefined)
        if(inst.publishSettings !== null) 
-            if(inst.publishSettings.hidden)
+            if(inst.publishSettings.hidden == true || inst.publishSettings.hidden == "true")
             return false
     return true
 };
@@ -620,7 +620,12 @@ function ShowSearchPage(mode, req, res, next) {
                     inst.id = i;
                     inst.shortid = i.substr("/adl/sandbox".length + 1, 16)
                     if (NotHidden(inst))
+                    {
                         results.push(inst);
+                    }else
+                    {
+                        console.log("world hidden")
+                    }
                 }
                 results.sort(function(a, b) {
                     return Date.parse(b.created || b.lastUpdate) - Date.parse(a.created || a.lastUpdate);
@@ -984,7 +989,7 @@ exports.handlePostRequest = function(req, res, next) {
                 delete data.hotState;
                 delete data.editVisible;
                 delete data.isVisible;
-
+                console.log(worldId,data);
                 DAL.updateInstance(worldId, data, function(e) {
                     res.end(e ? "done" : "error");
                 });

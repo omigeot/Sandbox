@@ -395,7 +395,7 @@ scripts:
 
       this.recordStandingOn = function(intersect) {
 
-
+        return;
         this.standingOnID = null;
         this.standingOnOffset = null
         if (!intersect) return;
