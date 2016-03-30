@@ -758,11 +758,13 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 									_Editor.loadMesh(val, 'subDriver/threejs/asset/vnd.gltf+json');
 								if (type == 'Three.js Native JSON')
 									_Editor.loadMesh(val, 'subDriver/threejs/asset/vnd.three.js+json');
+								if (type == 'Wavefront OBJ (.obj)')
+									_Editor.loadMesh(val, 'subDriver/threejs/asset/vnd.wavefront-obj');
 							}
 						}, 'http://');
 					}
 
-				}, ["Collada", "3DR JSON (http://3dr.adlnet.gov)", "glTF (v0.6) JSON", 'Three.js Native JSON'])
+				}, ["Collada", "3DR JSON (http://3dr.adlnet.gov)", "glTF (v0.6) JSON", 'Three.js Native JSON','Wavefront OBJ (.obj)'])
 
 			},
 
