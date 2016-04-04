@@ -181,10 +181,13 @@ var transformTool = function()
     }
     this.show = function()
     {
+        this.hidden = false;
         this.SetGizmoMode(this.GizmoMode)
     }
+    this.hidden = false;
     this.hide = function()
     {
+        this.hidden = true;
         while (this.getGizmoBody().children.length)
         {
             this.getGizmoBody().remove(this.getGizmoBody().children[this.getGizmoBody().children.length - 1])
@@ -192,7 +195,9 @@ var transformTool = function()
     }
     this.SetGizmoMode = function(type)
     {
+
         this.GizmoMode = type;
+        if(this.hidden) return;
         if (type == Move)
         {
             $('#StatusTransform').text('Move');

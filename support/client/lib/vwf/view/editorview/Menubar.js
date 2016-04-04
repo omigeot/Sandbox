@@ -39,6 +39,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			$scope.worldIsNotLaunchable = !($scope.worldIsPersistent && $scope.userIsOwner) || $scope.worldIsSinglePlayer || $scope.isExample;
 			$scope.worldHasTerrain = !!window._dTerrain;
 			$scope.hasContinuesFlag = /[?&]allowContinues/.test(window.location.search);
+			$scope.allowPlayPause = instanceData.allowPlayPause;
 
 			//console.log('UserIsOwner:', $scope.userIsOwner);
 		});
@@ -172,15 +173,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 			},
 
-			MenuLogOut: function(e) {
-				if ($('#MenuLogOut').attr('disabled') == 'disabled') return;
-
-				var path = window.location.pathname;
-
-				if(path.indexOf('example_blank') > 0) window.location = '/adl/sandbox/demos';
-				else if(path.indexOf('example_') > 0) window.location = '/adl/sandbox/examples';
-				else window.location = path.replace('/sandbox/', '/sandbox/world/');
-			},
+			
 			MenuSelectPick: function(e) {
 				_Editor.SetSelectMode('Pick');
 			},
@@ -464,10 +457,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 				_SceneManager.setShowRegions(!_SceneManager.getShowRegions());
 			},
 			MenuViewStats: function(e) {
-				if (window.stats.domElement.style.display == 'none')
-					window.stats.domElement.style.display = 'block';
+				if (_PerformanceManager.isOpen())
+					_PerformanceManager.hide()
 				else
-					window.stats.domElement.style.display = 'none';
+					_PerformanceManager.show()
 			},
 			MenuViewShadows: function(e) {
 				var val = !_Editor.findscene().children[1].castShadows;
@@ -706,6 +699,9 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			MenuCreateTSection: function(e) {
 				_Editor.CreatePrim('tsection', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
 			},
+			MenuCreateTurtle: function(e) {
+				_Editor.CreateTurtle('turtle', _Editor.GetInsertPoint(), [1, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
+			},
 			MenuCreateTerrain: function(e) {
 				if (!window._dTerrain)
 					_Editor.CreatePrim('terrain', [0, 0, 0], [1, 1, 1], 'checker.jpg', _UserManager.GetCurrentUserName(), '');
@@ -735,8 +731,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			MenuAssets3DRUpload: function(e) {
 				_ModelLibrary.showUpload();
 			},
-
-
+			MenuConsole:function()
+			{
+				logger.open();
+			},
 			MenuUndo: function(e) {
 				_UndoManager.undo();
 			},
@@ -760,11 +758,13 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 									_Editor.loadMesh(val, 'subDriver/threejs/asset/vnd.gltf+json');
 								if (type == 'Three.js Native JSON')
 									_Editor.loadMesh(val, 'subDriver/threejs/asset/vnd.three.js+json');
+								if (type == 'Wavefront OBJ (.obj)')
+									_Editor.loadMesh(val, 'subDriver/threejs/asset/vnd.wavefront-obj');
 							}
 						}, 'http://');
 					}
 
-				}, ["Collada", "3DR JSON (http://3dr.adlnet.gov)", "glTF (v0.6) JSON", 'Three.js Native JSON'])
+				}, ["Collada", "3DR JSON (http://3dr.adlnet.gov)", "glTF (v0.6) JSON", 'Three.js Native JSON','Wavefront OBJ (.obj)'])
 
 			},
 
@@ -890,10 +890,12 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			},
 
 			TestSettings: function(e) {
+				if(window._Publisher)
 				_Publisher.show();
 			},
 
 			TestLaunch: function(e) {
+				if(window._Publisher)
 				_Publisher.testPublish();
 			},
 			MenuViewTabletDemo: function(e) {
