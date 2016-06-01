@@ -283,6 +283,8 @@ viewInterpolationNode.prototype.interpolate = function(now, playmode)
 	var viewnode = this.threejsNode;
 	if(!viewnode)
 		return;
+	if(!this.threejsNode.getRoot)
+		return; 
 	var thispos = this.threejsNode.getRoot().matrixWorld.elements;
 	var _thispos = [thispos[12], thispos[13], thispos[14]];
 	var campos = _dView.getCamera().matrixWorld.elements;
