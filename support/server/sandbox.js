@@ -358,13 +358,16 @@ function startVWF() {
 
                         if(sass)
                         {
+
+                           
+
     						sass.render({
     							file: libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/Editorview.scss'),
     							includePaths: [libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/')],
     							outputStyle: 'compressed',
     							functions: {
     								'getImgPath()': function(){
-    									return new sass.types.String('vwf/view/editorview');
+    									return new sass.types.String('../vwf/view/editorview');
     								}
     							}
     						}, function(err,result){
