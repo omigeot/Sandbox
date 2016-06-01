@@ -53,6 +53,9 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 	app.service('MenuHandlers', function(){
 		var handlers =
 		{
+			MenuLogOut:function(e){
+				window.location = "/";
+			},
 			// hook up assets menu
 			MenuManageAssets: function(e){
 				$('#manageAssetsDialog').dialog('open');
