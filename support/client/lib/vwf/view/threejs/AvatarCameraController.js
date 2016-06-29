@@ -135,7 +135,7 @@ var AvatarCameraController = function()
             pos.z += this.totalz / 200 * this.zoom;
             findviewnode(_UserManager.GetAvatarForClientID(Engine.moniker()).id).traverse(function(o)
             {
-                if(o instanceof THREE.Mesh)
+                if(o instanceof THREE.Mesh && o.name !== "BoneSelectionHandle")
                     o.visible = true;
             })
         }
@@ -144,7 +144,7 @@ var AvatarCameraController = function()
             pos.z -= this.totalz / 2000;
             findviewnode(_UserManager.GetAvatarForClientID(Engine.moniker()).id).traverse(function(o)
             {
-                if(o instanceof THREE.Mesh)
+                if(o instanceof THREE.Mesh && o.name !== "BoneSelectionHandle")
                     o.visible = false;
             })
         }
