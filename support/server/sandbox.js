@@ -667,6 +667,16 @@ function startVWF() {
                     logger.warn("Building CSS. SASS is installed, so the CSS will be rebuilt on each request");
                     sass.render(
                     {
+
+                        /*file: libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/Editorview.scss'),
+                                includePaths: [libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/')],
+                                sourceComments: true,
+                                functions: {
+                                    'getImgPath()': function(){
+                                        return new sass.types.String('../vwf/view/editorview');
+                                    }
+                                }*/
+
                         file: libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/Editorview.scss'),
                         includePaths: [libpath.join(__dirname, '../client/lib/vwf/view/editorview/css/')],
                         outputStyle: 'compressed',
@@ -674,7 +684,7 @@ function startVWF() {
                         {
                             'getImgPath()': function()
                             {
-                                return new sass.types.String('vwf/view/editorview');
+                                return new sass.types.String('./vwf/view/editorview');
                             }
                         }
                     }, function(err, result)
