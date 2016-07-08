@@ -87,6 +87,23 @@ function interpolationQueue(length, default_val, id)
 }
 interpolationQueue.prototype.push = function(val)
 {
+	if(this.setCount === 0)
+	{
+		
+		for(var i = 0; i < this.length; i++)
+		{
+			this.values[i] = (val);
+			this.times[i] = (performance.now());
+		}
+		this.setCount = this.length;
+		return val;
+	}
+	if(this.values[this.values.length-1] == val)
+	{
+		this.times[this.times.length-1] = performance.now();
+		this.setCount++;
+		return val;
+	}
 	var oldval = this.values.shift();
 	this.times.shift();
 	this.values.push(val);
@@ -142,7 +159,7 @@ VectorQueue.prototype.push = function(val)
 	this.yQueue.push(val[1]);
 	this.zQueue.push(val[2]);
 	this.setCount++;
-	return oldval;
+	return [];
 }
 
 function QuaternionQueue(length, id)
@@ -159,7 +176,7 @@ QuaternionQueue.prototype._interpolate = function(time, sim)
 	var slope = Quaternion.scale(Quaternion.add(Y[len], Quaternion.negate(Y[len - 1], []), []), 1 / (X[len] - X[len - 1]), []); //(Y[len] - Y[len-1])/(X[len] - X[len-1]);
 	var dist = x - X[len];
 	var extrapolated = Quaternion.add(Y[len], Quaternion.scale(slope, dist, []), []);
-	var ret = Quaternion.slerp(this.interpolatedValues[len] || [0, 0, 0, 1], Y[len], .5, []);
+	var ret = Quaternion.slerp(this.interpolatedValues[len] || [0, 0, 0, 1], Y[len], .25, []);
 	return Quaternion.normalize(ret, []);
 }
 
@@ -246,15 +263,17 @@ viewInterpolationNode.prototype.setProperty = function(propertyName, propertyVal
 		this.properties[propertyName] = matCpy(propertyValue);
 		this.enabled = true;
 		this.lastUpdate = performance.now();
-		if (!this.isSimulating())
+		//if (!this.isSimulating())
 		{
 			this.pushTransform(matCpy(propertyValue));
 		}
 	}
 	if (propertyName == 'animationFrame')
 	{
+		this.enabled = true;
+		this.lastUpdate = performance.now();
 		this.properties[propertyName] = propertyValue;
-		if (!this.isSimulating())
+		//if (!this.isSimulating())
 		{
 			this.animationFrameQueue.push(propertyValue)
 		}
@@ -309,7 +328,7 @@ viewInterpolationNode.prototype.interpolate = function(now, playmode)
 				if (oldTransform)
 				{
 					oldTransform = matCpy(oldTransform);
-					//		this.pushTransform(oldTransform);
+					this.pushTransform(oldTransform);
 				}
 			}
 			var position = this.positionQueue.interpolate(now, simulating);
