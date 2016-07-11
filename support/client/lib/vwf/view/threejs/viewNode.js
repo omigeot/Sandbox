@@ -93,9 +93,10 @@ interpolationQueue.prototype.push = function(val)
 		for(var i = 0; i < this.length; i++)
 		{
 			this.values[i] = (val);
+			this.interpolatedValues[i] = val;
 			this.times[i] = (performance.now());
 		}
-		this.setCount = this.length;
+		this.setCount ++;	
 		return val;
 	}
 	if(this.values[this.values.length-1] == val)
@@ -183,6 +184,7 @@ QuaternionQueue.prototype._interpolate = function(time, sim)
 function viewInterpolationNode(id, childExtendsID, threejsNode, sim)
 {
 	this.id = id;
+	this._ready = false;
 	this.threejsNode = threejsNode;
 	this.childExtendsID = childExtendsID;
 	this.extends = childExtendsID;
@@ -200,6 +202,34 @@ function viewInterpolationNode(id, childExtendsID, threejsNode, sim)
 	this.oldPos = [0, 0, 0];
 	this.oldScale = [0, 0, 0];
 	this.oldQuat = [0, 0, 0, 0];
+}
+viewInterpolationNode.prototype.reset_interp = function()
+{
+	this._ready = true;
+	var t = this.getProperty('transform') || Engine.getPropertyFast(this.id, 'transform');
+	var a = this.getProperty('animationFrame') || Engine.getPropertyFast(this.id, 'animationFrame');
+	this.positionQueue.xQueue.setCount = 0;
+	this.positionQueue.yQueue.setCount = 0;
+	this.positionQueue.zQueue.setCount = 0;
+
+	this.scaleQueue.xQueue.setCount = 0;
+	this.scaleQueue.yQueue.setCount = 0;
+	this.scaleQueue.zQueue.setCount = 0;
+
+	this.scaleQueue.setCount = 0;
+	this.positionQueue.setCount = 0;
+	this.quaternionQueue.setCount = 0;
+
+	this.quaternionQueue.setCount = 0;
+	
+
+	this.animationFrameQueue.setCount = 0;
+	for(var i =0; i < 5; i++)
+	{
+		this.pushTransform(t)
+		this.animationFrameQueue.push(a);
+	}
+
 }
 viewInterpolationNode.prototype.setSim = function(v)
 {
@@ -294,7 +324,7 @@ viewInterpolationNode.prototype.interpolate = function(now, playmode)
 		this.enabled = false;
 	this.totalTime += now - (this.lastTime ? this.lastTime : now);
 	this.lastTime = now;
-	if (!this.enabled)
+	if (!this.enabled || this._ready === false)
 	{
 		this.totalTime = 0;
 		return;

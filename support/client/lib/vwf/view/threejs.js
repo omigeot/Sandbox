@@ -737,15 +737,20 @@ define(["module", "vwf/view", 'vwf/utility/eventSource', "vwf/view/threejs/viewN
                     this.setCamera_internal(args[1]);
                 }
             }
-            if (method == 'startSimulatingNode') {
+            else if (method == 'ready' || method == 'reset_interp') {
+                var node = this.nodes[id];
+                if (!node) return;
+                node.reset_interp();
+            }
+            else if (method == 'startSimulatingNode') {
                 if (this.nodes[args])
                     this.nodes[args].setSim(true);
             }
-            if (method == 'stopSimulatingNode') {
+            else if (method == 'stopSimulatingNode') {
                 if (this.nodes[args])
                     this.nodes[args].setSim(false);
             }
-            if (id == Engine.application() && method == 'cameraShareInfo') {
+            else if (id == Engine.application() && method == 'cameraShareInfo') {
                 if (this.receiveSharedCamera) {
                     this.setCamera();
                     this.getCamera().matrixAutoUpdate = false;
@@ -754,7 +759,7 @@ define(["module", "vwf/view", 'vwf/utility/eventSource', "vwf/view/threejs/viewN
 
                 }
             }
-            if (id == Engine.application() && method == 'startCameraShare') {
+            else if (id == Engine.application() && method == 'startCameraShare') {
                 if (!this.receiveSharedCamera && Engine.moniker() !== args[0]) {
                     var self = this;
                     alertify.confirm('A user would like to share their camera view. Accept?', function(ok) {
@@ -764,7 +769,7 @@ define(["module", "vwf/view", 'vwf/utility/eventSource', "vwf/view/threejs/viewN
                     })
                 }
             }
-            if (id == Engine.application() && method == 'stopCameraShare') {
+            else if (id == Engine.application() && method == 'stopCameraShare') {
                 this.receiveSharedCamera = false;
                 //   require("vwf/view/threejs/editorCameraController").getController('Orbit').orbitPoint(newintersectxy);
                 require("vwf/view/threejs/editorCameraController").setCameraMode('Orbit');

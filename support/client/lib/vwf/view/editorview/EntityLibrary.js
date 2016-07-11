@@ -530,6 +530,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 		else if (data.type == 'child')
 		{
 			var ID = GetPick(evt);
+			if(!ID) ID = _Editor.GetSelectedVWFID();
 			if (ID) {
 				$.getJSON(data.url, function(proto) {
 					//very important to clean the node! Might have accidently left a name or id in the libarary
@@ -555,6 +556,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 		else if (data.type == 'material')
 		{
 			var ID = GetPick(evt);
+			if(!ID) ID = _Editor.GetSelectedVWFID();
 			if (ID) {
 				$.getJSON(data.url, function(proto) {
 					proto.sourceAssetId = data.sourceAssetId;
@@ -565,6 +567,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 		else if( data.type === 'texture' )
 		{
 			var ID = GetPick(evt);
+			if(!ID) ID = _Editor.GetSelectedVWFID();
 			if(ID){
 				var mat = {
 					"color": {"r": 1,"g": 1,"b": 1},
