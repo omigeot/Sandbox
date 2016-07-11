@@ -386,6 +386,7 @@ var transformTool = function()
         tgizpos[2] = this.getGizmoHead().matrixWorld.elements[14];
         var campos = _Editor.getCameraPosition();
         var dist = MATH.lengthVec3(Vec3.subtract(tgizpos, campos, tempvec1));
+        dist = Math.max(dist,.0001); //prevent 0 dist thus 0 scale thus NANs in matrix
         var cam = _Editor.findcamera();
         cam.updateMatrixWorld(true);
         var fovadj = cam.fov / 75;
