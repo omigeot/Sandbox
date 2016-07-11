@@ -298,7 +298,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 		var ray = _Editor.GetWorldPickRay(evt.originalEvent);
 		var o = _Editor.getCameraPosition();
 		var hit = _SceneManager.CPUPick(o, ray, {
-			ignore: [_Editor.GetMoveGizmo()]
+			ignore: [_Editor.GetMoveGizmo().getGizmoHead()]
 		});
 
 		if(hit)
@@ -309,7 +309,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			return object.vwfID;
 		}
 		else
+		{
+			debugger;
 			return null;
+		}
 	}
 
 	function toGMat(threemat)
