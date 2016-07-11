@@ -1803,6 +1803,12 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                 return Mat4.createIdentity();
             return mat;
         }
+        this.getWorldTransform = function(id) {
+            var mat = Engine.getProperty(id, 'worldTransform');
+            if(!mat)
+                return Mat4.createIdentity();
+            return mat;
+        }
         this.getTranslation = function(id) {
             var mat = Engine.getProperty(id, 'worldTransform');
             if(!mat) return [0,0,0];
@@ -1844,6 +1850,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
 
         this.getScaleCallback = this.getScale;
         this.getTransformCallback = this.getTransform;
+        this.getWorldTransformCallback = this.getWorldTransform;
         this.getTranslationCallback = this.getTranslation;
 
         this.updateGizmoOrientation = function() {

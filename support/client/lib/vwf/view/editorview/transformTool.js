@@ -463,11 +463,11 @@ var transformTool = function()
             for (var i = 0; i < _Editor.getSelectionCount(); i++)
             {
                 var ID = _Editor.GetSelectedVWFID(i);
-                var transform = Engine.getProperty(ID, 'worldTransform');
+                var transform = _Editor.getWorldTransformCallback(ID)
                 var translation = [transform[12], transform[13], transform[14]]
                 this.mouseDownOffsets[ID] = MATH.subVec3(this.getPosition(), translation)
                 this.mouseDownTransforms[ID] = _Editor.getTransformCallback(ID)
-                this.mouseDownWorldTransforms[ID] = Engine.getProperty(ID, 'worldTransform');
+                this.mouseDownWorldTransforms[ID] = _Editor.getWorldTransformCallback(ID)
                 this.mouseDownWorldTransforms[findviewnode(ID).parent.uuid] = matCpy(findviewnode(ID).parent.matrixWorld.elements)
             }
             var worldRay = _Editor.GetWorldPickRay(e);
