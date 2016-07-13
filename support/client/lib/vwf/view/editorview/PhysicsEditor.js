@@ -382,8 +382,9 @@ define(["vwf/view/editorview/panelEditor"], function() {
         this.clearPreview = function() {
             //release all held memory
             this.dispose(this.physicsPreviewRoot);
-            for (var i in this.physicsPreviewRoot.children) {
-                this.physicsPreviewRoot.remove(this.physicsPreviewRoot.children[i]);
+            var len = this.physicsPreviewRoot.children.length;
+            for (var i =0; i < len ; i++) {
+                this.physicsPreviewRoot.remove(this.physicsPreviewRoot.children[0]);
             }
         }
         this.clearWorldPreview = function() {
