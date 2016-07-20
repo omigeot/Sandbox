@@ -353,6 +353,8 @@ define(["vwf/view/editorview/panelEditor"], function() {
             //find and select the current value in the dropdown
 
             var selectedindex = values.indexOf(Engine.getProperty(nodeid, propertyName));
+            if(selectedindex == -1)
+                selectedindex = 0;
             var selectedLabel = labels[selectedindex];
             $("select option").filter(function() {
                 //may want to use $.trim in here
