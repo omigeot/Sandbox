@@ -259,6 +259,7 @@ viewInterpolationNode.prototype.tick = function()
 }
 viewInterpolationNode.prototype.pushTransform = function(newTransform)
 {
+	if(!newTransform) return;
 	var mat = viewInterpolationNode.tempmat;
 	mat.elements.set(newTransform);
 	var tempvec1 = viewInterpolationNode.tempvec1;
