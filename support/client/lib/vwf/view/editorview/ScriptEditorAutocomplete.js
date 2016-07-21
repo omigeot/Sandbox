@@ -408,6 +408,7 @@ define(['./angular-app'], function(app)
         //hide or show the function top based on the inputs
         this.methodEditor.on('change', function(e)
         {
+            
             self.autoComplete(self.methodEditor);
             self.triggerFunctionTip(self.methodEditor);
 
