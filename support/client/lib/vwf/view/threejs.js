@@ -1303,6 +1303,8 @@ define(["module", "vwf/view", 'vwf/utility/eventSource', "vwf/view/threejs/viewN
 
             if (self.interpolateTransforms)
                 self.restoreTransforms();
+            else
+                _dScene.updateMatrixWorld();
 
             self.restoreViewTransformOverrides(timepassed);
 

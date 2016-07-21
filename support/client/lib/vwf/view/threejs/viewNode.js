@@ -310,7 +310,7 @@ viewInterpolationNode.prototype.interpolate = function(now, playmode)
 				if (oldTransform)
 				{
 					oldTransform = matCpy(oldTransform);
-					//		this.pushTransform(oldTransform);
+							this.pushTransform(oldTransform);
 				}
 			}
 			var position = this.positionQueue.interpolate(now, simulating);
@@ -328,7 +328,7 @@ viewInterpolationNode.prototype.interpolate = function(now, playmode)
 			//viewnode.backupTransforms(this.getProperty('animationFrame'));
 			if (qt)
 			{
-				//	this.animationFrameQueue.push(this.getProperty('animationFrame'));
+					this.animationFrameQueue.push(this.getProperty('animationFrame'));
 			}
 			var newFrame = this.animationFrameQueue.interpolate(now, simulating);
 			if (ANIMATION_SMOOTH_DIST > dist)
