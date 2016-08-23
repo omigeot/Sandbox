@@ -765,8 +765,13 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 			$('#vwf-root').hide();
 			$('#ScriptEditor').addClass('maximized');
 
+			try{
 			var evt = new Event('viewportresize');
-			document.dispatchEvent(evt);
+				document.dispatchEvent(evt);
+			}catch(e)
+			{
+				
+			}
 
 			$scope.maximized = true;
 		}
@@ -774,8 +779,13 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 			$('#vwf-root').show();
 			$('#ScriptEditor').removeClass('maximized');
 
+			try{
 			var evt = new Event('viewportresize');
-			document.dispatchEvent(evt);
+				document.dispatchEvent(evt);
+			}catch(e)
+			{
+
+			}
 
 			$scope.maximized = false;
 		}
