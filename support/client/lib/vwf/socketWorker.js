@@ -19,7 +19,14 @@ var totalMessagesDecoded = 0;
 var totalMessagesEncoded = 0;
 var totalEncodeTime = 0;
 var totalDecodeTime = 0;
-
+if(!self.performance)
+{
+	var performance = {
+		now:function(){
+			return Date.now();
+		}
+	}
+}
 
 //generate the ticks locally, but not on the main thread - which will suspend the timer if the window minimizes
 var EngineProxy = {
