@@ -129,9 +129,9 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
         var CurrentZ = [0, 0, 1];
         var CurrentY = [0, 1, 0];
         var CurrentX = [1, 0, 0];
-        var RotateSnap = 5 * 0.0174532925;
-        var MoveSnap = .25;
-        var ScaleSnap = .15;
+        var RotateSnap = .005 * 0.0174532925;
+        var MoveSnap = .0025;
+        var ScaleSnap = .0015;
         var oldxrot = 0;
         var oldyrot = 0;
         var oldzrot = 0;
@@ -3037,9 +3037,24 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
         this.mousemove = function(e) {
             if (!toolsOpen()) return;
             if (_Editor.disableDueToWorldState()) return;
-            if (this.activeTool && this.activeTool.mousemove) this.activeTool.mousemove(e);
+            if (this.activeTool && this.activeTool.mousemove)
+            {
+                //we really need to throttle mouse move updates, because it creates huge amounts of traffic
+                if(!this.lastMouseMove)
+                    this.lastMouseMove = performance.now();
+
+                //throttle to 20hz
+                if(performance.now() - this.lastMouseMove > 50)
+                {
+                    this.lastMouseMove = performance.now();
+                    this.activeTool.mousemove(e);      
+                }    
+
+                
+            } 
         }
         this.mousewheel = function(e) {
+            return;
             if (!toolsOpen()) return;
             if (_Editor.disableDueToWorldState()) return;
             if (this.activeTool && this.activeTool.mousewheel) this.activeTool.mousewheel(e);

@@ -687,10 +687,15 @@ var transformTool = function()
                 var newLocalmat = new THREE.Matrix4();
                 newLocalmat.multiplyMatrices(ptmatInv, wtmat);
                 var newt = newLocalmat.elements;
+                //really need to swap this from float32array to js array
+                var newta = [];
+                for(var j =0; j<16; j++)
+                    newta[j] = newt[j];
+
                 if (TESTING)
                     Engine.setProperty(_Editor.GetSelectedVWFID(i), 'transform', newt);
                 else
-                    var ok = _Editor.setTransformCallback(_Editor.GetSelectedVWFID(i), newt);
+                    var ok = _Editor.setTransformCallback(_Editor.GetSelectedVWFID(i), newta);
                // _dView.setViewTransformOverride(_Editor.GetSelectedVWFID(i), newt);
             }
         }

@@ -687,13 +687,16 @@ define(['progressScreen','nodeParser','vwf/utility/eventSource'], function(progr
                             //must be careful here to be async, otherwise code is sometimes synchronous and sometimes not
                             (function(fields)
                             {
-                                window.setImmediate(function()
-                                {
+                                //NOTE:sometime in the last year or so, the postmessage polyfill for set immediate 
+                                //no longer sets immediately. There is sometimes a large delay. Running this synchronously is 
+                                //easy and fast, but logically a problem. Can we have the socketWorker loopback itself?
+                              //  window.setImmediate(function()
+                              //  {
                                     Engine.localReentryStack++
                                         queue.insert(fields);
                                     if (Engine.localReentryStack > 2)
                                         Engine.localReentryStack--;
-                                })
+                              //  })
                             })(fields);
                         }
                     }
