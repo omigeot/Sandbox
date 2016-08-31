@@ -184,7 +184,7 @@ QuaternionQueue.prototype._interpolate = function(time, sim)
 function viewInterpolationNode(id, childExtendsID, threejsNode, sim)
 {
 	this.id = id;
-	this._ready = false;
+	this._ready = true;
 	this.threejsNode = threejsNode;
 	this.childExtendsID = childExtendsID;
 	this.extends = childExtendsID;
