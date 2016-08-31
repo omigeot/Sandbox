@@ -1057,7 +1057,7 @@ define(["module", "vwf/view", 'vwf/utility/eventSource', "vwf/view/threejs/viewN
             self.trigger('prerender', vpargs);
             self.updateGlyphs(null, vp, wh, ww);
             if (window._SceneManager)
-                _SceneManager.preRender(cam);
+                _SceneManager.preRender(cam,ww);
             var keys = Object.keys(Engine.models[0].model.nodes);
             for (var j = 0; j < keys.length; j++) {
                 var i = keys[j];
