@@ -437,7 +437,7 @@ var transformTool = function()
             for (var i = 0; i < _Editor.getSelectionCount(); i++)
             {
                 var undo = new _UndoManager.SetPropertyEvent(_Editor.GetSelectedVWFID(i), 'transform', Engine.getProperty(_Editor.GetSelectedVWFID(i), 'transform'));
-                undo.oldval = this.mouseDownTransforms[_Editor.GetSelectedVWFID(i)];
+                undo.oldval = this.mouseDownRawTransforms[_Editor.GetSelectedVWFID(i)];
                 this.masterUndoRecord.push(undo);
             }
             _UndoManager.pushEvent(this.masterUndoRecord);
@@ -462,6 +462,7 @@ var transformTool = function()
             this.masterUndoRecord = new _UndoManager.CompoundEvent();
             this.mouseDownCoordSystem = this.coordSystem.clone();
             this.mouseDownTransforms = {};
+            this.mouseDownRawTransforms = {};
             this.mouseDownWorldTransforms = {};
             this.mouseDownGizScale = MATH.lengthVec3([this.getGizmoBody().matrix.elements[0], this.getGizmoBody().matrix.elements[1], this.getGizmoBody().matrix.elements[2]])
             for (var i = 0; i < _Editor.getSelectionCount(); i++)
@@ -471,6 +472,7 @@ var transformTool = function()
                 var translation = [transform[12], transform[13], transform[14]]
                 this.mouseDownOffsets[ID] = MATH.subVec3(this.getPosition(), translation)
                 this.mouseDownTransforms[ID] = _Editor.getTransformCallback(ID)
+                this.mouseDownRawTransforms[ID] = Engine.getProperty(ID, 'transform');
                 this.mouseDownWorldTransforms[ID] = Engine.getProperty(ID, 'worldTransform');
                 this.mouseDownWorldTransforms[findviewnode(ID).parent.uuid] = matCpy(findviewnode(ID).parent.matrixWorld.elements)
             }
