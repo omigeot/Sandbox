@@ -87,6 +87,24 @@ function interpolationQueue(length, default_val, id)
 }
 interpolationQueue.prototype.push = function(val)
 {
+	if(this.setCount === 0)
+	{
+		
+		for(var i = 0; i < this.length; i++)
+		{
+			this.values[i] = (val);
+			this.interpolatedValues[i] = val;
+			this.times[i] = (performance.now());
+		}
+		this.setCount ++;	
+		return val;
+	}
+	if(this.values[this.values.length-1] == val)
+	{
+		this.times[this.times.length-1] = performance.now();
+		this.setCount++;
+		return val;
+	}
 	var oldval = this.values.shift();
 	this.times.shift();
 	this.values.push(val);
@@ -159,13 +177,14 @@ QuaternionQueue.prototype._interpolate = function(time, sim)
 	var slope = Quaternion.scale(Quaternion.add(Y[len], Quaternion.negate(Y[len - 1], []), []), 1 / (X[len] - X[len - 1]), []); //(Y[len] - Y[len-1])/(X[len] - X[len-1]);
 	var dist = x - X[len];
 	var extrapolated = Quaternion.add(Y[len], Quaternion.scale(slope, dist, []), []);
-	var ret = Quaternion.slerp(this.interpolatedValues[len] || [0, 0, 0, 1], Y[len], .5, []);
+	var ret = Quaternion.slerp(this.interpolatedValues[len] || [0, 0, 0, 1], Y[len], .25, []);
 	return Quaternion.normalize(ret, []);
 }
 
 function viewInterpolationNode(id, childExtendsID, threejsNode, sim)
 {
 	this.id = id;
+	this._ready = false;
 	this.threejsNode = threejsNode;
 	this.childExtendsID = childExtendsID;
 	this.extends = childExtendsID;
@@ -183,6 +202,34 @@ function viewInterpolationNode(id, childExtendsID, threejsNode, sim)
 	this.oldPos = [0, 0, 0];
 	this.oldScale = [0, 0, 0];
 	this.oldQuat = [0, 0, 0, 0];
+}
+viewInterpolationNode.prototype.reset_interp = function()
+{
+	this._ready = true;
+	var t = this.getProperty('transform') || Engine.getPropertyFast(this.id, 'transform');
+	var a = this.getProperty('animationFrame') || Engine.getPropertyFast(this.id, 'animationFrame');
+	this.positionQueue.xQueue.setCount = 0;
+	this.positionQueue.yQueue.setCount = 0;
+	this.positionQueue.zQueue.setCount = 0;
+
+	this.scaleQueue.xQueue.setCount = 0;
+	this.scaleQueue.yQueue.setCount = 0;
+	this.scaleQueue.zQueue.setCount = 0;
+
+	this.scaleQueue.setCount = 0;
+	this.positionQueue.setCount = 0;
+	this.quaternionQueue.setCount = 0;
+
+	this.quaternionQueue.setCount = 0;
+	
+
+	this.animationFrameQueue.setCount = 0;
+	for(var i =0; i < 5; i++)
+	{
+		this.pushTransform(t)
+		this.animationFrameQueue.push(a);
+	}
+
 }
 viewInterpolationNode.prototype.setSim = function(v)
 {
@@ -212,6 +259,7 @@ viewInterpolationNode.prototype.tick = function()
 }
 viewInterpolationNode.prototype.pushTransform = function(newTransform)
 {
+	if(!newTransform) return;
 	var mat = viewInterpolationNode.tempmat;
 	mat.elements.set(newTransform);
 	var tempvec1 = viewInterpolationNode.tempvec1;
@@ -246,15 +294,17 @@ viewInterpolationNode.prototype.setProperty = function(propertyName, propertyVal
 		this.properties[propertyName] = matCpy(propertyValue);
 		this.enabled = true;
 		this.lastUpdate = performance.now();
-		if (!this.isSimulating())
+		//if (!this.isSimulating())
 		{
 			this.pushTransform(matCpy(propertyValue));
 		}
 	}
 	if (propertyName == 'animationFrame')
 	{
+		this.enabled = true;
+		this.lastUpdate = performance.now();
 		this.properties[propertyName] = propertyValue;
-		if (!this.isSimulating())
+		//if (!this.isSimulating())
 		{
 			this.animationFrameQueue.push(propertyValue)
 		}
@@ -275,7 +325,7 @@ viewInterpolationNode.prototype.interpolate = function(now, playmode)
 		this.enabled = false;
 	this.totalTime += now - (this.lastTime ? this.lastTime : now);
 	this.lastTime = now;
-	if (!this.enabled)
+	if (!this.enabled || this._ready === false)
 	{
 		this.totalTime = 0;
 		return;
@@ -283,8 +333,7 @@ viewInterpolationNode.prototype.interpolate = function(now, playmode)
 	var viewnode = this.threejsNode;
 	if(!viewnode)
 		return;
-	if(!this.threejsNode.getRoot)
-		return; 
+	if(!this.threejsNode.getRoot) return;
 	var thispos = this.threejsNode.getRoot().matrixWorld.elements;
 	var _thispos = [thispos[12], thispos[13], thispos[14]];
 	var campos = _dView.getCamera().matrixWorld.elements;
@@ -320,6 +369,7 @@ viewInterpolationNode.prototype.interpolate = function(now, playmode)
 			{
 			this.tempmat.compose(viewInterpolationNode.tempvec1.set(position[0], position[1], position[2]), viewInterpolationNode.tempquat.set(rotation[0], rotation[1], rotation[2], rotation[3]), viewInterpolationNode.tempvec2.set(scale[0], scale[1], scale[2]))			
 			viewnode.setTransformInternal(this.tempmat.elements, false);
+			
 			}
 		}
 		if (viewnode.setAnimationFrameInternal)
@@ -354,6 +404,7 @@ viewInterpolationNode.prototype.restore = function()
 		{
 			oldTransform = matCpy(oldTransform);
 			viewnode.setTransformInternal(oldTransform, false);
+			
 		}
 	}
 	if (viewnode.setAnimationFrameInternal)
