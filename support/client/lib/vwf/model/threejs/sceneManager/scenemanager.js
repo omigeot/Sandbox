@@ -115,8 +115,8 @@ SceneManager.prototype.preRender = function(camera,ww)
         for (var i in region.childObjects)
         {
             var o = region.childObjects[i];
-            if (!o.boundsCache)
-                o.boundsCache = o.GetBoundingBox(true).transformBy(o.getModelMatrix(SceneManager.tempmat));
+            //if (!o.boundsCache)
+                o.boundsCache = o.GetBoundingBox(false).transformBy(o.getModelMatrix(SceneManager.tempmat));
             if(o.visible && o.frustumCulled)
             {
                 var size = MATH.distanceVec3(o.boundsCache.min,o.boundsCache.max);
