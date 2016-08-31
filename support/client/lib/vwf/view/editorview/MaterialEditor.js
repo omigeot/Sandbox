@@ -313,7 +313,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 
 				// update the value when sliding
 				slider.on('slide', function(evt, ui){
-					var fn = $scope.change();
+				//	var fn = $scope.change();
 					var changedIndex = undefined;
 
 					if(rangeMode){
@@ -324,7 +324,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 					else $scope.mantissa = ui.value;
 					$scope.$apply();
 
-					if(fn) fn(changedIndex);
+					//if(fn) fn(changedIndex);
 				});
 
 				// update sliding status
