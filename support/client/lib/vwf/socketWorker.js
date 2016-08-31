@@ -175,15 +175,19 @@ onmessage = function(e)
 	if (message.type == SEND)
 	{
 		// Send the message.
+		var compressedMessage;
 		if (message.message.constructor !== String)
 		{
 			var now = performance.now();
-			message.message = messageCompress.pack(message.message);
+			compressedMessage = messageCompress.pack(message.message);
 			totalEncodeTime += performance.now() - now;
 			totalMessagesEncoded++
 		}
-		socketBytesSent += 34 + getUTF8Length(message.message);
-		socket.emit('m',message.message)
+		socketBytesSent += 34 + getUTF8Length(compressedMessage);
+		socket.emit('m',compressedMessage)
+		//LOOPBACK for client side prediction, moved out of main thread for performance reasons
+
+		onEvent("message", message.message);
 	}
 	if (message.type == EVENT)
 	{

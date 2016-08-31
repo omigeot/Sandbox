@@ -685,20 +685,24 @@ define(['progressScreen','nodeParser','vwf/utility/eventSource'], function(progr
                             fields.client = this.moniker_; // stamp with the originating client like the reflector does
                             fields.origin = "reflector";
                             //must be careful here to be async, otherwise code is sometimes synchronous and sometimes not
-                            (function(fields)
-                            {
+                           // (function(fields)
+                           // {
                                 //NOTE:sometime in the last year or so, the postmessage polyfill for set immediate 
                                 //no longer sets immediately. There is sometimes a large delay. Running this synchronously is 
                                 //easy and fast, but logically a problem. Can we have the socketWorker loopback itself?
+
+                                //moving loopback to socketworker
+
                               //  window.setImmediate(function()
                               //  {
-                                    Engine.localReentryStack++
-                                        queue.insert(fields);
-                                    if (Engine.localReentryStack > 2)
-                                        Engine.localReentryStack--;
+                              //      Engine.localReentryStack++
+                              //          queue.insert(fields);
+                              //      if (Engine.localReentryStack > 2)
+                              //          Engine.localReentryStack--;
                               //  })
-                            })(fields);
+                   //         })(fields);
                         }
+                   
                     }
                     socket.send(fields);
                     Engine.trigger('messageSent');
