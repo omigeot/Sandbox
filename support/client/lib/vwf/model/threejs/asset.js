@@ -375,10 +375,7 @@
                 if (threeObject instanceof THREE.Mesh)
                 {
                     list.push(threeObject);
-                    for (var i = 0; i < threeObject.children.length; i++)
-                    {
-                        this.GetAllLeafMeshes(threeObject.children[i], list);
-                    }
+                   
                 }
                 if (threeObject && threeObject.children)
                 {
