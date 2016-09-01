@@ -139,7 +139,7 @@ define({
                     document.dispatchEvent(evt);    
                 }catch(e)
                 {
-                    
+                    $(document).trigger('viewportresize');
                 }
 				
 
