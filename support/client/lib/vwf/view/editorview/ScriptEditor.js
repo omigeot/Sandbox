@@ -621,7 +621,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/HierarchyManager
 				{
 					try {
 
-						if (fieldName.includes('ohm') == true) {
+						if (fieldName.indexOf('ohm') !== -1) {
 							var val = rawtext;
 
 						} else {
