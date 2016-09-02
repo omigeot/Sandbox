@@ -46,6 +46,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 		$scope.lookUpHandler = function(e){
 			$('#ddsmoothmenu li').trigger('mouseleave');
+			//we used to use pointer-events:none in the css, but that is causing some problems with mouseover. 
+			//now using application logic to reject clicks
+			if($(e.currentTarget).parent().hasClass('disabled'))
+			  return;
 			handlers[e.currentTarget.id](e);
 		}
 	}]);
