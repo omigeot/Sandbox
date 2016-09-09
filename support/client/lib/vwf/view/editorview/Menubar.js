@@ -328,13 +328,13 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 				_Editor.CreateModifier('lathe', _UserManager.GetCurrentUserName(), true);
 			},
 			MenuCreateTaper: function(e) {
-				_Editor.CreateModifier('taper', _UserManager.GetCurrentUserName());
+				_Editor.CreateModifier('taper', _UserManager.GetCurrentUserName(),true);
 			},
 			MenuCreateBend: function(e) {
-				_Editor.CreateModifier('bend', _UserManager.GetCurrentUserName());
+				_Editor.CreateModifier('bend', _UserManager.GetCurrentUserName(),true);
 			},
 			MenuCreateTwist: function(e) {
-				_Editor.CreateModifier('twist', _UserManager.GetCurrentUserName());
+				_Editor.CreateModifier('twist', _UserManager.GetCurrentUserName(),true);
 			},
 
 			MenuCreateUVMap: function(e) {
@@ -347,13 +347,13 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 				_Editor.CreateModifier('perlinnoise', _UserManager.GetCurrentUserName());
 			},
 			MenuCreateSimplexNoise: function(e) {
-				_Editor.CreateModifier('simplexnoise', _UserManager.GetCurrentUserName());
+				_Editor.CreateModifier('simplexnoise', _UserManager.GetCurrentUserName(),true);
 			},
 			MenuCreateOffset: function(e) {
-				_Editor.CreateModifier('offset', _UserManager.GetCurrentUserName());
+				_Editor.CreateModifier('offset', _UserManager.GetCurrentUserName(),true);
 			},
 			MenuCreateStretch: function(e) {
-				_Editor.CreateModifier('stretch', _UserManager.GetCurrentUserName());
+				_Editor.CreateModifier('stretch', _UserManager.GetCurrentUserName(),true);
 			},
 
 			MenuCreateBehaviorRotator: function(e) {
