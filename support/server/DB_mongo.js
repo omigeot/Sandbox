@@ -125,10 +125,22 @@ exports.new = function(DBTablePath, cb) {
 
         var MongoClient = require('mongodb').MongoClient;
         // Connection URL
-        var url = 'mongodb://localhost/ADLSandbox';
+        var url = global.configuration.DB_connection_string;
+        if(!url)
+        {
+            console.error("DB_connection_string must be specified in the config file to use the MongoDB driver.");
+            process.exit();
+        }
+      
         // Use connect method to connect to the server
         MongoClient.connect(url, function(err, db)
         {
+            if(err)
+            {
+                console.error("Error during database connection");
+                console.error(err);
+                process.exit();
+            }
             DB = db.collection('documents');
 
             DB.createIndex(

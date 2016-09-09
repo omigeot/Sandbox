@@ -1684,7 +1684,8 @@ function startup(callback)
     async.series([
         function(cb)
         {
-            console.log(global.configuration.DB_driver);
+
+            console.log("Database Driver is " + global.configuration.DB_driver);
             require(global.configuration.DB_driver)
                 .new(DBTablePath, function(_DB)
                 {
