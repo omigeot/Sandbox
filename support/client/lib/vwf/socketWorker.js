@@ -82,10 +82,10 @@ function socketMonitorInterval()
 	socketBytesSent = 0;
 	socketBytesReceivedLast = socketBytesReceived;
 	socketBytesReceived = 0;
-	log(socketBytesSentLast / 10000 + 'KBps up' + socketBytesReceivedLast / 10000 + 'KBps down');
-	log("Encode Average Time: " + (totalEncodeTime / totalMessagesEncoded));
-	log("Decode Average Time: " + (totalDecodeTime / totalMessagesDecoded));
-	log("Message Compression Load: " + ((totalDecodeTime + totalEncodeTime)/10000).toFixed(4) + "%");
+	//log(socketBytesSentLast / 10000 + 'KBps up' + socketBytesReceivedLast / 10000 + 'KBps down');
+	//log("Encode Average Time: " + (totalEncodeTime / totalMessagesEncoded));
+	//log("Decode Average Time: " + (totalDecodeTime / totalMessagesDecoded));
+	//log("Message Compression Load: " + ((totalDecodeTime + totalEncodeTime)/10000).toFixed(4) + "%");
 
 	(totalEncodeTime / totalMessagesEncoded)
 	if (totalMessagesDecoded + totalMessagesEncoded > 100)
@@ -128,7 +128,7 @@ onmessage = function(e)
 		socket.on('compress',function(e)
 		{
 			messageCompress.applyLearnedMappings(e)
-			log(e)
+			//log(e)
 		})
 		socket.on("m", function(e)
 		{

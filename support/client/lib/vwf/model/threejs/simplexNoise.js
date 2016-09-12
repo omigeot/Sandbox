@@ -493,7 +493,7 @@
 				var z = this.effectZ;
 				var world = this.WorldSpace;
 				var phase = this.phase;
-				console.log(scale, iterations, seed, x, y, z, world, phase);
+				
 				this.noise(scale, iterations, seed, x, y, z, world, phase);
 			}
 			this.Random = function(seed)
@@ -560,6 +560,7 @@
 			this.noise = function(scale, iterations, seed, effectX, effectY, effectZ, useWorldSpace, phase)
 			{
 				if (this.amount == undefined) return;
+				console.log("apply noise");
 				var mesh = this.GetMesh();
 				if (!mesh)
 					return;
@@ -707,4 +708,4 @@
 			return new modifier(childID, childSource, childName);
 		}
 	})();
-	//@ sourceURL=threejs.subdriver.push
+	//@ sourceURL=threejs.subdriver.simplexNoise

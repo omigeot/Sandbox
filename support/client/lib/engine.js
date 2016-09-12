@@ -773,7 +773,7 @@ define(['progressScreen','nodeParser','vwf/utility/eventSource'], function(progr
             this.enableSync = true;
             this.startSimulating = function(nodeID)
             {
-                console.log("Start Simulation of " + (this.getProperty(nodeID, "DisplayName") || nodeID));
+               // console.log("Start Simulation of " + (this.getProperty(nodeID, "DisplayName") || nodeID));
                 var nodes = this.decendants(nodeID);
                 if (nodeID !== "index-vwf")
                     nodes.push(nodeID);
@@ -2240,7 +2240,7 @@ define(['progressScreen','nodeParser','vwf/utility/eventSource'], function(progr
                     childComponent = cleanChildComponent(childComponent)
                 if (!childComponent)
                 {
-                    console.log('skipping null node ' + nodeID)
+                    //console.log('skipping null node ' + nodeID)
                     async.nextTick(function()
                     {
                         progressScreen.stopCreateNode();
