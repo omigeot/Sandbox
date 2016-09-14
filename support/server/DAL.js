@@ -489,7 +489,7 @@ function normalizePublishSettings(doc)
                 doc.publishSettings.camera = null;
 
             if (doc.publishSettings.createAvatar === undefined)
-                doc.publishSettings.createAvatar = true;
+                doc.publishSettings.createAvatar = false;
 
             if (doc.publishSettings.allowTools === undefined)
                 doc.publishSettings.allowTools = true;
