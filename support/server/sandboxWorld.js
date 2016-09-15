@@ -190,6 +190,7 @@ var STATUS = {
 
 function sandboxWorld(id, metadata)
 {
+   
     this.id = id;
     this.clients = {};
     this._time = 0.0;

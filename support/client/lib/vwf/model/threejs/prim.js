@@ -168,7 +168,7 @@ var defaultPrimMaterial = new THREE.MeshPhongMaterial();
                 mat = this.rootnode.children[0].material;
             else{
                 
-                mat = _MaterialCache.getMaterialbyDef(null,Engine.getProperty(this.ID,"materialDef"));
+                mat = _MaterialCache.getMaterialbyDef(null,Engine.getProperty(this.ID,"materialDef")) || defaultPrimMaterial;
             }
 
             if (this.mesh) {
