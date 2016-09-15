@@ -3,7 +3,7 @@
 	//draw a 2D quad, let the user place text on it.
 	function toRGBA(array)
 	{
-		return "rgba(" + parseInt(array[0]*255) +"," + parseInt(array[1]*255)+"," + parseInt(array[2]*255)+"," + parseInt(array[3]*255)+")";
+		return "rgba(" + parseInt(array[0] * 255) + "," + parseInt(array[1] * 255) + "," + parseInt(array[2] * 255) + "," + parseInt(array[3] * 255) + ")";
 	}
 
 	function text2D(childID, childSource, childName)
@@ -21,8 +21,8 @@
 		this.text = "hey";
 		this.resolutionX = 100;
 		this.resolutionY = 100;
-		this.forecolor = [1,1,1,1];
-		this.backcolor = [0,0,0,1];
+		this.forecolor = [1, 1, 1, 1];
+		this.backcolor = [0, 0, 0, 1];
 		this.startX = 10;
 		this.startY = 50;
 		this.font = "bold 40px Arial";
@@ -41,53 +41,19 @@
 				this.destroyMat();
 				this.build();
 			}
-			if (propertyName == "text")
-			{
-				this[propertyName] = propertyValue;
-				if (this.___ready && this.mesh)
-					this.updateCanvas();
-				else
-					this.build();
-			}
+
 			if (propertyName == "transparent")
 			{
 				this[propertyName] = propertyValue;
 				this.destroyMat();
 				this.build();
 			}
-			if (propertyName == "forecolor")
-			{
-				this[propertyName] = propertyValue;
-				if (this.___ready && this.mesh)
-					this.updateCanvas();
-				else
-					this.build();
-			}
-			if (propertyName == "backcolor")
-			{
-				this[propertyName] = propertyValue;
-				if (this.___ready && this.mesh)
-					this.updateCanvas();
-				else
-					this.build();
-			}
-			if (propertyName == "startX")
-			{
-				this[propertyName] = propertyValue;
-				if (this.___ready && this.mesh)
-					this.updateCanvas();
-				else
-					this.build();
-			}
-			if (propertyName == "startY")
-			{
-				this[propertyName] = propertyValue;
-				if (this.___ready && this.mesh)
-					this.updateCanvas();
-				else
-					this.build();
-			}
-			if (propertyName == "font")
+			if ((propertyName == "text") ||
+				(propertyName == "forecolor") ||
+				(propertyName == "backcolor") ||
+				(propertyName == "startX") ||
+				(propertyName == "startY") ||
+				(propertyName == "font"))
 			{
 				this[propertyName] = propertyValue;
 				if (this.___ready && this.mesh)
@@ -113,12 +79,12 @@
 		this.updateCanvas = function()
 		{
 			var context1 = this.canvas1.getContext('2d');
-			context1.clearRect(0, 0, this.resolutionX,this.resolutionY);
+			context1.clearRect(0, 0, this.resolutionX, this.resolutionY);
 			context1.fillStyle = toRGBA(this.backcolor);
-			context1.fillRect(0, 0, this.resolutionX,this.resolutionY);
+			context1.fillRect(0, 0, this.resolutionX, this.resolutionY);
 			context1.font = this.font;
 			context1.fillStyle = toRGBA(this.forecolor);
-			context1.fillText(this.text, this.startX, this.startY);
+			context1.fillText(this.text, this.startX / 100 * this.resolutionX, this.startY / 100 * this.resolutionY);
 			this.mat.map.needsUpdate = true;
 		}
 		this.buildMat = function()
@@ -126,7 +92,7 @@
 			this.canvas1 = document.createElement('canvas');
 			this.canvas1.width = this.resolutionX;
 			this.canvas1.height = this.resolutionY;
-			
+
 			// canvas contents will be used for a texture
 			var texture1 = new THREE.Texture(this.canvas1)
 			texture1.needsUpdate = true;
@@ -157,7 +123,7 @@
 			}
 			this.mesh = new THREE.Mesh(new THREE.PlaneGeometry(this._length, this.width, 1, 1), this.mat);
 			this.rootnode.add(this.mesh);
-		},200);
+		}, 200);
 
 		//must be defined by the object
 		this.getRoot = function()
