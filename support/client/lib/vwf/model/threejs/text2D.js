@@ -25,7 +25,12 @@
 		this.backcolor = [0, 0, 0, 1];
 		this.startX = 10;
 		this.startY = 50;
-		this.font = "bold 40px Arial";
+		this.font = "Arial";
+		this.fontSize = 40;
+		this.bold = true;
+		this.italic = false;
+		this.fontURL = null;
+		this.lineSpacing = 0;
 		this.inherits = ['vwf/model/threejs/transformable.js', 'vwf/model/threejs/visible.js'];
 		this.transparent = true;
 		//the node constructor
@@ -48,11 +53,20 @@
 				this.destroyMat();
 				this.build();
 			}
+			if (propertyName == "fontURL")
+			{
+				this[propertyName] = propertyValue;
+				this.loadFont();
+			}
 			if ((propertyName == "text") ||
 				(propertyName == "forecolor") ||
 				(propertyName == "backcolor") ||
 				(propertyName == "startX") ||
 				(propertyName == "startY") ||
+				(propertyName == "fontSize") ||
+				(propertyName == "bold") ||
+				(propertyName == "italic") ||
+				(propertyName == "lineSpacing") ||
 				(propertyName == "font"))
 			{
 				this[propertyName] = propertyValue;
@@ -76,16 +90,65 @@
 		{
 			this.mat = null;
 		}
+		this.buildFontStyle = function()
+		{
+			var fontface = this.font;
+			if(!!this.fontURL)
+			{
+				fontface = this.ID;
+			}
+			var style = "" + this.fontSize +"px " + "\"" + fontface +"\" ";
+			if(this.bold)
+			{
+				style = "bold " + style;
+			} 
+			if(this.italic)
+			{
+				style = "italic " + style;
+			} 
+			return style;
+
+		}
 		this.updateCanvas = function()
 		{
 			var context1 = this.canvas1.getContext('2d');
 			context1.clearRect(0, 0, this.resolutionX, this.resolutionY);
 			context1.fillStyle = toRGBA(this.backcolor);
 			context1.fillRect(0, 0, this.resolutionX, this.resolutionY);
-			context1.font = this.font;
+			context1.font = this.buildFontStyle();
 			context1.fillStyle = toRGBA(this.forecolor);
-			context1.fillText(this.text, this.startX / 100 * this.resolutionX, this.startY / 100 * this.resolutionY);
+
+
+			var lines = this.text.split("\\n");
+			var start = this.startY / 100 * this.resolutionY;
+			for(var i =0; i < lines.length; i++)
+			{
+				context1.fillText(lines[i], this.startX / 100 * this.resolutionX, start + (i * this.fontSize) + (i* this.lineSpacing));	
+			}
+
+			
 			this.mat.map.needsUpdate = true;
+		}
+		this.loadFont = function()
+		{
+			if (this.style)
+				$(this.style).remove();
+			if (!!this.fontURL)
+			{
+				var str =
+					'<style type="text/css" media="screen, print">' +
+					'	@font-face {' +
+					'		font-family: "{{ID}}";' +
+					'		src: url("{{URL}}");' +
+					'	}' +
+					'</style>';
+				str = str.replace("{{ID}}", this.ID).replace("{{URL}}", this.fontURL);
+				this.style = $(str).appendTo($(document.head));
+				var self = this;
+				window.setTimeout(function(){
+					self.updateCanvas()
+				},2000)
+			}
 		}
 		this.buildMat = function()
 		{

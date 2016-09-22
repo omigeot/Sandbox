@@ -19,7 +19,12 @@ properties:
   resolutionX: 100
   resolutionY: 100
   text: "hey"
-  font: "Bold 40px Arial"
+  font: "Arial"
+  fontSize: 40
+  bold: true
+  italic: false
+  fontURL: null
+  lineSpacing: 0
   startX: 10
   startY: 50
   transparent: true
@@ -40,6 +45,20 @@ properties:
       min: 0
       max: 10
       step: 0.01
+    fontSize: 
+      displayname: "fontSize (px)"
+      property: "fontSize"
+      type: "slider"
+      min: 0
+      max: 1000
+      step: 1  
+    lineSpacing: 
+      displayname: "lineSpacing (px)"
+      property: "lineSpacing"
+      type: "slider"
+      min: 0
+      max: 1000
+      step: 1    
     resX: 
       displayname: "Resolution X"
       property: "resolutionX"
@@ -76,10 +95,22 @@ properties:
       displayname: "font"
       property: "font"
       type: "text"
+    fontURL: 
+      displayname: "URL of Font"
+      property: "fontURL"
+      type: "text"  
     transparent: 
       displayname: "transparent"
       property: "transparent"
       type: "check"
+    italic: 
+      displayname: "italic"
+      property: "italic"
+      type: "check" 
+    bold: 
+      displayname: "bold"
+      property: "bold"
+      type: "check"   
     forecolor: 
       displayname: "forecolor"
       property: "forecolor"
