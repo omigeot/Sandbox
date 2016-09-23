@@ -27,6 +27,7 @@ properties:
   lineSpacing: 0
   startX: 10
   startY: 50
+  justified : "left"
   transparent: true
   forecolor: [ 1, 1, 1, 1]
   backcolor: [ 0, 0, 0, 0]
@@ -39,7 +40,7 @@ properties:
       max: 10
       step: 0.01
     width: 
-      displayname: "Width"
+      displayname: "Height"
       property: "width"
       type: "slider"
       min: 0
@@ -118,4 +119,10 @@ properties:
     backcolor: 
       displayname: "backcolor"
       property: "backcolor"
-      type: "color"          
+      type: "color"
+    justified: 
+      displayname: "justified"
+      property: "justified"
+      type: "choice"
+      values: ["left","right","center"]
+      labels: ["left","right","center"]                    
