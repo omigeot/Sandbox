@@ -123,11 +123,11 @@
 				var textWidth = context1.measureText(lines[i]).width;
 				if(this.justified == "right")
 				{
-					startX = this.resolutionX - this.startX - textWidth;
+					startX = this.resolutionX - startX - textWidth;
 				}
 				if(this.justified == "center")
 				{
-					startX = this.resolutionX/2 - textWidth/2 + this.startX;
+					startX = this.resolutionX/2 - textWidth/2 + startX;
 				}
 
 				context1.fillText(lines[i], startX , start + (i * this.fontSize) + (i * this.lineSpacing));
