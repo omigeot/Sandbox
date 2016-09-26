@@ -149,12 +149,14 @@
 					'</style>';
 				str = str.replace("{{ID}}", this.ID).replace("{{URL}}", this.fontURL);
 				this.style = $(str).appendTo($(document.head));
-				var self = this;
-				window.setTimeout(function()
+				
+				
+			}
+			var self = this;
+			window.setTimeout(function()
 				{
 					self.updateCanvas()
 				}, 2000)
-			}
 		}
 		this.buildMat = function()
 		{
