@@ -2307,9 +2307,17 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
 
         }
         this.RemoveParent = function() {
+
                 _UndoManager.startCompoundEvent();
                 var newnames = [];
                 for (var i = 0; i < this.getSelectionCount(); i++) {
+
+                    var _node = Engine.getNode(this.GetSelectedVWFID(i));
+                    if (_node && _node.type == "link_existing/threejs") {
+                        _Notifier.alert("Nodes which are links into the heirarchy of an asset cannot be unlinked");
+                        return;
+                    }
+
                     var id = this.GetSelectedVWFNode(i).id;
                     _RenderManager.flashHilight(findviewnode(Engine.parent(id)));
                     var node = _DataManager.getCleanNodePrototype(id);
@@ -2399,6 +2407,12 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
                 // _Notifier.alert('You must be the owner of all objects to group them.');
                 // return;
                 // }
+                var node = Engine.getNode(this.GetSelectedVWFID(i));
+                if (node && node.type == "link_existing/threejs") {
+                    _Notifier.alert("Nodes which are links into the heirarchy of an asset cannot be grouped");
+                    return;
+                }
+
                 var childmat = toGMat(this.findviewnode(this.GetSelectedVWFNode(i).id).matrixWorld);
                 if (!pos) pos = [childmat[3], childmat[7], childmat[11]];
                 else pos = MATH.addVec3(pos, [childmat[3], childmat[7], childmat[11]]);
