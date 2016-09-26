@@ -174,7 +174,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/SidePanel', 'vwf
 					buildTree(threenode);
 					$scope.threeMaps[nodeId] = threeMap[threenode.uuid];
 				}
-				else {
+				else if($scope.threeMaps[node.parent]){
 					$scope.threeMaps[nodeId] = $scope.threeMaps[node.parent].map[threenode.uuid];
 				}
 			}
