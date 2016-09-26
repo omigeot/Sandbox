@@ -1664,10 +1664,19 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
         }
         this.Duplicate = function() {
             for (var i = 0; i < SelectedVWFNodes.length; i++)
+            {
+
+
                 if (Engine.prototype(SelectedVWFNodes[i].id) == 'character-vwf') {
                     _Notifier.alert('Avatars cannot be copied');
                     return
                 }
+                var _node = SelectedVWFNodes[i];
+                if (_node && _node.type == "link_existing/threejs") {
+                    _Notifier.alert("Nodes which are links into the heirarchy of an asset cannot be duplicated");
+                    return;
+                }
+            }
             var newnames = [];
             for (var i = 0; i < SelectedVWFNodes.length; i++) {
                 var proto = _DataManager.getCleanNodePrototype(SelectedVWFNodes[i].id);
@@ -1701,10 +1710,17 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
             _CopiedNodes = [];
 
             for (var i = 0; i < SelectedVWFNodes.length; i++)
+            {
                 if (Engine.prototype(SelectedVWFNodes[i].id) == 'character-vwf') {
                     _Notifier.alert('Avatars cannot be copied');
                     return
                 }
+                var _node = SelectedVWFNodes[i];
+                if (_node && _node.type == "link_existing/threejs") {
+                    _Notifier.alert("Nodes which are links into the heirarchy of an asset cannot be duplicated");
+                    return;
+                }
+            }
 
             var tocopy = SelectedVWFNodes;
             if (nodes) tocopy = nodes;
