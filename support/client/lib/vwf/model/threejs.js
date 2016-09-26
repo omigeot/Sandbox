@@ -1245,7 +1245,8 @@ define(["module", "vwf/model", "vwf/utility", "vwf/utility/color", "vwf/model/th
     //will look into nodes that don't match.... this might not be desirable
     function FindChildByName(obj, childName, childType) {
 
-
+        if(!obj)
+            return null;
         if (obj.name == childName) {
             return obj;
         } else if (obj.children && obj.children.length > 0) {
