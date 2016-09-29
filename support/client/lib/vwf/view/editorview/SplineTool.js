@@ -212,6 +212,9 @@ function SplineTool() {
     }
     self.deactivate = function() {
 
+        if(!self.active)
+            return;
+        
         $('#SplineToolGUIEditPoints').children().css('background-color', '');
         _Editor.setTransformCallback = _Editor.setTransform;
         _Editor.setTranslationCallback = _Editor.setTranslation;

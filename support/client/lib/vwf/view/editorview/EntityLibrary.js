@@ -295,6 +295,8 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 
 	function GetPick(evt)
 	{
+		if(!evt)
+			return null;
 		var ray = _Editor.GetWorldPickRay(evt.originalEvent);
 		var o = _Editor.getCameraPosition();
 		var hit = _SceneManager.CPUPick(o, ray, {
@@ -560,6 +562,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			if (ID) {
 				$.getJSON(data.url, function(proto) {
 					proto.sourceAssetId = data.sourceAssetId;
+					_UndoManager.recordSetProperty(ID, 'materialDef', proto);
 					_PrimitiveEditor.setProperty(ID, 'materialDef', proto);
 				})
 			}
@@ -587,6 +590,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 					}],
 					"type": "phong"
 				};
+				_UndoManager.recordSetProperty(ID, 'materialDef', proto);
 				_PrimitiveEditor.setProperty(ID, 'materialDef', mat);
 			}
 		}
@@ -594,7 +598,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			$.getJSON(data.url, function(proto) {
 				_UndoManager.startCompoundEvent();
 				for (var i in proto.properties)
+				{
+					_UndoManager.recordSetProperty(Engine.application(), i, proto.properties[i]);
 					_PrimitiveEditor.setProperty(Engine.application(), i, proto.properties[i]);
+				}
 				for (var i in proto.children)
 					_Editor.createChild(Engine.application(), GUID(), proto.children[i]);
 				_UndoManager.stopCompoundEvent();

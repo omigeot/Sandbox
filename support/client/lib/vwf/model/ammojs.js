@@ -311,11 +311,9 @@ define(["module", "vwf/model", "vwf/configuration","vwf/utility/eventSource", "v
                             Engine.setProperty(node.id, 'transform', node.getTransform(tempmat));
                         }
                     }
-                  
-                    this.reEntry = false;
+                }
                     this.triggerCollisions();
                 }
-            }
             this.trigger('tickEnd');
         },
         // -- initializingNode ---------------------------------------------------------------------

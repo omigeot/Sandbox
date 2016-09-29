@@ -1392,6 +1392,7 @@ function createState(URL, data, response)
 		var id = "/adl/sandbox".replace(/\//g, "_") + '_' + makeid() + '_';
 		DAL.createInstance(id, statedata, function()
 		{
+			console.log(statedata);
 			var displayID = id.replace("_adl_sandbox",global.configuration.appPath.replace(/\//g,"_"));
 			respond(response, 200, displayID);
 			mailTools.newWorld(URL.loginData.UID, data.title, displayID);

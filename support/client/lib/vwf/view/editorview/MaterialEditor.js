@@ -313,7 +313,7 @@ define(['./angular-app', './mapbrowser', './colorpicker', './EntityLibrary'], fu
 
 				// update the value when sliding
 				slider.on('slide', function(evt, ui){
-					var fn = $scope.change();
+					var fn = $scope.change && $scope.change(); //in somecases, there is not this func
 					var changedIndex = undefined;
 
 					if(rangeMode){

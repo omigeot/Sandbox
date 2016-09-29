@@ -184,7 +184,7 @@ QuaternionQueue.prototype._interpolate = function(time, sim)
 function viewInterpolationNode(id, childExtendsID, threejsNode, sim)
 {
 	this.id = id;
-	this._ready = false;
+	this._ready = true;
 	this.threejsNode = threejsNode;
 	this.childExtendsID = childExtendsID;
 	this.extends = childExtendsID;
@@ -359,7 +359,7 @@ viewInterpolationNode.prototype.interpolate = function(now, playmode)
 				if (oldTransform)
 				{
 					oldTransform = matCpy(oldTransform);
-					this.pushTransform(oldTransform);
+							this.pushTransform(oldTransform);
 				}
 			}
 			var position = this.positionQueue.interpolate(now, simulating);
@@ -369,6 +369,7 @@ viewInterpolationNode.prototype.interpolate = function(now, playmode)
 			{
 			this.tempmat.compose(viewInterpolationNode.tempvec1.set(position[0], position[1], position[2]), viewInterpolationNode.tempquat.set(rotation[0], rotation[1], rotation[2], rotation[3]), viewInterpolationNode.tempvec2.set(scale[0], scale[1], scale[2]))			
 			viewnode.setTransformInternal(this.tempmat.elements, false);
+			
 			}
 		}
 		if (viewnode.setAnimationFrameInternal)
@@ -377,7 +378,7 @@ viewInterpolationNode.prototype.interpolate = function(now, playmode)
 			//viewnode.backupTransforms(this.getProperty('animationFrame'));
 			if (qt)
 			{
-				//	this.animationFrameQueue.push(this.getProperty('animationFrame'));
+					this.animationFrameQueue.push(this.getProperty('animationFrame'));
 			}
 			var newFrame = this.animationFrameQueue.interpolate(now, simulating);
 			if (ANIMATION_SMOOTH_DIST > dist)
@@ -403,6 +404,7 @@ viewInterpolationNode.prototype.restore = function()
 		{
 			oldTransform = matCpy(oldTransform);
 			viewnode.setTransformInternal(oldTransform, false);
+			
 		}
 	}
 	if (viewnode.setAnimationFrameInternal)
