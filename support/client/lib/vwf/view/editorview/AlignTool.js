@@ -1,53 +1,11 @@
 function AlignTool() {
 	this.buildGUI = function() {
-		$(document.body).append("<div id='AlignToolGUI'/>");
-		$('#AlignToolGUI').append("<div id='AlignToolGUI_PickTarget'/>");
-		$('#AlignToolGUI').append("<div id='AlignToolGUI_PickTargetID' style='display: inline;margin-left: 10px;'/>");
-		$('#AlignToolGUI').append("<div style='width:400px'>" +
-			"<input type='checkbox' id='AlignX' /><label for='AlignX'>X</label>" +
-			"<div id='XFrom' style='display: inline;margin-left: 10px;'>" +
-			"  <input type='radio' id='xFromMin' name='XFrom'/><label for='xFromMin'>Min</label>" +
-			"  <input type='radio' id='xFromMax' name='XFrom'/><label for='xFromMax'>Max</label>" +
-			"  <input type='radio' id='xFromCenter' name='XFrom' checked=checked/><label for='xFromCenter'>Center</label>" +
-			"</div>" +
-			"<div id='XTo' style='display: inline;margin-left: 10px;'>" +
-			"  <input type='radio' id='xToMin' name='XTo'/><label for='xToMin'>Min</label>" +
-			"  <input type='radio' id='xToMax' name='XTo'/><label for='xToMax'>Max</label>" +
-			"  <input type='radio' id='xToCenter' name='XTo' checked=checked/><label for='xToCenter'>Center</label>" +
-			"</div>" +
-			"</div>"
-		);
+		
+		
+		var template = $.ajax({url:"../vwf/view/editorView/templates/alignTool.html",async:false}).responseText;
 
-		$('#AlignToolGUI').append("<div style='width:400px'>" +
-			"<input type='checkbox' id='AlignY' /><label for='AlignY'>Y</label>" +
-			"<div id='YFrom' style='display: inline;margin-left: 10px;'>" +
-			"  <input type='radio' id='yFromMin' name='YFrom'/><label for='yFromMin'>Min</label>" +
-			"  <input type='radio' id='yFromMax' name='YFrom'/><label for='yFromMax'>Max</label>" +
-			"  <input type='radio' id='yFromCenter' name='YFrom' checked=checked/><label for='yFromCenter'>Center</label>" +
-			"</div>" +
-			"<div id='YTo' style='display: inline;margin-left: 10px;'>" +
-			"  <input type='radio' id='yToMin' name='YTo'/><label for='yToMin'>Min</label>" +
-			"  <input type='radio' id='yToMax' name='YTo'/><label for='yToMax'>Max</label>" +
-			"  <input type='radio' id='yToCenter' name='YTo' checked=checked/><label for='yToCenter'>Center</label>" +
-			"</div>" +
-			"</div>"
-		);
+		$(document.body).append(template);
 
-
-		$('#AlignToolGUI').append("<div style='width:400px'>" +
-			"<input type='checkbox' id='AlignZ' /><label for='AlignZ'>Z</label>" +
-			"<div id='ZFrom' style='display: inline;margin-left: 10px;'>" +
-			"  <input type='radio' id='zFromMin' name='ZFrom'/><label for='zFromMin'>Min</label>" +
-			"  <input type='radio' id='zFromMax' name='ZFrom'/><label for='zFromMax'>Max</label>" +
-			"  <input type='radio' id='zFromCenter' name='ZFrom' checked=checked/><label for='zFromCenter'>Center</label>" +
-			"</div>" +
-			"<div id='ZTo' style='display: inline;margin-left: 10px;'>" +
-			"  <input type='radio' id='zToMin' name='ZTo'/><label for='zToMin'>Min</label>" +
-			"  <input type='radio' id='zToMax' name='ZTo'/><label for='zToMax'>Max</label>" +
-			"  <input type='radio' id='zToCenter' name='ZTo' checked=checked/><label for='zToCenter'>Center</label>" +
-			"</div>" +
-			"</div>"
-		);
 
 		this.xDisplay = new THREE.Mesh(new THREE.PlaneGeometry(10, 10, 10, 10), new THREE.MeshPhongMaterial());
 		this.yDisplay = new THREE.Mesh(new THREE.PlaneGeometry(10, 10, 10, 10), new THREE.MeshPhongMaterial());
@@ -119,15 +77,15 @@ function AlignTool() {
 		$('#AlignToolGUI_PickTarget').click(function() {
 			_AlignTool.PickTarget()
 		});
-		$("#AlignX").button();
-		$("#XFrom").buttonset();
-		$("#XTo").buttonset();
-		$("#AlignY").button();
-		$("#YFrom").buttonset();
-		$("#YTo").buttonset();
-		$("#AlignZ").button();
-		$("#ZFrom").buttonset();
-		$("#ZTo").buttonset();
+		//$("#AlignX").checkboxradio();
+		//$("#XFrom").controlgroup();
+		//$("#XTo").buttonset();
+		//$("#AlignY").checkboxradio();
+		//$("#YFrom").buttonset();
+		//$("#YTo").buttonset();
+		//$("#AlignZ").checkboxradio();
+		//$("#ZFrom").buttonset();
+		//$("#ZTo").buttonset();
 		$('#AlignToolGUI').dialog({
 
 
@@ -155,12 +113,13 @@ function AlignTool() {
 				_AlignTool.hide();
 			},
 			autoOpen: false,
-			width: 'auto'
+			width: 'auto',
+			title:"Align"
 
 		});
 	}
 	this.OK = function() {
-
+		//need to do undo work here
 
 	}
 	this.Cancel = function() {
@@ -387,8 +346,6 @@ function AlignTool() {
 		this.backcolor = $('#AlignToolGUI_PickTarget').css('background');
 		$('#AlignToolGUI_PickTarget').addClass('ui-state-active')
 		this.pickMode = 'Pick';
-
-
 	}
 	this.show = function() {
 
