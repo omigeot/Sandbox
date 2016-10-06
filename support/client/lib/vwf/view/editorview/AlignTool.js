@@ -25,9 +25,7 @@ function AlignTool() {
 		this.xDisplay.material.color.b = 0;
 		this.xDisplay.material.color.r = 1;
 		this.xDisplay.material.needsUpdate = true
-		this.xDisplay.material.ambient.g = 0;
-		this.xDisplay.material.ambient.b = 0;
-		this.xDisplay.material.ambient.r = 1;
+		
 		this.xDisplay.material.wireframe = true;
 
 		this.yDisplay.material.side = 2
@@ -37,9 +35,7 @@ function AlignTool() {
 		this.yDisplay.material.color.b = 0;
 		this.yDisplay.material.color.r = 0;
 		this.yDisplay.material.needsUpdate = true
-		this.yDisplay.material.ambient.g = 1;
-		this.yDisplay.material.ambient.b = 0;
-		this.yDisplay.material.ambient.r = 0;
+	
 		this.yDisplay.material.wireframe = true;
 
 		this.zDisplay.material.side = 2
@@ -49,9 +45,7 @@ function AlignTool() {
 		this.zDisplay.material.color.b = 1;
 		this.zDisplay.material.color.r = 0;
 		this.zDisplay.material.needsUpdate = true
-		this.zDisplay.material.ambient.g = 0;
-		this.zDisplay.material.ambient.b = 1;
-		this.zDisplay.material.ambient.r = 0;
+		
 		this.zDisplay.material.wireframe = true;
 
 		this.xDisplay.material.map = THREE.ImageUtils.loadTexture('./textures/grid2.gif');
@@ -124,10 +118,12 @@ function AlignTool() {
 	}
 	this.Cancel = function() {
 
-
+		_UndoManager.startCompoundEvent();
 		for (var i = 0; i < this.sourceNodeIDs.length; i++) {
-			vwf_view.kernel.setProperty(this.sourceNodeIDs[i], 'transform', this.sourceBackupTransform[this.sourceNodeIDs[i]]);
+			_UndoManager.recordSetProperty(this.sourceNodeIDs[i], 'transform',  this.sourceBackupTransform[this.sourceNodeIDs[i]]);
+			_Editor.setProperty(this.sourceNodeIDs[i], 'transform', this.sourceBackupTransform[this.sourceNodeIDs[i]]);
 		}
+		_UndoManager.stopCompoundEvent();
 
 	}
 	this.updateDisplay = function() {
@@ -156,6 +152,7 @@ function AlignTool() {
 		var alignY = $("#AlignY").is(':checked');
 		var alignZ = $("#AlignZ").is(':checked');
 
+		_UndoManager.startCompoundEvent();
 		for (var i = 0; i < this.sourceNodeIDs.length; i++) {
 			var source = _Editor.findviewnode(this.sourceNodeIDs[i])
 			var sbounds = source.GetBoundingBox(true);
@@ -303,8 +300,10 @@ function AlignTool() {
 			trans[12] = spos.x;
 			trans[13] = spos.y;
 			trans[14] = spos.z;
- 			vwf_view.kernel.setProperty(this.sourceNodeIDs[i], 'transform', trans);
+ 			_UndoManager.recordSetProperty(this.sourceNodeIDs[i], 'transform', trans);
+ 			_Editor.setProperty(this.sourceNodeIDs[i], 'transform', trans);
 		}
+		_UndoManager.stopCompoundEvent();
 		
 		var xCenter = (tbounds.min[0] + tbounds.max[0]) / 2;
 		var yCenter = (tbounds.min[1] + tbounds.max[1]) / 2;
