@@ -14,7 +14,7 @@ var sessions = require('./sessions');
 exports.init = function() {
     root = global.appPath,
     console.log(root);
-    fs.readdir(__dirname + '/../../public' + '/adl/sandbox' + '/views/help', function(err, files) {
+    fs.readdir(__dirname +  '/views/help', function(err, files) {
         var tempArr = [];
 
         for (var i = 0; i < files.length; i++) {
