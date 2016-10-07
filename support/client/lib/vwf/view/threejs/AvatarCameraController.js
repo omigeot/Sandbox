@@ -122,11 +122,14 @@ var AvatarCameraController = function()
         var avatarNode = _UserManager.GetAvatarForClientID(Engine.moniker());
         if(!avatarNode)
             return;
-        var avatar = avatarNode.transformAPI.getPosition();
+        var avatarRoot = findviewnode(avatarNode.id);
+        var avatar = [avatarRoot.matrixWorld.elements[12],avatarRoot.matrixWorld.elements[13],avatarRoot.matrixWorld.elements[14]];
         var center = new THREE.Vector3(avatar[0], avatar[1], avatar[2] + 1.5);
         
 
         var pos = center.clone().add(this.offset.setLength(this.zoom));
+        if(this.zoom > 10)
+            this.zoom = 10;
         if(this.zoom > .05)
         {
             pos.z += this.totalz / 200 * this.zoom;
@@ -145,7 +148,7 @@ var AvatarCameraController = function()
                     o.visible = false;
             })
         }
-        if(this.zoom > .05)
+         if(this.zoom > .05 && Object.keys(this.keysDown).length == 0)
         {
         this.lastpos.x = (this.lastpos.x * 90 + pos.x*10)/100;
         this.lastpos.y = (this.lastpos.y * 90 + pos.y*10)/100;

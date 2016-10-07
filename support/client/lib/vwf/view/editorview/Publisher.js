@@ -330,10 +330,12 @@ define([], function() {
             }
             var currentState = Engine.getProperty(Engine.application(), 'playMode');
             if (currentState === 'stop') return;
+           
+            vwf_view.kernel.callMethod(Engine.application(), 'preWorldStop');
+            vwf_view.kernel.setProperty(Engine.application(), 'playMode', 'stop');
             this.restoreState();
             this.stateBackup = null;
-            vwf_view.kernel.callMethod(Engine.application(), 'preWorldStop');
-            vwf_view.kernel.setProperty(Engine.application(), 'playMode', 'stop')
+             vwf_view.kernel.callMethod(Engine.application(), 'postWorldStop');
 
         }
 
