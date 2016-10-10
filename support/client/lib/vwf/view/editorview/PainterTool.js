@@ -58,10 +58,11 @@ function PainterTool() {
     }.bind(this));
     $('#PainterToolGUIActivteTool').change(function(e) {
 
-        var checked = ($(this).next().attr('aria-pressed'));
+       
+        var checked = $("#PainterToolGUIActivteTool").is(":checked")
         if(!self.display.material.map)
             self.display.material.map = _SceneManager.getTexture('./vwfDataManager.svc/texture?UID=checker.jpg');
-        if (checked == 'true') {
+        if (checked == true) {
             $(this).next().children().css('background-color', 'red');
             _Editor.addTool('Painter', _PainterTool);
             _Editor.setActiveTool('Painter');

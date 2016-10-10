@@ -743,7 +743,7 @@ function startVWF() {
                     return;
                 }
                 app.set('layout', 'layout');
-                app.set('views', __dirname + '/../../public/adl/sandbox/views');
+                app.set('views', __dirname + '/views');
                 app.set('view engine', 'html');
                 app.engine('.html', require('hogan-express'));
 
