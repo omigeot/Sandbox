@@ -585,11 +585,9 @@ var transformTool = function()
         var thisOff = MATH.subVec3(offset, mouseDownOffset);
         thisOff = MATH.subVec3(thisOff, worldTranslation)
         thisOff = this.maskOffset(this.axisToPlane(this.axisSelected), thisOff);
-        var snapped;
-        if (!TESTING)
-            snapped = _Editor.snapPosition([worldTranslation[0] + thisOff[0], worldTranslation[1] + thisOff[1], worldTranslation[2] + thisOff[2]])
-        else
-            snapped = [worldTranslation[0] + thisOff[0], worldTranslation[1] + thisOff[1], worldTranslation[2] + thisOff[2]];
+        _Editor.snapPosition(thisOff);
+        var snapped = [worldTranslation[0] + thisOff[0], worldTranslation[1] + thisOff[1], worldTranslation[2] + thisOff[2]]
+    
         var finalpos = new THREE.Vector3(snapped[0], snapped[1], snapped[2]);
         if (finalpos.length() < .0001) return false;
         wtmat.setPosition(finalpos);
@@ -667,6 +665,7 @@ var transformTool = function()
     }
     this.applyTransform = function(offset, deltas)
     {
+
         for (var i = 0; i < _Editor.getSelectionCount(); i++)
         {
             var ID = _Editor.GetSelectedVWFID(i)
@@ -683,6 +682,7 @@ var transformTool = function()
             var wtmat = new THREE.Matrix4();
             wtmat.elements.set(wt);
             var changed = false;
+            
             if (this.axisToTransformType(this.axisSelected) == 'move')
                 changed = this.applyMove(wtmat, offset, mouseDownOffset, ID);
             if (this.axisToTransformType(this.axisSelected) == 'rotate')
