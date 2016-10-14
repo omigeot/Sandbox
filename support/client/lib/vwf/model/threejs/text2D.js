@@ -34,28 +34,36 @@
 		//the node constructor
 		this.settingProperty = function(propertyName, propertyValue)
 		{
-			if (propertyName == '_length' || propertyName == 'width')
+			else if (propertyName == '_length' || propertyName == 'width')
 			{
 				this[propertyName] = propertyValue;
 				this.build();
 			}
-			if (propertyName == 'resolutionX' || propertyName == 'resolutionY')
+			else if (propertyName == 'resolutionX' || propertyName == 'resolutionY')
 			{
 				this.destroyMat();
 				this.build();
 			}
-			if (propertyName == "transparent")
+			else if (propertyName == "transparent")
 			{
 				this[propertyName] = propertyValue;
 				this.destroyMat();
 				this.build();
 			}
-			if (propertyName == "fontURL")
+			else if (propertyName == "fontURL")
 			{
 				this[propertyName] = propertyValue;
 				this.loadFont();
 			}
-			if ((propertyName == "text") ||
+			else if (propertyName == "text")
+			{
+				this.text = propertyValue.toString();
+				if (this.___ready && this.mesh)
+					this.updateCanvas();
+				else
+					this.build();
+			}
+			else if (
 				(propertyName == "forecolor") ||
 				(propertyName == "backcolor") ||
 				(propertyName == "startX") ||
