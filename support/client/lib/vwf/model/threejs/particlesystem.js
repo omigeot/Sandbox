@@ -4,27 +4,19 @@
 
     function Particle(system, i)
     {
-        THREE.Vector3.call(this);
-        system.threeParticleSystem.geometry.vertices.push(this);
-
+       
         this.i = i;
         this.system = system;
         //the world space position
         this.world = new THREE.Vector3();
         //the previous !tick! (not frame) position
         this.prevworld = new THREE.Vector3();
-        this.system.shaderMaterial_interpolate.attributes.previousPosition.value.push(this.prevworld);
+        this.position = new THREE.Vector3();
         //the color
         var color = new THREE.Vector4(1, 1, 1, 1);
-        this.system.shaderMaterial_default.attributes.vertexColor.value.push(color);
-        //age
-        this.system.shaderMaterial_interpolate.attributes.age.value.push(1);
+       
         this.waitForRegen = false;
         this.color = color;
-
-        this.x = 0;
-        this.y = 0;
-        this.z = 0;
 
         this.size = 1;
         //back up initial (needed by the analyticShader)
@@ -40,47 +32,194 @@
         this.lifespan = 1;
 
         //the sise
-        this.system.shaderMaterial_default.attributes.size.value.push(1);
+      
 
-        this._aSize = this.system.threeParticleSystem.material.attributes.size;
-        this._aAge = this.system.shaderMaterial_interpolate.attributes.age;
-        this._aLifespan = this.system.shaderMaterial_interpolate.attributes.lifespan;
+        this._aSize = this.system.threeParticleSystem.geometry.attributes.size;
+        this._aAge = this.system.geometry.attributes.age;
+        this._aLifespan = this.system.geometry.attributes.lifespan;
         //set the size - stored per vertex
        
-
+        this.previousPosition = new THREE.Vector3();
+        this.random = new THREE.Vector4(Math.random(),Math.random(),Math.random(),Math.random());
         //This looks like it could be computed from the start and end plus random on the shader
         //doing this saves computetime on the shader at expense of gpu mem
-        this.system.shaderMaterial_analytic.attributes.acceleration.value.push(new THREE.Vector3());
-        this.system.shaderMaterial_analytic.attributes.velocity.value.push(new THREE.Vector3());
-        this.system.shaderMaterial_analytic.attributes.lifespan.value.push(1);
-        this.system.shaderMaterial_analytic.attributes.random.value.push(new THREE.Vector4(Math.random(), Math.random(), Math.random(), Math.random()));
+
+    
+        this.sizeDirty = true;
+        this.vertexColorDirty = true;
+        this.ageDirty = true;
+        this.previousPositionDirty = true;
+        this.accelerationDirty = true;
+        this.velocityDirty = true;
+        this.lifespanDirty = true;
+        this.randomDirty = true;
+        this.positionDirty = true;
+        this.randomDirty = true;
+        this.renderToBuffers();
+    }
+    Particle.prototype.dirty = function()
+    {
+
+        this.sizeDirty = true;
+        this.vertexColorDirty = true;
+        this.ageDirty = true;
+        this.previousPositionDirty = true;
+        this.accelerationDirty = true;
+        this.velocityDirty = true;
+        this.lifespanDirty = true;
+        this.randomDirty = true;
+        this.positionDirty = true;
+        this.randomDirty = true;
+       
     }
     Particle.prototype.setSize = function(s)
     {
         this.size = s;
-        this._aSize.value[this.i] = s;
+        this.sizeDirty = true;
     }
     //set the age - stored per vertex
     Particle.prototype.setAge = function(a)
     {
         this.age = a;
-        this._aAge.value[this.i] = this.age;
+        this.ageDirty = true;
     }
     //the lifespan - stored per vertex
     Particle.prototype.setLifespan = function(a)
     {
         this.lifespan = a;
-        this._aLifespan.value[this.i] = this.lifespan;
+        this.lifespanDirty = true;
+    }
+    //the lifespan - stored per vertex
+    Particle.prototype.setPreviousPosition = function(a)
+    {
+        this.previousPosition.set(a);
+        this.previousPositionDirty = true;
+    }
+    Particle.prototype.setPosition = function(a)
+    {
+        this.position.set(a);
+        this.positionDirty = true;
+    }
+    Particle.prototype.setVelocity = function(a)
+    {
+        this.velocity.set(a);
+        this.velocityDirty = true;
+    }
+    Particle.prototype.setAcceleraton = function(a)
+    {
+        this.acceleration.set(a);
+        this.accelerationDirty = true;
+    }
+    Particle.prototype.setVertexColor = function(a)
+    {
+        this.vertexColor.set(a);
+        this.vertexColorDirty = true;
+    }
+    Particle.prototype.renderToBuffers = function()
+    {
+        if (this.positionDirty)
+        {
+            this.system.geometry.attributes.position.array[this.i * 3 + 0] = this.position.x;
+            this.system.geometry.attributes.position.array[this.i * 3 + 1] = this.position.y;
+            this.system.geometry.attributes.position.array[this.i * 3 + 2] = this.position.z;
+            this.system.geometry.attributes.position.needsUpdate = true;
+        }
+        if (this.previousPositionDirty)
+        {
+            this.system.geometry.attributes.previousPosition.array[this.i * 3 + 0] = this.previousPosition.x;
+            this.system.geometry.attributes.previousPosition.array[this.i * 3 + 1] = this.previousPosition.y;
+            this.system.geometry.attributes.previousPosition.array[this.i * 3 + 2] = this.previousPosition.z;
+            this.system.geometry.attributes.previousPosition.needsUpdate = true;
+        }
+        if (this.accelerationDirty)
+        {
+            this.system.geometry.attributes.acceleration.array[this.i * 3 + 0] = this.acceleration.x;
+            this.system.geometry.attributes.acceleration.array[this.i * 3 + 1] = this.acceleration.y;
+            this.system.geometry.attributes.acceleration.array[this.i * 3 + 2] = this.acceleration.z;
+            this.system.geometry.attributes.acceleration.needsUpdate = true;
+        }
+        if (this.velocityDirty)
+        {
+            this.system.geometry.attributes.velocity.array[this.i * 3 + 0] = this.velocity.x;
+            this.system.geometry.attributes.velocity.array[this.i * 3 + 1] = this.velocity.y;
+            this.system.geometry.attributes.velocity.array[this.i * 3 + 2] = this.velocity.z;
+            this.system.geometry.attributes.velocity.needsUpdate = true;
+        }
+        if (this.vertexColorDirty)
+        {
+            this.system.geometry.attributes.vertexColor.array[this.i * 4 + 0] = this.color.x;
+            this.system.geometry.attributes.vertexColor.array[this.i * 4 + 1] = this.color.y;
+            this.system.geometry.attributes.vertexColor.array[this.i * 4 + 2] = this.color.z;
+            this.system.geometry.attributes.vertexColor.array[this.i * 4 + 3] = this.color.w;
+            this.system.geometry.attributes.vertexColor.needsUpdate = true;
+        }
+        if (this.randomDirty)
+        {
+            this.system.geometry.attributes.random.array[this.i * 4 + 0] = this.random.x;
+            this.system.geometry.attributes.random.array[this.i * 4 + 1] = this.random.y;
+            this.system.geometry.attributes.random.array[this.i * 4 + 2] = this.random.z;
+            this.system.geometry.attributes.random.array[this.i * 4 + 3] = this.random.w;
+            this.system.geometry.attributes.random.needsUpdate = true;
+        }
+        
+        if (this.lifespanDirty)
+        {
+            this.system.geometry.attributes.lifespan.array[this.i * 1 + 0] = this.lifespan;
+            this.system.geometry.attributes.lifespan.needsUpdate = true;
+        }
+        if (this.ageDirty)
+        {
+            this.system.geometry.attributes.age.array[this.i * 1 + 0] = this.age;
+            this.system.geometry.attributes.age.needsUpdate = true;
+        }
+        if (this.sizeDirty)
+        {
+            this.system.geometry.attributes.size.array[this.i * 1 + 0] = this.size;
+            this.system.geometry.attributes.size.needsUpdate = true;
+        }
+
+        this.randomDirty = false;
+        this.sizeDirty = false;
+        this.positionDirty = false;
+        this.vertexColorDirty = false;
+        this.ageDirty = false;
+        this.previousPositionDirty = false;
+        this.accelerationDirty = false;
+        this.velocityDirty = false;
+        this.lifespanDirty = false;
+        this.randomDirty = false;
+
     }
 
-    function ParticleSystem(nodeID, childID, childName)
+    function ParticleSystem(count)
     {
 
-
+       
         // create the particle variables
+      
+        var particles = new THREE.BufferGeometry();
+        this.particleCount = count;
+        particles.addAttribute('position',new THREE.BufferAttribute(new Float32Array(count*3),3));
+        particles.addAttribute('acceleration',new THREE.BufferAttribute(new Float32Array(count*3),3));
+        particles.addAttribute('velocity',new THREE.BufferAttribute(new Float32Array(count*3),3));
+        particles.addAttribute('previousPosition',new THREE.BufferAttribute(new Float32Array(count*3),3));
 
-        var particles = new THREE.Geometry();
+        particles.addAttribute('random',new THREE.BufferAttribute(new Float32Array(count*4),4));
+        particles.addAttribute('vertexColor',new THREE.BufferAttribute(new Float32Array(count*4),4));
 
+        particles.addAttribute('age',new THREE.BufferAttribute(new Float32Array(count*1),1));
+        particles.addAttribute('lifespan',new THREE.BufferAttribute(new Float32Array(count*1),1));
+        particles.addAttribute('size',new THREE.BufferAttribute(new Float32Array(count*1),1));
+
+        particles.attributes.position.dynamic = true;
+        particles.attributes.acceleration.dynamic = true;
+        particles.attributes.velocity.dynamic = true;
+        particles.attributes.previousPosition.dynamic = true;
+        particles.attributes.random.dynamic = true;
+        particles.attributes.vertexColor.dynamic = true;
+        particles.attributes.age.dynamic = true;
+        particles.attributes.lifespan.dynamic = true;
+        particles.attributes.size.dynamic = true;
 
         //default material expects all computation done cpu side, just renders
         // note that since the color, size, spin and orientation are just linear
@@ -121,6 +260,10 @@
             "uniform float textureTiles;\n" +
             "uniform float alphaTest;\n" +
             "varying vec3 vFogPosition;\n" +
+            THREE.ShaderChunk.common + "\n" +
+
+            THREE.ShaderChunk.bsdfs + "\n" +
+            
             THREE.ShaderChunk.lights_phong_pars_fragment + "\n" +
             THREE.ShaderChunk.fog_pars_fragment + "\n" +
 
@@ -277,7 +420,7 @@
         var shaderMaterial_default = new THREE.ShaderMaterial(
         {
             uniforms: uniforms_default,
-            attributes: attributes_default,
+           
             vertexShader: vertShader_default,
             fragmentShader: fragShader_default
 
@@ -305,10 +448,10 @@
             "varying vec3 vFogPosition;\n" +
             "uniform float screenSize;\n" +
             "void main() {\n" +
-            "   vColor = mix(startColor,endColor,(age+fractime*3.33)/lifespan) + (random -0.5) * colorRange;\n" +
+            "   vColor = mix(startColor,endColor,(age/2.0+fractime)/lifespan) + (random -0.5) * colorRange;\n" +
             "   vFogPosition = (modelMatrix * vec4(mix(previousPosition,position,fractime),1.0)).xyz; \n" +
             "   vec4 mvPosition = modelViewMatrix * vec4(mix(previousPosition,position,fractime), 1.0 );\n" +
-            "   float psize = mix(startSize,endSize,(age+fractime*6.66)/lifespan) + (random.y -0.5) * sizeRange;\n" +
+            "   float psize = mix(startSize,endSize,(age/2.0+fractime)/lifespan) + (random.y -0.5) * sizeRange;\n" +
             //"   psize *= screenSize;" +
             //"   gl_PointSize = psize * ( 1000.0/ length( mvPosition.xyz ) );\n" +
             "   vec4 p1 = vec4(mvPosition.x+0.5*psize, mvPosition.yzw);\n" +
@@ -341,7 +484,7 @@
         var shaderMaterial_interpolate = new THREE.ShaderMaterial(
         {
             uniforms: uniforms_default,
-            attributes: attributes_interpolate,
+            
             vertexShader: vertShader_interpolate,
             fragmentShader: fragShader_default
 
@@ -377,7 +520,7 @@
             "uniform float screenSize;\n" +
             "void main() {\n" +
             //randomly offset in time
-            "   float lifetime = fract(random.x*(min(1.0,pCount/(maxRate*1.0)))+(time))*lifespan*1.33;" +
+            "   float lifetime = mod(lifespan*random.x*100.0 + time*100.0,lifespan);" +
             //solve for position
             "   vec3 pos2 = position.xyz + velocity*lifetime + (acceleration*lifetime*lifetime)/2.0;" + // ;
             "   vFogPosition = (modelMatrix * vec4(pos2,1.0)).xyz; \n" +
@@ -409,6 +552,8 @@
             "uniform float textureTiles;\n" +
             "uniform float alphaTest;\n" +
             "varying vec3 vFogPosition;\n" +
+            THREE.ShaderChunk.common + "\n" +
+            THREE.ShaderChunk.bsdfs + "\n" +
             THREE.ShaderChunk.lights_phong_pars_fragment + "\n" +
             THREE.ShaderChunk.fog_pars_fragment + "\n" +
             "void main() {\n" +
@@ -454,7 +599,7 @@
         var shaderMaterial_analytic = new THREE.ShaderMaterial(
         {
             uniforms: uniforms_default,
-            attributes: attributes_analytic,
+           
             vertexShader: vertShader_analytic,
             fragmentShader: fragShader_analytic
         });
@@ -469,11 +614,11 @@
         shaderMaterial_default.fog = true;
 
         // create the particle system
-        var particleSystem = new THREE.PointCloud(particles, shaderMaterial_default);
+        var particleSystem = new THREE.Points(particles, shaderMaterial_default);
         var self = this;
 
         this.threeParticleSystem = particleSystem;
-
+        this.geometry = particles;
         //keep track of the shaders
         this.shaderMaterial_analytic = shaderMaterial_analytic;
         this.shaderMaterial_default = shaderMaterial_default;
@@ -525,22 +670,40 @@
         this.totaltime = 0;
 
         this._emitterPosition = new THREE.Vector3(0, 0, 0);
-    	this._previousEmitterPosition = new THREE.Vector3(0,0,0);
+        this._previousEmitterPosition = new THREE.Vector3(0,0,0);
 
+        this.particles = [];
         //Setup some defaults
-        this.setParticleCount(1000);
+       
+
         this.setSolverType('AnalyticShader');
+
+        for(var i = 0; i < count; i++)
+        {
+            var p = this.createParticle(i);
+            this.setupParticle(p,this.threeParticleSystem.matrix);
+        }
+        this.renderParticles();
         this.update(1);
 
 
     }
+    ParticleSystem.prototype.renderParticles = function()
+    {
+        
+        for(var i = 0; i < this.particles.length; i++)
+        {
+            this.particles[i].renderToBuffers();
+        }
 
+    }
 
     //timesliced Euler integrator
     //todo: switch to RK4 
     //This can do more complex sim, maybe even a cloth sim or such. It ticks 10 times a second, and blends tick with previous via a shader
     ParticleSystem.prototype.updateEuler = function(time)
     {
+       
         this.threeParticleSystem.material.uniforms.time.value += time / 3333.0;
         //var timer = performance.now();
         var time_in_ticks = time / 100.0;
@@ -552,7 +715,7 @@
        // var inv = this.threeParticleSystem.matrix.clone();
        // inv = inv.getInverse(inv);
 
-        var particles = this.threeParticleSystem.geometry;
+        var particles = this.particles;
 
         //timesliced tick give up after 5 steps - just cant go fast enough        
         if (Math.floor(this.lastTime) > 5)
@@ -562,10 +725,10 @@
         {
             this.lastTime--;
 
-            var pCount = this.threeParticleSystem.geometry.vertices.length;
+            var pCount = this.particles.length;
             while (pCount--)
             {
-                var particle = particles.vertices[pCount];
+                var particle = particles[pCount];
                 this.updateParticleEuler(particle, this.threeParticleSystem.matrix, null, 3.333);
             }
 
@@ -577,7 +740,8 @@
             //We hold extras in limbo with alpha 0 until they can be regenerated
             //Note the maxRate never creates or destroys particles, just manages when they will restart
             //after dying
-            var len = Math.min(this.regenParticles.length, this.maxRate * 333);
+
+            var len = Math.min(this.regenParticles.length, this.maxRate *  1000 * time_in_ticks);
             for (var i = 0; i < len; i++)
             {
 
@@ -595,43 +759,43 @@
 
         }
 
-        this.threeParticleSystem.material.attributes.lifespan.needsUpdate = true;
-        this.threeParticleSystem.geometry.verticesNeedUpdate = true;
-        this.threeParticleSystem.material.attributes.previousPosition.needsUpdate = true;
-        this.threeParticleSystem.material.attributes.age.needsUpdate = true;
 
         //even if this is not a sim tick, we need to send the fractional time up to the shader for the interpolation
         this.threeParticleSystem.material.uniforms.fractime.value = this.lastTime;
-
+        this.renderParticles();
     }
 
     //Update a particle from the Analytic solver
     ParticleSystem.prototype.updateParticleAnalytic = function(particle, mat, inv, delta_time)
     {
-        particle.age += delta_time;
+       
 
         if(particle.waitForRegen)
         {
-            particle.setSize(0);
-            return;
-        }
-        //Make the particle dead. Hide it until it can be reused
-        if (particle.age >= particle.lifespan && !particle.waitForRegen)
-        {
-            this.regenParticles.push(particle);
             particle.waitForRegen = true;
-            particle.x = 0;
-            particle.y = 0;
-            particle.z = 0;
+            particle.position.x = 0;
+            particle.position.y = 10;
+            particle.age = 0;
+            particle.position.z = 0;
             particle.color.w = 0.0;
             particle.setSize(0);
-        } else {
+            particle.dirty();
+            particle.setLifespan(1)  
+
+            return;
+        }
+         particle.age += delta_time;
+        //Make the particle dead. Hide it until it can be reused
+        if (particle.age < particle.lifespan)
+        {
+           
             //Run the formula to get position.
+           
             var percent = particle.age / particle.lifespan;
             var pa2 = particle.age * particle.age;
-            particle.x = particle.initialx + (particle.velocity.x * particle.age) + 0.5 * (particle.acceleration.x * pa2)
-            particle.y = particle.initialy + (particle.velocity.y * particle.age) + 0.5 * (particle.acceleration.y * pa2)
-            particle.z = particle.initialz + (particle.velocity.z * particle.age) + 0.5 * (particle.acceleration.z * pa2)
+            particle.position.x = particle.initialx + (particle.velocity.x * particle.age) + 0.5 * (particle.acceleration.x * pa2)
+            particle.position.y = particle.initialy + (particle.velocity.y * particle.age) + 0.5 * (particle.acceleration.y * pa2)
+            particle.position.z = particle.initialz + (particle.velocity.z * particle.age) + 0.5 * (particle.acceleration.z * pa2)
 
             //this.temp.x = particle.world.x;
             //this.temp.y = particle.world.y;
@@ -639,9 +803,9 @@
 
             //need to specify in object space, event though comptued in local
             //this.temp.applyMatrix4(inv);
-            //particle.x = this.temp.x;
-            //particle.y = this.temp.y;
-            //particle.z = this.temp.z;
+            //particle.position.x = this.temp.x;
+            //particle.position.y = this.temp.y;
+            //particle.position.z = this.temp.z;
 
             //Should probably move this to the shader. Linear with time, no point in doing on CPU
             particle.color.x = this.startColor[0] + (this.endColor[0] - this.startColor[0]) * percent;
@@ -649,47 +813,48 @@
             particle.color.z = this.startColor[2] + (this.endColor[2] - this.startColor[2]) * percent;
             particle.color.w = this.startColor[3] + (this.endColor[3] - this.startColor[3]) * percent;
 
-            particle.setSize(this.startSize + (this.endSize - this.startSize) * percent);
-        }
+            particle.setSize(this.startSize);// + (this.endSize - this.startSize) * percent);
+            particle.dirty();
+        } else {
+            this.regenParticles.push(particle);
+            particle.waitForRegen = true;
+            particle.position.x = 0;
+            particle.position.y = 10;
+            particle.age = 0;
+            particle.position.z = 0;
+            particle.color.w = 0.0;
+            particle.setSize(0);
+            particle.dirty();
+        } 
     }
 
-    //updtae a partilce with the Euler solver
+    //updtae a particle with the Euler solver
     ParticleSystem.prototype.updateParticleEuler = function(particle, mat, inv, step_dist)
     {
+        
+
+        if(particle.waitForRegen)
+        {
+            particle.setSize(0);
+            particle.dirty();
+            return;
+        }
+
         particle.prevage = particle.age;
         particle.age += step_dist;
         particle.setAge(particle.age + step_dist);
 
-		if(particle.waitForRegen)
-        {
-            particle.setSize(0);
-            return;
-        }
-
         //If the particle is dead ,hide it unitl it can be reused
-        if (particle.age >= particle.lifespan && !particle.waitForRegen)
+        if (particle.age/2 <particle.lifespan)
         {
 
-            this.regenParticles.push(particle);
-            particle.waitForRegen = true;
-            particle.x = 0;
-            particle.y = 0;
-            particle.z = 0;
-            particle.world.x = 0;
-            particle.world.y = 0;
-            particle.world.z = 0;
-            particle.prevworld.x = 0;
-            particle.prevworld.y = 0;
-            particle.prevworld.z = 0;
-            particle.color.w = 1.0;
-            particle.setSize(0);
-        } else {
+         
 
 
             // and the position
-            particle.prevworld.x = particle.world.x;
-            particle.prevworld.y = particle.world.y;
-            particle.prevworld.z = particle.world.z;
+            particle.previousPosition.x = particle.position.x;
+            particle.previousPosition.y = particle.position.y;
+            particle.previousPosition.z = particle.position.z;
 
             //find direction to center for gravity
             var gravityAccel = new THREE.Vector3(particle.world.x, particle.world.y, particle.world.z);
@@ -724,11 +889,27 @@
             this.temp.y = particle.world.y;
             this.temp.z = particle.world.z;
             //this.temp.applyMatrix4(inv);
-            particle.x = this.temp.x;
-            particle.y = this.temp.y;
-            particle.z = this.temp.z;
+            particle.position.x = this.temp.x;
+            particle.position.y = this.temp.y;
+            particle.position.z = this.temp.z;
             //careful to have prev and current pos in same space!!!!
             //particle.prevworld.applyMatrix4(inv);
+            particle.dirty();
+        } else{ 
+            this.regenParticles.push(particle);
+            particle.waitForRegen = true;
+            particle.position.x = 0;
+            particle.position.y = 0;
+            particle.position.z = 0;
+            particle.world.x = 0;
+            particle.world.y = 0;
+            particle.world.z = 0;
+            particle.previousPosition.x = 0;
+            particle.previousPosition.y = 0;
+            particle.previousPosition.z = 0;
+            particle.color.w = 0.0;
+            particle.setSize(0);
+            particle.dirty();
         }
     }
     ParticleSystem.prototype.update = function(time)
@@ -780,7 +961,7 @@
     //not that we pointedly dont do this for the AnalyticShader. We could, but that solver is ment to  be very high performance, do we dont
     ParticleSystem.prototype.updateTransform = function(newtransform)
     {
-
+        return;
         //Get he current transform, and invert new one
         var inv = new THREE.Matrix4();
         var newt = new THREE.Matrix4();
@@ -801,51 +982,27 @@
         //note that it would actually be more efficient to leave the matrix as identity, and change the position of the 
         //emitters for this...... Could probably handle it in the model setter actually... would be much more efficient, but linking 
         //a system to a moving object would break.
-        for (var i = 0; i < this.threeParticleSystem.geometry.vertices.length; i++)
+        for (var i = 0; i < this.particles.length; i++)
         {
-            this.threeParticleSystem.geometry.vertices[i].applyMatrix4(inv);
-            this.shaderMaterial_interpolate.attributes.previousPosition.value[i].applyMatrix4(inv);
-            this.threeParticleSystem.geometry.vertices[i].applyMatrix4(newt);
-            this.shaderMaterial_interpolate.attributes.previousPosition.value[i].applyMatrix4(newt);
+            this.geometry.vertices[i].applyMatrix4(inv);
+            this.geometry.attributes.previousPosition.value[i].applyMatrix4(inv);
+            this.geometry.vertices[i].applyMatrix4(newt);
+            this.geometry.attributes.previousPosition.value[i].applyMatrix4(newt);
         }
-        this.threeParticleSystem.geometry.verticesNeedUpdate = true;
-        this.shaderMaterial_interpolate.attributes.previousPosition.needsUpdate = true;
-        this.threeParticleSystem.material.attributes.vertexColor.needsUpdate = true;
-        this.threeParticleSystem.material.attributes.size.needsUpdate = true;
-        this.threeParticleSystem.material.attributes.lifespan.needsUpdate = true;
-        this.threeParticleSystem.material.attributes.age.needsUpdate = true;
+        this.geometry.verticesNeedUpdate = true;
+        this.geometry.attributes.previousPosition.needsUpdate = true;
+        this.geometry.attributes.vertexColor.needsUpdate = true;
+        this.geometry.attributes.size.needsUpdate = true;
+        this.geometry.attributes.lifespan.needsUpdate = true;
+        this.geometry.attributes.age.needsUpdate = true;
 
     }
-    //Change the system count. Note that this must be set before the first frame renders, cant be changed at runtime.
-    ParticleSystem.prototype.setParticleCount = function(newcount)
-    {
-       // var inv = this.threeParticleSystem.matrix.clone();
-       // inv = inv.getInverse(inv);
-
-        var particles = this.threeParticleSystem.geometry;
-        while (this.threeParticleSystem.geometry.vertices.length > newcount)
-        {
-            this.threeParticleSystem.geometry.vertices.pop();
-        }
-        while (this.threeParticleSystem.geometry.vertices.length < newcount)
-        {
-            var particle = this.createParticle(this.threeParticleSystem.geometry.vertices.length);
-            this.setupParticle(particle, this.threeParticleSystem.matrix);
-            particle.age = Infinity;
-            this.regenParticles.push(particle);
-            particle.waitForRegen = true;
-        }
-        this.threeParticleSystem.geometry.verticesNeedUpdate = true;
-        this.threeParticleSystem.geometry.colorsNeedUpdate = true;
-        this.shaderMaterial_default.attributes.vertexColor.needsUpdate = true;
-        this.particleCount = newcount;
-    }
-
+    
     //create a new particle. create and store all the values for vertex attributes in each shader
     ParticleSystem.prototype.createParticle = function(i)
     {
         var particle = new Particle(this, i);
-
+        this.particles.push(particle);
         return particle;
     }
 
@@ -909,19 +1066,21 @@
     ParticleSystem.prototype.rebuildParticles = function()
     {
         if(!this.initialized) return;
-        var count = this.solver == "AnalyticShader" ? this.threeParticleSystem.geometry.vertices.length : Math.floor(this.maxRate * 3);
-        for (var i = 0; i < count && i < this.threeParticleSystem.geometry.vertices.length; i++)
+        var count = this.solver == "AnalyticShader" ? this.particles.length : Math.floor(this.maxRate * 3);
+        for (var i = 0; i < count && i < this.particles.length; i++)
         {
-            this.setupParticle(this.threeParticleSystem.geometry.vertices[i], this.threeParticleSystem.matrix);
-            this.threeParticleSystem.geometry.vertices[i].waitForRegen = false;
+            this.setupParticle(this.particles[i], this.threeParticleSystem.matrix);
+            this.particles[i].waitForRegen = false;
+            this.particles[i].dirty();
         }
         this.regenParticles.length = 0;
-        for (var i = count; i < this.threeParticleSystem.geometry.vertices.length; i++)
+        for (var i = count; i < this.particles.length; i++)
         {
-            this.threeParticleSystem.geometry.vertices[i].waitForRegen = true;
-            this.regenParticles.push(this.threeParticleSystem.geometry.vertices[i]);
+            this.particles[i].waitForRegen = true;
+            this.regenParticles.push(this.particles[i]);
+
         }
-        
+        this.renderParticles();
     }
     //set the particles initial values. Used when creating and resuing particles
     ParticleSystem.prototype.setupParticle = function(particle, mat)
@@ -929,9 +1088,9 @@
      
         
 
-        particle.x = 0;
-        particle.y = 0;
-        particle.z = 0;
+        particle.position.x = 0;
+        particle.position.y = 0;
+        particle.position.z = 0;
 
         //generate a point in objects space, the move to world space
         //dont do if in analytic shader mode
@@ -948,16 +1107,16 @@
         particle.initialz = particle.world.z;
 
         //start at initial pos
-        particle.x = particle.initialx;
-        particle.y = particle.initialy;
-        particle.z = particle.initialz;
+        particle.position.x = particle.initialx;
+        particle.position.y = particle.initialy;
+        particle.position.z = particle.initialz;
 
 
         //start stoped, age 0
         particle.age = 0;
         particle.velocity.set(0, 0, 0);
         particle.acceleration.set(0, 0, 0);
-        particle.lifespan = 1;
+      //  particle.setLifespan(this.minLifeTime + (this.maxLifeTime - this.minLifeTime) * Math.random());
 
         //Generate the initial velocity
         //In this mode, you specify a min and max x,y,z
@@ -1013,25 +1172,19 @@
         particle.color.z = this.startColor[2];
         particle.color.w = this.startColor[3];
 
-        //save the values into the attributes
-        this.shaderMaterial_analytic.attributes.acceleration.value[particle.i].copy(particle.acceleration);
-        this.shaderMaterial_analytic.attributes.velocity.value[particle.i].copy(particle.velocity);
-        this.shaderMaterial_analytic.attributes.lifespan.value[particle.i] = (particle.lifespan);
 
-
-        this.shaderMaterial_analytic.attributes.acceleration.needsUpdate = true;
-        this.shaderMaterial_analytic.attributes.velocity.needsUpdate = true;
-        this.shaderMaterial_analytic.attributes.lifespan.needsUpdate = true;
-        this.threeParticleSystem.geometry.verticesNeedUpdate = true;
+      
         //randomly move the particle up to one step in time
-        particle.prevworld.x = particle.x;
-        particle.prevworld.y = particle.y;
-        particle.prevworld.z = particle.z;
-        this.shaderMaterial_analytic.attributes.previousPosition.needsUpdate = true;
+        particle.previousPosition.x = particle.position.x;
+        particle.previousPosition.y = particle.position.y;
+        particle.previousPosition.z = particle.position.z;
+        
     }
     //In Analytic mode, run the equation for the position
     ParticleSystem.prototype.updateAnalytic = function(time)
     {
+
+
         this.threeParticleSystem.material.uniforms.time.value += time / 3333.0;
 
         var time_in_ticks = time / 33.333;
@@ -1039,15 +1192,9 @@
         //var inv = this.threeParticleSystem.matrix.clone();
         //inv = inv.getInverse(inv);
 
-        var particles = this.threeParticleSystem.geometry;
+        var particles = this.particles;
 
-        //update each particle
-        var pCount = this.threeParticleSystem.geometry.vertices.length;
-        while (pCount--)
-        {
-            var particle = particles.vertices[pCount];
-            this.updateParticleAnalytic(particle, this.threeParticleSystem.matrix, null, time_in_ticks);
-        }
+      
 
         //examples developed with faster tick - maxrate *33 is scale to make work 
         //with new timing
@@ -1056,30 +1203,37 @@
         //We hold extras in limbo with alpha 0 until they can be regenerated
         //Note the maxRate never creates or destroys particles, just manages when they will restart
         //after dying
-        var len = Math.min(this.regenParticles.length, this.maxRate * 15 * time_in_ticks);
+        var len = Math.min(this.regenParticles.length,   this.maxRate * 15 * time_in_ticks);
+
+
+       
         for (var i = 0; i < len; i++)
         {
 
             //setup with new random values, and move randomly forward in time one step    
             var particle = this.regenParticles.shift();
             this.setupParticle(particle, this.threeParticleSystem.matrix);
+            particle.waitForRegen = false;
             if (this.maxRate < this.particleCount)
                 this.updateParticleAnalytic(particle, this.threeParticleSystem.matrix, null, Math.random() * 3.33);
-            particle.waitForRegen = false;
+            particle.age = 0;
+            particle.dirty();
         }
 
+          //update each particle
+       
+        for (var i = 0; i < particles.length; i++)
+        {
+            var particle = particles[i];
+            this.updateParticleAnalytic(particle, this.threeParticleSystem.matrix, null, time_in_ticks);
+        }
+        this.renderParticles();
 
-        //only these things change, other properties are in the shader as they are linear WRT time  
-        this.threeParticleSystem.geometry.verticesNeedUpdate = true;
-        this.threeParticleSystem.geometry.colorsNeedUpdate = true;
-        this.threeParticleSystem.material.attributes.vertexColor.needsUpdate = true;
-        this.threeParticleSystem.material.attributes.size.needsUpdate = true;
     }
     //when updating in AnalyticShader mode, is very simple, just inform the shader of new time.
     ParticleSystem.prototype.updateAnalyticShader = function(time)
     {
         this.threeParticleSystem.material.uniforms.time.value += time / 3333.0;
-
     }
 
 
@@ -1090,7 +1244,7 @@
 
        
         particleRegistry[childID] = this;
-        this.ps = new ParticleSystem();
+        this.ps = new ParticleSystem(1000);
 
         this.inherits = ['vwf/model/threejs/transformable.js', 'vwf/model/threejs/visible.js', 'vwf/model/threejs/renderDepth.js'];
         //the node constructor
@@ -1103,7 +1257,7 @@
         {
 
 
-            var particles = this.ps.threeParticleSystem.geometry;
+            var particles = this.ps.particles;
             if (propertyName == 'quaternion') return;
             if (propertyName == 'rotation') return;
 
@@ -1118,9 +1272,9 @@
                 this.ps.threeParticleSystem.geometry.dispose();
                 var oldparent = this.ps.threeParticleSystem.parent;
                 this.ps.threeParticleSystem.parent.remove(this.ps.threeParticleSystem)
-                this.ps = new ParticleSystem();
+                this.ps = new ParticleSystem(propertyValue);
                 this.ps.particleCount = propertyValue;
-                this.ps.setParticleCount(propertyValue);
+                
                 this.ps.setSolverType(oldSolver);
                 oldparent.add(this.ps.threeParticleSystem);
                 oldparent.updateMatrixWorld(true);
@@ -1134,14 +1288,14 @@
 
                 var propbackup = Engine.getProperties(this.ID);
                 delete propbackup.solver;
-                var oldCount = propbackup.particleCount;
+                var oldCount = propbackup.particleCount || this.ps.particleCount;
 
                 delete propbackup.particleCount;
                 this.ps.threeParticleSystem.geometry.dispose();
                 var oldparent = this.ps.threeParticleSystem.parent;
                 this.ps.threeParticleSystem.parent.remove(this.ps.threeParticleSystem)
-                this.ps = new ParticleSystem();
-                this.ps.setParticleCount(oldCount);
+                this.ps = new ParticleSystem(oldCount);
+                
                 this.ps.setSolverType(propertyValue);
 
                 oldparent.add(this.ps.threeParticleSystem);
@@ -1159,17 +1313,15 @@
             {
                 //this.ps.material.size = propertyValue;
 
-                for (var i = 0; i < this.ps.material.attributes.size.value.length; i++)
+                for (var i = 0; i < this.ps.particles.length; i++)
                 {
-                    this.ps.threeParticleSystem.material.attributes.size.value[i] = propertyValue;
+                    this.ps.particles[i].size = propertyValue;
+                    this.ps.particles[i].sizeDirty = true;
                 }
-                this.ps.threeParticleSystem.material.attributes.size.needsUpdate = true;
+                this.ps.renderParticles();
             }
-            if (propertyName == 'particleCount')
-            {
-                this.ps.setParticleCount(propertyValue);
-            }
-            if (propertyName == 'emitterPosition')
+           
+            else if (propertyName == 'emitterPosition')
             {
                 this.ps._previousEmitterPosition.copy(this.ps._emitterPosition);
                 this.ps._emitterPosition.x = propertyValue[0];
@@ -1177,53 +1329,53 @@
                 this.ps._emitterPosition.z = propertyValue[2];
 
             }
-            if (propertyName == 'startSize')
+            else if (propertyName == 'startSize')
             {
                 this.ps.shaderMaterial_analytic.uniforms.startSize.value = propertyValue;
             }
-            if (propertyName == 'endSize')
+            else if (propertyName == 'endSize')
             {
                 this.ps.shaderMaterial_analytic.uniforms.endSize.value = propertyValue;
             }
-            if (propertyName == 'sizeRange')
+            else if (propertyName == 'sizeRange')
             {
                 this.ps.shaderMaterial_analytic.uniforms.sizeRange.value = propertyValue;
             }
-            if (propertyName == 'maxRate')
+            else if (propertyName == 'maxRate')
             {
                 this.ps.shaderMaterial_analytic.uniforms.maxRate.value = propertyValue;
             }
-            if (propertyName == 'particleCount')
+            else if (propertyName == 'particleCount')
             {
                 this.ps.shaderMaterial_analytic.uniforms.pCount.value = propertyValue;
             }
-            if (propertyName == 'maxSpin')
+            else if (propertyName == 'maxSpin')
             {
                 this.ps.shaderMaterial_analytic.uniforms.maxSpin.value = propertyValue;
             }
-            if (propertyName == 'textureTiles')
+            else if (propertyName == 'textureTiles')
             {
                 this.ps.shaderMaterial_analytic.uniforms.textureTiles.value = propertyValue;
             }
-            if (propertyName == 'minSpin')
+            else if (propertyName == 'minSpin')
             {
                 this.ps.shaderMaterial_analytic.uniforms.minSpin.value = propertyValue;
             }
-            if (propertyName == 'maxOrientation')
+            else if (propertyName == 'maxOrientation')
             {
                 this.ps.shaderMaterial_analytic.uniforms.maxOrientation.value = propertyValue;
             }
-            if (propertyName == 'minOrientation')
+            else if (propertyName == 'minOrientation')
             {
                 this.ps.shaderMaterial_analytic.uniforms.minOrientation.value = propertyValue;
             }
-            if (propertyName == 'alphaTest')
+            else if (propertyName == 'alphaTest')
             {
                 this.ps.shaderMaterial_analytic.uniforms.alphaTest.value = propertyValue;
             }
 
 
-            if (propertyName == 'colorRange')
+            else if (propertyName == 'colorRange')
             {
                 this.ps.shaderMaterial_analytic.uniforms.colorRange.value.x = propertyValue[0];
                 this.ps.shaderMaterial_analytic.uniforms.colorRange.value.y = propertyValue[1];
@@ -1232,14 +1384,14 @@
             }
 
 
-            if (propertyName == 'startColor')
+            else if (propertyName == 'startColor')
             {
                 this.ps.shaderMaterial_analytic.uniforms.startColor.value.x = propertyValue[0];
                 this.ps.shaderMaterial_analytic.uniforms.startColor.value.y = propertyValue[1];
                 this.ps.shaderMaterial_analytic.uniforms.startColor.value.z = propertyValue[2];
                 this.ps.shaderMaterial_analytic.uniforms.startColor.value.w = propertyValue[3];
             }
-            if (propertyName == 'endColor')
+            else if (propertyName == 'endColor')
             {
                 this.ps.shaderMaterial_analytic.uniforms.endColor.value.x = propertyValue[0];
                 this.ps.shaderMaterial_analytic.uniforms.endColor.value.y = propertyValue[1];
@@ -1248,12 +1400,12 @@
             }
 
 
-            if (propertyName == 'solver')
+            else if (propertyName == 'solver')
             {
 
                 // this.ps.setSolverType(propertyValue)
             }
-            if (propertyName == 'image')
+            else if (propertyName == 'image')
             {
                 this.ps.shaderMaterial_default.uniforms.texture.value = _SceneManager.getTexture(propertyValue);
                 this.ps.shaderMaterial_default.uniforms.useTexture.value = 1.0;
@@ -1261,7 +1413,7 @@
                 this.ps.shaderMaterial_analytic.uniforms.useTexture.value = 1.0;
 
             }
-            if (propertyName == 'additive')
+            else if (propertyName == 'additive')
             {
                 if (propertyValue)
                 {
@@ -1294,7 +1446,7 @@
                 this.ps.shaderMaterial_analytic.needsUpdate = true;
                 this.ps.shaderMaterial_interpolate.needsUpdate = true;
             }
-            if (propertyName == 'depthTest')
+            else if (propertyName == 'depthTest')
             {
                 this.ps.shaderMaterial_default.depthTest = true;
                 this.ps.shaderMaterial_default.depthWrite = propertyValue;
@@ -1307,40 +1459,46 @@
                 this.ps.shaderMaterial_analytic.needsUpdate = true;
                 this.ps.shaderMaterial_interpolate.needsUpdate = true;
             }
-            if (propertyName == "minAcceleration" || propertyName == "maxAcceleration")
+            else if (propertyName == "minAcceleration" || propertyName == "maxAcceleration")
             {
                 if (!this.ps.minAcceleration) this.ps.minAcceleration = [0, 0, 0];
                 if (!this.ps.maxAcceleration) this.ps.maxAcceleration = [0, 0, 0];
 
-                for (var i = 0; i < particles.vertices.length; i++)
+                for (var i = 0; i < particles.length; i++)
                 {
-                    particles.vertices[i].acceleration.x = this.ps.minAcceleration[0] + (this.ps.maxAcceleration[0] - this.ps.minAcceleration[0]) * Math.random();
-                    particles.vertices[i].acceleration.y = this.ps.minAcceleration[1] + (this.ps.maxAcceleration[1] - this.ps.minAcceleration[1]) * Math.random();
-                    particles.vertices[i].acceleration.z = this.ps.minAcceleration[2] + (this.ps.maxAcceleration[2] - this.ps.minAcceleration[2]) * Math.random();
+                    particles[i].acceleration.x = this.ps.minAcceleration[0] + (this.ps.maxAcceleration[0] - this.ps.minAcceleration[0]) * Math.random();
+                    particles[i].acceleration.y = this.ps.minAcceleration[1] + (this.ps.maxAcceleration[1] - this.ps.minAcceleration[1]) * Math.random();
+                    particles[i].acceleration.z = this.ps.minAcceleration[2] + (this.ps.maxAcceleration[2] - this.ps.minAcceleration[2]) * Math.random();
+                    particles[i].accelerationDirty = true;
                 }
+                this.ps.renderParticles();
             }
-            if (propertyName == "minVelocity" || propertyName == "maxVelocity")
+            else if (propertyName == "minVelocity" || propertyName == "maxVelocity")
             {
                 if (!this.ps.minVelocity) this.ps.minVelocity = [0, 0, 0];
                 if (!this.ps.maxVelocity) this.ps.maxVelocity = [0, 0, 0];
 
-                for (var i = 0; i < particles.vertices.length; i++)
+                for (var i = 0; i < particles.length; i++)
                 {
 
-                    particles.vertices[i].velocity.x = this.ps.minVelocity[0] + (this.ps.maxVelocity[0] - this.ps.minVelocity[0]) * Math.random();
-                    particles.vertices[i].velocity.y = this.ps.minVelocity[1] + (this.ps.maxVelocity[1] - this.ps.minVelocity[1]) * Math.random();
-                    particles.vertices[i].velocity.z = this.ps.minVelocity[2] + (this.ps.maxVelocity[2] - this.ps.minVelocity[2]) * Math.random();
+                    particles[i].velocity.x = this.ps.minVelocity[0] + (this.ps.maxVelocity[0] - this.ps.minVelocity[0]) * Math.random();
+                    particles[i].velocity.y = this.ps.minVelocity[1] + (this.ps.maxVelocity[1] - this.ps.minVelocity[1]) * Math.random();
+                    particles[i].velocity.z = this.ps.minVelocity[2] + (this.ps.maxVelocity[2] - this.ps.minVelocity[2]) * Math.random();
+                    particles[i].velocityDirty = true;
                 }
+                this.ps.renderParticles();
             }
-            if (propertyName == "minLifeTime" || propertyName == "maxLifeTime")
+            else if (propertyName == "minLifeTime" || propertyName == "maxLifeTime")
             {
                 if (this.ps.minLifeTime === undefined) this.ps.minLifeTime = 0;
                 if (this.ps.maxLifeTime === undefined) this.ps.maxLifeTime = 1;
 
-                for (var i = 0; i < particles.vertices.length; i++)
+                for (var i = 0; i < particles.length; i++)
                 {
-                    particles.vertices[i].lifespan = this.ps.minLifeTime + (this.ps.maxLifeTime - this.ps.minLifeTime) * Math.random();
+                    particles[i].lifespan = this.ps.minLifeTime + (this.ps.maxLifeTime - this.ps.minLifeTime) * Math.random();
+                    particles[i].lifespanDirty = true;
                 }
+                this.ps.renderParticles();
             }
 
             if (propertyName == 'maxVelocity' ||
@@ -1392,6 +1550,7 @@
             return this.rootnode;
         }
         this.rootnode = new THREE.Object3D();
+        this.rootnode.matrixAutoUpdate = false;
         this.rootnode.add(this.ps.threeParticleSystem);
         //this.Build();
     }
