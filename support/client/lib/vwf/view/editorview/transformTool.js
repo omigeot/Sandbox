@@ -380,6 +380,7 @@ var transformTool = function()
         {
             this.getGizmoBody().matrix.copy(new THREE.Matrix4());
         }
+        var pixelRatio = window.devicePixelRatio || 1;
         var tgizpos = [0, 0, 0];
         var tgizpos2 = [0, 0, 0];
         var transposeTemp = [];
@@ -403,8 +404,8 @@ var transformTool = function()
         var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
         var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
 
-        var windowXadj = 1600.0 / w;
-        var windowYadj = 1200.0 / h;
+        var windowXadj = 1600.0 / (w*pixelRatio);
+        var windowYadj = 1200.0 / (h*pixelRatio);
         var winadj = Math.max(windowXadj, windowYadj);
         this.getGizmoBody().matrix.scale(new THREE.Vector3(dist * winadj * fovadj, dist * winadj * fovadj, dist * winadj * fovadj));
         tempcammatinverse.getInverse(this.getGizmoHead().matrixWorld);
