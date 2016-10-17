@@ -85,7 +85,7 @@ function needsCull(FOV,dist,size,ww)
 SceneManager.tempmat = new THREE.Matrix4();
 SceneManager.prototype.preRender = function(camera,ww)
 {
-
+    return; //some objects still cull incorrectly.
     this.trigger('cullStart');
    
     var cameraPos = [camera.matrixWorld.elements[12],camera.matrixWorld.elements[13],camera.matrixWorld.elements[14]]

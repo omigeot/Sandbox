@@ -614,7 +614,7 @@
         shaderMaterial_default.fog = true;
 
         // create the particle system
-        var particleSystem = new THREE.Points(particles, shaderMaterial_default);
+        var particleSystem = new THREE.PointCloud(particles, shaderMaterial_default);
         var self = this;
 
         this.threeParticleSystem = particleSystem;
