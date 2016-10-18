@@ -34,7 +34,7 @@
 		//the node constructor
 		this.settingProperty = function(propertyName, propertyValue)
 		{
-			else if (propertyName == '_length' || propertyName == 'width')
+			if (propertyName == '_length' || propertyName == 'width')
 			{
 				this[propertyName] = propertyValue;
 				this.build();
