@@ -121,9 +121,9 @@ var transformTool = function()
         this.allChildren.push(this.BuildBox([.30, 5, 5], [-5, 0, 0], red)); //scale uniform
         this.allChildren.push(this.BuildBox([5, .30, 5], [0, -5, 0], green)); //scale uniform
         this.allChildren.push(this.BuildBox([5, 5, .30], [0, 0, -5], blue)); //scale uniform        
-        this.allChildren[0].name = 'XRotation';
-        this.allChildren[1].name = 'YRotation';
-        this.allChildren[2].name = 'ZRotation';
+        this.allChildren[0].name = 'XMovement';
+        this.allChildren[1].name = 'YMovement';
+        this.allChildren[2].name = 'ZMovement';
         this.allChildren[3].name = 'XMovement';
         this.allChildren[4].name = 'YMovement';
         this.allChildren[5].name = 'ZMovement';
@@ -413,6 +413,107 @@ var transformTool = function()
         //document.title = tcamposGizSpace[0];
         this.getGizmoBody().matrix.scale(new THREE.Vector3(tcamposGizSpace[0] > 0 ? 1 : -1, tcamposGizSpace[1] > 0 ? 1 : -1, tcamposGizSpace[2] > 0 ? 1 : -1));
         this.getGizmoBody().updateMatrixWorld(true);
+        this.updateHandleVisiblity(MATH.toUnitVec3( MATH.subVec3(tgizpos,campos)));
+    }
+   
+    this.updateHandleVisiblity = function(camvec)
+    {
+         function testDot(vec,vec1)
+        {
+            if(Math.abs(MATH.dotVec3(vec,vec1)) < .995)
+                return true;
+            return false;
+        }
+        function hide(obj)
+        {
+            obj.visible = false;
+            obj.InvisibleToCPUPick = true;
+            for(var i =0; i < obj.children.length; i++)
+                hide(obj.children[i])
+        }
+        function show(obj)
+        {
+            obj.visible = true;
+            obj.InvisibleToCPUPick = false;
+            for(var i =0; i < obj.children.length; i++)
+                show(obj.children[i])
+        }
+
+        var gizmoHead = this.getGizmoBody();
+        var camRay = camvec;
+        var elements = gizmoHead.matrixWorld.elements;
+        var gizWorldX = MATH.toUnitVec3([elements[0],elements[1],elements[2]]);
+        var gizWorldY = MATH.toUnitVec3([elements[4],elements[5],elements[6]]);
+        var gizWorldZ = MATH.toUnitVec3([elements[8],elements[9],elements[10]]);
+
+        var objects = this.getGizmoBody().children;
+        for(var i =0; i < objects.length; i++ )
+        {
+            if(objects[i].name == "XMovement")
+            {
+                if(testDot(gizWorldX,camRay))
+                    show(objects[i])
+                else
+                    hide(objects[i])
+            }
+            else if(objects[i].name == "YMovement")
+            {
+                if(testDot(gizWorldY,camRay))
+                    show(objects[i])
+                else
+                    hide(objects[i]);
+            }
+            else if(objects[i].name == "ZMovement")
+            {
+                if(testDot(gizWorldZ,camRay))
+                    show(objects[i])
+                else
+                    hide(objects[i])
+            }
+            else if(objects[i].name == "XYMove")
+            {
+                if(testDot(gizWorldX,camRay) && testDot(gizWorldY,camRay))
+                    show(objects[i])
+                else
+                    hide(objects[i])
+            }
+            else if(objects[i].name == "ZXMove")
+            {
+                if(testDot(gizWorldY,camRay) && testDot(gizWorldZ,camRay))
+                    show(objects[i])
+                else
+                    hide(objects[i])
+            }
+            else if(objects[i].name == "YZMove")
+            {
+                if(testDot(gizWorldX,camRay) && testDot(gizWorldZ,camRay))
+                    show(objects[i])
+                else
+                    hide(objects[i])
+            }
+            else if(objects[i].name == "XRotate")
+            {
+                if(Math.abs(MATH.dotVec3(gizWorldX,camRay)) < .15) 
+                    hide(objects[i])
+                else
+                    show(objects[i])
+            }
+            else if(objects[i].name == "YRotate")
+            {
+                if(Math.abs(MATH.dotVec3(gizWorldY,camRay)) < .15) 
+                    hide(objects[i])
+                else
+                    show(objects[i])
+            }
+            else if(objects[i].name == "ZRotate")
+            {
+                if(Math.abs(MATH.dotVec3(gizWorldZ,camRay)) < .15) 
+                    hide(objects[i])
+                else
+                    show(objects[i])
+            }
+
+        }
     }
     this.mouseLeave = function(e)
     {
