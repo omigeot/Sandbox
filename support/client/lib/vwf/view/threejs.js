@@ -678,7 +678,7 @@ define(["module", "vwf/view", 'vwf/utility/eventSource', "vwf/view/threejs/viewN
 
         },
         setCamera: function(camID) {
-            vwf_view.kernel.callMethod(Engine.application(), 'setClientCamera', [Engine.moniker(), camID]);
+            Engine.emit.callMethod(Engine.application(), 'setClientCamera', [Engine.moniker(), camID]);
             if (camID) {
                 Engine.requestControl(camID);
             }
@@ -1085,12 +1085,12 @@ define(["module", "vwf/view", 'vwf/utility/eventSource', "vwf/view/threejs/viewN
                 if (self.lastPickId != newPickId && self.lastEventData) {
 
                     if (self.lastPickId) {
-                        view.kernel.dispatchEvent(self.lastPickId, "pointerOut", self.lastEventData.eventData, self.lastEventData.eventNodeData);
+                        Engine.emit.dispatchEvent(self.lastPickId, "pointerOut", self.lastEventData.eventData, self.lastEventData.eventNodeData);
 
                     }
 
                     if (newPickId) {
-                        view.kernel.dispatchEvent(newPickId, "pointerOver", self.lastEventData.eventData, self.lastEventData.eventNodeData);
+                        Engine.emit.dispatchEvent(newPickId, "pointerOver", self.lastEventData.eventData, self.lastEventData.eventNodeData);
 
                     }
 
