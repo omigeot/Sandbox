@@ -2551,16 +2551,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
         this.SetSelectMode = function(e) {
             SelectMode = e;
             $('#StatusPickMode').html(('Pick: ' + e).escape());
-            if (e == 'Pick') {
-                //$('#MenuSelectPickicon').addClass('iconselected')
-                $('#glyphOverlay').show();
-
-            } else {
-
-                //$('#MenuSelectPickicon').removeClass('iconselected')
-                $('#glyphOverlay').hide();
-
-            }
+           
             if (SelectMode == 'TempPick') {
                 $('#index-vwf').css('cursor', 'crosshair');
 
