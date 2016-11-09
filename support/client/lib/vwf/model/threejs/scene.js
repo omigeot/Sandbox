@@ -504,6 +504,7 @@
 		}
 		this.properties = {};
 		this.rootnode = new THREE.Scene();
+		
 		this.camera = {};
 		this.camera.ID = undefined;
 		this.camera.defaultCamID = "http-vwf-example-com-camera-vwf-camera";
