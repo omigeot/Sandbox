@@ -684,7 +684,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             _Notifier.notify('You must log in to participate');
             return;
         }
-        else if (node && node.id && node.id != 'selection') {
+        else if (node && node.id && _Editor.getSelectionCount() == 1) {
             if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(), node.id) == 0) {
                 _Notifier.notify('You do not have permission to edit this object');
                 return;

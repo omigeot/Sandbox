@@ -1913,7 +1913,7 @@ define(["vwf/view/editorview/log", "vwf/view/editorview/progressbar", "vwf/view/
 
                 //if the object is the type which can have transforms, update them to be relative to the current paste point, or the center of the screen
                 if (t.properties && t.properties.transform) {
-                    var campos = this.GetWorldPickOrigin(e);
+                    var campos = this.GetWorldPickOrigin(this.ContextShowEvent);
                     var newintersectxy;
 
                     if (!useMousePoint) newintersectxy = self.GetInsertPoint();
