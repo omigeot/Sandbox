@@ -218,18 +218,19 @@
 }
 
 .ui-button {
-    display:inline-block;
-    position:relative;
-    padding:0;
-    line-height:normal;
-    margin-right:.1em;
-    cursor:pointer;
-    vertical-align:middle;
-    text-align:center;
-    overflow:visible;
-    background: rgb(75, 83, 95);
+    display: inline-block;
+    position: relative;
+    padding: 0;
+    line-height: normal;
+    margin-right: .1em;
+    cursor: pointer;
+    vertical-align: middle;
+    text-align: center;
+    overflow: visible;
+    background: rgb(0, 0, 0);
     margin: 3px;
     border: 2px outset rgb(89, 91, 93);
+    color: white;
 }
 
 .ui-button:hover {

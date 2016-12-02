@@ -1503,7 +1503,9 @@ THREE.Geometry.prototype.GetBoundingBox = function()
     {
         if (!this.BoundingSphere || !this.BoundingBox || this.dirtyMesh)
         {
-            this.GenerateBounds();
+            this.dirtyMesh = false;
+             this.GenerateBounds();
+            this.BuildRayTraceAccelerationStructure();
         }
         return this.BoundingBox.clone();
     }
@@ -1532,7 +1534,9 @@ THREE.Geometry.prototype.CPUPick = function(origin, direction, options, collisio
         //if for some reason dont have good bounds, generate	 
         if (!this.BoundingSphere || !this.BoundingBox || this.dirtyMesh)
         {
+            this.dirtyMesh = false;
             this.GenerateBounds();
+            this.BuildRayTraceAccelerationStructure();
         }
         //try to reject based on bounding sphere
         //*** profiling shows reject based on bounding sphere function is way too slow.

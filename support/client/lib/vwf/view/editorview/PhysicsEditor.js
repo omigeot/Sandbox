@@ -107,7 +107,7 @@ define(["vwf/view/editorview/panelEditor"], function() {
        
         this.setProperty = function(id, propertyName, propertyValue) {
             //the prim editor will always set properties for all selected objects
-            id = 'selection';
+           
             _PrimitiveEditor.setProperty(id, propertyName, propertyValue);
         }
       

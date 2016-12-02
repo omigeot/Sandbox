@@ -1,6 +1,57 @@
 
 
 define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor'], function(app, baseClass){
+
+
+// Closure
+(function() {
+  /**
+   * Decimal adjustment of a number.
+   *
+   * @param {String}  type  The type of adjustment.
+   * @param {Number}  value The number.
+   * @param {Integer} exp   The exponent (the 10 logarithm of the adjustment base).
+   * @returns {Number} The adjusted value.
+   */
+  function decimalAdjust(type, value, exp) {
+    // If the exp is undefined or zero...
+    if (typeof exp === 'undefined' || +exp === 0) {
+      return Math[type](value);
+    }
+    value = +value;
+    exp = +exp;
+    // If the value is not a number or the exp is not an integer...
+    if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
+      return NaN;
+    }
+    // Shift
+    value = value.toString().split('e');
+    value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
+    // Shift back
+    value = value.toString().split('e');
+    return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
+  }
+
+  // Decimal round
+  if (!Math.round10) {
+    Math.round10 = function(value, exp) {
+      return decimalAdjust('round', value, exp);
+    };
+  }
+  // Decimal floor
+  if (!Math.floor10) {
+    Math.floor10 = function(value, exp) {
+      return decimalAdjust('floor', value, exp);
+    };
+  }
+  // Decimal ceil
+  if (!Math.ceil10) {
+    Math.ceil10 = function(value, exp) {
+      return decimalAdjust('ceil', value, exp);
+    };
+  }
+})();
+
     var primEditor = {};
     var isInitialized = false;
     var inSetup = true;
@@ -151,18 +202,13 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             }
         }
 
-        function rotationMatrix_2_XYZ(m) {
-            var x = Math.atan2(m[9], m[10]);
-            var y = Math.atan2(-m[8], Math.sqrt(m[9] * m[9] + m[10] * m[10]));
-            var z = Math.atan2(m[4], m[0]);
-            return [x, y, z];
-        }
+        
 
         var transformFromVWF = false;
         function updateTransform(vwfTransform, oldTransform){
             var node = $scope.node;
             if(vwfTransform == oldTransform) return;
-
+          
             try {
                 //dont update the spinners when the user is typing in them, but when they drag the gizmo do.
                 var mat = Engine.getProperty(node.id, 'transform');
@@ -172,9 +218,9 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
                 for(var i = 0; i < 3; i++){
                     //since there is ambiguity in the matrix, we need to keep these values aroud. otherwise , the typeins don't really do what you would think
                     var scl = i * 4;
-                    var newRot = Math.round(angles[i] * 57.2957795);
-                    var newScale = Math.floor(MATH.lengthVec3([mat[scl],mat[scl+1],mat[scl+2]]) * 1000) / 1000;
-                    var newPos = Math.floor(pos[i] * 1000) / 1000;
+                    var newRot = Math.round10(angles[i],-3);
+                    var newScale = Math.round10(MATH.lengthVec3([mat[scl],mat[scl+1],mat[scl+2]]) , -3) ;
+                    var newPos = Math.round10(pos[i], -3)
 
                     //If newX == oldX, then this is the tailend of the Angular-VWF roundtrip initiated by the Sandbox
                     if(newRot != $scope.transform.rotation[i] ||
@@ -193,27 +239,35 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             }
         }
 
-
+        function clamp(val,min,max)
+        {
+            if(val < min ) return min;
+            if(val > max) return max;
+            return val;
+        }
         function setTransform(transform, oldTransform) {
             if(transform != oldTransform && !transformFromVWF){
                 var val = [0, 0, 0];
                 var scale = [1, 1, 1];
                 var pos = [0, 0, 0];
 
+                transform.rotation[0] = clamp(transform.rotation[0],-180,180);
+                transform.rotation[1] = clamp(transform.rotation[1],-90,90);
+                transform.rotation[2] = clamp(transform.rotation[2],-180,180);
                 for(var i = 0; i < 3; i++){
                     val[i] = isNum(transform.rotation[i]) ? transform.rotation[i] : 0;
                     scale[i] = isNum(transform.scale[i]) ? parseFloat(transform.scale[i]) : 1;
                     pos[i] = isNum(transform.translation[i]) ? parseFloat(transform.translation[i]) : 0;
                 }
 
-                var rotmat = makeRotMat(parseFloat(val[0]) / 57.2957795, parseFloat(val[1]) / 57.2957795, parseFloat(val[2]) / 57.2957795);
-                rotmat = goog.vec.Mat4.scale(rotmat, scale[0], scale[1], scale[2]);
-
-                pos = goog.vec.Mat4.translate(goog.vec.Mat4.createIdentity(), pos[0], pos[1], pos[2])
-                var vwfTransform = goog.vec.Mat4.multMat(pos, rotmat, []);
-
-                pushUndoEvent($scope.node, 'transform', vwfTransform);
-                setProperty($scope.node, 'transform', vwfTransform);
+                var m = new THREE.Matrix4();
+                m.makeRotationFromEuler(new THREE.Euler(val[0]/  57.2957795,val[1]/  57.2957795,val[2]/  57.2957795));
+                m.scale(new THREE.Vector3(scale[0],scale[1],scale[2]))
+                m.elements[12] = pos[0];
+                m.elements[13] = pos[1];
+                m.elements[14] = pos[2];
+                pushUndoEvent($scope.node, 'transform', m.elements);
+                setProperty($scope.node, 'transform', m.elements);
             }
 
             transformFromVWF = false;
@@ -223,33 +277,24 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             }
         }
 
+        function rotationMatrix_2_XYZ(m) {
+            var mat = new THREE.Matrix4();
+            mat.elements = m;
+
+            var rotmat = new THREE.Matrix4();
+            rotmat.extractRotation(mat)
+            var r = new THREE.Euler(0,0,0,'XYZ')
+      
+            r.setFromRotationMatrix(rotmat)
+            return [r.x *  57.2957795,r.y*  57.2957795,r.z*  57.2957795]
+
+        }
+
         function makeRotMat(x, y, z) {
-            var xm = [
-
-                1, 0, 0, 0,
-                0, Math.cos(x), -Math.sin(x), 0,
-                0, Math.sin(x), Math.cos(x), 0,
-                0, 0, 0, 1
-
-            ];
-
-            var ym = [
-
-                Math.cos(y), 0, Math.sin(y), 0,
-                0, 1, 0, 0, -Math.sin(y), 0, Math.cos(y), 0,
-                0, 0, 0, 1
-            ];
-
-            var zm = [
-
-                Math.cos(z), -Math.sin(z), 0, 0,
-                Math.sin(z), Math.cos(z), 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-
-            ];
-            return goog.vec.Mat4.multMat(xm, goog.vec.Mat4.multMat(ym, zm, []), []);
-
+            var r = new THREE.Euler(x/  57.2957795,y/  57.2957795,z/  57.2957795,'XYZ');
+            var rotmat = new THREE.Matrix4();
+            rotmat.makeRotationFromEuler(r);
+            return rotmat.elements;
         }
 
         function setFlags(){
@@ -639,7 +684,7 @@ define(['./angular-app', './panelEditor', './EntityLibrary', './MaterialEditor']
             _Notifier.notify('You must log in to participate');
             return;
         }
-        else if (node && node.id && node.id != 'selection') {
+        else if (node && node.id && _Editor.getSelectionCount() == 1) {
             if (_PermissionsManager.getPermission(_UserManager.GetCurrentUserName(), node.id) == 0) {
                 _Notifier.notify('You do not have permission to edit this object');
                 return;

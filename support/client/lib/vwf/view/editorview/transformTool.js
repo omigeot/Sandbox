@@ -121,9 +121,9 @@ var transformTool = function()
         this.allChildren.push(this.BuildBox([.30, 5, 5], [-5, 0, 0], red)); //scale uniform
         this.allChildren.push(this.BuildBox([5, .30, 5], [0, -5, 0], green)); //scale uniform
         this.allChildren.push(this.BuildBox([5, 5, .30], [0, 0, -5], blue)); //scale uniform        
-        this.allChildren[0].name = 'XRotation';
-        this.allChildren[1].name = 'YRotation';
-        this.allChildren[2].name = 'ZRotation';
+        this.allChildren[0].name = 'XMovement';
+        this.allChildren[1].name = 'YMovement';
+        this.allChildren[2].name = 'ZMovement';
         this.allChildren[3].name = 'XMovement';
         this.allChildren[4].name = 'YMovement';
         this.allChildren[5].name = 'ZMovement';
@@ -380,6 +380,7 @@ var transformTool = function()
         {
             this.getGizmoBody().matrix.copy(new THREE.Matrix4());
         }
+        var pixelRatio = window.devicePixelRatio || 1;
         var tgizpos = [0, 0, 0];
         var tgizpos2 = [0, 0, 0];
         var transposeTemp = [];
@@ -393,25 +394,150 @@ var transformTool = function()
         dist = Math.max(dist,.0001); //prevent 0 dist thus 0 scale thus NANs in matrix
         var cam = _Editor.findcamera();
         cam.updateMatrixWorld(true);
-        var fovadj = cam.fov / 75;
-        cam.matrixWorldInverse.getInverse(cam.matrixWorld);
-        tgizpos2 = MATH.mulMat4Vec3(MATH.transposeMat4(cam.matrixWorldInverse.elements, transposeTemp), tgizpos, tgizpos2);
-        dist = -tgizpos2[2] / 65;
-        var oldscale = [this.getGizmoBody().matrix.elements[0], this.getGizmoBody().matrix.elements[5], this.getGizmoBody().matrix.elements[10]];
-        this.getGizmoBody().matrix.scale(new THREE.Vector3(1 / oldscale[0], 1 / oldscale[1], 1 / oldscale[2]));
 
-        var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
-        var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+        if(cam instanceof THREE.OrthographicCamera)
+        {
+            dist = Math.min(Math.abs(cam.top-cam.bottom),Math.abs(cam.left-cam.right));
+            var oldscale = [this.getGizmoBody().matrix.elements[0], this.getGizmoBody().matrix.elements[5], this.getGizmoBody().matrix.elements[10]];
+            this.getGizmoBody().matrix.scale(new THREE.Vector3(1 / oldscale[0], 1 / oldscale[1], 1 / oldscale[2]));
 
-        var windowXadj = 1600.0 / w;
-        var windowYadj = 1200.0 / h;
-        var winadj = Math.max(windowXadj, windowYadj);
-        this.getGizmoBody().matrix.scale(new THREE.Vector3(dist * winadj * fovadj, dist * winadj * fovadj, dist * winadj * fovadj));
-        tempcammatinverse.getInverse(this.getGizmoHead().matrixWorld);
-        tcamposGizSpace = MATH.mulMat4Vec3(MATH.transposeMat4(tempcammatinverse.elements, transposeTemp), campos, tcamposGizSpace);
-        //document.title = tcamposGizSpace[0];
-        this.getGizmoBody().matrix.scale(new THREE.Vector3(tcamposGizSpace[0] > 0 ? 1 : -1, tcamposGizSpace[1] > 0 ? 1 : -1, tcamposGizSpace[2] > 0 ? 1 : -1));
+            var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
+            var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+
+            var windowXadj = 16.0 / (w*pixelRatio);
+            var windowYadj = 12.0 / (h*pixelRatio);
+            var winadj = Math.max(windowXadj, windowYadj);
+            this.getGizmoBody().matrix.scale(new THREE.Vector3(dist * winadj , dist * winadj , dist * winadj ));
+            //document.title = tcamposGizSpace[0];
+            //this.getGizmoBody().matrix.scale(new THREE.Vector3(tcamposGizSpace[0] > 0 ? 1 : -1, tcamposGizSpace[1] > 0 ? 1 : -1, tcamposGizSpace[2] > 0 ? 1 : -1));
+            this.updateHandleVisiblity(_Editor.GetWorldPickRay({clientX:0,clientY:0}));
+
+        } else
+        {
+            var fovadj = cam.fov / 75;
+            cam.matrixWorldInverse.getInverse(cam.matrixWorld);
+            tgizpos2 = MATH.mulMat4Vec3(MATH.transposeMat4(cam.matrixWorldInverse.elements, transposeTemp), tgizpos, tgizpos2);
+            dist = -tgizpos2[2] / 65;
+            var oldscale = [this.getGizmoBody().matrix.elements[0], this.getGizmoBody().matrix.elements[5], this.getGizmoBody().matrix.elements[10]];
+            this.getGizmoBody().matrix.scale(new THREE.Vector3(1 / oldscale[0], 1 / oldscale[1], 1 / oldscale[2]));
+
+            var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
+            var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+
+            var windowXadj = 1600.0 / (w*pixelRatio);
+            var windowYadj = 1200.0 / (h*pixelRatio);
+            var winadj = Math.max(windowXadj, windowYadj);
+            this.getGizmoBody().matrix.scale(new THREE.Vector3(dist * winadj * fovadj, dist * winadj * fovadj, dist * winadj * fovadj));
+            tempcammatinverse.getInverse(this.getGizmoHead().matrixWorld);
+            tcamposGizSpace = MATH.mulMat4Vec3(MATH.transposeMat4(tempcammatinverse.elements, transposeTemp), campos, tcamposGizSpace);
+            //document.title = tcamposGizSpace[0];
+            this.getGizmoBody().matrix.scale(new THREE.Vector3(tcamposGizSpace[0] > 0 ? 1 : -1, tcamposGizSpace[1] > 0 ? 1 : -1, tcamposGizSpace[2] > 0 ? 1 : -1));
+              this.updateHandleVisiblity(MATH.toUnitVec3( MATH.subVec3(tgizpos,campos)));
+        }
+       
         this.getGizmoBody().updateMatrixWorld(true);
+
+      
+    }
+   
+    this.updateHandleVisiblity = function(camvec)
+    {
+         function testDot(vec,vec1)
+        {
+            if(Math.abs(MATH.dotVec3(vec,vec1)) < .995)
+                return true;
+            return false;
+        }
+        function hide(obj)
+        {
+            obj.visible = false;
+            obj.InvisibleToCPUPick = true;
+            for(var i =0; i < obj.children.length; i++)
+                hide(obj.children[i])
+        }
+        function show(obj)
+        {
+            obj.visible = true;
+            obj.InvisibleToCPUPick = false;
+            for(var i =0; i < obj.children.length; i++)
+                show(obj.children[i])
+        }
+
+        var gizmoHead = this.getGizmoBody();
+        var camRay = camvec;
+        var elements = gizmoHead.matrixWorld.elements;
+        var gizWorldX = MATH.toUnitVec3([elements[0],elements[1],elements[2]]);
+        var gizWorldY = MATH.toUnitVec3([elements[4],elements[5],elements[6]]);
+        var gizWorldZ = MATH.toUnitVec3([elements[8],elements[9],elements[10]]);
+
+        var objects = this.getGizmoBody().children;
+        for(var i =0; i < objects.length; i++ )
+        {
+            if(objects[i].name == "XMovement")
+            {
+                if(testDot(gizWorldX,camRay))
+                    show(objects[i])
+                else
+                    hide(objects[i])
+            }
+            else if(objects[i].name == "YMovement")
+            {
+                if(testDot(gizWorldY,camRay))
+                    show(objects[i])
+                else
+                    hide(objects[i]);
+            }
+            else if(objects[i].name == "ZMovement")
+            {
+                if(testDot(gizWorldZ,camRay))
+                    show(objects[i])
+                else
+                    hide(objects[i])
+            }
+            else if(objects[i].name == "XYMove")
+            {
+                if(testDot(gizWorldX,camRay) && testDot(gizWorldY,camRay))
+                    show(objects[i])
+                else
+                    hide(objects[i])
+            }
+            else if(objects[i].name == "ZXMove")
+            {
+                if(testDot(gizWorldY,camRay) && testDot(gizWorldZ,camRay))
+                    show(objects[i])
+                else
+                    hide(objects[i])
+            }
+            else if(objects[i].name == "YZMove")
+            {
+                if(testDot(gizWorldX,camRay) && testDot(gizWorldZ,camRay))
+                    show(objects[i])
+                else
+                    hide(objects[i])
+            }
+            else if(objects[i].name == "XRotate")
+            {
+                if(Math.abs(MATH.dotVec3(gizWorldX,camRay)) < .15) 
+                    hide(objects[i])
+                else
+                    show(objects[i])
+            }
+            else if(objects[i].name == "YRotate")
+            {
+                if(Math.abs(MATH.dotVec3(gizWorldY,camRay)) < .15) 
+                    hide(objects[i])
+                else
+                    show(objects[i])
+            }
+            else if(objects[i].name == "ZRotate")
+            {
+                if(Math.abs(MATH.dotVec3(gizWorldZ,camRay)) < .15) 
+                    hide(objects[i])
+                else
+                    show(objects[i])
+            }
+
+        }
     }
     this.mouseLeave = function(e)
     {
@@ -478,7 +604,7 @@ var transformTool = function()
             }
             var worldRay = _Editor.GetWorldPickRay(e);
             this.mouseDownOrigin = this.getPosition();
-            this.mouseDownIntersects = this.intersectPlanes(worldRay, _Editor.getCameraPosition());
+            this.mouseDownIntersects = this.intersectPlanes(worldRay, _Editor.GetWorldPickOrigin(e));
             this.mouseDownIntersects.xy = MATH.subVec3(this.mouseDownIntersects.xy, this.getPosition())
             this.mouseDownIntersects.yz = MATH.subVec3(this.mouseDownIntersects.yz, this.getPosition())
             this.mouseDownIntersects.zx = MATH.subVec3(this.mouseDownIntersects.zx, this.getPosition())
@@ -585,11 +711,9 @@ var transformTool = function()
         var thisOff = MATH.subVec3(offset, mouseDownOffset);
         thisOff = MATH.subVec3(thisOff, worldTranslation)
         thisOff = this.maskOffset(this.axisToPlane(this.axisSelected), thisOff);
-        var snapped;
-        if (!TESTING)
-            snapped = _Editor.snapPosition([worldTranslation[0] + thisOff[0], worldTranslation[1] + thisOff[1], worldTranslation[2] + thisOff[2]])
-        else
-            snapped = [worldTranslation[0] + thisOff[0], worldTranslation[1] + thisOff[1], worldTranslation[2] + thisOff[2]];
+        _Editor.snapPosition(thisOff);
+        var snapped = [worldTranslation[0] + thisOff[0], worldTranslation[1] + thisOff[1], worldTranslation[2] + thisOff[2]]
+    
         var finalpos = new THREE.Vector3(snapped[0], snapped[1], snapped[2]);
         if (finalpos.length() < .0001) return false;
         wtmat.setPosition(finalpos);
@@ -667,6 +791,7 @@ var transformTool = function()
     }
     this.applyTransform = function(offset, deltas)
     {
+
         for (var i = 0; i < _Editor.getSelectionCount(); i++)
         {
             var ID = _Editor.GetSelectedVWFID(i)
@@ -683,6 +808,7 @@ var transformTool = function()
             var wtmat = new THREE.Matrix4();
             wtmat.elements.set(wt);
             var changed = false;
+            
             if (this.axisToTransformType(this.axisSelected) == 'move')
                 changed = this.applyMove(wtmat, offset, mouseDownOffset, ID);
             if (this.axisToTransformType(this.axisSelected) == 'rotate')
@@ -759,9 +885,9 @@ var transformTool = function()
             return;
         }
         var worldRay = _Editor.GetWorldPickRay(e);
-        var intersections = this.intersectPlanes(worldRay, _Editor.getCameraPosition());
+        var intersections = this.intersectPlanes(worldRay, _Editor.GetWorldPickOrigin(e));
         var deltas = this.subIntersects(intersections, this.mouseDownIntersects);
-        var offset = deltas[this.bestPlane(this.axisToPlane(this.axisSelected), _Editor.getCameraPosition())]
+        var offset = deltas[this.bestPlane(this.axisToPlane(this.axisSelected), _Editor.GetWorldPickOrigin(e))]
         this.applyTransform(offset, deltas);
     }
     this.axisToPlane = function(axis)

@@ -58,9 +58,15 @@
          //  this.PickOptions = new MATH.CPUPickOptions();
          //  this.PickOptions.UserRenderBatches = true;
      }
+     this.getCamera = function()
+     {
+        return this.camera;
+     }
      this.activate = function()
      {
         this.active = true;
+        this.last_y = null;
+        this.last_x = null;
      }
      this.deactivate = function()
      {
@@ -312,6 +318,12 @@
              this.middledown = false;
          }
      }
+     this.focus= function(point,extents)
+     {
+        this.orbitPoint(point);
+        if(extents)
+            this.zoom = extents;
+     }
      this.localpointerDown = function(parms, pickInfo)
      {
          if (!_dView.inDefaultCamera()) return;
@@ -525,7 +537,7 @@
              var move = MATH.addVec3(MATH.scaleVec3(up,this.rel_x),MATH.scaleVec3(side,-this.rel_y));
 
 
-             var panfactor = 1;
+             var panfactor = 5;
              if (this.cameramode == 'Free')
                  panfactor = 50;
              ////console.log(this.zoom);
@@ -596,6 +608,19 @@
          this.camera.matrix.elements[14] = oldz;
          // console.log(e.alpha,e.beta,e.gamma);
      }
+     this.clampRoty = function()
+     {
+        
+             if (this.y_rot < .6)
+             {
+               
+                this.y_rot = .601;
+             } 
+            if (this.y_rot > .93 && (this.cameramode != 'Free' && this.cameramode != 'Fly')) this.y_rot = .929;
+             if (this.y_rot > .93 && (this.cameramode == 'Free' || this.cameramode == 'Fly')) this.y_rot = .929;
+
+           
+     }
      this.updateCamera = function()
      {
          if(!this.active) return
@@ -606,7 +631,7 @@
          {
              return;
          }
-
+         this.clampRoty ();
         this.last_y_rot += this.y_rot/5;
         this.last_x_rot += this.x_rot/5;
         this.last_zoom += (this.zoom - this.last_zoom) * .094;
@@ -635,9 +660,9 @@
              var offset = MATH.mulMat4Vec3(xmatrix, XAXIS, toffset);
              offset = Vec3.scale(offset, 1 / MATH.lengthVec3(offset), offset);
              tside = Vec3.cross([0, 0, 1], offset, tside);
-             if (this.last_y_rot < .479) this.last_y_rot = .479;
-             if (this.last_y_rot > .783 && (this.cameramode != 'Free' && this.cameramode != 'Fly')) this.last_y_rot = .783;
-             if (this.last_y_rot > .783 && (this.cameramode == 'Free' || this.cameramode == 'Fly')) this.last_y_rot = .783;
+             
+             this.clampRoty();
+
              var crossmatrix = MATH.angleAxis(this.last_y_rot * 10, tside, tcrossmatrix);
              var stage2offset = MATH.mulMat4Vec3(crossmatrix, offset, tstage2offset);
              stage2offset = Vec3.scale(stage2offset, 1 / MATH.lengthVec3(stage2offset), stage2offset);
@@ -692,6 +717,7 @@
      }
      this.setCameraMode = function(mode)
      {
+
          this.cameramode = mode;
          if (this.cameramode == 'Orbit')
              this.followObject(null);
@@ -704,7 +730,10 @@
          }
      }
      this.orbitPoint = function(point)
-     {
+     {  
+        
+        if(!point) return;
+        if(isNaN(point[0])) return;
          this.setCameraMode('Orbit');
          var campos = [this.camera.position.x, this.camera.position.y, this.camera.position.z];
          var diff = MATH.subVec3(campos, point);
@@ -788,8 +817,10 @@
      this.prerender = function()
      {
          var now = performance.now();
-         this.totalTime += now - (this.lastTime ? this.lastTime : now);
+         if( this.active)
+            this.totalTime += now - (this.lastTime ? this.lastTime : now);
          this.lastTime = now;
+        this.totalTime = Math.min( this.totalTime,300);       
          while(this.totalTime > 0)
          {
             this.totalTime -= 16;
