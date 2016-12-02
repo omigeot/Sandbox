@@ -312,8 +312,9 @@ define(["module", "vwf/model", "vwf/configuration","vwf/utility/eventSource", "v
                         }
                     }
                 }
-                    this.triggerCollisions();
-                }
+                this.triggerCollisions();
+                this.reEntry = false;
+            }
             this.trigger('tickEnd');
         },
         // -- initializingNode ---------------------------------------------------------------------
