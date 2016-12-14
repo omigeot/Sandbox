@@ -1076,12 +1076,7 @@ define(["module", "vwf/view", 'vwf/utility/eventSource', "vwf/view/threejs/viewN
                 self.trigger('pickStart');
                 var newPick = ThreeJSPick.call(self, sceneNode, cam, ww, wh);
 
-
-                var newPickId = null; 
-                if(newPick)
-                    newPickId = getPickObjectID.call(view, newPick.object);
-                if(!newPickId) 
-                    newPickId = _dView.cameraID ||  view.state.sceneRootID;
+                var newPickId = newPick ? getPickObjectID.call(view, newPick.object) : view.state.sceneRootID;
                 self.trigger('pickEnd');
 
                 if (self.lastPickId != newPickId && self.lastEventData) {
@@ -1111,9 +1106,8 @@ define(["module", "vwf/view", 'vwf/utility/eventSource', "vwf/view/threejs/viewN
                 } else if (self.lastEventData && self.mouseOverCanvas && !hovering && self.lastPick) {
                     var pickId = getPickObjectID.call(view, self.lastPick.object, false);
                     if (!pickId) {
-                        pickId =  _dView.cameraID || view.state.sceneRootID;
+                        pickId = view.state.sceneRootID;
                     }
-
                     view.kernel.dispatchEvent(pickId, "pointerHover", self.lastEventData.eventData, self.lastEventData.eventNodeData);
                     hovering = true;
                 }
@@ -1617,10 +1611,6 @@ define(["module", "vwf/view", 'vwf/utility/eventSource', "vwf/view/threejs/viewN
 
             threeActualObj = pickInfo ? pickInfo.object : undefined;
             pointerPickID = pickInfo ? getPickObjectID.call(sceneView, pickInfo.object, debug) : undefined;
-            if(!pointerPickID)
-            {
-                pointerPickID = _dView.cameraID || view.state.sceneRootID;
-            }
             var mouseButton = "left";
             switch (e.button) {
                 case 2:
