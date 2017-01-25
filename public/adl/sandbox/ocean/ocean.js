@@ -646,7 +646,7 @@
              if (this.disable) return;
             var rttcam = _dView.getCamera();
             
-            var oldFogStart = _dScene.fog.vFalloffStart;
+            var oldFogStart = _dScene.fog ? _dScene.fog.vFalloffStart : 0;
             var camZ = rttcam.matrixWorld.elements[14];
             var camHeightOverFog = camZ - oldFogStart;
             var oldShadowEnabled = _dRenderer.shadowMapEnabled;
@@ -674,7 +674,8 @@
             e[6] = up[2];
             this.reflectionCam.updateMatrixWorld(true);
 
-            _dScene.fog.vFalloffStart = this.reflectionCam.matrixWorld.elements[14] - camHeightOverFog;
+            if(_dScene.fog)
+                _dScene.fog.vFalloffStart = this.reflectionCam.matrixWorld.elements[14] - camHeightOverFog;
             _dRenderer.setRenderTarget(this.reflectionColorRtt);
             _dRenderer.clear();
             _dRenderer.setBlending(THREE.CustomBlending,THREE.AddEquation,THREE.OneFactor,THREE.ZeroFactor);
@@ -691,7 +692,8 @@
             _dRenderer.flipCulling = true;
             _dRenderer.render(_dScene, this.reflectionCam, this.reflectionColorRtt, false);
             _dRenderer.flipCulling = false;
-            _dScene.fog.vFalloffStart = oldFogStart;
+            if(_dScene.fog)
+                _dScene.fog.vFalloffStart = oldFogStart;
         
            
            

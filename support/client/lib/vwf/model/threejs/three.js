@@ -17762,6 +17762,7 @@ THREE.ShaderLib = {
             " if (projectionMatrix[3][2] == 0.0) mvPosition.z = max(-0.99,min(mvPosition.z,min(far2,far)));\n"+
             " pos = position;" +
             "   gl_Position = projectionMatrix * mvPosition;\n" +
+            " vFar = 1000.0;" + "\n" +
             "vFogPosition = position.xyz; \n" +
             "}    \n",
 
