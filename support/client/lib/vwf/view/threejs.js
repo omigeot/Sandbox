@@ -1619,7 +1619,7 @@ define(["module", "vwf/view", 'vwf/utility/eventSource', "vwf/view/threejs/viewN
             pointerPickID = pickInfo ? getPickObjectID.call(sceneView, pickInfo.object, debug) : undefined;
             if(!pointerPickID)
             {
-                pointerPickID = _dView.cameraID || view.state.sceneRootID;
+                pointerPickID = _dView.cameraID || _dView.state.sceneRootID;
             }
             var mouseButton = "left";
             switch (e.button) {
