@@ -51,7 +51,7 @@ executionContext.prototype.getProperty = function(id, name)
 				return val2;
 		}
 		var val;
-		if (inTick)
+		if (jsDriverSelf.inTick)
 			val = Engine.getPropertyFast(id, name);
 		else
 			val = Engine.getProperty(id, name);

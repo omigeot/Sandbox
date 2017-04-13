@@ -11,10 +11,10 @@
 // is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 // or implied. See the License for the specific language governing permissions and limitations under
 // the License.
-var jsDriverSelf = this;
+var jsDriverSelf = null;
 var propertiesSet = {};
 var contextPostTime;
-var inTick = false;
+
 function argumentsToArray(arg)
 {
     var ret = [];
@@ -1377,13 +1377,13 @@ define(["module", "vwf/model", "vwf/utility","vwf/model/javascript/clientAPI","v
         ticking: function()
         {
             this.trigger('tickStart');
-            inTick = true;
+            this.inTick = true;
             var now = performance.now();
             this.enterNewContext(null,executionContext.TYPE.TICK,null);
             this.callMethodTraverse(this.nodes['index-vwf'], 'tick', []);
             this.exitContext();
             //console.log("Tick View: " + (performance.now() - now))
-            inTick = false;
+            this.inTick = false;
             this.trigger('tickEnd');
         },
         isBehavior: function(node)

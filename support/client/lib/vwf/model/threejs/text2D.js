@@ -183,7 +183,7 @@
 			this.mat.transparent = this.transparent;
 			this.updateCanvas();
 		}
-		this.build = debounce(function()
+		this.build = function()
 		{
 			if (!this.___ready) return;
 			if (!this.mat)
@@ -198,7 +198,7 @@
 			}
 			this.mesh = new THREE.Mesh(new THREE.PlaneGeometry(this._length, this.width, 1, 1), this.mat);
 			this.rootnode.add(this.mesh);
-		}, 200);
+		}
 		//must be defined by the object
 		this.getRoot = function()
 		{

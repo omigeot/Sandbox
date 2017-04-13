@@ -6,7 +6,7 @@ function defaultContext()
         //here's the magic. If we are not the client simulating the node, send over the reflector
         if (Engine.isSimulating(id))
         {
-            if (inTick)
+            if (jsDriverSelf.inTick)
                 Engine.setPropertyFast(id, name, val);
             else
                 Engine.setProperty(id, name, val);
@@ -19,7 +19,7 @@ function defaultContext()
     }
     this.getProperty = function(id, name)
     {
-        if (inTick)
+        if (jsDriverSelf.inTick)
             return Engine.getPropertyFast(id, name);
         else
             return Engine.getProperty(id, name);
