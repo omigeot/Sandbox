@@ -1090,8 +1090,8 @@
 
        
         particleRegistry[childID] = this;
-        this.ps = new ParticleSystem();
-
+        this.ps = new ParticleSystem(1000);
+        this.initialized = false;
         this.inherits = ['vwf/model/threejs/transformable.js', 'vwf/model/threejs/visible.js', 'vwf/model/threejs/renderDepth.js'];
         //the node constructor
         this.deletingNode = function()
@@ -1128,6 +1128,10 @@
                 {
                     this.settingProperty(i, propbackup[i]);
                 }
+                 if(this.initialized == true)
+                {
+                    this.ps.initialize();
+                }
             }
             if (propertyName == "solver" && propertyValue != this.ps[propertyName])
             {
@@ -1149,6 +1153,10 @@
                 for (var i in propbackup)
                 {
                     this.settingProperty(i, propbackup[i]);
+                }
+                if(this.initialized == true)
+                {
+                    this.ps.initialize();
                 }
 
             }
@@ -1368,7 +1376,7 @@
             this.ps.update(time);
         }
         this.initializingNode = function() {
-
+            this.initialized = true;
             this.ps.initialize();
         }
         this.gettingProperty = function(propertyName)

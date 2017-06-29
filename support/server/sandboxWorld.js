@@ -752,17 +752,10 @@ function sandboxWorld(id, metadata)
         this.totalMessages++;
         var message = this.messageCompress.unpack(msg);
         //     message.time() = this.time();
-        if (this.queue.length > 0 || message.action == 'createChild')
-        {
+        
             this.queue.push(new QueuedMessage(message, sendingclient));
             this.dispatch();
-        }
-        else
-            {
-            var lasttime = now();
-            this.process_message_sync(message, sendingclient);
-            this.messageTotalProcessTime += (now() - lasttime);
-            }
+        
     }
     this.dispatch = function()
             {

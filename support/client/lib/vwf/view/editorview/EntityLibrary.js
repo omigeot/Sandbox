@@ -311,7 +311,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 			return object.vwfID;
 		}
 		else
+		{
+			debugger;
 			return null;
+		}
 	}
 
 	function toGMat(threemat)
@@ -455,6 +458,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 		//remove the preview and do the creation
 		$("#vwf-root").on('drop',"#index-vwf", function(evt)
 		{
+
 			evt.preventDefault();
 			if(!currentDrag) return;
 			data = JSON.parse(evt.originalEvent.dataTransfer.getData('text'));
@@ -464,8 +468,10 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 				_dScene.remove(dropPreview, true);
 				 _RenderManager.removeHilightObject(dropPreview);
 				dropPreview = null;
+			
 				create(data, evt);
 			}
+			
 		});
 	}
 
@@ -593,6 +599,7 @@ define(['vwf/view/editorview/angular-app', 'vwf/view/editorview/manageAssets'], 
 		}
 		else if (data.type == 'environment') {
 			$.getJSON(data.url, function(proto) {
+			
 				_UndoManager.startCompoundEvent();
 				for (var i in proto.properties)
 				{
