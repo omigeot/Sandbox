@@ -356,6 +356,7 @@ exports.generalHandler = function(req, res, next) {
                     res.locals.twitterLogin = global.configuration.twitter_consumer_key ? true : false;
                     res.locals.googleLogin = global.configuration.google_client_id ? true : false;
                     res.locals.facebookLogin = global.configuration.facebook_app_id ? true : false;
+                    res.locals.openstreetmapLogin = global.configuration.openstreetmap_app_id ? true : false;
                     if (sessionData) {
                         //don't allow on the login page if logged in
                         res.redirect('/');

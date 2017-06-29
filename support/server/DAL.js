@@ -1345,6 +1345,32 @@ function createProfileFromFacebook(profile, cb)
     });
 }
 
+
+function createProfileFromOSM(profile, cb)
+{
+    data = {
+        id: profile.id,
+        Username: profile.displayName,
+        Email: profile.email
+    };
+    createUser(profile.id, data, function(ok, err)
+    {   
+        if (ok)
+        {   
+            mailTools.newUser(profile.id, data.Email);
+            xapi.sendStatement(profile.id, xapi.verbs.registered);
+            cb("ok");
+        }
+        else
+        {   
+            xapi.sendStatement(profile.id, xapi.verbs.unsuccessful_registered_attempt);
+            logger.error("Failed registration with " + err);
+            cb(err);
+        }
+    });
+}
+
+
 function createProfileFromTwitter(profile, cb)
 {
     data = {
@@ -1759,6 +1785,7 @@ function startup(callback)
             DAL_Singleton.createProfileFromFacebook = createProfileFromFacebook;
             DAL_Singleton.createProfileFromTwitter = createProfileFromTwitter;
             DAL_Singleton.createProfileFromGoogle = createProfileFromGoogle;
+            DAL_Singleton.createProfileFromOSM = createProfileFromOSM;
             DAL_Singleton.find = findInDB;
             DAL_Singleton.getInstance = getInstance;
             DAL_Singleton.updateInstance = updateInstance;

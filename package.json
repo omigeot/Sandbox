@@ -47,6 +47,7 @@
     "passport": "0.2.x",
     "passport-facebook": "1.0.3",
     "passport-google-oauth": "0.1.5",
+    "passport-openstreetmap": "0.1.2",
     "passport-local": "~1.0.0",
     "passport-twitter": "1.0.2",
     "passport.socketio": "~3.4.1",

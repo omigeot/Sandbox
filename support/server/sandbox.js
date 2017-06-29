@@ -37,6 +37,7 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
 var TwitterStrategy = require('passport-twitter').Strategy;
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+var OpenStreetMapStrategy = require('passport-openstreetmap').Strategy;
 
 var sessions = require('./sessions');
 var xapi = require('./xapi');
@@ -552,6 +553,41 @@ function startVWF() {
                         })
                     }));
 
+
+
+                if (global.configuration.openstreetmap_app_id) { // Always on for now
+                    passport.use(new OpenStreetMapStrategy({
+                        consumerKey: global.configuration.openstreetmap_app_id,
+                        consumerSecret: global.configuration.openstreetmap_app_secret,
+                        callbackURL: global.configuration.openstreetmap_callback_url
+                        },
+                        function(accessToken, refreshToken, profile, done) {
+                            process.nextTick(function() {
+                                profile.id = "openstreetmap_" + profile.id;
+
+                                DAL.getUser(profile.id, function(user) {
+                                    if (user) {
+                                        xapi.sendStatement(user.Username, xapi.verbs.logged_in);
+                                        done(null, user);
+                                    } else {
+                                        user = DAL.createProfileFromOSM(profile, function(results) {
+                                            if (results === "ok") {
+                                                DAL.getUser(profile.id, function(user) {
+                                                    xapi.sendStatement(user.Username, xapi.verbs.logged_in);
+                                                    done(null, user);
+                                                });
+                                            } else {
+                                                done("Error creating user from OSM " + results, null);
+                                            }
+                                        });
+                                    }
+                                });
+                            });
+                        }
+                    ));
+                }
+
+
                 if (global.configuration.facebook_app_id) {
                     passport.use(new FacebookStrategy({
                             clientID: global.configuration.facebook_app_id,
@@ -848,6 +884,22 @@ function startVWF() {
                             handleRedirectAfterLogin(req, res);
                         });
                 }
+                
+                if (global.configuration.openstreetmap_app_id) {
+                    app.get("/adl/sandbox" + '/auth/openstreetmap',
+                        passport.authenticate('openstreetmap', {
+                            scope: 'email'
+                        }));
+
+                    app.get("/adl/sandbox" + '/auth/openstreetmap/callback',
+                        passport.authenticate('openstreetmap', {
+                            failureRedirect: "/adl/sandbox" + '/login'
+                        }),
+                        function(req, res) {
+                            handleRedirectAfterLogin(req, res);
+                        });
+                }
+
 
                 if (global.configuration.twitter_consumer_key) {
                     // Twitter authentication routing
